@@ -11,6 +11,7 @@
     "legacy:start": "node server/index.js",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "db:generate": "drizzle-kit generate",
