@@ -39,13 +39,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Review gate is pending: run Gito review before creating a PR' }, { status: 409 })
     }
 
+    if (snapshot.status !== 'passed') {
+      return NextResponse.json({ error: `Review gate is ${snapshot.status}; PR creation requires a completed passing review` }, { status: 409 })
+    }
+
+    if (!snapshot.checksPassing) {
+      return NextResponse.json({ error: 'Review gate blocked pull request creation: required checks are not passing' }, { status: 422 })
+    }
+
     const gate = evaluateReviewGate(snapshot.findings)
     if (!gate.passed) {
       return NextResponse.json({ error: 'Review gate blocked pull request creation', blockingFindings: gate.blockingFindings }, { status: 422 })
-    }
-
-    if (snapshot.status !== 'passed' && snapshot.status !== 'running') {
-      return NextResponse.json({ error: `Review gate is ${snapshot.status}` }, { status: 409 })
     }
 
     const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : task.title?.trim() || 'Velclaw changes'
@@ -55,7 +59,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const result = await createPullRequest({ repoUrl: task.repoUrl, branchName: task.branchName, title, body: prBody, baseBranch })
     if (!result.success) return NextResponse.json({ error: result.error || 'Failed to create pull request' }, { status: 502 })
 
-    const [updatedTask] = await db.update(tasks).set({ prUrl: result.prUrl, prNumber: result.prNumber, prStatus: 'open', updatedAt: new Date() }).where(eq(tasks.id, taskId)).returning()
+    const [updatedTask] = await db
+      .update(tasks)
+      .set({ prUrl: result.prUrl, prNumber: result.prNumber, prStatus: 'open', updatedAt: new Date() })
+      .where(eq(tasks.id, taskId))
+      .returning()
 
     return NextResponse.json({ success: true, data: { prUrl: result.prUrl, prNumber: result.prNumber, task: updatedTask } })
   } catch (error) {
