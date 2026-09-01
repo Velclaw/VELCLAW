@@ -6,7 +6,9 @@ const routes = [
   { path: '/', name: 'Workspace / Task', scope: 'Core workspace' },
   { path: '/tasks', name: 'Tasks', scope: 'Task list' },
   { path: '/velclaw', name: 'Velclaw Dashboard', scope: 'Pipeline dashboard' },
-  { path: '/settings', name: 'Settings', scope: 'Provider + security' },
+  { path: '/mcp', name: 'MCP Servers', scope: 'Tool/resource connectors' },
+  { path: '/api-keys', name: 'API Keys', scope: 'Provider credentials' },
+  { path: '/wiki', name: 'Wiki', scope: 'System knowledge' },
   { path: '/auth/signin', name: 'Sign In', scope: 'Authentication' },
   { path: '/velclaw/ui-audit', name: 'UI Audit', scope: 'This QA page' },
 ] as const
@@ -22,18 +24,14 @@ export default async function VelclawUiAuditPage() {
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-violet-300">VELCLAW UI AUDIT</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">Đồng bộ giao diện toàn hệ thống</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Global design tokens enforce the Velclaw dark/purple/square baseline. Use this page to click through the
-            primary routes after each UI change.
+            Global design tokens enforce the Velclaw dark/purple/square baseline. Use this page to click through every
+            primary workspace route after UI changes.
           </p>
         </header>
 
         <section className="grid gap-3 md:grid-cols-2">
           {routes.map((route) => (
-            <Link
-              key={route.path}
-              href={route.path}
-              className="group border border-border bg-card/80 p-4 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5"
-            >
+            <Link key={route.path} href={route.path} className="group border border-border bg-card/80 p-4 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="font-medium">{route.name}</div>
@@ -54,8 +52,8 @@ export default async function VelclawUiAuditPage() {
             <li>✓ monospace-first typography</li>
             <li>✓ Velclaw mark trong header</li>
             <li>✓ Agent Chat có identity Velclaw</li>
-            <li>✓ mobile không phá reader/workspace</li>
-            <li>✓ planned integrations không phải nút giả</li>
+            <li>✓ MCP + API Keys có route riêng</li>
+            <li>✓ Wiki có kiến thức hệ thống</li>
           </ul>
         </section>
       </div>
