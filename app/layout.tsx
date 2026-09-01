@@ -20,9 +20,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Coding Agent Template',
-  description:
-    'AI-powered coding agent template supporting Claude Code, OpenAI Codex CLI, Cursor CLI, and opencode with Vercel Sandbox',
+  title: 'Velclaw — AI-native Software Workspace',
+  description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
 }
 
 export default function RootLayout({
@@ -31,10 +30,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <JotaiProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <SessionProvider />
             <AppLayoutWrapper>{children}</AppLayoutWrapper>
             <Toaster />

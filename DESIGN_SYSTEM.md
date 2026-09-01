@@ -10,6 +10,18 @@ Mọi sản phẩm, trang web, ứng dụng, thư viện, công cụ, nhánh con
 
 `docs.velclaw.ai` là nguồn tham chiếu trực quan chính cho giao diện Velclaw. Kho giao diện tham chiếu nội bộ được dùng để lưu các thành phần và quy ước thiết kế chuẩn.
 
+## Visual baseline
+
+- nền đen/tối là mặc định;
+- tím/violet là màu nhận diện chính;
+- typography ưu tiên monospace/DejaVu Sans Mono-style;
+- control, card và panel dùng góc vuông;
+- header nhỏ gọn, có hamburger menu và Velclaw mark ở trung tâm;
+- mobile ưu tiên reader/workspace, sidebar mở dạng drawer;
+- desktop ưu tiên layout workspace nhiều cột nhưng không lãng phí diện tích đọc;
+- focus/active dùng viền hoặc glow violet, không dùng màu ngẫu nhiên;
+- logo Velclaw phải dùng asset nhận diện chuẩn, không tự chế logo khác.
+
 ## Các thành phần phải đồng bộ
 
 - Logo và nhận diện chữ Velclaw.
@@ -21,6 +33,18 @@ Mọi sản phẩm, trang web, ứng dụng, thư viện, công cụ, nhánh con
 - Trạng thái hover, focus, active và disabled.
 - Bố cục đáp ứng trên máy tính và thiết bị di động.
 - Quy tắc chuyển động và hiệu ứng giao diện khi được sử dụng.
+- Agent Chat phải có nhận diện Velclaw rõ ràng và không trộn lẫn với branding của provider.
+
+## Domain identity
+
+Trong giai đoạn triển khai hiện tại:
+
+- public domain: `huynhthuong.xyz`;
+- virtual/internal identity: `velclaw.ai`;
+- không được trình bày `velclaw.ai` như một hostname DNS đang hoạt động khi domain chưa được đăng ký/cấu hình;
+- mapping domain được quản lý tập trung bởi `lib/velclaw/virtual-domain.ts`.
+
+Khi `velclaw.ai` được mua và cấu hình thật, chỉ cần chuyển lớp domain/DNS mapping; không xây lại UI hoặc ecosystem identity.
 
 ## Quy tắc cho dự án con
 
@@ -36,6 +60,8 @@ Nếu có nhu cầu tạo một phong cách khác, phải được phê duyệt 
 ## Bảo vệ giao diện chuẩn
 
 Thay đổi giao diện phải được xem xét về khả năng tương thích với hệ thống thiết kế trước khi hợp nhất. Không được làm thay đổi nhận diện chung của Velclaw chỉ vì một dự án con có cấu trúc hoặc chức năng khác.
+
+Các primitive UI dùng chung phải giữ radius về `0` và lấy màu từ design tokens; route mới không được hard-code một visual system riêng.
 
 ## Mục tiêu
 

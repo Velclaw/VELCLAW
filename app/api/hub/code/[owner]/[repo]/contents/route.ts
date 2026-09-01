@@ -22,14 +22,38 @@ export async function GET(
       return NextResponse.json({
         success: true,
         type: 'directory',
-        entries: data.map((entry) => ({ name: entry.name, path: entry.path, type: entry.type, sha: entry.sha, size: entry.size ?? null })),
+        entries: data.map((entry) => ({
+          name: entry.name,
+          path: entry.path,
+          type: entry.type,
+          sha: entry.sha,
+          size: entry.size ?? null,
+        })),
       })
+    }
+
+    if (data.type !== 'file') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unsupported GitHub content type: ${data.type}`,
+        },
+        { status: 422 },
+      )
     }
 
     return NextResponse.json({
       success: true,
       type: 'file',
-      file: { name: data.name, path: data.path, sha: data.sha, size: data.size ?? null, url: data.html_url ?? null, content: data.content ?? null, encoding: data.encoding ?? null },
+      file: {
+        name: data.name,
+        path: data.path,
+        sha: data.sha,
+        size: data.size ?? null,
+        url: data.html_url ?? null,
+        content: data.content ?? null,
+        encoding: data.encoding ?? null,
+      },
     })
   } catch (error) {
     console.error('Velclaw Code contents error:', error)

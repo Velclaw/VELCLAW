@@ -10,22 +10,65 @@ export type VelclawAgent =
 export type VelclawIntegration = {
   id: string
   name: string
-  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud'
+  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'source-control' | 'identity'
   status: 'planned' | 'available'
   source: string
+  capabilities?: string[]
 }
 
 /**
  * Canonical integration registry for Velclaw.
  * Source repositories are references for adapters/modules; they are not copied wholesale.
+ * Planned entries are capability boundaries only until a real adapter and runtime path exist.
  */
 export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
+  {
+    id: 'github-cloud',
+    name: 'GitHub Cloud',
+    kind: 'source-control',
+    status: 'available',
+    source: 'https://github.com/',
+    capabilities: ['oauth', 'repositories', 'branches', 'pull-requests', 'checks'],
+  },
+  {
+    id: 'vercel-cloud',
+    name: 'Vercel Cloud',
+    kind: 'identity',
+    status: 'available',
+    source: 'https://vercel.com/',
+    capabilities: ['oauth', 'workspace-auth'],
+  },
+  {
+    id: 'gitlab-cloud',
+    name: 'GitLab Cloud',
+    kind: 'source-control',
+    status: 'planned',
+    source: 'https://gitlab.com/',
+    capabilities: ['oauth', 'repositories', 'merge-requests', 'pipelines'],
+  },
+  {
+    id: 'bitbucket-cloud',
+    name: 'Bitbucket Cloud',
+    kind: 'source-control',
+    status: 'planned',
+    source: 'https://bitbucket.org/',
+    capabilities: ['oauth', 'repositories', 'pull-requests', 'pipelines'],
+  },
+  {
+    id: 'azure-devops',
+    name: 'Azure DevOps',
+    kind: 'source-control',
+    status: 'planned',
+    source: 'https://dev.azure.com/',
+    capabilities: ['entra-oauth', 'repositories', 'pull-requests', 'builds'],
+  },
   {
     id: 'gito-review',
     name: 'Gito AI review',
     kind: 'reviewer',
     status: 'planned',
     source: 'zskbot/Gito',
+    capabilities: ['review', 'findings', 'gate-input'],
   },
   {
     id: 'ollama-local',
@@ -33,6 +76,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'agent',
     status: 'available',
     source: 'zskbot/code-ollama',
+    capabilities: ['local-models', 'agent-execution'],
   },
   {
     id: 'git-worktree',
@@ -40,6 +84,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'workspace',
     status: 'planned',
     source: 'zskbot/git-worktree-runner',
+    capabilities: ['isolated-worktrees', 'parallel-tasks'],
   },
   {
     id: 'skills',
@@ -47,6 +92,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'skills',
     status: 'planned',
     source: 'zskbot/skills',
+    capabilities: ['skill-discovery', 'skill-execution'],
   },
   {
     id: 'claude-skills',
@@ -54,6 +100,15 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'skills',
     status: 'planned',
     source: 'zskbot/awesome-claude-skills',
+    capabilities: ['catalog', 'skill-metadata'],
+  },
+  {
+    id: 'mcp-runtime',
+    name: 'MCP runtime',
+    kind: 'skills',
+    status: 'planned',
+    source: 'https://modelcontextprotocol.io/',
+    capabilities: ['tools', 'resources', 'prompts'],
   },
   {
     id: 'docs',
@@ -61,6 +116,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'docs',
     status: 'planned',
     source: 'zskbot/docs-web',
+    capabilities: ['reference', 'guides', 'ecosystem'],
   },
   {
     id: 'curl-network',
@@ -68,6 +124,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'network',
     status: 'available',
     source: 'https://curl.se/',
+    capabilities: ['http', 'https', 'sandboxed-execution'],
   },
   {
     id: 'mdn-web-platform',
@@ -75,6 +132,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'docs',
     status: 'available',
     source: 'https://developer.mozilla.org/',
+    capabilities: ['web-platform', 'reference-resolution', 'search'],
   },
   {
     id: 'ibm-cloud',
@@ -82,6 +140,7 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'cloud',
     status: 'planned',
     source: 'https://cloud.ibm.com/',
+    capabilities: ['bearer-auth', 'service-api', 'cloud-runtime'],
   },
 ]
 
