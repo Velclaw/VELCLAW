@@ -9,6 +9,10 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10'
+
 jobs:
   typecheck:
     name: TypeScript typecheck
@@ -17,20 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
-
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
-          cache: pnpm
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        run: npm install --global pnpm@${PNPM_VERSION}
 
       - name: Verify toolchain
         run: |
+          set -euo pipefail
           node --version
           pnpm --version
 
@@ -66,7 +67,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${LLM_API_KEY:-}" ]; then
-            echo "ERROR: GitHub Actions secret LLM_API_KEY is not available. Add it under Settings > Secrets and variables > Actions > Repository secrets."
+            echo 'ERROR: LLM_API_KEY is missing.'
+            echo 'Add the API key under GitHub repository Settings > Secrets and variables > Actions > Repository secrets.'
+            echo 'The secret name must be exactly: LLM_API_KEY'
             exit 1
           fi
           gito --verbose review
