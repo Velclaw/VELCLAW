@@ -173,6 +173,37 @@ select,
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
 }
 
+/* Agent chat: make the existing response stream visibly belong to Velclaw. */
+.mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2 {
+  position: relative;
+  padding-left: 2.25rem;
+  min-height: 1.5rem;
+}
+
+.mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.65);
+  background: #08070d url('/brand/velclaw-mark.svg') center / 1.15rem 1.15rem no-repeat;
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.16);
+}
+
+@media (max-width: 768px) {
+  .mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2 {
+    padding-left: 2rem;
+  }
+
+  .mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2::before {
+    width: 1.25rem;
+    height: 1.25rem;
+    background-size: 1rem 1rem;
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
