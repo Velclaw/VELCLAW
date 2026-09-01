@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useTasks } from '@/components/app-layout'
@@ -26,16 +27,23 @@ export function SharedHeader({
 
   return (
     <div className="px-0 pt-0.5 md:pt-3 pb-1.5 md:pb-4 overflow-visible">
-      <div className="flex items-center justify-between gap-2 h-8 min-w-0">
-        {/* Left side - Menu Button and Left Actions */}
+      <div className="relative flex items-center justify-between gap-2 h-8 min-w-0">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
-          <Button onClick={toggleSidebar} variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+          <Button onClick={toggleSidebar} variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0" aria-label="Open menu">
             <Menu className="h-4 w-4" />
           </Button>
           {leftActions}
         </div>
 
-        {/* Actions - Right side */}
+        <Link
+          href="/"
+          aria-label="Velclaw home"
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2 md:flex"
+        >
+          <img src="/brand/velclaw-mark.svg" alt="" className="h-7 w-7 border border-violet-400/60" />
+          <span className="font-mono text-xs font-semibold tracking-[0.2em] text-foreground">VELCLAW</span>
+        </Link>
+
         <div className="flex items-center gap-2 flex-shrink-0">
           {!hideStars && <GitHubStarsButton initialStars={initialStars} />}
 
@@ -44,7 +52,7 @@ export function SharedHeader({
               asChild
               variant="outline"
               size="sm"
-              className="h-8 sm:px-3 px-0 sm:w-auto w-8 bg-black text-white border-black hover:bg-black/90 dark:bg-white dark:text-black dark:border-white dark:hover:bg-white/90"
+              className="h-8 border-violet-400/50 bg-card text-foreground hover:border-violet-300 hover:bg-violet-500/10 sm:px-3 px-0 sm:w-auto w-8"
             >
               <a
                 href={VERCEL_DEPLOY_URL}
@@ -61,7 +69,6 @@ export function SharedHeader({
           )}
 
           {extraActions}
-
           <User />
         </div>
       </div>
