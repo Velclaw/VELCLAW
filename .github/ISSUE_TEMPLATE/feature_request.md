@@ -1,6 +1,6 @@
 ---
 name: Đề xuất tính năng
-a bout: Đề xuất cải tiến cho Velclaw
+about: Đề xuất cải tiến cho Velclaw
 labels: enhancement
 ---
 
