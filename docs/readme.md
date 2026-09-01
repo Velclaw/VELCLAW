@@ -180,4 +180,4 @@ rhods-dashboard-8bbc85997-9f44t                                   2/2     Runnin
 rhods-dashboard-8bbc85997-jkwzl                                   2/2     Running     0          119m
 rhods-dashboard-8bbc85997-x2knq                                   2/2     Running     0          119m
 rhods-dashboard-8bbc85997-ztksv                                   2/2     Running     0          119m
-```
+``` 
