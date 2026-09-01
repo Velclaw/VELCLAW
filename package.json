@@ -49,7 +49,7 @@
     "@vercel/speed-insights": "^1.3.1",
     "ai": "7.0.85",
     "arctic": "^3.7.0",
-    "class-variance-authority": "0.7.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.45.2",
@@ -64,15 +64,15 @@
     "postgres": "^3.4.8",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "sonner": "2.0.7",
+    "sonner": "^2.0.7",
     "streamdown": "^1.6.11",
     "tailwind-merge": "^3.4.0",
     "typescript-language-server": "^5.1.3",
-    "vaul": "1.1.2",
+    "vaul": "^1.1.2",
     "vscode-jsonrpc": "^8.2.1",
     "vscode-languageserver-protocol": "^3.17.5",
     "ws": "^8.19.0",
-    "zod": "4.3.6"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
