@@ -4,12 +4,15 @@ import { getServerSession } from '@/lib/session/get-server-session'
 
 const routes = [
   { path: '/', name: 'Workspace / Task', scope: 'Core workspace' },
+  { path: '/new', name: 'New Task', scope: 'Task creation' },
   { path: '/tasks', name: 'Tasks', scope: 'Task list' },
   { path: '/velclaw', name: 'Velclaw Dashboard', scope: 'Pipeline dashboard' },
+  { path: '/repos/new', name: 'Repo Workspace', scope: 'Repository creation' },
   { path: '/mcp', name: 'MCP Servers', scope: 'Tool/resource connectors' },
   { path: '/api-keys', name: 'API Keys', scope: 'Provider credentials' },
   { path: '/wiki', name: 'Wiki', scope: 'System knowledge' },
   { path: '/auth/signin', name: 'Sign In', scope: 'Authentication' },
+  { path: '/test', name: 'Test Hub', scope: 'Public ecosystem gateway' },
   { path: '/velclaw/ui-audit', name: 'UI Audit', scope: 'This QA page' },
 ] as const
 
