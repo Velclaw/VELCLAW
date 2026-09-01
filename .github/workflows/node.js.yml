@@ -31,6 +31,7 @@ jobs:
 
       - name: Verify toolchain
         run: |
+          set -euo pipefail
           node --version
           pnpm --version
 
@@ -39,6 +40,9 @@ jobs:
 
       - name: Type-check
         run: pnpm type-check
+
+      - name: Runtime validation
+        run: pnpm validate:runtime
 
       - name: Lint
         run: pnpm lint
