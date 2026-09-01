@@ -41,8 +41,6 @@ export function getIbmCloudConfig(serviceUrl?: string): IbmCloudConfig {
  */
 export function createIbmCloudRequestPlan(request: IbmCloudRequest): IbmCloudRequestPlan {
   const base = new URL(request.serviceUrl)
-  const path = request.path.startsWith('/') ? request.path : `/${request.path}`
-  const url = new URL(path, base)
   const method = request.method?.toUpperCase() ?? 'GET'
 
   if (!/^https?:$/.test(base.protocol)) {
@@ -56,6 +54,12 @@ export function createIbmCloudRequestPlan(request: IbmCloudRequest): IbmCloudReq
   if (!request.accessToken.trim()) {
     throw new Error('IBM Cloud access token is required')
   }
+
+  // Preserve a serviceUrl path prefix such as /gateway/api/ while still
+  // accepting request paths with or without a leading slash.
+  if (!base.pathname.endsWith('/')) base.pathname += '/'
+  const path = request.path.replace(/^\/+/, '')
+  const url = new URL(path, base)
 
   return {
     url: url.toString(),
