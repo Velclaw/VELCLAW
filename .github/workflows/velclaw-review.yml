@@ -44,6 +44,7 @@ jobs:
   review:
     name: AI review
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -67,12 +68,13 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${LLM_API_KEY:-}" ]; then
-            echo 'ERROR: LLM_API_KEY is missing.'
-            echo 'Add the API key under GitHub repository Settings > Secrets and variables > Actions > Repository secrets.'
-            echo 'The secret name must be exactly: LLM_API_KEY'
-            exit 1
+            echo 'AI review skipped: LLM_API_KEY is not configured.'
+            exit 0
           fi
-          gito --verbose review
+          if ! gito --verbose review; then
+            echo 'AI review unavailable (for example, API quota/credits may be exhausted). Core CI remains authoritative.'
+            exit 0
+          fi
           gito github-comment --token "$GITHUB_TOKEN"
 
       - name: Publish review report

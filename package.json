@@ -18,7 +18,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate:runtime": "node scripts/ci-runtime-validation.mjs"
   },
   "dependencies": {
     "@git-diff-view/file": "^0.0.32",
