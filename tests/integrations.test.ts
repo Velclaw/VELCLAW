@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createCurlPlan } from '@/lib/velclaw/integrations/curl'
+import { createCurlPlan, executeCurlPlanInSandbox } from '@/lib/velclaw/integrations/curl'
 import { createIbmCloudRequestPlan, getIbmCloudConfig } from '@/lib/velclaw/integrations/ibm-cloud'
 import { mdnSearchUrl, resolveMdnReference } from '@/lib/velclaw/integrations/mdn'
 import { VELCLAW_INTEGRATIONS } from '@/lib/velclaw/integrations'
@@ -21,6 +21,47 @@ test('curl adapter builds a sandbox-safe request plan', () => {
   assert.ok(plan.args.includes('--request'))
   assert.ok(plan.args.includes('POST'))
   assert.ok(plan.args.includes('Accept: application/json'))
+})
+
+test('curl adapter keeps GET explicit when a body is supplied', () => {
+  const plan = createCurlPlan({
+    method: 'GET',
+    url: 'https://example.com/search',
+    body: 'query=velclaw',
+  })
+
+  const requestIndex = plan.args.indexOf('--request')
+  assert.ok(requestIndex >= 0)
+  assert.equal(plan.args[requestIndex + 1], 'GET')
+})
+
+test('curl sandbox executor enforces a streamed response cap', async () => {
+  let capturedCommand = ''
+  let capturedArgs: string[] = []
+
+  const sandbox = {
+    runCommand: async (command: string, args: string[]) => {
+      capturedCommand = command
+      capturedArgs = args
+      return {
+        exitCode: 0,
+        stdout: async () => '',
+        stderr: async () => '',
+      }
+    },
+  }
+
+  const result = await executeCurlPlanInSandbox(
+    sandbox as never,
+    createCurlPlan({ url: 'https://example.com', maxResponseBytes: 1024 }),
+    1024,
+  )
+
+  assert.equal(result.success, true)
+  assert.equal(capturedCommand, 'sh')
+  assert.equal(capturedArgs[0], '-c')
+  assert.match(capturedArgs[1], /head -c 1025/)
+  assert.match(capturedArgs[1], /CURL_RESPONSE_TOO_LARGE/)
 })
 
 test('curl adapter rejects non-http protocols', () => {
@@ -44,6 +85,16 @@ test('ibm cloud adapter builds bearer-authenticated request descriptors', () => 
 
   assert.equal(plan.url, 'https://example.cloud.ibm.com/v1/resources')
   assert.equal(plan.headers.Authorization, 'Bearer test-token')
+})
+
+test('ibm cloud adapter preserves service URL path prefixes', () => {
+  const plan = createIbmCloudRequestPlan({
+    serviceUrl: 'https://example.cloud.ibm.com/gateway/api',
+    path: '/v1/resources',
+    accessToken: 'test-token',
+  })
+
+  assert.equal(plan.url, 'https://example.cloud.ibm.com/gateway/api/v1/resources')
 })
 
 test('integration registry exposes the three provider boundaries', () => {
