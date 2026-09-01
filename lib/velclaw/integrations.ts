@@ -16,11 +16,7 @@ export type VelclawIntegration = {
   capabilities?: string[]
 }
 
-/**
- * Canonical integration registry for Velclaw.
- * Source repositories are references for adapters/modules; they are not copied wholesale.
- * Planned entries are capability boundaries only until a real adapter and runtime path exist.
- */
+/** Only integrations that materially help the current Velclaw workflow are kept here. */
 export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
   {
     id: 'github-cloud',
@@ -39,28 +35,12 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     capabilities: ['oauth', 'workspace-auth'],
   },
   {
-    id: 'gitlab-cloud',
-    name: 'GitLab Cloud',
-    kind: 'source-control',
-    status: 'planned',
-    source: 'https://gitlab.com/',
-    capabilities: ['oauth', 'repositories', 'merge-requests', 'pipelines'],
-  },
-  {
-    id: 'bitbucket-cloud',
-    name: 'Bitbucket Cloud',
-    kind: 'source-control',
-    status: 'planned',
-    source: 'https://bitbucket.org/',
-    capabilities: ['oauth', 'repositories', 'pull-requests', 'pipelines'],
-  },
-  {
-    id: 'azure-devops',
-    name: 'Azure DevOps',
-    kind: 'source-control',
-    status: 'planned',
-    source: 'https://dev.azure.com/',
-    capabilities: ['entra-oauth', 'repositories', 'pull-requests', 'builds'],
+    id: 'mcp-runtime',
+    name: 'MCP runtime',
+    kind: 'skills',
+    status: 'available',
+    source: 'https://modelcontextprotocol.io/',
+    capabilities: ['tools', 'resources', 'prompts', 'agent-context'],
   },
   {
     id: 'gito-review',
@@ -93,30 +73,6 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     status: 'planned',
     source: 'zskbot/skills',
     capabilities: ['skill-discovery', 'skill-execution'],
-  },
-  {
-    id: 'claude-skills',
-    name: 'Claude skill catalog',
-    kind: 'skills',
-    status: 'planned',
-    source: 'zskbot/awesome-claude-skills',
-    capabilities: ['catalog', 'skill-metadata'],
-  },
-  {
-    id: 'mcp-runtime',
-    name: 'MCP runtime',
-    kind: 'skills',
-    status: 'planned',
-    source: 'https://modelcontextprotocol.io/',
-    capabilities: ['tools', 'resources', 'prompts'],
-  },
-  {
-    id: 'docs',
-    name: 'Velclaw documentation',
-    kind: 'docs',
-    status: 'planned',
-    source: 'zskbot/docs-web',
-    capabilities: ['reference', 'guides', 'ecosystem'],
   },
   {
     id: 'curl-network',
