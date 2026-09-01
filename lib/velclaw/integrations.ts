@@ -10,7 +10,7 @@ export type VelclawAgent =
 export type VelclawIntegration = {
   id: string
   name: string
-  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs'
+  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud'
   status: 'planned' | 'available'
   source: string
 }
@@ -61,6 +61,27 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     kind: 'docs',
     status: 'planned',
     source: 'zskbot/docs-web',
+  },
+  {
+    id: 'curl-network',
+    name: 'curl network executor',
+    kind: 'network',
+    status: 'available',
+    source: 'https://curl.se/',
+  },
+  {
+    id: 'mdn-web-platform',
+    name: 'MDN Web Platform reference',
+    kind: 'docs',
+    status: 'available',
+    source: 'https://developer.mozilla.org/',
+  },
+  {
+    id: 'ibm-cloud',
+    name: 'IBM Cloud provider adapter',
+    kind: 'cloud',
+    status: 'planned',
+    source: 'https://cloud.ibm.com/',
   },
 ]
 
