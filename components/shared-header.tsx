@@ -43,6 +43,13 @@ export function SharedHeader({
           <img src="/brand/velclaw-mark.svg" alt="" className="h-7 w-7 border border-violet-400/60" />
           <span className="font-mono text-xs font-semibold tracking-[0.2em] text-foreground">VELCLAW</span>
         </Link>
+        <Link
+          href="/"
+          aria-label="Velclaw home"
+          className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 md:hidden"
+        >
+          <img src="/brand/velclaw-mark.svg" alt="Velclaw" className="h-7 w-7 border border-violet-400/60" />
+        </Link>
 
         <div className="flex items-center gap-2 flex-shrink-0">
           {!hideStars && <GitHubStarsButton initialStars={initialStars} />}
