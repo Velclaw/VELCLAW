@@ -17,24 +17,24 @@ test('Velclaw virtual domain keeps huynhthuong.xyz as the public hostname', () =
   assert.equal(isVelclawPublicDomain('velclaw.ai'), false)
 })
 
-test('Velclaw integration registry exposes the expanded ecosystem boundaries', () => {
+test('Velclaw registry contains only current useful ecosystem boundaries', () => {
   const ids = new Set(VELCLAW_INTEGRATIONS.map((integration) => integration.id))
-
   for (const id of [
     'github-cloud',
     'vercel-cloud',
-    'gitlab-cloud',
-    'bitbucket-cloud',
-    'azure-devops',
     'mcp-runtime',
+    'gito-review',
+    'ollama-local',
+    'git-worktree',
+    'skills',
     'curl-network',
     'mdn-web-platform',
     'ibm-cloud',
   ]) {
-    assert.ok(ids.has(id), `missing integration: ${id}`)
+    assert.ok(ids.has(id), `missing useful integration: ${id}`)
   }
-
-  assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'github-cloud')?.status, 'available')
-  assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'gitlab-cloud')?.status, 'planned')
-  assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'azure-devops')?.status, 'planned')
+  for (const id of ['gitlab-cloud', 'bitbucket-cloud', 'azure-devops', 'claude-skills', 'docs']) {
+    assert.equal(ids.has(id), false, `unnecessary integration retained: ${id}`)
+  }
+  assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'mcp-runtime')?.status, 'available')
 })
