@@ -1,10 +1,10 @@
 const BASE = 'https://velclaw.cfd'
 
 const groups = [
-  { title: 'CORE WORKSPACE', items: [['Workspace / Task', '/'], ['New Task', '/new'], ['Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Repo Workspace', '/repos/new']] },
-  { title: 'AI + KNOWLEDGE', items: [['MCP Servers', '/mcp'], ['API Keys', '/api-keys'], ['Wiki', '/wiki']] },
-  { title: 'AUTH + QA', items: [['Sign In', '/auth/signin'], ['UI Audit', '/velclaw/ui-audit'], ['VelclawHub', '/velclawhub']] },
-  { title: 'ECOSYSTEM PATHS', items: [['Docs', '/docs'], ['VelclawHub', '/hub']] },
+  { title: 'CORE WORKSPACE', items: [['Velclaw Workspace', '/'], ['Velclaw Task', '/new'], ['Velclaw Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Velclaw Repo', '/repos/new']] },
+  { title: 'AI + KNOWLEDGE', items: [['Velclaw MCP', '/mcp'], ['Velclaw API Keys', '/api-keys'], ['Velclaw Wiki', '/wiki']] },
+  { title: 'AUTH + QA', items: [['Velclaw Sign In', '/auth/signin'], ['Velclaw UI Audit', '/velclaw/ui-audit'], ['VelclawHub', '/velclawhub']] },
+  { title: 'ECOSYSTEM PATHS', items: [['Velclaw Docs', '/docs'], ['VelclawHub Ecosystem', '/hub']] },
 ] as const
 
 export default function VelclawHubPage() {
@@ -20,8 +20,8 @@ export default function VelclawHubPage() {
               </div>
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-violet-300">VELCLAW / VELCLAWHUB</p>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">VELCLAWHUB</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cổng kiểm thử và điều hướng toàn hệ sinh thái Velclaw trên domain canonical duy nhất.</p>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">VelclawHub</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cổng điều hướng và kiểm thử hệ sinh thái Velclaw trên domain canonical duy nhất.</p>
               </div>
             </div>
             <div className="border border-border bg-background/70 px-4 py-3 font-mono text-xs">
