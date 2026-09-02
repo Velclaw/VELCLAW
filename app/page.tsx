@@ -3,6 +3,7 @@ import { HomePageContent } from '@/components/home-page-content'
 import { getServerSession } from '@/lib/session/get-server-session'
 import { getGitHubStars } from '@/lib/github-stars'
 import { getMaxSandboxDuration } from '@/lib/db/settings'
+import styles from './velclaw-home.module.css'
 
 export default async function Home() {
   const cookieStore = await cookies()
@@ -21,16 +22,18 @@ export default async function Home() {
   const stars = await getGitHubStars()
 
   return (
-    <HomePageContent
-      initialSelectedOwner={selectedOwner}
-      initialSelectedRepo={selectedRepo}
-      initialInstallDependencies={installDependencies}
-      initialMaxDuration={maxDuration}
-      initialKeepAlive={keepAlive}
-      initialEnableBrowser={enableBrowser}
-      maxSandboxDuration={maxSandboxDuration}
-      user={session?.user ?? null}
-      initialStars={stars}
-    />
+    <div className={styles.home} data-velclaw-home>
+      <HomePageContent
+        initialSelectedOwner={selectedOwner}
+        initialSelectedRepo={selectedRepo}
+        initialInstallDependencies={installDependencies}
+        initialMaxDuration={maxDuration}
+        initialKeepAlive={keepAlive}
+        initialEnableBrowser={enableBrowser}
+        maxSandboxDuration={maxSandboxDuration}
+        user={session?.user ?? null}
+        initialStars={stars}
+      />
+    </div>
   )
 }
