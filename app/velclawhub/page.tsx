@@ -2,7 +2,7 @@ const BASE = 'https://velclaw.cfd'
 
 const groups = [
   { title: 'CORE WORKSPACE', items: [['Velclaw Workspace', '/'], ['Velclaw Task', '/new'], ['Velclaw Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Velclaw Repo', '/repos/new']] },
-  { title: 'AI + KNOWLEDGE', items: [['Velclaw MCP', '/mcp'], ['Velclaw API Keys', '/api-keys'], ['Velclaw Wiki', '/wiki']] },
+  { title: 'AI + KNOWLEDGE', items: [['Velclaw MCP', '/mcp'], ['Velclaw Plugins', '/plugins'], ['Velclaw API Keys', '/api-keys'], ['Velclaw Wiki', '/wiki']] },
   { title: 'AUTH + QA', items: [['Velclaw Sign In', '/auth/signin'], ['Velclaw UI Audit', '/velclaw/ui-audit'], ['VelclawHub', '/velclawhub']] },
   { title: 'ECOSYSTEM PATHS', items: [['Velclaw Docs', '/docs'], ['VelclawHub Ecosystem', '/hub']] },
 ] as const
