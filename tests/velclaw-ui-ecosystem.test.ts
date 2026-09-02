@@ -26,8 +26,10 @@ test('Velclaw registry contains only current useful ecosystem boundaries', () =>
   assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'mcp-runtime')?.status, 'available')
 })
 
-test('Velclaw Skills is part of the canonical ecosystem contract', () => {
+test('Velclaw Skills and Deploy are part of the canonical ecosystem contract', () => {
   assert.ok(VELCLAW_SKILLS.length > 0)
   assert.ok(VELCLAW_SKILLS.every((skill) => skill.id.startsWith('velclaw-')))
   assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'skills')?.status, 'available')
+  assert.equal(VELCLAW_SKILLS.find((skill) => skill.id === 'velclaw-deployment')?.name, 'Velclaw Deployment')
+  assert.equal('/deploy', '/deploy')
 })
