@@ -2,34 +2,17 @@
   min-height: 100%;
 }
 
-/* Official Velclaw homepage identity: keep the existing task engine, replace template-facing copy. */
+/* Homepage identity is rendered by the real Velclaw wordmark in SharedHeader. */
 .home :global(h1) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   letter-spacing: 0.08em;
-}
-
-.home :global(h1) {
   font-size: 0;
 }
 
+.home :global(h1)::before,
 .home :global(h1)::after {
-  content: "VELCLAW";
-  font-size: clamp(2.5rem, 8vw, 4rem);
-}
-
-.home :global(h1)::before {
-  content: "V";
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  margin-right: 0.75rem;
-  border: 1px solid rgb(167 139 250 / 0.7);
-  color: rgb(196 181 253);
-  font-size: 1rem;
-  vertical-align: middle;
-  letter-spacing: 0;
+  content: none !important;
+  display: none !important;
 }
 
 .home :global(h1 + p) {
@@ -45,21 +28,19 @@
   line-height: 1.7;
 }
 
-/* Preserve provider identity, but remove template/promotion chrome from the product home. */
+/* No Vercel template promotion/deploy chrome on the product homepage. */
 .home :global(a[href*="vercel-labs/coding-agent-template"]),
-.home :global(a[href*="vercel.com/new/clone"]) {
+.home :global(a[href*="vercel.com/new/clone"]),
+.home :global(a[href*="vercel.com/new"]),
+.home :global(a[href*="vercel.com/templates"]) {
   display: none !important;
 }
 
-/* Velclaw baseline: compact, square controls and cards. */
 .home :global(.rounded-2xl),
 .home :global(.rounded-xl),
 .home :global(.rounded-lg),
 .home :global(.rounded-md),
-.home :global(.rounded-sm) {
-  border-radius: 0 !important;
-}
-
+.home :global(.rounded-sm),
 .home :global(button),
 .home :global([role="button"]),
 .home :global(input),
@@ -74,11 +55,5 @@
 @media (max-width: 767px) {
   .home :global(h1 + p)::after {
     font-size: 0.9rem;
-  }
-
-  .home :global(h1)::before {
-    width: 2rem;
-    height: 2rem;
-    margin-right: 0.5rem;
   }
 }
