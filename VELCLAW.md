@@ -4,19 +4,21 @@ Velclaw is the unified ZSKBOT AI coding-agent platform.
 
 ## Product direction
 
-Velclaw combines repository-aware coding agents, isolated workspaces, Git automation, pull requests, AI code review, local LLM support, MCP, and extensible skills behind one workflow.
+Velclaw combines repository-aware coding agents, isolated workspaces, Git automation, pull requests, AI code review, local LLM support, MCP, extensible skills, and deployment control behind one workflow.
 
 ## Core workflow
 
 1. Authenticate and select a repository.
 2. Create a task and isolated agent workspace.
 3. Select a cloud or local coding agent.
-4. Let the agent inspect, modify, and test the code.
-5. Review the diff and AI findings.
-6. Commit and push a dedicated branch.
-7. Open a pull request.
-8. Run automated quality/security review.
-9. Merge only when configured checks and review gates pass.
+4. Select the applicable Velclaw Skill.
+5. Let the agent inspect, modify, and test the code.
+6. Review the diff and AI findings.
+7. Commit and push a dedicated branch.
+8. Open a pull request.
+9. Run automated quality/security review.
+10. Merge only when configured checks and review gates pass.
+11. Use **Velclaw Deploy** (`/deploy`) to prepare release delivery and verify deployment evidence.
 
 ## Integration plan
 
@@ -37,7 +39,16 @@ Velclaw combines repository-aware coding agents, isolated workspaces, Git automa
 - Isolate agent execution from the application host.
 - Require explicit approval for destructive or privileged actions.
 - Prefer small, testable adapters over tightly coupled integrations.
+- Treat `velclaw.cfd` as the sole canonical Velclaw host; deployment URLs such as `*.vercel.app` are not canonical.
+
+## Deployment
+
+**Velclaw Deploy** is the dedicated deployment control plane. It does not create a second task/executor pipeline. The canonical delivery path is:
+
+`Task → Skill selection → Executor → Review → Gate → GitHub API → PR → Deployment evidence`
+
+Deployment success must be backed by provider/GitHub evidence; opening the Deploy page alone never constitutes a successful deployment.
 
 ## Initial milestone
 
-Establish a clean platform shell, provider abstraction, repository/task workflow, isolated execution, GitHub branch/PR automation, and an optional AI review pipeline. Later milestones add local agents, MCP, skills, richer observability, and deployment automation.
+Establish a clean platform shell, provider abstraction, repository/task workflow, isolated execution, GitHub branch/PR automation, an optional AI review pipeline, and a dedicated deployment evidence surface. Later milestones add richer deployment automation and observability.
