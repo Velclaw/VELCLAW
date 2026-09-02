@@ -14,21 +14,36 @@ export async function GET(req: NextRequest): Promise<Response> {
   const cookieStore = await cookies()
 
   const authMode = cookieStore.get('github_auth_mode')?.value ?? null
-  const isSignInFlow = authMode === 'signin'
-  const isConnectFlow = authMode === 'connect'
-
-  const storedState = cookieStore.get(authMode ? 'github_auth_state' : 'github_oauth_state')?.value ?? null
-  const storedRedirectTo =
-    cookieStore.get(authMode ? 'github_auth_redirect_to' : 'github_oauth_redirect_to')?.value ?? null
+  const authState = cookieStore.get('github_auth_state')?.value ?? null
+  const oauthState = cookieStore.get('github_oauth_state')?.value ?? null
+  const authRedirectTo = cookieStore.get('github_auth_redirect_to')?.value ?? null
+  const oauthRedirectTo = cookieStore.get('github_oauth_redirect_to')?.value ?? null
   const storedUserId = cookieStore.get('github_oauth_user_id')?.value ?? null
+
+  // Prefer the explicit mode, but tolerate an older callback where the mode
+  // cookie was lost while the state cookies survived. A connect flow must
+  // still carry the existing user ID; otherwise treat it as sign-in.
+  const isConnectFlow = authMode === 'connect' || (!authMode && !authState && !!oauthState && !!storedUserId)
+  const isSignInFlow = !isConnectFlow && (authMode === 'signin' || !!authState)
+  const storedState = isSignInFlow ? authState : oauthState
+  const storedRedirectTo = isSignInFlow ? authRedirectTo : oauthRedirectTo
 
   if (
     code === null ||
     state === null ||
+    storedState === null ||
     storedState !== state ||
     storedRedirectTo === null ||
-    (!isSignInFlow && storedUserId === null)
+    (!isSignInFlow && !storedUserId)
   ) {
+    console.error('[GitHub Callback] Invalid OAuth state', {
+      hasCode: !!code,
+      hasState: !!state,
+      hasAuthState: !!authState,
+      hasOAuthState: !!oauthState,
+      authMode,
+      hasStoredUserId: !!storedUserId,
+    })
     return new Response('Invalid OAuth state', { status: 400 })
   }
 
@@ -87,7 +102,6 @@ export async function GET(req: NextRequest): Promise<Response> {
         return Response.redirect(new URL('/?error=github_session', req.url))
       }
 
-      // Mutate the exact response that carries the redirect and session cookie.
       const response = NextResponse.redirect(new URL(storedRedirectTo, req.nextUrl.origin))
       await saveSession(response, session)
       response.cookies.delete('github_auth_state')
@@ -99,7 +113,6 @@ export async function GET(req: NextRequest): Promise<Response> {
       return response
     }
 
-    // CONNECT FLOW: attach GitHub to the existing Vercel user.
     const encryptedToken = encrypt(tokenData.access_token)
     const existingAccount = await db
       .select()
