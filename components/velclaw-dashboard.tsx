@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Activity, Bot, CheckCircle2, GitPullRequest, KeyRound, Play, Server, TerminalSquare, BookOpen, Cloud, ListChecks, PlugZap } from 'lucide-react'
+import { Activity, CheckCircle2, GitPullRequest, KeyRound, Play, Server, TerminalSquare, BookOpen, Cloud, ListChecks, PlugZap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
