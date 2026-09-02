@@ -34,8 +34,8 @@ const sections = [
   },
   {
     id: 'domain',
-    title: 'Domain identity',
-    body: 'Hiện tại hostname public là huynhthuong.xyz. velclaw.ai chỉ là virtual identity cho kiến trúc thương hiệu cho tới khi domain được mua và cấu hình thật. Không được coi virtual identity là DNS hostname đang hoạt động.',
+    title: 'Domain',
+    body: 'Domain canonical duy nhất của Velclaw hiện tại là velclaw.cfd. Tất cả public route, test gateway và ecosystem navigation phải dùng cùng hostname này.',
   },
 ] as const
 
