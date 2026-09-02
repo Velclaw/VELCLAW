@@ -8,12 +8,13 @@ import {
   resolveVelclawVirtualDomain,
 } from '../lib/velclaw/virtual-domain'
 
-test('Velclaw virtual domain keeps huynhthuong.xyz as the public hostname', () => {
-  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'huynhthuong.xyz')
-  assert.equal(VELCLAW_VIRTUAL_DOMAIN, 'velclaw.ai')
-  assert.equal(resolveVelclawVirtualDomain('huynhthuong.xyz'), 'velclaw.ai')
-  assert.equal(resolveVelclawVirtualDomain('huynhthuong.xyz:3000'), 'velclaw.ai')
-  assert.equal(isVelclawPublicDomain('huynhthuong.xyz'), true)
+test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
+  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.cfd')
+  assert.equal(VELCLAW_VIRTUAL_DOMAIN, 'velclaw.cfd')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd'), 'velclaw.cfd')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd:3000'), 'velclaw.cfd')
+  assert.equal(isVelclawPublicDomain('velclaw.cfd'), true)
+  assert.equal(isVelclawPublicDomain('huynhthuong.xyz'), false)
   assert.equal(isVelclawPublicDomain('velclaw.ai'), false)
 })
 
