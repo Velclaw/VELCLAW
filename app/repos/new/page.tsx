@@ -64,7 +64,7 @@ interface Organization {
   avatar_url: string
 }
 
-export default function NewRepoPage() {
+export default function VelclawRepoPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const ownerParam = searchParams.get('owner') || ''
@@ -177,7 +177,8 @@ export default function NewRepoPage() {
       <div className="px-3 pb-3">
         <div className="container max-w-2xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">Create New Repository</h1>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">VELCLAW / REPO</p>
+            <h1 className="text-3xl font-bold tracking-tight">Velclaw Repo</h1>
             <p className="text-muted-foreground mt-2">
               Create a new GitHub repository{selectedOwner ? ` for ${selectedOwner}` : ''}.
             </p>
@@ -259,7 +260,6 @@ export default function NewRepoPage() {
                       isCreatingRepo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                     }`}
                   >
-                    {/* Mobile List View */}
                     <div
                       className={`md:hidden flex items-center gap-3 p-3 rounded-md border-2 transition-all ${
                         selectedTemplate === template.id
@@ -290,23 +290,13 @@ export default function NewRepoPage() {
                       </div>
                       {selectedTemplate === template.id && (
                         <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="w-3 h-3"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                              clipRule="evenodd"
-                            />
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                           </svg>
                         </div>
                       )}
                     </div>
 
-                    {/* Desktop Card View */}
                     <div className="hidden md:block">
                       <div
                         className={`aspect-video rounded-md overflow-hidden bg-muted mb-2 border-2 transition-all flex items-center justify-center text-foreground ${
@@ -317,16 +307,8 @@ export default function NewRepoPage() {
                           <File className="w-12 h-12" strokeWidth={1} />
                         ) : (
                           <>
-                            <img
-                              src={template.imageLight}
-                              alt={template.name}
-                              className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain dark:hidden"
-                            />
-                            <img
-                              src={template.imageDark}
-                              alt={template.name}
-                              className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain hidden dark:block"
-                            />
+                            <img src={template.imageLight} alt={template.name} className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain dark:hidden" />
+                            <img src={template.imageDark} alt={template.name} className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain hidden dark:block" />
                           </>
                         )}
                       </div>
@@ -335,17 +317,8 @@ export default function NewRepoPage() {
                       </div>
                       {selectedTemplate === template.id && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="w-3 h-3"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                              clipRule="evenodd"
-                            />
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 01.05-.143z" clipRule="evenodd" />
                           </svg>
                         </div>
                       )}
@@ -356,30 +329,14 @@ export default function NewRepoPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="repo-private" className="text-sm font-medium">
-                Private repository
-              </Label>
-              <Switch
-                id="repo-private"
-                checked={newRepoPrivate}
-                onCheckedChange={setNewRepoPrivate}
-                disabled={isCreatingRepo}
-              />
+              <Label htmlFor="repo-private" className="text-sm font-medium">Private repository</Label>
+              <Switch id="repo-private" checked={newRepoPrivate} onCheckedChange={setNewRepoPrivate} disabled={isCreatingRepo} />
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleCancel} disabled={isCreatingRepo}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={handleCancel} disabled={isCreatingRepo}>Cancel</Button>
               <Button onClick={handleCreateRepo} disabled={isCreatingRepo || !newRepoName.trim()}>
-                {isCreatingRepo ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  'Create Repository'
-                )}
+                {isCreatingRepo ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Creating...</> : 'Create Repository'}
               </Button>
             </div>
           </div>
