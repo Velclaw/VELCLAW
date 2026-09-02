@@ -4,11 +4,9 @@
 
 Mọi sản phẩm, trang web, ứng dụng, thư viện, công cụ, nhánh con hoặc dự án mới có liên quan đến Velclaw đều phải kế thừa và tuân thủ **phong cách mặc định của Velclaw**.
 
-Điều này áp dụng cả cho các dự án được tạo trong tương lai nhưng thuộc hệ sinh thái Velclaw.
-
 ## Nguồn chuẩn
 
-`docs.velclaw.ai` là nguồn tham chiếu trực quan chính cho giao diện Velclaw. Kho giao diện tham chiếu nội bộ được dùng để lưu các thành phần và quy ước thiết kế chuẩn.
+Giao diện Velclaw phải dùng chung design system của hệ sinh thái.
 
 ## Visual baseline
 
@@ -19,8 +17,8 @@ Mọi sản phẩm, trang web, ứng dụng, thư viện, công cụ, nhánh con
 - header nhỏ gọn, có hamburger menu và Velclaw mark ở trung tâm;
 - mobile ưu tiên reader/workspace, sidebar mở dạng drawer;
 - desktop ưu tiên layout workspace nhiều cột nhưng không lãng phí diện tích đọc;
-- focus/active dùng viền hoặc glow violet, không dùng màu ngẫu nhiên;
-- logo Velclaw phải dùng asset nhận diện chuẩn, không tự chế logo khác.
+- focus/active dùng viền hoặc glow violet;
+- logo Velclaw phải dùng asset nhận diện chuẩn.
 
 ## Các thành phần phải đồng bộ
 
@@ -32,37 +30,34 @@ Mọi sản phẩm, trang web, ứng dụng, thư viện, công cụ, nhánh con
 - Thanh đầu trang, điều hướng và các nút ngôn ngữ/chuyển chế độ.
 - Trạng thái hover, focus, active và disabled.
 - Bố cục đáp ứng trên máy tính và thiết bị di động.
-- Quy tắc chuyển động và hiệu ứng giao diện khi được sử dụng.
 - Agent Chat phải có nhận diện Velclaw rõ ràng và không trộn lẫn với branding của provider.
 
 ## Domain identity
 
-Trong giai đoạn triển khai hiện tại:
+**`velclaw.cfd` là domain duy nhất của Velclaw trong cấu hình hiện tại.**
 
-- public domain: `huynhthuong.xyz`;
-- virtual/internal identity: `velclaw.ai`;
-- không được trình bày `velclaw.ai` như một hostname DNS đang hoạt động khi domain chưa được đăng ký/cấu hình;
-- mapping domain được quản lý tập trung bởi `lib/velclaw/virtual-domain.ts`.
+Không sử dụng `huynhthuong.xyz` hoặc `velclaw.ai` làm public domain, alias, virtual identity hay hostname trong ứng dụng.
 
-Khi `velclaw.ai` được mua và cấu hình thật, chỉ cần chuyển lớp domain/DNS mapping; không xây lại UI hoặc ecosystem identity.
+Các route ecosystem dùng cùng canonical host:
+
+- `https://velclaw.cfd/`
+- `https://velclaw.cfd/docs`
+- `https://velclaw.cfd/hub`
+- `https://velclaw.cfd/mcp`
+- `https://velclaw.cfd/api-keys`
+- `https://velclaw.cfd/wiki`
+- `https://velclaw.cfd/test`
+
+Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code không được duy trì một domain cũ chỉ để làm alias.
 
 ## Quy tắc cho dự án con
 
-Một dự án mới không được tự ý tạo một bộ nhận diện giao diện khác nếu dự án đó:
-
-- mang tên Velclaw;
-- thuộc tổ chức Velclaw;
-- được công bố là một phần của hệ sinh thái Velclaw;
-- hoặc được xác định là sản phẩm/thành phần chính thức của Velclaw.
-
-Nếu có nhu cầu tạo một phong cách khác, phải được phê duyệt trước khi triển khai.
+Một dự án mới không được tự ý tạo một bộ nhận diện giao diện hoặc domain identity khác nếu dự án đó thuộc hệ sinh thái Velclaw.
 
 ## Bảo vệ giao diện chuẩn
 
-Thay đổi giao diện phải được xem xét về khả năng tương thích với hệ thống thiết kế trước khi hợp nhất. Không được làm thay đổi nhận diện chung của Velclaw chỉ vì một dự án con có cấu trúc hoặc chức năng khác.
-
-Các primitive UI dùng chung phải giữ radius về `0` và lấy màu từ design tokens; route mới không được hard-code một visual system riêng.
+Thay đổi giao diện phải được xem xét về khả năng tương thích với hệ thống thiết kế trước khi hợp nhất. Các primitive UI dùng chung phải giữ radius về `0` và lấy màu từ design tokens.
 
 ## Mục tiêu
 
-Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất, dù họ đang ở Docs, VelclawHub hay bất kỳ sản phẩm Velclaw chính thức nào trong tương lai.
+Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất và domain canonical `velclaw.cfd`.
