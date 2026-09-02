@@ -30,16 +30,16 @@ export function SharedHeader({ leftActions, extraActions }: SharedHeaderProps) {
         <Link
           href="/"
           aria-label="Velclaw home"
-          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center md:flex"
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center"
         >
-          <img src="/brand/velclaw-logo.svg" alt="VELCLAW" className="h-8 w-auto max-w-[150px]" />
+          <img src="/brand/velclaw-logo.svg?v=3" alt="VELCLAW" className="h-8 w-auto max-w-[150px]" />
         </Link>
         <Link
           href="/"
           aria-label="Velclaw home"
           className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 md:hidden"
         >
-          <img src="/brand/velclaw-logo.svg" alt="VELCLAW" className="h-8 w-auto max-w-[112px]" />
+          <img src="/brand/velclaw-logo.svg?v=3" alt="VELCLAW" className="h-8 w-auto max-w-[112px]" />
         </Link>
 
         <div className="flex items-center gap-2 flex-shrink-0">
