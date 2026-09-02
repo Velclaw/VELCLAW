@@ -31,5 +31,4 @@ test('Velclaw Skills and Deploy are part of the canonical ecosystem contract', (
   assert.ok(VELCLAW_SKILLS.every((skill) => skill.id.startsWith('velclaw-')))
   assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'skills')?.status, 'available')
   assert.equal(VELCLAW_SKILLS.find((skill) => skill.id === 'velclaw-deployment')?.name, 'Velclaw Deployment')
-  assert.equal('/deploy', '/deploy')
 })
