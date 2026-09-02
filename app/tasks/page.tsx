@@ -3,7 +3,7 @@ import { getGitHubStars } from '@/lib/github-stars'
 import { TasksListClient } from '@/components/tasks-list-client'
 import { redirect } from 'next/navigation'
 
-export default async function TasksListPage() {
+export default async function VelclawTasksPage() {
   const session = await getServerSession()
   const stars = await getGitHubStars()
 

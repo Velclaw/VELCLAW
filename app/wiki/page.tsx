@@ -39,7 +39,7 @@ const sections = [
   },
 ] as const
 
-export default async function WikiPage() {
+export default async function VelclawWikiPage() {
   const session = await getServerSession()
   if (!session?.user) redirect('/auth/signin')
 
