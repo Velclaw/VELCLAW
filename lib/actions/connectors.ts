@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid'
 import { revalidatePath } from 'next/cache'
 import { ZodError } from 'zod'
 import { eq, and } from 'drizzle-orm'
-import { encrypt, decrypt } from '@/lib/crypto'
+import { encrypt } from '@/lib/crypto'
 import { getServerSession } from '@/lib/session/get-server-session'
 
 type FormState = {
@@ -155,14 +155,31 @@ export async function updateConnector(_: FormState, formData: FormData): Promise
       }
     }
 
+    const [existingConnector] = await db
+      .select({
+        oauthClientSecret: connectors.oauthClientSecret,
+        env: connectors.env,
+      })
+      .from(connectors)
+      .where(and(eq(connectors.id, id), eq(connectors.userId, session.user.id)))
+      .limit(1)
+
+    if (!existingConnector) {
+      return {
+        success: false,
+        message: 'Connector not found',
+        errors: {},
+      }
+    }
+
     const name = formData.get('name') as string
     const description = formData.get('description') as string
     const type = (formData.get('type') as string) || 'remote'
     const baseUrl = formData.get('baseUrl') as string
     const oauthClientId = formData.get('oauthClientId') as string
-    const oauthClientSecret = formData.get('oauthClientSecret') as string
+    const oauthClientSecret = (formData.get('oauthClientSecret') as string | null)?.trim() || ''
     const command = formData.get('command') as string
-    const envJson = formData.get('env') as string
+    const envJson = (formData.get('env') as string | null)?.trim() || ''
 
     const connectorData = {
       userId: session.user.id,
@@ -171,7 +188,7 @@ export async function updateConnector(_: FormState, formData: FormData): Promise
       type: type as 'local' | 'remote',
       baseUrl: baseUrl?.trim() || undefined,
       oauthClientId: oauthClientId?.trim() || undefined,
-      oauthClientSecret: oauthClientSecret?.trim() || undefined,
+      oauthClientSecret: oauthClientSecret || undefined,
       command: command?.trim() || undefined,
       env: envJson ? JSON.parse(envJson) : undefined,
       status: 'connected' as const,
@@ -187,9 +204,9 @@ export async function updateConnector(_: FormState, formData: FormData): Promise
         type: validatedData.type,
         baseUrl: validatedData.baseUrl || null,
         oauthClientId: validatedData.oauthClientId || null,
-        oauthClientSecret: validatedData.oauthClientSecret ? encrypt(validatedData.oauthClientSecret) : null,
+        oauthClientSecret: oauthClientSecret ? encrypt(oauthClientSecret) : existingConnector.oauthClientSecret,
         command: validatedData.command || null,
-        env: validatedData.env ? encrypt(JSON.stringify(validatedData.env)) : null,
+        env: envJson ? encrypt(JSON.stringify(validatedData.env)) : existingConnector.env,
         status: validatedData.status,
         updatedAt: new Date(),
       })
@@ -271,18 +288,26 @@ export async function getConnectors() {
       }
     }
 
-    const userConnectors = await db.select().from(connectors).where(eq(connectors.userId, session.user.id))
-
-    // Decrypt sensitive fields
-    const decryptedConnectors = userConnectors.map((connector) => ({
-      ...connector,
-      oauthClientSecret: connector.oauthClientSecret ? decrypt(connector.oauthClientSecret) : null,
-      env: connector.env ? JSON.parse(decrypt(connector.env)) : null,
-    }))
+    const userConnectors = await db
+      .select({
+        id: connectors.id,
+        userId: connectors.userId,
+        name: connectors.name,
+        description: connectors.description,
+        type: connectors.type,
+        baseUrl: connectors.baseUrl,
+        oauthClientId: connectors.oauthClientId,
+        command: connectors.command,
+        status: connectors.status,
+        createdAt: connectors.createdAt,
+        updatedAt: connectors.updatedAt,
+      })
+      .from(connectors)
+      .where(eq(connectors.userId, session.user.id))
 
     return {
       success: true,
-      data: decryptedConnectors,
+      data: userConnectors,
     }
   } catch (error) {
     console.error('Error fetching connectors:', error)
