@@ -1,1 +1,0 @@
-Velclaw production deployment is configured from the private Velclaw/Velclaw repository. The canonical production domain is velclaw.cfd.
