@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { VELCLAW_INTEGRATIONS } from '../lib/velclaw/integrations'
+import { VELCLAW_SKILLS } from '../lib/velclaw/skills'
 import {
   VELCLAW_PUBLIC_DOMAIN,
   isVelclawPublicDomain,
@@ -23,4 +24,10 @@ test('Velclaw registry contains only current useful ecosystem boundaries', () =>
     assert.equal(ids.has(id), false, `unnecessary integration retained: ${id}`)
   }
   assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'mcp-runtime')?.status, 'available')
+})
+
+test('Velclaw Skills is part of the canonical ecosystem contract', () => {
+  assert.ok(VELCLAW_SKILLS.length > 0)
+  assert.ok(VELCLAW_SKILLS.every((skill) => skill.id.startsWith('velclaw-')))
+  assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'skills')?.status, 'available')
 })
