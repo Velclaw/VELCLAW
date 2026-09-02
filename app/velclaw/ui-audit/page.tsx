@@ -3,17 +3,19 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from '@/lib/session/get-server-session'
 
 const routes = [
-  { path: '/', name: 'Workspace / Task', scope: 'Core workspace' },
-  { path: '/new', name: 'New Task', scope: 'Task creation' },
-  { path: '/tasks', name: 'Tasks', scope: 'Task list' },
+  { path: '/', name: 'Velclaw Workspace', scope: 'Core workspace' },
+  { path: '/new', name: 'Velclaw Task', scope: 'Task creation' },
+  { path: '/tasks', name: 'Velclaw Tasks', scope: 'Task list' },
   { path: '/velclaw', name: 'Velclaw Dashboard', scope: 'Pipeline dashboard' },
-  { path: '/repos/new', name: 'Repo Workspace', scope: 'Repository creation' },
-  { path: '/mcp', name: 'MCP Servers', scope: 'Tool/resource connectors' },
-  { path: '/api-keys', name: 'API Keys', scope: 'Provider credentials' },
-  { path: '/wiki', name: 'Wiki', scope: 'System knowledge' },
-  { path: '/auth/signin', name: 'Sign In', scope: 'Authentication' },
-  { path: '/velclawhub', name: 'VelclawHub', scope: 'Public ecosystem gateway' },
-  { path: '/velclaw/ui-audit', name: 'UI Audit', scope: 'This QA page' },
+  { path: '/repos/new', name: 'Velclaw Repo', scope: 'Repository creation' },
+  { path: '/mcp', name: 'Velclaw MCP', scope: 'Tool/resource connectors' },
+  { path: '/api-keys', name: 'Velclaw API Keys', scope: 'Provider credentials' },
+  { path: '/wiki', name: 'Velclaw Wiki', scope: 'System knowledge' },
+  { path: '/auth/signin', name: 'Velclaw Sign In', scope: 'Authentication' },
+  { path: '/velclawhub', name: 'VelclawHub', scope: 'Ecosystem gateway' },
+  { path: '/velclaw/ui-audit', name: 'Velclaw UI Audit', scope: 'This QA page' },
+  { path: '/docs', name: 'Velclaw Docs', scope: 'Documentation' },
+  { path: '/hub', name: 'VelclawHub Ecosystem', scope: 'Existing ecosystem hub route' },
 ] as const
 
 export default async function VelclawUiAuditPage() {
@@ -58,6 +60,7 @@ export default async function VelclawUiAuditPage() {
             <li>✓ MCP + API Keys có route riêng</li>
             <li>✓ Wiki có kiến thức hệ thống</li>
             <li>✓ VelclawHub là tên canonical của ecosystem gateway</li>
+            <li>✓ VelclawHub Ecosystem được phân biệt riêng với VelclawHub</li>
           </ul>
         </section>
       </div>
