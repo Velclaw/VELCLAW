@@ -40,6 +40,13 @@ yarn-error.log*
 *.tmp
 *.temp
 
+actions-runner/
+gitlab_o11y/
+filelist.txt
+structure.txt
+velclaw-files.txt
+velclaw-tree.txt
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
