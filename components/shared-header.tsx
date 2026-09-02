@@ -5,24 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import { useTasks } from '@/components/app-layout'
 import { User } from '@/components/auth/user'
-import { GitHubStarsButton } from '@/components/github-stars-button'
-import { VERCEL_DEPLOY_URL } from '@/lib/constants'
 
 interface SharedHeaderProps {
   leftActions?: React.ReactNode
   extraActions?: React.ReactNode
+  // Kept for compatibility with existing callers; template promotion chrome is no longer rendered.
   initialStars?: number
   hideStars?: boolean
   hideDeployButton?: boolean
 }
 
-export function SharedHeader({
-  leftActions,
-  extraActions,
-  initialStars = 1200,
-  hideStars = false,
-  hideDeployButton = false,
-}: SharedHeaderProps) {
+export function SharedHeader({ leftActions, extraActions }: SharedHeaderProps) {
   const { toggleSidebar } = useTasks()
 
   return (
@@ -52,29 +45,6 @@ export function SharedHeader({
         </Link>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {!hideStars && <GitHubStarsButton initialStars={initialStars} />}
-
-          {!hideDeployButton && (
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="h-8 border-violet-400/50 bg-card text-foreground hover:border-violet-300 hover:bg-violet-500/10 sm:px-3 px-0 sm:w-auto w-8"
-            >
-              <a
-                href={VERCEL_DEPLOY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5"
-              >
-                <svg viewBox="0 0 76 65" className="h-3 w-3" fill="currentColor">
-                  <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
-                </svg>
-                <span className="hidden sm:inline">Deploy Your Own</span>
-              </a>
-            </Button>
-          )}
-
           {extraActions}
           <User />
         </div>
