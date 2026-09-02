@@ -9,7 +9,6 @@ import { User } from '@/components/auth/user'
 interface SharedHeaderProps {
   leftActions?: React.ReactNode
   extraActions?: React.ReactNode
-  // Kept for compatibility with existing callers; template promotion chrome is no longer rendered.
   initialStars?: number
   hideStars?: boolean
   hideDeployButton?: boolean
@@ -31,17 +30,16 @@ export function SharedHeader({ leftActions, extraActions }: SharedHeaderProps) {
         <Link
           href="/"
           aria-label="Velclaw home"
-          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2 md:flex"
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center md:flex"
         >
-          <img src="/brand/velclaw-mark.svg" alt="" className="h-7 w-7 border border-violet-400/60" />
-          <span className="font-mono text-xs font-semibold tracking-[0.2em] text-foreground">VELCLAW</span>
+          <img src="/brand/velclaw-logo.svg" alt="VELCLAW" className="h-8 w-auto max-w-[150px]" />
         </Link>
         <Link
           href="/"
           aria-label="Velclaw home"
           className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 md:hidden"
         >
-          <img src="/brand/velclaw-mark.svg" alt="Velclaw" className="h-7 w-7 border border-violet-400/60" />
+          <img src="/brand/velclaw-logo.svg" alt="VELCLAW" className="h-8 w-auto max-w-[112px]" />
         </Link>
 
         <div className="flex items-center gap-2 flex-shrink-0">
