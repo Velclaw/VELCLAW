@@ -1,4 +1,4 @@
-const BASE = 'https://huynhthuong.xyz'
+const BASE = 'https://velclaw.cfd'
 
 const groups = [
   {
@@ -51,12 +51,12 @@ export default function VelclawTestHub() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-violet-300">VELCLAW / TEST HUB</p>
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">VELCLAW</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                  Cổng kiểm thử và điều hướng toàn hệ sinh thái trên domain hiện tại.
+                  Cổng kiểm thử và điều hướng toàn hệ sinh thái trên domain canonical duy nhất.
                 </p>
               </div>
             </div>
             <div className="border border-border bg-background/70 px-4 py-3 font-mono text-xs">
-              <div className="text-muted-foreground">PUBLIC DOMAIN</div>
+              <div className="text-muted-foreground">CANONICAL DOMAIN</div>
               <div className="mt-1 text-violet-200">{BASE}</div>
             </div>
           </div>
@@ -93,17 +93,17 @@ export default function VelclawTestHub() {
             </div>
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Identity</div>
-              <div className="mt-2 text-sm">huynhthuong.xyz → Velclaw</div>
+              <div className="mt-2 text-sm">Velclaw</div>
             </div>
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Future domain</div>
-              <div className="mt-2 text-sm">velclaw.ai only after real registration/configuration</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Canonical host</div>
+              <div className="mt-2 text-sm">velclaw.cfd</div>
             </div>
           </div>
         </section>
 
         <footer className="border-t border-border pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-          Velclaw ecosystem test gateway · current canonical host: huynhthuong.xyz
+          Velclaw ecosystem test gateway · canonical host: velclaw.cfd
         </footer>
       </div>
     </main>
