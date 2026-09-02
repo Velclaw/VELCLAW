@@ -7,21 +7,32 @@
 - Project: **Velclaw** / `velclaw`
 - Canonical GitHub repository: **`Velclaw/Velclaw`**
 - Primary/canonical domain: **`velclaw.cfd`**
-- Documentation domain: **`docs.velclaw.ai`**
-- Default branch: `main`
+- Canonical default branch: `main`
 
 ## Domain rules
 
-- `velclaw.cfd` is the primary Velclaw domain.
-- `docs.velclaw.ai` is the documentation domain, not the primary application domain.
-- `*.vercel.app` addresses are deployment URLs and must not be assumed to be the canonical domain.
+- `velclaw.cfd` is the primary and canonical domain for the Velclaw ecosystem.
+- All first-party Velclaw pages should use the `velclaw.cfd` host.
+- `*.vercel.app` addresses are deployment URLs and must not be assumed to be canonical.
 - Never infer the primary domain from a GitHub Website field or a Vercel deployment URL.
 
-## Repository rule
+## Canonical pages
 
-- The canonical/root repository is **`Velclaw/Velclaw`**.
-- Do not treat `zskbot/Velclaw` or `zskbot/velclaw` as the canonical/root repository.
-- Future Velclaw implementation work must be checked against `Velclaw/Velclaw` first.
+- `/` — Workspace / Task
+- `/new` — New Task
+- `/tasks` — Tasks
+- `/velclaw` — Velclaw Dashboard
+- `/repos/new` — Repo Workspace
+- `/mcp` — MCP Servers
+- `/api-keys` — API Keys
+- `/wiki` — Wiki
+- `/auth/signin` — Sign In
+- `/velclaw/ui-audit` — UI Audit
+- `/velclawhub` — **VelclawHub** (renamed from the legacy Test Hub)
+- `/docs` — Docs
+- `/hub` — existing ecosystem hub route
+
+The canonical public ecosystem gateway is now named **VelclawHub**, with route `/velclawhub`. The legacy `/test` route has been removed.
 
 ## Core architecture
 
@@ -47,7 +58,7 @@ The MCP App is an integration/presentation layer. It must reuse Velclaw's existi
 ## Important project facts
 
 - Primary domain: `velclaw.cfd`
-- Docs domain: `docs.velclaw.ai`
 - Canonical repository: `Velclaw/Velclaw`
 - Project name: Velclaw / `velclaw`
+- Canonical ecosystem gateway: `/velclawhub`
 - Pipeline: Task → Executor → Review → Gate → GitHub API → PR
