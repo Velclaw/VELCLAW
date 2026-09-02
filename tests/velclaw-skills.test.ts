@@ -24,6 +24,14 @@ test('every available skill has an execution boundary and no credentials', () =>
   }
 })
 
+test('deployment skill is bound to the task executor', () => {
+  const skill = getVelclawSkill('velclaw-deployment')
+  assert.equal(skill?.name, 'Velclaw Deployment')
+  assert.equal(skill?.executorBinding, 'task-executor')
+  assert.equal(skill?.sandbox, 'isolated')
+  assert.ok(skill?.capabilities.includes('deployment-evidence'))
+})
+
 test('skill lookup and agent validation are deterministic', () => {
   assert.equal(getVelclawSkill('velclaw-task-planning')?.name, 'Velclaw Task Planning')
   assert.equal(getVelclawSkill('missing-skill'), undefined)

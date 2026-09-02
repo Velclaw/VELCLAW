@@ -1,7 +1,7 @@
 const BASE = 'https://velclaw.cfd'
 
 const groups = [
-  { title: 'CORE WORKSPACE', items: [['Velclaw Workspace', '/'], ['Velclaw Task', '/new'], ['Velclaw Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Velclaw Repo', '/repos/new']] },
+  { title: 'CORE WORKSPACE', items: [['Velclaw Workspace', '/'], ['Velclaw Task', '/new'], ['Velclaw Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Velclaw Repo', '/repos/new'], ['Velclaw Deploy', '/deploy']] },
   { title: 'AI + CAPABILITIES', items: [['Velclaw MCP', '/mcp'], ['Velclaw Plugins', '/plugins'], ['Velclaw Skills', '/skills'], ['Velclaw API Keys', '/api-keys'], ['Velclaw Wiki', '/wiki']] },
   { title: 'AUTH + QA', items: [['Velclaw Sign In', '/auth/signin'], ['Velclaw UI Audit', '/velclaw/ui-audit'], ['VelclawHub', '/velclawhub']] },
   { title: 'ECOSYSTEM PATHS', items: [['Velclaw Docs', '/docs'], ['VelclawHub Ecosystem', '/hub']] },
@@ -52,7 +52,7 @@ export default function VelclawHubPage() {
 
         <section className="border border-border bg-card p-5">
           <div className="grid gap-5 md:grid-cols-3">
-            <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Architecture</div><div className="mt-2 text-sm">Task → Skill → Executor → Review → Gate → GitHub</div></div>
+            <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Architecture</div><div className="mt-2 text-sm">Task → Skill → Executor → Review → Gate → GitHub → Deploy</div></div>
             <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Identity</div><div className="mt-2 text-sm">Velclaw</div></div>
             <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Canonical host</div><div className="mt-2 text-sm">velclaw.cfd</div></div>
           </div>

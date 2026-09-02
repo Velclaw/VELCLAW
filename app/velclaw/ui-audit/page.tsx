@@ -10,6 +10,8 @@ const routes = [
   { path: '/repos/new', name: 'Velclaw Repo', scope: 'Repository creation' },
   { path: '/mcp', name: 'Velclaw MCP', scope: 'Tool/resource connectors' },
   { path: '/plugins', name: 'Velclaw Plugins', scope: 'Integration registry' },
+  { path: '/skills', name: 'Velclaw Skills', scope: 'Reusable agent capabilities' },
+  { path: '/deploy', name: 'Velclaw Deploy', scope: 'Deployment control plane' },
   { path: '/api-keys', name: 'Velclaw API Keys', scope: 'Provider credentials' },
   { path: '/wiki', name: 'Velclaw Wiki', scope: 'System knowledge' },
   { path: '/auth/signin', name: 'Velclaw Sign In', scope: 'Authentication' },
@@ -58,7 +60,7 @@ export default async function VelclawUiAuditPage() {
             <li>✓ monospace-first typography</li>
             <li>✓ Velclaw mark trong header</li>
             <li>✓ Agent Chat có identity Velclaw</li>
-            <li>✓ MCP + Plugins + API Keys có route riêng</li>
+            <li>✓ MCP + Plugins + Skills + Deploy + API Keys có route riêng</li>
             <li>✓ Wiki có kiến thức hệ thống</li>
             <li>✓ VelclawHub là tên canonical của ecosystem gateway</li>
             <li>✓ VelclawHub Ecosystem được phân biệt riêng với VelclawHub</li>
