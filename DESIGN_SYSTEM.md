@@ -34,9 +34,9 @@ Giao diện Velclaw phải dùng chung design system của hệ sinh thái.
 
 ## Domain identity
 
-**`velclaw.cfd` là domain duy nhất của Velclaw trong cấu hình hiện tại.**
+**`velclaw.cfd` là domain duy nhất của Velclaw.**
 
-Không sử dụng `huynhthuong.xyz` hoặc `velclaw.ai` làm public domain, alias, virtual identity hay hostname trong ứng dụng.
+Không sử dụng domain cũ, domain thử nghiệm hoặc virtual hostname khác trong source code, UI, test gateway, wiki hoặc ecosystem navigation.
 
 Các route ecosystem dùng cùng canonical host:
 
@@ -48,7 +48,7 @@ Các route ecosystem dùng cùng canonical host:
 - `https://velclaw.cfd/wiki`
 - `https://velclaw.cfd/test`
 
-Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code không được duy trì một domain cũ chỉ để làm alias.
+Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code chỉ duy trì canonical domain `velclaw.cfd`.
 
 ## Quy tắc cho dự án con
 
