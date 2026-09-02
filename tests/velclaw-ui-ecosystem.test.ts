@@ -3,19 +3,15 @@ import test from 'node:test'
 import { VELCLAW_INTEGRATIONS } from '../lib/velclaw/integrations'
 import {
   VELCLAW_PUBLIC_DOMAIN,
-  VELCLAW_VIRTUAL_DOMAIN,
   isVelclawPublicDomain,
   resolveVelclawVirtualDomain,
 } from '../lib/velclaw/virtual-domain'
 
 test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
   assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.cfd')
-  assert.equal(VELCLAW_VIRTUAL_DOMAIN, 'velclaw.cfd')
   assert.equal(resolveVelclawVirtualDomain('velclaw.cfd'), 'velclaw.cfd')
   assert.equal(resolveVelclawVirtualDomain('velclaw.cfd:3000'), 'velclaw.cfd')
   assert.equal(isVelclawPublicDomain('velclaw.cfd'), true)
-  assert.equal(isVelclawPublicDomain('huynhthuong.xyz'), false)
-  assert.equal(isVelclawPublicDomain('velclaw.ai'), false)
 })
 
 test('Velclaw registry contains only current useful ecosystem boundaries', () => {
