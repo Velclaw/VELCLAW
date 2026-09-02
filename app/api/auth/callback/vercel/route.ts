@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server'
 import { OAuth2Client, type OAuth2Tokens } from 'arctic'
 import { createSession, saveSession } from '@/lib/session/create'
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest): Promise<Response> {
   const code = req.nextUrl.searchParams.get('code')
@@ -40,13 +41,6 @@ export async function GET(req: NextRequest): Promise<Response> {
     })
   }
 
-  const response = new Response(null, {
-    status: 302,
-    headers: {
-      Location: storedRedirectTo,
-    },
-  })
-
   const session = await createSession({
     accessToken: tokens.accessToken(),
     expiresAt: tokens.accessTokenExpiresAt().getTime(),
@@ -58,13 +52,14 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response('Failed to create session', { status: 500 })
   }
 
-  // Note: Vercel tokens are already stored in users table by upsertUser() in createSession()
-
+  // Build the redirect response first, then attach the session cookie to that exact response.
+  const response = NextResponse.redirect(new URL(storedRedirectTo, req.nextUrl.origin))
   await saveSession(response, session)
 
-  cookieStore.delete(`vercel_oauth_state`)
-  cookieStore.delete(`vercel_oauth_code_verifier`)
-  cookieStore.delete(`vercel_oauth_redirect_to`)
+  // Clear the short-lived OAuth handshake cookies on the same response.
+  response.cookies.delete('vercel_oauth_state')
+  response.cookies.delete('vercel_oauth_code_verifier')
+  response.cookies.delete('vercel_oauth_redirect_to')
 
   return response
 }
