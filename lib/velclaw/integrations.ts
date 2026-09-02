@@ -68,11 +68,11 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
   },
   {
     id: 'skills',
-    name: 'Velclaw skills',
+    name: 'Velclaw Skills',
     kind: 'skills',
-    status: 'planned',
-    source: 'zskbot/skills',
-    capabilities: ['skill-discovery', 'skill-execution'],
+    status: 'available',
+    source: 'velclaw://skills',
+    capabilities: ['skill-discovery', 'skill-metadata', 'executor-binding', 'sandbox-boundary'],
   },
   {
     id: 'curl-network',
