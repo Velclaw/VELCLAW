@@ -12,7 +12,7 @@ const routes = [
   { path: '/api-keys', name: 'API Keys', scope: 'Provider credentials' },
   { path: '/wiki', name: 'Wiki', scope: 'System knowledge' },
   { path: '/auth/signin', name: 'Sign In', scope: 'Authentication' },
-  { path: '/test', name: 'Test Hub', scope: 'Public ecosystem gateway' },
+  { path: '/velclawhub', name: 'VelclawHub', scope: 'Public ecosystem gateway' },
   { path: '/velclaw/ui-audit', name: 'UI Audit', scope: 'This QA page' },
 ] as const
 
@@ -57,6 +57,7 @@ export default async function VelclawUiAuditPage() {
             <li>✓ Agent Chat có identity Velclaw</li>
             <li>✓ MCP + API Keys có route riêng</li>
             <li>✓ Wiki có kiến thức hệ thống</li>
+            <li>✓ VelclawHub là tên canonical của ecosystem gateway</li>
           </ul>
         </section>
       </div>
