@@ -16,7 +16,11 @@ export function SessionProvider() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch('/api/auth/info')
+        const response = await fetch('/api/auth/info', {
+          cache: 'no-store',
+          credentials: 'include',
+        })
+        if (!response.ok) throw new Error(`Session request failed: ${response.status}`)
         const data: SessionUserInfo = await response.json()
         setSession(data)
         setInitialized(true)
@@ -29,7 +33,11 @@ export function SessionProvider() {
 
     const fetchGitHubConnection = async () => {
       try {
-        const response = await fetch('/api/auth/github/status')
+        const response = await fetch('/api/auth/github/status', {
+          cache: 'no-store',
+          credentials: 'include',
+        })
+        if (!response.ok) throw new Error(`GitHub status request failed: ${response.status}`)
         const data: GitHubConnection = await response.json()
         setGitHubConnection(data)
         setGitHubInitialized(true)
@@ -46,10 +54,7 @@ export function SessionProvider() {
 
     fetchAll()
 
-    // Refresh both every minute
     const interval = setInterval(fetchAll, 60000)
-
-    // Refresh on focus
     const handleFocus = () => fetchAll()
     window.addEventListener('focus', handleFocus)
 
