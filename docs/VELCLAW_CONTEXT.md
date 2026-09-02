@@ -28,6 +28,7 @@ Display names follow the **Velclaw + function** convention so product navigation
 | `/velclaw` | **Velclaw Dashboard** | Pipeline dashboard |
 | `/repos/new` | **Velclaw Repo** | Repository creation |
 | `/mcp` | **Velclaw MCP** | MCP connectors |
+| `/plugins` | **Velclaw Plugins** | Integration registry |
 | `/api-keys` | **Velclaw API Keys** | Provider credentials |
 | `/wiki` | **Velclaw Wiki** | System knowledge |
 | `/auth/signin` | **Velclaw Sign In** | Authentication |
@@ -73,5 +74,6 @@ The MCP App is an integration/presentation layer. It must reuse Velclaw's existi
 - Canonical repository: `Velclaw/Velclaw`
 - Project name: Velclaw / `velclaw`
 - Canonical ecosystem gateway: `/velclawhub`
+- Canonical Plugins route: `/plugins`
 - Canonical page naming: `Velclaw + function`
 - Pipeline: Task → Executor → Review → Gate → GitHub API → PR
