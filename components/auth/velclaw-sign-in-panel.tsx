@@ -4,7 +4,7 @@ import { GitHubIcon } from '@/components/icons/github-icon'
 import { Button } from '@/components/ui/button'
 import { getEnabledAuthProviders } from '@/lib/auth/providers'
 import { redirectToSignIn } from '@/lib/session/redirect-to-sign-in'
-import { Cloud, KeyRound, Loader2 } from 'lucide-react'
+import { Cloud, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
 type ProviderRowProps = {
@@ -13,19 +13,16 @@ type ProviderRowProps = {
   onClick?: () => void
   loading?: boolean
   disabled?: boolean
-  status?: 'available' | 'planned'
 }
 
-function ProviderRow({ label, icon, onClick, loading, disabled, status = 'available' }: ProviderRowProps) {
-  const isDisabled = disabled || status === 'planned'
-
+function ProviderRow({ label, icon, onClick, loading, disabled }: ProviderRowProps) {
   return (
     <Button
       type="button"
       variant="outline"
       size="lg"
       onClick={onClick}
-      disabled={isDisabled || loading}
+      disabled={disabled || loading}
       className="velclaw-auth-provider h-14 w-full justify-between border-border/80 bg-card/70 px-4 text-left hover:border-violet-400/70 hover:bg-violet-500/5"
     >
       <span className="flex min-w-0 items-center gap-3">
@@ -34,11 +31,7 @@ function ProviderRow({ label, icon, onClick, loading, disabled, status = 'availa
         </span>
         <span className="truncate text-sm font-medium">{label}</span>
       </span>
-      {status === 'planned' ? (
-        <span className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Sắp có</span>
-      ) : (
-        <span className="h-2 w-2 shrink-0 bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.9)]" aria-label="Available" />
-      )}
+      <span className="h-2 w-2 shrink-0 bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.9)]" aria-label="Available" />
     </Button>
   )
 }
@@ -87,24 +80,10 @@ export function VelclawSignInPanel({ compact = false }: { compact?: boolean }) {
             loading={loading === 'vercel'}
           />
         )}
-
-        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          <span>hoặc</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <ProviderRow label="GitLab Cloud" icon={<Cloud className="h-4 w-4" />} status="planned" />
-        <ProviderRow label="Bitbucket Cloud" icon={<Cloud className="h-4 w-4" />} status="planned" />
-        <ProviderRow label="Azure DevOps" icon={<Cloud className="h-4 w-4" />} status="planned" />
       </div>
 
-      <div className="mt-6 flex items-start gap-3 border border-border/70 bg-muted/20 p-3 text-xs text-muted-foreground">
-        <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" />
-        <p>
-          Velclaw chỉ hiển thị các nhà cung cấp đã được cấu hình thật. GitLab, Bitbucket và Azure DevOps đang được giữ ở
-          lớp tích hợp để mở rộng sau, chưa phải nút đăng nhập giả.
-        </p>
+      <div className="mt-6 border border-border/70 bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
+        Chỉ phương thức đăng nhập đã được cấu hình thật mới xuất hiện trên trang này.
       </div>
 
       <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60">
