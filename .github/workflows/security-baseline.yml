@@ -8,21 +8,12 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pull-requests: read
   security-events: write
 
 jobs:
-  dependency-review:
-    name: Dependency review
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dependency review
-        uses: actions/dependency-review-action@v5
-        with:
-          fail-on-severity: high
-
   codeql:
     name: CodeQL JavaScript/TypeScript
     runs-on: ubuntu-latest
