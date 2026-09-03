@@ -14,35 +14,23 @@ export async function POST(request: Request) {
   }
 
   try {
-    const deployment = await sql.begin(async (tx) => {
-      const rows = await tx`
-        SELECT
-          id,
-          project_name,
-          github_url,
-          branch,
-          status,
-          image
+    const rows = await sql`
+      WITH next_deployment AS (
+        SELECT id
         FROM velclaw_deployments
         WHERE status = 'queued'
         ORDER BY created_at ASC
         FOR UPDATE SKIP LOCKED
         LIMIT 1
-      `
+      )
+      UPDATE velclaw_deployments AS d
+      SET status = 'building', updated_at = NOW()
+      FROM next_deployment AS n
+      WHERE d.id = n.id
+      RETURNING d.id, d.project_name, d.github_url, d.branch, d.status, d.image
+    `
 
-      if (rows.length === 0) return null
-
-      const current = rows[0]
-      await tx`
-        UPDATE velclaw_deployments
-        SET status = 'building', updated_at = NOW()
-        WHERE id = ${current.id}
-      `
-
-      return current
-    })
-
-    return NextResponse.json({ deployment })
+    return NextResponse.json({ deployment: rows[0] ?? null })
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to claim deployment' },
