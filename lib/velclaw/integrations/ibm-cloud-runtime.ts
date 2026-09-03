@@ -24,6 +24,7 @@ export type IbmCloudRuntimePlan = {
 }
 
 const API_VERSION = '2025-01-21'
+const CANONICAL_REPO = 'https://github.com/Velclaw/Velclaw.git'
 
 /**
  * Builds a deterministic IBM Cloud VPC VSI request.
@@ -42,6 +43,25 @@ export function createIbmCloudRuntimePlan(
   const base = new URL(c.serviceUrl)
   if (base.protocol !== 'https:') throw new Error('IBM Cloud serviceUrl must use HTTPS')
 
+  const userData = [
+    '#cloud-config',
+    'write_files:',
+    '  - path: /usr/local/sbin/velclaw-bootstrap',
+    '    permissions: "0755"',
+    '    content: |',
+    '      #!/usr/bin/env bash',
+    '      set -euo pipefail',
+    '      export DEBIAN_FRONTEND=noninteractive',
+    '      apt-get update',
+    '      apt-get install -y ca-certificates curl git',
+    `      rm -rf /opt/velclaw`,
+    `      git clone --depth 1 --branch main ${CANONICAL_REPO} /opt/velclaw`,
+    '      exec /opt/velclaw/deploy/ibm-cloud/bootstrap.sh',
+    'runcmd:',
+    '  - /usr/local/sbin/velclaw-bootstrap',
+    '',
+  ].join('\n')
+
   const body = JSON.stringify({
     name: c.instanceName,
     profile: { name: c.profileName },
@@ -53,16 +73,7 @@ export function createIbmCloudRuntimePlan(
       ...(c.securityGroupId ? { security_groups: [{ id: c.securityGroupId }] } : {}),
     },
     keys: [{ id: c.sshKeyId }],
-    user_data:
-      '#cloud-config\n' +
-      'write_files:\n' +
-      '  - path: /usr/local/sbin/velclaw-bootstrap-ready\n' +
-      '    permissions: "0755"\n' +
-      '    content: |\n' +
-      '      #!/bin/sh\n' +
-      '      touch /var/lib/velclaw-bootstrap-ready\n' +
-      'runcmd:\n' +
-      '  - /usr/local/sbin/velclaw-bootstrap-ready\n',
+    user_data: userData,
   })
 
   return {
