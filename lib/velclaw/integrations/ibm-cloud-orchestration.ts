@@ -50,7 +50,7 @@ export function createIbmCloudRuntimeIdempotencyKey(config: IbmCloudRuntimeConfi
   return `ibm-vpc:${config.region}:${config.zone}:${config.instanceName}`
 }
 
-/** Maps the IBM instance status response into Velclaw's lifecycle state. */
+/** Maps IBM instance status into Velclaw lifecycle state without treating initial stopped as failure. */
 export function classifyIbmCloudInstanceStatus(
   response: IbmCloudInstanceStatus,
 ): IbmCloudRuntimeState {
@@ -59,7 +59,6 @@ export function classifyIbmCloudInstanceStatus(
 
   if (status === 'running' && lifecycleState === 'stable') return 'ready'
   if (status === 'failed' || lifecycleState === 'failed' || lifecycleState === 'suspended') return 'failed'
-  if (status === 'stopped' || status === 'stopping' || status === 'starting') return 'failed'
   return 'provisioning'
 }
 
