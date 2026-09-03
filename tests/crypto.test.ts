@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import crypto from 'node:crypto'
 import test from 'node:test'
 import { decrypt, encrypt } from '@/lib/crypto'
 
@@ -35,9 +36,10 @@ test('authenticated ciphertext rejects tampering', () => {
 })
 
 test('decrypt remains backward compatible with legacy CBC values', () => {
-  const encrypted = encrypt('legacy-check')
-  const [, ivHex, authTagHex, ciphertextHex] = encrypted.split(':')
-  assert.ok(ivHex)
-  assert.ok(authTagHex)
-  assert.ok(ciphertextHex)
+  const iv = crypto.randomBytes(16)
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(TEST_KEY, 'hex'), iv)
+  const encrypted = Buffer.concat([cipher.update('legacy-check', 'utf8'), cipher.final()])
+  const legacyValue = `${iv.toString('hex')}:${encrypted.toString('hex')}`
+
+  assert.equal(decrypt(legacyValue), 'legacy-check')
 })
