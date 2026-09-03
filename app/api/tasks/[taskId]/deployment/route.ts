@@ -4,27 +4,12 @@ import { db } from '@/lib/db/client'
 import { tasks } from '@/lib/db/schema'
 import { eq, and, isNull } from 'drizzle-orm'
 import { getOctokit } from '@/lib/github/client'
-
-const VELCLAW_PUBLIC_HOST = 'velclaw.cfd'
-const VELCLAW_PUBLIC_URL = `https://${VELCLAW_PUBLIC_HOST}`
-
-function isVelclawPublicUrl(value: string | null | undefined): value is string {
-  if (!value) return false
-  try {
-    const url = new URL(value)
-    return (
-      url.protocol === 'https:' &&
-      (url.hostname === VELCLAW_PUBLIC_HOST || url.hostname.endsWith(`.${VELCLAW_PUBLIC_HOST}`))
-    )
-  } catch {
-    return false
-  }
-}
+import { isVelclawProductUrl, VELCLAW_PRODUCT_DOMAIN, VELCLAW_PRODUCT_URL } from '@/lib/velclaw/product-domain'
 
 function extractVelclawUrl(value: string | null | undefined): string | null {
   if (!value) return null
-  const match = value.match(/https:\/\/[^\s\)\]<]+/gi)?.find((url) => isVelclawPublicUrl(url))
-  return match ?? (isVelclawPublicUrl(value.trim()) ? value.trim() : null)
+  const match = value.match(/https:\/\/[^\s\)\]<]+/gi)?.find((url) => isVelclawProductUrl(url))
+  return match ?? (isVelclawProductUrl(value.trim()) ? value.trim() : null)
 }
 
 async function saveAndReturn(taskId: string, previewUrl: string, extra: Record<string, unknown> = {}) {
@@ -50,7 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
     // Only expose first-party Velclaw URLs. Legacy/provider hostnames are deliberately hidden.
-    if (isVelclawPublicUrl(task.previewUrl)) {
+    if (isVelclawProductUrl(task.previewUrl)) {
       return saveAndReturn(taskId, task.previewUrl, { cached: true })
     }
 
@@ -137,7 +122,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           per_page: 100,
         })
         const status = statuses.find(
-          (item) => item.state === 'success' && item.target_url && isVelclawPublicUrl(item.target_url),
+          (item) => item.state === 'success' && item.target_url && isVelclawProductUrl(item.target_url),
         )
         if (status?.target_url) return saveAndReturn(taskId, status.target_url, { createdAt: status.created_at })
       } catch (error) {
@@ -149,8 +134,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: {
         hasDeployment: false,
-        canonicalHost: VELCLAW_PUBLIC_HOST,
-        canonicalUrl: VELCLAW_PUBLIC_URL,
+        canonicalHost: VELCLAW_PRODUCT_DOMAIN,
+        canonicalUrl: VELCLAW_PRODUCT_URL,
         message: 'No verified Velclaw deployment URL found',
       },
     })
