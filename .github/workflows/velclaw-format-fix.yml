@@ -17,16 +17,8 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           fetch-depth: 0
-      - name: Set up pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
-        with:
-          version: 10
-          run_install: false
-      - name: Use Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e289664e5dc5ba9c38
-        with:
-          node-version: 22.x
-          cache: pnpm
+      - name: Enable pnpm
+        run: corepack enable && corepack prepare pnpm@10.34.5 --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Format TypeScript
