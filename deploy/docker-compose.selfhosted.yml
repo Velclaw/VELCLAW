@@ -21,30 +21,30 @@ services:
       - VELCLAW_DEPLOY_API
       - VELCLAW_DEPLOY_API_TOKEN
       - VELCLAW_RUNTIME_NETWORK=velclaw-runtime
-      - VELCLAW_HOST_SUFFIX=velclaw.cfd
+      - VELCLAW_PUBLIC_DOMAIN=velclaw.cfd
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks: [velclaw-runtime]
     depends_on: [velclaw-control-plane]
 
   velclaw-proxy:
-    image: caddy:2-alpine
+    image: traefik:v3.5
     restart: unless-stopped
     env_file: .env
+    command:
+      - --configFile=/etc/traefik/traefik.yml
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - letsencrypt:/letsencrypt
     networks: [velclaw-runtime]
-    depends_on: [velclaw-control-plane]
 
 networks:
   velclaw-runtime:
     name: velclaw-runtime
 
 volumes:
-  caddy_data:
-  caddy_config:
+  letsencrypt:
