@@ -17,6 +17,27 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/docs',
+        destination: '/docs/',
+        permanent: false,
+      },
+    ]
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/docs/',
+        destination: 'https://docs.velclaw.ai/',
+      },
+      {
+        source: '/docs/:path*',
+        destination: 'https://docs.velclaw.ai/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig
