@@ -2,10 +2,7 @@ import type { IbmCloudRuntimeConfig } from './ibm-cloud-runtime'
 import { createIbmCloudRuntimePlan } from './ibm-cloud-runtime'
 import { createIbmCloudInstanceStatusPlan } from './ibm-cloud-vpc'
 
-export type IbmCloudRuntimeState =
-  | 'provisioning'
-  | 'ready'
-  | 'failed'
+export type IbmCloudRuntimeState = 'provisioning' | 'ready' | 'failed'
 
 export type IbmCloudRuntimeRecord = {
   idempotencyKey: string
@@ -41,10 +38,7 @@ export function createIbmCloudRuntimeIdempotencyKey(config: IbmCloudRuntimeConfi
   return `ibm-vpc:${config.region}:${config.zone}:${config.instanceName}`
 }
 
-/**
- * Pure orchestration decision layer. It is deliberately side-effect free so retries
- * can reuse the same idempotency key without creating another VSI.
- */
+/** Pure decision layer: retries reuse the same key and never create a second VSI. */
 export function createIbmCloudRuntimeOrchestrationPlan(
   input: IbmCloudRuntimeOrchestrationInput,
 ): IbmCloudRuntimeOrchestrationPlan {
@@ -64,11 +58,15 @@ export function createIbmCloudRuntimeOrchestrationPlan(
   }
 
   if (input.existing.state === 'provisioning' && input.existing.instanceId) {
+    const statusConfig = {
+      ...input.config,
+      accessToken: input.accessToken,
+    }
     return {
       action: 'poll',
       state: 'provisioning',
       idempotencyKey,
-      request: createIbmCloudInstanceStatusPlan(input.configWithToken, input.existing.instanceId),
+      request: createIbmCloudInstanceStatusPlan(statusConfig, input.existing.instanceId),
     }
   }
 
@@ -91,9 +89,5 @@ export function transitionIbmCloudRuntimeState(
     throw new Error('failed runtime must be reprovisioned before becoming ready')
   }
 
-  return {
-    ...record,
-    ...next,
-    updatedAt: now.toISOString(),
-  }
+  return { ...record, ...next, updatedAt: now.toISOString() }
 }
