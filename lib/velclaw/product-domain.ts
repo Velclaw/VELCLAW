@@ -18,17 +18,16 @@ export function buildVelclawProductUrl(branchName: string): string {
   const branchSlug = slugify(branchName) || 'main'
   const availableBranchLength = 63 - 'velclaw-git-'.length - '-velclaw'.length
   const boundedBranch = branchSlug.slice(0, availableBranchLength).replace(/-+$/g, '') || 'main'
-  return `https://velclaw-git-${boundedBranch}-velclaw.${VELCLAW_PRODUCT_DOMAIN}`
+  return `https://velclaw-git-${boundedBranch}-velclaw.cfd`
 }
 
 export function isVelclawProductUrl(value: string | null | undefined): value is string {
   if (!value) return false
   try {
     const url = new URL(value)
-    return url.protocol === 'https:' && (
-      url.hostname === VELCLAW_PRODUCT_DOMAIN ||
-      url.hostname.endsWith(`.${VELCLAW_PRODUCT_DOMAIN}`)
-    )
+    if (url.protocol !== 'https:') return false
+    if (url.hostname === VELCLAW_PRODUCT_DOMAIN) return true
+    return /^velclaw-git-[a-z0-9-]+-velclaw\.cfd$/.test(url.hostname)
   } catch {
     return false
   }
