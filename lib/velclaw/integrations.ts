@@ -3,7 +3,7 @@ export type VelclawAgent = 'claude' | 'codex' | 'copilot' | 'cursor' | 'gemini' 
 export type VelclawIntegration = {
   id: string
   name: string
-  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'source-control' | 'identity'
+  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'database' | 'source-control' | 'identity'
   status: 'planned' | 'available'
   source: string
   capabilities?: string[]
@@ -26,6 +26,14 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     status: 'available',
     source: 'https://vercel.com/',
     capabilities: ['oauth', 'workspace-auth'],
+  },
+  {
+    id: 'supabase-postgres',
+    name: 'Supabase Postgres',
+    kind: 'database',
+    status: 'available',
+    source: 'https://supabase.com/',
+    capabilities: ['postgresql', 'drizzle', 'connection-pooling', 'migrations'],
   },
   {
     id: 'mcp-runtime',
