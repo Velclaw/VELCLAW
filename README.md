@@ -66,6 +66,27 @@ The goal is to give coding agents and developers one coherent environment instea
 | **Deployment** | Move validated software toward production |
 | **Developer UI** | A single workspace for the software lifecycle |
 
+## Product URLs
+
+The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+
+| Product surface | Canonical URL |
+| --- | --- |
+| Velclaw | `https://velclaw.cfd/` |
+| Velclaw Docs | `https://velclaw.cfd/docs` |
+| VelclawHub | `https://velclaw.cfd/velclawhub` |
+| VelclawHub Ecosystem | `https://velclaw.cfd/hub` |
+| Velclaw Deploy | `https://velclaw.cfd/deploy` |
+| Velclaw Skills | `https://velclaw.cfd/skills` |
+| Velclaw Plugins | `https://velclaw.cfd/plugins` |
+| Velclaw MCP | `https://velclaw.cfd/mcp` |
+| Velclaw Tasks | `https://velclaw.cfd/tasks` |
+| Velclaw Dashboard | `https://velclaw.cfd/velclaw` |
+| Velclaw Repo | `https://velclaw.cfd/repos/new` |
+| Velclaw API Keys | `https://velclaw.cfd/api-keys` |
+
+Infrastructure-generated hostnames are not product URLs.
+
 ## Technology stack
 
 <p align="center">
@@ -162,7 +183,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/Velclaw)
 - [Issues](https://github.com/Velclaw/Velclaw/issues)
 - [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
-- Documentation URL: add the official Velclaw docs site when it is published.
+- Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
 
@@ -186,14 +207,12 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 - [x] Build/runtime workflow foundation
 - [ ] Expand agent workflows
 - [ ] Expand deployment automation
-- [ ] Dedicated documentation site
 - [ ] Production-grade observability
 - [ ] Broader ecosystem integrations
 
 ## License
 
 The current project configuration identifies Velclaw as private software. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
-
 
 ## Visual identity
 
@@ -209,7 +228,6 @@ The current project configuration identifies Velclaw as private software. Do not
 
 The repository includes the official Velclaw mark and a lightweight product-introduction GIF so the project identity remains visible throughout the README rather than only in the hero.
 
-
 ---
 
 <div align="center">
@@ -218,9 +236,3 @@ The repository includes the official Velclaw mark and a lightweight product-intr
 
 **Velclaw**  
 *Code. Innovate. Elevate.*
-
-<a href="https://github.com/Velclaw/Velclaw">GitHub</a> ·
-<a href="https://github.com/Velclaw/Velclaw/issues">Issues</a> ·
-<a href="https://github.com/Velclaw/Velclaw/pulls">Pull Requests</a>
-
-</div>
