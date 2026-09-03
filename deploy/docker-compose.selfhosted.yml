@@ -1,0 +1,51 @@
+services:
+  velclaw-control-plane:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - POSTGRES_URL
+      - VELCLAW_DEPLOY_API_TOKEN
+      - VELCLAW_PUBLIC_DOMAIN
+    networks: [velclaw-runtime]
+
+  velclaw-publisher:
+    image: node:22-bookworm-slim
+    restart: unless-stopped
+    working_dir: /workspace
+    command: ['node', 'deploy/runtime-publisher.mjs']
+    env_file: .env
+    environment:
+      - VELCLAW_DEPLOY_API
+      - VELCLAW_DEPLOY_API_TOKEN
+      - VELCLAW_RUNTIME_NETWORK=velclaw-runtime
+      - VELCLAW_HOST_SUFFIX=velclaw.cfd
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workspace:ro
+    networks: [velclaw-runtime]
+    depends_on: [velclaw-control-plane]
+
+  velclaw-proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [velclaw-runtime]
+    depends_on: [velclaw-control-plane]
+
+networks:
+  velclaw-runtime:
+    name: velclaw-runtime
+
+volumes:
+  caddy_data:
+  caddy_config:
