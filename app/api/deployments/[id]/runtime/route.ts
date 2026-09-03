@@ -1,28 +1,115 @@
-import { NextResponse } from 'next/server'
-import postgres from 'postgres'
+import { NextResponse } from "next/server";
+import { Client } from "pg";
 
-const sql = postgres(process.env.POSTGRES_URL || '', { max: 3 })
+export const dynamic = "force-dynamic";
 
-function authorized(request: Request) {
-  const configured = process.env.VELCLAW_DEPLOY_API_TOKEN
-  const provided = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-  return Boolean(configured && provided && provided === configured)
-}
+type Params = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!authorized(request)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (!process.env.POSTGRES_URL) return NextResponse.json({ error: 'POSTGRES_URL is not configured' }, { status: 503 })
-  const { id } = await context.params
-  const input = await request.json().catch(() => null)
-  const status = input?.status === 'ready' || input?.status === 'failed' ? input.status : null
-  const url = typeof input?.url === 'string' ? input.url : null
-  const error = typeof input?.error === 'string' ? input.error : null
-  const logs = Array.isArray(input?.logs) ? input.logs.filter((item: unknown): item is string => typeof item === 'string').slice(-500) : []
-  if (!status) return NextResponse.json({ error: 'Invalid runtime status' }, { status: 400 })
-  await sql`
-    UPDATE velclaw_deployments
-    SET status = ${status}, url = ${url}, error = ${error}, logs = ${JSON.stringify(logs)}::jsonb, updated_at = now()
-    WHERE id = ${id}
-  `
-  return NextResponse.json({ ok: true, id, status, url })
+export async function POST(
+  request: Request,
+  { params }: Params,
+) {
+  const auth = request.headers.get("authorization");
+  const expected = process.env.VELCLAW_DEPLOY_API_TOKEN;
+
+  if (!expected || auth !== `Bearer ${expected}`) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
+  const { id } = await params;
+
+  const body = await request.json().catch(() => ({}));
+
+  const status =
+    typeof body.status === "string"
+      ? body.status
+      : "failed";
+
+  const url =
+    typeof body.url === "string"
+      ? body.url
+      : null;
+
+  const logs =
+    typeof body.logs === "string"
+      ? body.logs
+      : null;
+
+  const error =
+    typeof body.error === "string"
+      ? body.error
+      : null;
+
+  if (!["building", "ready", "failed"].includes(status)) {
+    return NextResponse.json(
+      { error: "Invalid deployment status" },
+      { status: 400 },
+    );
+  }
+
+  const client = new Client({
+    connectionString: process.env.POSTGRES_URL,
+  });
+
+  try {
+    await client.connect();
+
+    const result = await client.query(
+      `
+        UPDATE velclaw_deployments
+        SET
+          status = $1,
+          url = COALESCE($2, url),
+          logs = COALESCE($3, logs),
+          error = $4,
+          updated_at = NOW()
+        WHERE id = $5
+        RETURNING
+          id,
+          project_name,
+          status,
+          url,
+          error,
+          logs
+      `,
+      [
+        status,
+        url,
+        logs,
+        error,
+        id,
+      ],
+    );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { error: "Deployment not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      deployment: result.rows[0],
+    });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        error:
+          err instanceof Error
+            ? err.message
+            : "Runtime update failed",
+      },
+      { status: 500 },
+    );
+  } finally {
+    await client.end().catch(() => {});
+  }
 }
