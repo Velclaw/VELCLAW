@@ -32,6 +32,7 @@ services:
       - VELCLAW_DEPLOY_API_TOKEN
       - VELCLAW_RUNTIME_NETWORK=velclaw-runtime
       - VELCLAW_PUBLIC_DOMAIN=velclaw.cfd
+      - GITHUB_TOKEN
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks: [velclaw-runtime]
