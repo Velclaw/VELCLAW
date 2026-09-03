@@ -1,140 +1,81 @@
-import { NextResponse } from "next/server";
-import { Client } from "pg";
+import { NextResponse } from 'next/server'
+import postgres from 'postgres'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
+
+const sql = postgres(process.env.POSTGRES_URL || '', { max: 3 })
 
 type Params = {
-  params: Promise<{
-    id: string;
-  }>;
-};
+  params: Promise<{ id: string }>
+}
 
 export async function POST(request: Request, { params }: Params) {
-  const token = request.headers.get("x-velclaw-admin-token");
-  const expected = process.env.VELCLAW_DEPLOY_API_TOKEN;
+  const token = request.headers.get('x-velclaw-admin-token')
+  const expected = process.env.VELCLAW_DEPLOY_API_TOKEN
 
   if (!expected || token !== expected) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { id } = await params;
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Deployment id is required" },
-      { status: 400 },
-    );
-  }
-
-  const client = new Client({
-    connectionString: process.env.POSTGRES_URL,
-  });
+  const { id } = await params
+  if (!id) return NextResponse.json({ error: 'Deployment id is required' }, { status: 400 })
 
   try {
-    await client.connect();
-
-    await client.query("BEGIN");
-
-    const currentResult = await client.query(
-      `
-        SELECT
-          id,
-          project_name,
-          status,
-          image
+    const result = await sql.begin(async (tx) => {
+      const currentRows = await tx`
+        SELECT id, project_name, status, image
         FROM velclaw_deployments
-        WHERE id = $1
+        WHERE id = ${id}
         FOR UPDATE
-      `,
-      [id],
-    );
-
-    if (currentResult.rowCount === 0) {
-      await client.query("ROLLBACK");
-
-      return NextResponse.json(
-        { error: "Deployment not found" },
-        { status: 404 },
-      );
-    }
-
-    const current = currentResult.rows[0];
-
-    const previousResult = await client.query(
       `
-        SELECT
-          id,
-          project_name,
-          status,
-          image,
-          url,
-          logs
+
+      if (currentRows.length === 0) return { error: 'Deployment not found', status: 404 } as const
+      const current = currentRows[0]
+
+      const previousRows = await tx`
+        SELECT id, project_name, status, image, url, logs
         FROM velclaw_deployments
-        WHERE project_name = $1
+        WHERE project_name = ${current.project_name}
           AND status = 'ready'
-          AND id <> $2
+          AND id <> ${id}
           AND image IS NOT NULL
         ORDER BY created_at DESC
         LIMIT 1
         FOR UPDATE
-      `,
-      [current.project_name, id],
-    );
-
-    if (previousResult.rowCount === 0) {
-      await client.query("ROLLBACK");
-
-      return NextResponse.json(
-        {
-          error: "No previous ready deployment is available for rollback",
-        },
-        { status: 409 },
-      );
-    }
-
-    const previous = previousResult.rows[0];
-
-    await client.query(
       `
+
+      if (previousRows.length === 0) {
+        return { error: 'No previous ready deployment is available for rollback', status: 409 } as const
+      }
+
+      const previous = previousRows[0]
+      await tx`
         UPDATE velclaw_deployments
         SET
           status = 'queued',
           error = NULL,
-          logs = COALESCE(logs, '') ||
-            E'\\nRollback requested from deployment ' || $1,
+          logs = COALESCE(logs, '') || ${`\nRollback requested from deployment ${previous.id}`},
           updated_at = NOW()
-        WHERE id = $2
-      `,
-      [previous.id, id],
-    );
+        WHERE id = ${id}
+      `
 
-    await client.query("COMMIT");
+      return {
+        ok: true,
+        action: 'rollback',
+        project_name: current.project_name,
+        from_deployment: id,
+        target_deployment: previous.id,
+        image: previous.image,
+        status: 'queued',
+      } as const
+    })
 
-    return NextResponse.json({
-      ok: true,
-      action: "rollback",
-      project_name: current.project_name,
-      from_deployment: id,
-      target_deployment: previous.id,
-      image: previous.image,
-      status: "queued",
-    });
+    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status })
+    return NextResponse.json(result)
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => {});
-
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Rollback failed",
-      },
+      { error: error instanceof Error ? error.message : 'Rollback failed' },
       { status: 500 },
-    );
-  } finally {
-    await client.end().catch(() => {});
+    )
   }
 }
