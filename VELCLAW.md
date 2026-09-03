@@ -39,7 +39,9 @@ Velclaw combines repository-aware coding agents, isolated workspaces, Git automa
 - Isolate agent execution from the application host.
 - Require explicit approval for destructive or privileged actions.
 - Prefer small, testable adapters over tightly coupled integrations.
-- Treat `velclaw.cfd` as the sole canonical Velclaw host; deployment URLs such as `*.vercel.app` are not canonical.
+- Treat `velclaw.cfd` as the sole canonical Velclaw host.
+- Public preview/release URLs must use the Velclaw-owned `*.velclaw.cfd` namespace.
+- Platform-generated deployment hostnames are infrastructure details and must never be presented as Velclaw product URLs.
 
 ## Deployment
 
@@ -47,7 +49,11 @@ Velclaw combines repository-aware coding agents, isolated workspaces, Git automa
 
 `Task → Skill selection → Executor → Review → Gate → GitHub API → PR → Deployment evidence`
 
-Deployment success must be backed by provider/GitHub evidence; opening the Deploy page alone never constitutes a successful deployment.
+Production URL: `https://velclaw.cfd`
+
+Preview URL pattern: `https://<velclaw-deployment-name>.velclaw.cfd`
+
+Deployment success must be backed by real deployment/GitHub evidence; opening the Deploy page alone never constitutes a successful deployment. DNS and deployment-provider routing for the `*.velclaw.cfd` namespace are infrastructure configuration, not application state.
 
 ## Initial milestone
 
