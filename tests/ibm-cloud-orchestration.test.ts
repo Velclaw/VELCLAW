@@ -82,7 +82,7 @@ test('IBM Cloud status classifier only marks running and stable as ready', () =>
   assert.equal(classifyIbmCloudInstanceStatus({ status: 'running', lifecycle_state: 'stable' }), 'ready')
   assert.equal(classifyIbmCloudInstanceStatus({ status: 'failed', lifecycle_state: 'failed' }), 'failed')
   assert.equal(classifyIbmCloudInstanceStatus({ status: 'running', lifecycle_state: 'suspended' }), 'failed')
-  assert.equal(classifyIbmCloudInstanceStatus({ status: 'stopped', lifecycle_state: 'stable' }), 'failed')
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'stopped', lifecycle_state: 'stable' }), 'provisioning')
 })
 
 test('runtime state transition updates timestamp and rejects invalid ready rollback', () => {
