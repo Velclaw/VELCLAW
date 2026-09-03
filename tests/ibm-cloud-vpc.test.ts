@@ -22,7 +22,7 @@ const config = {
 
 test('IBM Cloud VSI plan uses the VPC id separately from region', () => {
   const plan = createIbmCloudVpcInstancePlan(config)
-  const body = JSON.parse(String(plan.body))
+  const body = plan.body as Record<string, any>
   assert.equal(plan.method, 'POST')
   assert.equal(body.vpc.id, 'vpc-123')
   assert.equal(body.zone.name, 'eu-de-2')
