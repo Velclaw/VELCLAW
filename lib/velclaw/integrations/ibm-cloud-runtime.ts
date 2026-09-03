@@ -4,6 +4,7 @@ export type IbmCloudRuntimeConfig = {
   instanceName: string
   imageId: string
   profileName: string
+  vpcId: string
   subnetId: string
   securityGroupId?: string
   sshKeyId: string
@@ -22,11 +23,7 @@ export type IbmCloudRuntimePlan = {
   body: string
 }
 
-/**
- * Builds an IBM Cloud VPC VSI provisioning request.
- * The runtime supplies the IAM access token; this module never persists it.
- * Actual provider execution remains outside the web process.
- */
+/** Builds a deterministic IBM Cloud VPC VSI request. Secrets are supplied at runtime. */
 export function createIbmCloudRuntimePlan(
   request: IbmCloudRuntimeRequest,
 ): IbmCloudRuntimePlan {
@@ -34,7 +31,7 @@ export function createIbmCloudRuntimePlan(
 
   const c = request.config
   for (const [name, value] of Object.entries(c)) {
-    if (!value.trim()) throw new Error(`${name} is required`)
+    if (typeof value !== 'string' || !value.trim()) throw new Error(`${name} is required`)
   }
 
   const base = new URL(c.serviceUrl)
@@ -45,12 +42,13 @@ export function createIbmCloudRuntimePlan(
     profile: { name: c.profileName },
     zone: { name: c.zone },
     image: { id: c.imageId },
-    vpc: { id: c.region },
+    vpc: { id: c.vpcId },
     primary_network_interface: {
       subnet: { id: c.subnetId },
       ...(c.securityGroupId ? { security_groups: [{ id: c.securityGroupId }] } : {}),
     },
     keys: [{ id: c.sshKeyId }],
+    user_data: '#cloud-config\n' + 'runcmd:\n  - echo velclaw-bootstrap-ready > /var/lib/velclaw-bootstrap\n',
   })
 
   return {
