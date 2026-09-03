@@ -15,13 +15,24 @@ async function request(pathname, options = {}) {
   return response.json()
 }
 
-async function run(cmd, args, cwd, logs) {
+async function run(cmd, args, cwd, logs, env = process.env) {
   logs.push(`$ ${cmd} ${args.join(' ')}`)
-  const child = spawn(cmd, args, { cwd, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] })
+  const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
   child.stdout.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
   child.stderr.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
   const code = await new Promise((resolve) => child.on('close', resolve))
   if (code !== 0) throw new Error(`${cmd} exited with code ${code}`)
+}
+
+function gitEnv() {
+  const token = process.env.GITHUB_TOKEN || process.env.GITHUB_APP_TOKEN
+  if (!token) return process.env
+  return {
+    ...process.env,
+    GIT_CONFIG_COUNT: '1',
+    GIT_CONFIG_KEY_0: 'http.extraheader',
+    GIT_CONFIG_VALUE_0: `AUTHORIZATION: Bearer ${token}`,
+  }
 }
 
 async function publish(job) {
@@ -31,7 +42,7 @@ async function publish(job) {
   const hostname = `${job.projectName}-${job.id.slice(0, 8)}.${PUBLIC_DOMAIN}`
   const container = `velclaw-${job.id}`
   try {
-    await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs)
+    await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
     await run('docker', ['build', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
     await run('docker', ['network', 'inspect', RUNTIME_NETWORK], process.cwd(), logs).catch(async () => {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
@@ -41,7 +52,8 @@ async function publish(job) {
       'run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK,
       '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--security-opt', 'no-new-privileges:true',
       '--label', `velclaw.deployment=${job.id}`,
-      '--label', `traefik.enable=true`,
+      '--label', `velclaw.project=${job.projectName}`,
+      '--label', 'traefik.enable=true',
       '--label', `traefik.docker.network=${RUNTIME_NETWORK}`,
       '--label', `traefik.http.routers.${job.id}.rule=Host(\`${hostname}\`)`,
       '--label', `traefik.http.routers.${job.id}.entrypoints=websecure`,
@@ -50,10 +62,18 @@ async function publish(job) {
       '--label', `traefik.http.services.${job.id}.loadbalancer.server.port=3000`,
       '--name', container, image,
     ], process.cwd(), logs)
-    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` }, body: JSON.stringify({ status: 'ready', url: `https://${hostname}`, logs }) })
+    await request(`/api/deployments/${job.id}/runtime`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
+      body: JSON.stringify({ status: 'ready', url: `https://${hostname}`, logs }),
+    })
   } catch (error) {
     logs.push(`ERROR: ${error instanceof Error ? error.message : String(error)}`)
-    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` }, body: JSON.stringify({ status: 'failed', logs, error: error instanceof Error ? error.message : String(error) }) }).catch(() => {})
+    await request(`/api/deployments/${job.id}/runtime`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
+      body: JSON.stringify({ status: 'failed', logs, error: error instanceof Error ? error.message : String(error) }),
+    }).catch(() => {})
   } finally {
     await fs.rm(workdir, { recursive: true, force: true })
   }
@@ -63,7 +83,10 @@ async function main() {
   console.log(`Velclaw runtime publisher listening on ${API}`)
   while (true) {
     try {
-      const { deployment } = await request('/api/deployments/claim', { method: 'POST', headers: { authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` } })
+      const { deployment } = await request('/api/deployments/claim', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
+      })
       if (deployment) await publish(deployment)
     } catch (error) {
       console.error(`[publisher] ${error instanceof Error ? error.message : String(error)}`)
