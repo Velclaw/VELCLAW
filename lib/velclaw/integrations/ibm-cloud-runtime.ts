@@ -23,7 +23,7 @@ export type IbmCloudRuntimePlan = {
   body: string
 }
 
-const API_VERSION = '2025-01-01'
+const API_VERSION = '2025-01-21'
 
 /**
  * Builds a deterministic IBM Cloud VPC VSI request.
