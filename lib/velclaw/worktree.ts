@@ -20,10 +20,7 @@ export function createWorktreePlan(branch: string, path: string): WorktreePlan {
   return {
     branch,
     path,
-    commands: [
-      'git fetch --prune origin',
-      `git worktree add ${shellQuote(path)} -b ${shellQuote(branch)} origin/HEAD`,
-    ],
+    commands: ['git fetch --prune origin', `git worktree add ${shellQuote(path)} -b ${shellQuote(branch)} origin/HEAD`],
   }
 }
 

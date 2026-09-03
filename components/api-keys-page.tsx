@@ -24,8 +24,8 @@ export function ApiKeysPage() {
             </div>
           </div>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Quản lý key của các agent/provider. Velclaw chỉ hiển thị trạng thái đã lưu; giá trị key không được đưa vào URL,
-            log hoặc giao diện sau khi lưu.
+            Quản lý key của các agent/provider. Velclaw chỉ hiển thị trạng thái đã lưu; giá trị key không được đưa vào
+            URL, log hoặc giao diện sau khi lưu.
           </p>
         </header>
 
@@ -44,18 +44,26 @@ export function ApiKeysPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm"><ShieldCheck className="h-4 w-4 text-violet-300" />Security</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <ShieldCheck className="h-4 w-4 text-violet-300" />
+                Security
+              </CardTitle>
               <CardDescription>Key được mã hóa ở lớp lưu trữ hiện có của Velclaw.</CardDescription>
             </CardHeader>
             <CardContent className="text-xs leading-5 text-muted-foreground">
-              Không commit API key vào repository. Không dán key vào task prompt. Khi đổi key, hãy xóa key cũ sau khi xác nhận key mới hoạt động.
+              Không commit API key vào repository. Không dán key vào task prompt. Khi đổi key, hãy xóa key cũ sau khi
+              xác nhận key mới hoạt động.
             </CardContent>
           </Card>
         </div>
 
         <div className="flex gap-2 text-xs">
-          <Button variant="outline" asChild><Link href="/mcp">MCP Servers</Link></Button>
-          <Button variant="outline" asChild><Link href="/wiki">Wiki</Link></Button>
+          <Button variant="outline" asChild>
+            <Link href="/mcp">MCP Servers</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/wiki">Wiki</Link>
+          </Button>
         </div>
 
         <ApiKeysDialog open={open} onOpenChange={setOpen} />

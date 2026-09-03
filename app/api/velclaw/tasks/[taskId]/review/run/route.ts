@@ -8,7 +8,9 @@ import { runGitoReview } from '@/lib/velclaw/gito'
 import { setReviewSnapshot } from '@/lib/velclaw/review-store'
 import { evaluateReviewGate } from '@/lib/velclaw/review'
 
-interface Props { params: Promise<{ taskId: string }> }
+interface Props {
+  params: Promise<{ taskId: string }>
+}
 
 export async function POST(_request: Request, { params }: Props) {
   try {
@@ -25,7 +27,13 @@ export async function POST(_request: Request, { params }: Props) {
     if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
     if (!task.sandboxId) return NextResponse.json({ error: 'Task has no sandbox to review' }, { status: 409 })
 
-    await setReviewSnapshot({ taskId, findings: [], checksPassing: false, status: 'running', updatedAt: new Date().toISOString() })
+    await setReviewSnapshot({
+      taskId,
+      findings: [],
+      checksPassing: false,
+      status: 'running',
+      updatedAt: new Date().toISOString(),
+    })
 
     const sandbox = await Sandbox.get({ sandboxId: task.sandboxId })
     const result = await runGitoReview(sandbox, { model: task.selectedModel ?? undefined })

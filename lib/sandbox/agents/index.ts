@@ -68,17 +68,61 @@ export async function executeAgentInSandbox(
   try {
     switch (agentType) {
       case 'claude':
-        return await executeClaudeInSandbox(sandbox, instruction, logger, selectedModel, mcpServers, isResumed, sessionId, taskId, agentMessageId)
+        return await executeClaudeInSandbox(
+          sandbox,
+          instruction,
+          logger,
+          selectedModel,
+          mcpServers,
+          isResumed,
+          sessionId,
+          taskId,
+          agentMessageId,
+        )
       case 'codex':
-        return await executeCodexInSandbox(sandbox, instruction, logger, selectedModel, mcpServers, isResumed, sessionId)
+        return await executeCodexInSandbox(
+          sandbox,
+          instruction,
+          logger,
+          selectedModel,
+          mcpServers,
+          isResumed,
+          sessionId,
+        )
       case 'copilot':
-        return await executeCopilotInSandbox(sandbox, instruction, logger, selectedModel, mcpServers, isResumed, sessionId, taskId)
+        return await executeCopilotInSandbox(
+          sandbox,
+          instruction,
+          logger,
+          selectedModel,
+          mcpServers,
+          isResumed,
+          sessionId,
+          taskId,
+        )
       case 'cursor':
-        return await executeCursorInSandbox(sandbox, instruction, logger, selectedModel, mcpServers, isResumed, sessionId, taskId)
+        return await executeCursorInSandbox(
+          sandbox,
+          instruction,
+          logger,
+          selectedModel,
+          mcpServers,
+          isResumed,
+          sessionId,
+          taskId,
+        )
       case 'gemini':
         return await executeGeminiInSandbox(sandbox, instruction, logger, selectedModel, mcpServers)
       case 'opencode':
-        return await executeOpenCodeInSandbox(sandbox, instruction, logger, selectedModel, mcpServers, isResumed, sessionId)
+        return await executeOpenCodeInSandbox(
+          sandbox,
+          instruction,
+          logger,
+          selectedModel,
+          mcpServers,
+          isResumed,
+          sessionId,
+        )
       case 'ollama':
         return await executeOllamaInSandbox(sandbox, instruction, logger, selectedModel)
       default:

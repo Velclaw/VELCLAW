@@ -16,7 +16,7 @@ test('connector API never serializes decrypted connector secrets', async () => {
   assert.doesNotMatch(source, /\bdecrypt\s*\(/)
   assert.doesNotMatch(source, /oauthClientSecret\s*:/)
   assert.doesNotMatch(source, /\benv\s*:/)
-  assert.match(source, /Cache-Control['\"]:\s*['\"]private, no-store['\"]/) 
+  assert.match(source, /Cache-Control['\"]:\s*['\"]private, no-store['\"]/)
 })
 
 test('connector server action keeps stored secrets server-side', async () => {
@@ -25,6 +25,12 @@ test('connector server action keeps stored secrets server-side', async () => {
   assert.doesNotMatch(source, /import \{ encrypt, decrypt \}/)
   assert.doesNotMatch(source, /oauthClientSecret:\s*connector\.oauthClientSecret\s*\?\s*decrypt/)
   assert.doesNotMatch(source, /env:\s*connector\.env\s*\?\s*JSON\.parse\(decrypt/)
-  assert.match(source, /oauthClientSecret:\s*oauthClientSecret\s*\?\s*encrypt\(oauthClientSecret\)\s*:\s*existingConnector\.oauthClientSecret/)
-  assert.match(source, /env:\s*envJson\s*\?\s*encrypt\(JSON\.stringify\(validatedData\.env\)\)\s*:\s*existingConnector\.env/)
+  assert.match(
+    source,
+    /oauthClientSecret:\s*oauthClientSecret\s*\?\s*encrypt\(oauthClientSecret\)\s*:\s*existingConnector\.oauthClientSecret/,
+  )
+  assert.match(
+    source,
+    /env:\s*envJson\s*\?\s*encrypt\(JSON\.stringify\(validatedData\.env\)\)\s*:\s*existingConnector\.env/,
+  )
 })

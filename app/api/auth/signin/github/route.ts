@@ -33,9 +33,7 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   // This endpoint is explicitly the SIGN-IN flow. Do not infer "connect"
   // from an existing/stale Vercel session cookie.
-  const response = NextResponse.redirect(
-    `https://github.com/login/oauth/authorize?${params.toString()}`,
-  )
+  const response = NextResponse.redirect(`https://github.com/login/oauth/authorize?${params.toString()}`)
 
   response.cookies.set('github_auth_mode', 'signin', AUTH_COOKIE_OPTIONS)
   response.cookies.set('github_auth_state', state, AUTH_COOKIE_OPTIONS)

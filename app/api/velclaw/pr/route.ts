@@ -39,10 +39,7 @@ export async function POST(request: Request) {
     })
 
     if (!result.success) {
-      return NextResponse.json(
-        { ok: false, error: result.error ?? 'Failed to create pull request' },
-        { status: 502 },
-      )
+      return NextResponse.json({ ok: false, error: result.error ?? 'Failed to create pull request' }, { status: 502 })
     }
 
     return NextResponse.json({
