@@ -49,12 +49,18 @@ export default async function VelclawWikiPage() {
         <header className="border border-border bg-card p-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-violet-300">VELCLAW / WIKI</p>
           <h1 className="mt-2 text-2xl font-semibold">Velclaw Wiki</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Nguồn giải thích ngắn gọn về kiến trúc, workflow, MCP, API Keys, agent và các quy tắc vận hành của Velclaw.</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+            Nguồn giải thích ngắn gọn về kiến trúc, workflow, MCP, API Keys, agent và các quy tắc vận hành của Velclaw.
+          </p>
         </header>
 
         <nav className="grid gap-2 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
           {sections.map((section) => (
-            <a key={section.id} href={`#${section.id}`} className="border border-border/70 p-3 text-sm hover:border-violet-400/70 hover:bg-violet-500/5">
+            <a
+              key={section.id}
+              href={`#${section.id}`}
+              className="border border-border/70 p-3 text-sm hover:border-violet-400/70 hover:bg-violet-500/5"
+            >
               {section.title}
             </a>
           ))}

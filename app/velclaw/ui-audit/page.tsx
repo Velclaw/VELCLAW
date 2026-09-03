@@ -39,7 +39,11 @@ export default async function VelclawUiAuditPage() {
 
         <section className="grid gap-3 md:grid-cols-2">
           {routes.map((route) => (
-            <Link key={route.path} href={route.path} className="group border border-border bg-card/80 p-4 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5">
+            <Link
+              key={route.path}
+              href={route.path}
+              className="group border border-border bg-card/80 p-4 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="font-medium">{route.name}</div>

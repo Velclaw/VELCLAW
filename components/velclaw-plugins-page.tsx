@@ -35,28 +35,59 @@ export function VelclawPluginsPage() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-violet-300">VELCLAW / PLUGINS</p>
                 <h1 className="text-2xl font-semibold">Velclaw Plugins</h1>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Integration registry cho các capability mà Velclaw có thể đưa vào Task → Executor → Review → Gate → GitHub API → PR.
+                  Integration registry cho các capability mà Velclaw có thể đưa vào Task → Executor → Review → Gate →
+                  GitHub API → PR.
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" asChild><Link href="/mcp"><Cable className="h-4 w-4" /> MCP</Link></Button>
-              <Button variant="outline" asChild><Link href="/api-keys"><KeyRound className="h-4 w-4" /> API Keys</Link></Button>
+              <Button variant="outline" asChild>
+                <Link href="/mcp">
+                  <Cable className="h-4 w-4" /> MCP
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/api-keys">
+                  <KeyRound className="h-4 w-4" /> API Keys
+                </Link>
+              </Button>
             </div>
           </div>
         </header>
 
         <section className="grid gap-3 sm:grid-cols-3">
-          <Card><CardHeader className="p-4"><CardTitle className="text-sm">Available</CardTitle><CardDescription>Đã có adapter/registry entry.</CardDescription></CardHeader><CardContent className="px-4 pb-4 text-2xl font-semibold">{available.length}</CardContent></Card>
-          <Card><CardHeader className="p-4"><CardTitle className="text-sm">Planned</CardTitle><CardDescription>Được định nghĩa nhưng chưa bật runtime.</CardDescription></CardHeader><CardContent className="px-4 pb-4 text-2xl font-semibold">{planned.length}</CardContent></Card>
-          <Card><CardHeader className="p-4"><CardTitle className="text-sm">Security</CardTitle><CardDescription>Credentials không nằm trong plugin metadata.</CardDescription></CardHeader><CardContent className="flex items-center gap-2 px-4 pb-4 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-violet-300" /> Secrets qua API Keys / environment.</CardContent></Card>
+          <Card>
+            <CardHeader className="p-4">
+              <CardTitle className="text-sm">Available</CardTitle>
+              <CardDescription>Đã có adapter/registry entry.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 text-2xl font-semibold">{available.length}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="p-4">
+              <CardTitle className="text-sm">Planned</CardTitle>
+              <CardDescription>Được định nghĩa nhưng chưa bật runtime.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 text-2xl font-semibold">{planned.length}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="p-4">
+              <CardTitle className="text-sm">Security</CardTitle>
+              <CardDescription>Credentials không nằm trong plugin metadata.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-2 px-4 pb-4 text-xs text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-violet-300" /> Secrets qua API Keys / environment.
+            </CardContent>
+          </Card>
         </section>
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Integration registry</h2>
-              <p className="text-xs text-muted-foreground">Nguồn dữ liệu duy nhất: <code>lib/velclaw/integrations.ts</code>.</p>
+              <p className="text-xs text-muted-foreground">
+                Nguồn dữ liệu duy nhất: <code>lib/velclaw/integrations.ts</code>.
+              </p>
             </div>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
@@ -73,8 +104,14 @@ export function VelclawPluginsPage() {
                         <CardDescription className="mt-1 font-mono text-[10px]">{integration.id}</CardDescription>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center gap-1 border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${integration.status === 'available' ? 'border-emerald-400/40 text-emerald-300' : 'border-border text-muted-foreground'}`}>
-                      {integration.status === 'available' ? <CheckCircle2 className="h-3 w-3" /> : <Network className="h-3 w-3" />}
+                    <span
+                      className={`inline-flex items-center gap-1 border px-2 py-1 font-mono text-[10px] uppercase tracking-wider ${integration.status === 'available' ? 'border-emerald-400/40 text-emerald-300' : 'border-border text-muted-foreground'}`}
+                    >
+                      {integration.status === 'available' ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <Network className="h-3 w-3" />
+                      )}
                       {integration.status}
                     </span>
                   </div>
@@ -86,11 +123,21 @@ export function VelclawPluginsPage() {
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {(integration.capabilities ?? []).map((capability) => (
-                      <span key={capability} className="border border-border bg-background px-2 py-1 font-mono text-[10px] text-muted-foreground">{capability}</span>
+                      <span
+                        key={capability}
+                        className="border border-border bg-background px-2 py-1 font-mono text-[10px] text-muted-foreground"
+                      >
+                        {capability}
+                      </span>
                     ))}
                   </div>
                   {integration.status === 'available' && integration.source.startsWith('http') ? (
-                    <a className="inline-flex items-center gap-1 text-violet-300 hover:underline" href={integration.source} target="_blank" rel="noreferrer">
+                    <a
+                      className="inline-flex items-center gap-1 text-violet-300 hover:underline"
+                      href={integration.source}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       Open source <ExternalLink className="h-3 w-3" />
                     </a>
                   ) : null}
@@ -102,7 +149,10 @@ export function VelclawPluginsPage() {
 
         <section className="border border-border bg-card p-4 text-xs leading-5 text-muted-foreground">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-300">Boundary</p>
-          <p className="mt-2">Trang này hiện là control-plane/registry UI, không giả lập Enable/Disable hay credential storage khi runtime chưa cung cấp các thao tác đó. MCP manager và API Keys vẫn là nơi thực hiện cấu hình thực tế.</p>
+          <p className="mt-2">
+            Trang này hiện là control-plane/registry UI, không giả lập Enable/Disable hay credential storage khi runtime
+            chưa cung cấp các thao tác đó. MCP manager và API Keys vẫn là nơi thực hiện cấu hình thực tế.
+          </p>
         </section>
       </div>
     </main>

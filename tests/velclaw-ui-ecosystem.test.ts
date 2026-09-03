@@ -17,7 +17,18 @@ test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
 
 test('Velclaw registry contains only current useful ecosystem boundaries', () => {
   const ids = new Set(VELCLAW_INTEGRATIONS.map((integration) => integration.id))
-  for (const id of ['github-cloud', 'vercel-cloud', 'mcp-runtime', 'gito-review', 'ollama-local', 'git-worktree', 'skills', 'curl-network', 'mdn-web-platform', 'ibm-cloud']) {
+  for (const id of [
+    'github-cloud',
+    'vercel-cloud',
+    'mcp-runtime',
+    'gito-review',
+    'ollama-local',
+    'git-worktree',
+    'skills',
+    'curl-network',
+    'mdn-web-platform',
+    'ibm-cloud',
+  ]) {
     assert.ok(ids.has(id), `missing useful integration: ${id}`)
   }
   for (const id of ['gitlab-cloud', 'bitbucket-cloud', 'azure-devops', 'claude-skills', 'docs']) {

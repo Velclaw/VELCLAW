@@ -112,7 +112,7 @@ export async function executeCurlPlanInSandbox(
     '_velclaw_bytes=$(wc -c < \"$_velclaw_tmp\")',
     `if [ \"$_velclaw_bytes\" -gt ${maxResponseBytes} ]; then`,
     '  rm -f "$_velclaw_tmp"',
-    '  printf \'%s\\n\' \'CURL_RESPONSE_TOO_LARGE\' >&2',
+    "  printf '%s\\n' 'CURL_RESPONSE_TOO_LARGE' >&2",
     '  exit 100',
     'fi',
     'cat "$_velclaw_tmp"',

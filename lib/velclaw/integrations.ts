@@ -1,11 +1,4 @@
-export type VelclawAgent =
-  | 'claude'
-  | 'codex'
-  | 'copilot'
-  | 'cursor'
-  | 'gemini'
-  | 'opencode'
-  | 'ollama'
+export type VelclawAgent = 'claude' | 'codex' | 'copilot' | 'cursor' | 'gemini' | 'opencode' | 'ollama'
 
 export type VelclawIntegration = {
   id: string

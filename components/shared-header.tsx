@@ -21,7 +21,13 @@ export function SharedHeader({ leftActions, extraActions }: SharedHeaderProps) {
     <div className="px-0 pt-0.5 md:pt-3 pb-1.5 md:pb-4 overflow-visible">
       <div className="relative flex items-center justify-between gap-2 h-8 min-w-0">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
-          <Button onClick={toggleSidebar} variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0" aria-label="Open menu">
+          <Button
+            onClick={toggleSidebar}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 flex-shrink-0"
+            aria-label="Open menu"
+          >
             <Menu className="h-4 w-4" />
           </Button>
           {leftActions}

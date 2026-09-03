@@ -1,11 +1,4 @@
-export type VelclawAgentId =
-  | 'claude'
-  | 'codex'
-  | 'copilot'
-  | 'cursor'
-  | 'gemini'
-  | 'opencode'
-  | 'ollama'
+export type VelclawAgentId = 'claude' | 'codex' | 'copilot' | 'cursor' | 'gemini' | 'opencode' | 'ollama'
 
 export type AgentRunRequest = {
   agent: VelclawAgentId

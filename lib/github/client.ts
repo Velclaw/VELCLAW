@@ -24,8 +24,19 @@ export function parseGitHubUrl(repoUrl: string): { owner: string; repo: string }
   return match ? { owner: match[1], repo: match[2] } : null
 }
 
-interface CreatePullRequestParams { repoUrl: string; branchName: string; title: string; body?: string; baseBranch?: string }
-interface CreatePullRequestResult { success: boolean; prUrl?: string; prNumber?: number; error?: string }
+interface CreatePullRequestParams {
+  repoUrl: string
+  branchName: string
+  title: string
+  body?: string
+  baseBranch?: string
+}
+interface CreatePullRequestResult {
+  success: boolean
+  prUrl?: string
+  prNumber?: number
+  error?: string
+}
 
 export async function createPullRequest(params: CreatePullRequestParams): Promise<CreatePullRequestResult> {
   const { repoUrl, branchName, title, body = '', baseBranch = 'main' } = params
@@ -34,7 +45,14 @@ export async function createPullRequest(params: CreatePullRequestParams): Promis
     if (!octokit.auth) return { success: false, error: 'GitHub account not connected' }
     const parsed = parseGitHubUrl(repoUrl)
     if (!parsed) return { success: false, error: 'Invalid GitHub repository URL' }
-    const response = await octokit.rest.pulls.create({ owner: parsed.owner, repo: parsed.repo, title, body, head: branchName, base: baseBranch })
+    const response = await octokit.rest.pulls.create({
+      owner: parsed.owner,
+      repo: parsed.repo,
+      title,
+      body,
+      head: branchName,
+      base: baseBranch,
+    })
     return { success: true, prUrl: response.data.html_url, prNumber: response.data.number }
   } catch (error: unknown) {
     console.error('Error creating pull request:', error)
@@ -52,9 +70,19 @@ export async function getPullRequestStatus(params: { repoUrl: string; prNumber: 
     if (!octokit.auth) return { success: false, error: 'GitHub account not connected' }
     const parsed = parseGitHubUrl(params.repoUrl)
     if (!parsed) return { success: false, error: 'Invalid GitHub repository URL' }
-    const { data } = await octokit.rest.pulls.get({ owner: parsed.owner, repo: parsed.repo, pull_number: params.prNumber })
-    return { success: true, status: data.merged_at ? 'merged' as const : data.state === 'closed' ? 'closed' as const : 'open' as const, mergeCommitSha: data.merge_commit_sha || undefined }
-  } catch { return { success: false, error: 'Failed to get pull request status' } }
+    const { data } = await octokit.rest.pulls.get({
+      owner: parsed.owner,
+      repo: parsed.repo,
+      pull_number: params.prNumber,
+    })
+    return {
+      success: true,
+      status: data.merged_at ? ('merged' as const) : data.state === 'closed' ? ('closed' as const) : ('open' as const),
+      mergeCommitSha: data.merge_commit_sha || undefined,
+    }
+  } catch {
+    return { success: false, error: 'Failed to get pull request status' }
+  }
 }
 
 export async function getPullRequestChecks(params: { repoUrl: string; prNumber: number }) {
@@ -66,10 +94,25 @@ export async function getPullRequestChecks(params: { repoUrl: string; prNumber: 
     const pr = await octokit.rest.pulls.get({ owner: parsed.owner, repo: parsed.repo, pull_number: params.prNumber })
     const sha = pr.data.head.sha
     const checks = await octokit.rest.checks.listForRef({ owner: parsed.owner, repo: parsed.repo, ref: sha })
-    const statuses = checks.data.check_runs.map((check) => ({ name: check.name, status: check.status, conclusion: check.conclusion, url: check.html_url }))
+    const statuses = checks.data.check_runs.map((check) => ({
+      name: check.name,
+      status: check.status,
+      conclusion: check.conclusion,
+      url: check.html_url,
+    }))
     const completed = statuses.filter((check) => check.status === 'completed')
-    const passing = completed.length > 0 && completed.every((check) => check.conclusion === 'success' || check.conclusion === 'neutral' || check.conclusion === 'skipped')
-    return { success: true, headSha: sha, checks: statuses, passing, pending: statuses.some((check) => check.status !== 'completed') }
+    const passing =
+      completed.length > 0 &&
+      completed.every(
+        (check) => check.conclusion === 'success' || check.conclusion === 'neutral' || check.conclusion === 'skipped',
+      )
+    return {
+      success: true,
+      headSha: sha,
+      checks: statuses,
+      passing,
+      pending: statuses.some((check) => check.status !== 'completed'),
+    }
   } catch (error) {
     console.error('Error getting pull request checks:', error)
     return { success: false, error: 'Failed to get pull request checks' }
@@ -92,13 +135,7 @@ interface MergePullRequestResult {
 }
 
 export async function mergePullRequest(params: MergePullRequestParams): Promise<MergePullRequestResult> {
-  const {
-    repoUrl,
-    prNumber,
-    commitTitle,
-    commitMessage,
-    mergeMethod = 'squash',
-  } = params
+  const { repoUrl, prNumber, commitTitle, commitMessage, mergeMethod = 'squash' } = params
 
   try {
     const octokit = await getOctokit()
@@ -126,10 +163,7 @@ export async function mergePullRequest(params: MergePullRequestParams): Promise<
   } catch (error: unknown) {
     console.error('Error merging pull request:', error)
 
-    const status =
-      error && typeof error === 'object' && 'status' in error
-        ? (error as { status: number }).status
-        : 0
+    const status = error && typeof error === 'object' && 'status' in error ? (error as { status: number }).status : 0
 
     if (status === 403) return { success: false, error: 'Permission denied. Check repository access' }
     if (status === 404) return { success: false, error: 'Repository or pull request not found' }
