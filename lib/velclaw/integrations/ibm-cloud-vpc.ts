@@ -22,7 +22,7 @@ export type IbmCloudApiPlan = IbmCloudApiRequest & {
   headers: Record<string, string>
 }
 
-const API_VERSION = '2025-01-01'
+const API_VERSION = '2025-01-21'
 
 function requireValue(name: string, value: string) {
   if (!value.trim()) throw new Error(`${name} is required`)
@@ -35,6 +35,7 @@ function buildPlan(config: IbmCloudVpcConfig, request: IbmCloudApiRequest): IbmC
   if (base.protocol !== 'https:') throw new Error('IBM Cloud serviceUrl must use HTTPS')
   const url = new URL(request.path, base)
   url.searchParams.set('version', API_VERSION)
+  url.searchParams.set('generation', '2')
   return {
     ...request,
     url: url.toString(),
