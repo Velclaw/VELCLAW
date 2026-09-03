@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 import { VELCLAW_INTEGRATIONS } from '../lib/velclaw/integrations'
 import { VELCLAW_SKILLS } from '../lib/velclaw/skills'
@@ -41,5 +42,18 @@ test('Velclaw Skills and Deploy are part of the canonical ecosystem contract', (
   assert.ok(VELCLAW_SKILLS.length > 0)
   assert.ok(VELCLAW_SKILLS.every((skill) => skill.id.startsWith('velclaw-')))
   assert.equal(VELCLAW_INTEGRATIONS.find((integration) => integration.id === 'skills')?.status, 'available')
-  assert.equal(VELCLAW_SKILLS.find((skill) => skill.id === 'velclaw-deployment')?.name, 'Velclaw Deployment')
+  const deploymentSkill = VELCLAW_SKILLS.find((skill) => skill.id === 'velclaw-deployment')
+  assert.equal(deploymentSkill?.name, 'Velclaw Deployment')
+  assert.ok(deploymentSkill?.capabilities.includes('docker-build'))
+  assert.ok(deploymentSkill?.capabilities.includes('container-runtime'))
+})
+
+test('Velclaw root Docker runtime is present and uses the production contract', () => {
+  assert.equal(existsSync('Dockerfile'), true)
+  const dockerfile = readFileSync('Dockerfile', 'utf8')
+  assert.match(dockerfile, /FROM node:22-bookworm-slim/)
+  assert.match(dockerfile, /pnpm install --frozen-lockfile/)
+  assert.match(dockerfile, /pnpm build/)
+  assert.match(dockerfile, /EXPOSE 3000/)
+  assert.match(dockerfile, /USER velclaw/)
 })
