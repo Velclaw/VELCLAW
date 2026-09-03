@@ -23,7 +23,12 @@ export type IbmCloudRuntimePlan = {
   body: string
 }
 
-/** Builds a deterministic IBM Cloud VPC VSI request. Secrets are supplied at runtime. */
+const API_VERSION = '2025-01-01'
+
+/**
+ * Builds a deterministic IBM Cloud VPC VSI request.
+ * Credentials are supplied at runtime and never persisted in the plan body.
+ */
 export function createIbmCloudRuntimePlan(
   request: IbmCloudRuntimeRequest,
 ): IbmCloudRuntimePlan {
@@ -48,12 +53,21 @@ export function createIbmCloudRuntimePlan(
       ...(c.securityGroupId ? { security_groups: [{ id: c.securityGroupId }] } : {}),
     },
     keys: [{ id: c.sshKeyId }],
-    user_data: '#cloud-config\n' + 'runcmd:\n  - echo velclaw-bootstrap-ready > /var/lib/velclaw-bootstrap\n',
+    user_data:
+      '#cloud-config\n' +
+      'write_files:\n' +
+      '  - path: /usr/local/sbin/velclaw-bootstrap-ready\n' +
+      '    permissions: "0755"\n' +
+      '    content: |\n' +
+      '      #!/bin/sh\n' +
+      '      touch /var/lib/velclaw-bootstrap-ready\n' +
+      'runcmd:\n' +
+      '  - /usr/local/sbin/velclaw-bootstrap-ready\n',
   })
 
   return {
     method: 'POST',
-    url: new URL('/v1/instances?version=2025-01-01&generation=2', base).toString(),
+    url: new URL(`/v1/instances?version=${API_VERSION}&generation=2`, base).toString(),
     headers: {
       Authorization: `Bearer ${request.accessToken}`,
       Accept: 'application/json',
