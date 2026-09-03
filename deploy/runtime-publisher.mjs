@@ -13,10 +13,6 @@ if (PUBLIC_DOMAIN !== 'velclaw.cfd') {
   throw new Error(`VELCLAW_PUBLIC_DOMAIN must be velclaw.cfd, received: ${PUBLIC_DOMAIN}`)
 }
 
-const SPECIAL_HOSTS = new Map([
-  ['https://github.com/Velclaw/docs.velclaw.ai.git', 'docs.velclaw.ai'],
-])
-
 async function request(pathname, options = {}) {
   const response = await fetch(`${API}${pathname}`, options)
   if (!response.ok) throw new Error(`${response.status} ${await response.text()}`)
@@ -54,15 +50,11 @@ function productHostname(branchName) {
   return `velclaw-git-${bounded}-velclaw.${PUBLIC_DOMAIN}`
 }
 
-function deploymentHostname(job) {
-  return SPECIAL_HOSTS.get(job.repoUrl.trim().replace(/\.git$/, '.git')) || productHostname(job.branch)
-}
-
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${job.projectName}:${job.id}`
-  const hostname = deploymentHostname(job)
+  const hostname = productHostname(job.branch)
   const container = `velclaw-${job.id}`
   try {
     await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
@@ -102,7 +94,4 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+void main()
