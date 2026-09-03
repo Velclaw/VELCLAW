@@ -6,10 +6,10 @@ RUN apt-get update \
   && corepack enable
 
 WORKDIR /app
-COPY package.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # The worker only needs the postgres driver and its own runtime dependencies.
-RUN pnpm install --prod --ignore-scripts
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 COPY deploy/runner.mjs ./runner.mjs
 
 RUN useradd --create-home --uid 10001 velclaw \
