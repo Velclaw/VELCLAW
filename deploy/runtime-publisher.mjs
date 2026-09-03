@@ -7,7 +7,11 @@ import process from 'node:process'
 const API = process.env.VELCLAW_DEPLOY_API || 'http://127.0.0.1:3000'
 const POLL_MS = Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000)
 const RUNTIME_NETWORK = process.env.VELCLAW_RUNTIME_NETWORK || 'velclaw-runtime'
-const PUBLIC_DOMAIN = 'velclaw.cfd'
+const PUBLIC_DOMAIN = (process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd').trim().toLowerCase()
+
+if (PUBLIC_DOMAIN !== 'velclaw.cfd') {
+  throw new Error(`VELCLAW_PUBLIC_DOMAIN must be velclaw.cfd, received: ${PUBLIC_DOMAIN}`)
+}
 
 async function request(pathname, options = {}) {
   const response = await fetch(`${API}${pathname}`, options)
@@ -47,7 +51,7 @@ function productHostname(branchName) {
 }
 
 async function publish(job) {
-  const logs = [...(job.logs || []), 'Runtime publisher started']
+  const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${job.projectName}:${job.id}`
   const hostname = productHostname(job.branch)
@@ -59,20 +63,48 @@ async function publish(job) {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
     })
     await run('docker', ['rm', '--force', container], process.cwd(), logs).catch(() => {})
-    await run('docker', [
-      'run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK,
-      '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--security-opt', 'no-new-privileges:true',
-      '--label', `velclaw.deployment=${job.id}`,
-      '--label', `velclaw.project=${job.projectName}`,
-      '--label', 'traefik.enable=true',
-      '--label', `traefik.docker.network=${RUNTIME_NETWORK}`,
-      '--label', `traefik.http.routers.${job.id}.rule=Host(\`${hostname}\`)`,
-      '--label', `traefik.http.routers.${job.id}.entrypoints=websecure`,
-      '--label', `traefik.http.routers.${job.id}.tls=true`,
-      '--label', `traefik.http.routers.${job.id}.tls.certresolver=letsencrypt`,
-      '--label', `traefik.http.services.${job.id}.loadbalancer.server.port=3000`,
-      '--name', container, image,
-    ], process.cwd(), logs)
+    await run(
+      'docker',
+      [
+        'run',
+        '--detach',
+        '--restart',
+        'unless-stopped',
+        '--network',
+        RUNTIME_NETWORK,
+        '--memory',
+        '768m',
+        '--cpus',
+        '1.0',
+        '--pids-limit',
+        '256',
+        '--security-opt',
+        'no-new-privileges:true',
+        '--label',
+        `velclaw.deployment=${job.id}`,
+        '--label',
+        `velclaw.project=${job.projectName}`,
+        '--label',
+        'traefik.enable=true',
+        '--label',
+        `traefik.docker.network=${RUNTIME_NETWORK}`,
+        '--label',
+        `traefik.http.routers.${job.id}.rule=Host(\`${hostname}\`)`,
+        '--label',
+        `traefik.http.routers.${job.id}.entrypoints=websecure`,
+        '--label',
+        `traefik.http.routers.${job.id}.tls=true`,
+        '--label',
+        `traefik.http.routers.${job.id}.tls.certresolver=letsencrypt`,
+        '--label',
+        `traefik.http.services.${job.id}.loadbalancer.server.port=3000`,
+        '--name',
+        container,
+        image,
+      ],
+      process.cwd(),
+      logs,
+    )
     await request(`/api/deployments/${job.id}/runtime`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
