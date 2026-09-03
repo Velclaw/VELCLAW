@@ -9,6 +9,14 @@ const exec = promisify(execFile)
 const sql = postgres(process.env.POSTGRES_URL || '', { max: 2 })
 const POLL_MS = Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000)
 const WORK_ROOT = process.env.VELCLAW_DEPLOY_WORKDIR || path.join(tmpdir(), 'velclaw-deploy')
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
+
+function validateRepo(repoUrl) {
+  const url = new URL(repoUrl)
+  if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'github.com') {
+    throw new Error('Only HTTPS github.com repositories are supported')
+  }
+}
 
 async function ensureStore() {
   await sql`
@@ -47,7 +55,14 @@ async function run(job) {
   const dir = await mkdtemp(path.join(WORK_ROOT, `${job.id}-`))
   const logs = Array.isArray(job.logs) ? [...job.logs] : []
   try {
-    await exec('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, dir], {
+    validateRepo(job.repoUrl)
+    const cloneArgs = ['clone', '--depth', '1', '--branch', job.branch]
+    if (GITHUB_TOKEN) {
+      const auth = Buffer.from(`x-access-token:${GITHUB_TOKEN}`).toString('base64')
+      cloneArgs.push('-c', `http.extraheader=AUTHORIZATION: basic ${auth}`)
+    }
+    cloneArgs.push(job.repoUrl, dir)
+    await exec('git', cloneArgs, {
       env: process.env,
       timeout: 120_000,
       maxBuffer: 2 * 1024 * 1024,
@@ -63,8 +78,6 @@ async function run(job) {
     await exec(packageManager, buildArgs, { cwd: dir, env: process.env, timeout: 900_000, maxBuffer: 8 * 1024 * 1024 })
     logs.push('Production build completed')
 
-    // Phase 1 deliberately stops at a verified build artifact. Runtime publication
-    // is handled by the isolated runtime adapter in the next phase.
     const manifest = {
       deploymentId: job.id,
       project: job.projectName,
