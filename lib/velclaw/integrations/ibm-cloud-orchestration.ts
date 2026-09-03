@@ -1,6 +1,9 @@
 import type { IbmCloudRuntimeConfig } from './ibm-cloud-runtime'
 import { createIbmCloudRuntimePlan } from './ibm-cloud-runtime'
-import { createIbmCloudInstanceStatusPlan } from './ibm-cloud-vpc'
+import {
+  createIbmCloudInstanceListPlan,
+  createIbmCloudInstanceStatusPlan,
+} from './ibm-cloud-vpc'
 
 export type IbmCloudRuntimeState = 'provisioning' | 'ready' | 'failed'
 
@@ -27,10 +30,13 @@ export type IbmCloudRuntimeOrchestrationInput = {
 }
 
 export type IbmCloudRuntimeOrchestrationPlan = {
-  action: 'create' | 'poll' | 'noop'
+  action: 'create' | 'recover' | 'poll' | 'noop'
   state: IbmCloudRuntimeState
   idempotencyKey: string
-  request?: ReturnType<typeof createIbmCloudRuntimePlan> | ReturnType<typeof createIbmCloudInstanceStatusPlan>
+  request?:
+    | ReturnType<typeof createIbmCloudRuntimePlan>
+    | ReturnType<typeof createIbmCloudInstanceListPlan>
+    | ReturnType<typeof createIbmCloudInstanceStatusPlan>
 }
 
 function requireValue(name: string, value: string) {
@@ -57,7 +63,10 @@ export function classifyIbmCloudInstanceStatus(
   return 'provisioning'
 }
 
-/** Pure decision layer: retries reuse the same key and never create a second VSI. */
+/**
+ * Pure decision layer. A provisioning record without an instance id is recovered by
+ * listing instances by deterministic name before any second create request is allowed.
+ */
 export function createIbmCloudRuntimeOrchestrationPlan(
   input: IbmCloudRuntimeOrchestrationInput,
 ): IbmCloudRuntimeOrchestrationPlan {
@@ -76,11 +85,18 @@ export function createIbmCloudRuntimeOrchestrationPlan(
     }
   }
 
-  if (input.existing.state === 'provisioning' && input.existing.instanceId) {
-    const statusConfig = {
-      ...input.config,
-      accessToken: input.accessToken,
+  if (input.existing.state === 'provisioning' && !input.existing.instanceId) {
+    const listConfig = { ...input.config, accessToken: input.accessToken }
+    return {
+      action: 'recover',
+      state: 'provisioning',
+      idempotencyKey,
+      request: createIbmCloudInstanceListPlan(listConfig),
     }
+  }
+
+  if (input.existing.state === 'provisioning' && input.existing.instanceId) {
+    const statusConfig = { ...input.config, accessToken: input.accessToken }
     return {
       action: 'poll',
       state: 'provisioning',
