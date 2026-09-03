@@ -10,9 +10,9 @@
 
 ## Domain rules
 - `velclaw.cfd` is the primary and canonical domain for the Velclaw ecosystem.
-- All first-party Velclaw pages should use the `velclaw.cfd` host.
-- `*.vercel.app` addresses are deployment URLs and must not be assumed to be canonical.
-- Never infer the primary domain from a GitHub Website field or a Vercel deployment URL.
+- All first-party Velclaw pages and public deployment links should use the `velclaw.cfd` host.
+- Preview deployments use first-party subdomains under `velclaw.cfd`, for example `velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd`.
+- Platform-generated deployment hostnames are infrastructure details and must not be exposed as Velclaw product URLs.
 
 ## Canonical page naming
 Display names follow the **Velclaw + function** convention.
@@ -65,9 +65,9 @@ Canonical delivery pipeline:
 
 The canonical deployment control-plane page is `/deploy` (**Velclaw Deploy**). It centralizes release preparation, target semantics, deployment evidence and links to the existing Task, Skills, Executor, Review, Gate, GitHub, Plugins, MCP, API Keys and VelclawHub surfaces.
 
-The existing task deployment API remains the source of truth for task-scoped deployment discovery. It can inspect cached task preview URLs plus GitHub Checks, Deployments and commit statuses. The Deploy page must not claim production success without provider-backed evidence.
+Task-scoped deployment discovery may consume provider/GitHub evidence, but the public Velclaw URL presented to users must be a first-party `*.velclaw.cfd` address. The Deploy page must not claim production success without provider-backed evidence.
 
-`velclaw.cfd` is the only canonical Velclaw host. `*.vercel.app` is preview/deployment output only.
+`velclaw.cfd` is the only canonical Velclaw host. Preview URLs are Velclaw-owned hostnames under that domain.
 
 ## Working rules
 1. Inspect the canonical repository before changing anything.
