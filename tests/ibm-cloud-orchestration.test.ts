@@ -26,6 +26,23 @@ test('IBM Cloud orchestration creates once when no runtime exists', () => {
   assert.equal(plan.idempotencyKey, createIbmCloudRuntimeIdempotencyKey(config))
 })
 
+test('IBM Cloud orchestration recovers a provisioning runtime without an instance id', () => {
+  const plan = createIbmCloudRuntimeOrchestrationPlan({
+    config,
+    accessToken: 'test-token',
+    existing: {
+      idempotencyKey: createIbmCloudRuntimeIdempotencyKey(config),
+      state: 'provisioning',
+      instanceName: config.instanceName,
+      updatedAt: '2026-09-03T00:00:00.000Z',
+    },
+  })
+  assert.equal(plan.action, 'recover')
+  assert.equal(plan.state, 'provisioning')
+  assert.match(plan.request?.url ?? '', /\/v1\/instances\?version=/)
+  assert.equal(plan.request?.headers.Authorization, 'Bearer test-token')
+})
+
 test('IBM Cloud orchestration polls an existing provisioning runtime', () => {
   const plan = createIbmCloudRuntimeOrchestrationPlan({
     config,
