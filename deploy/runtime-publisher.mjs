@@ -7,7 +7,7 @@ import process from 'node:process'
 const API = process.env.VELCLAW_DEPLOY_API || 'http://127.0.0.1:3000'
 const POLL_MS = Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000)
 const RUNTIME_NETWORK = process.env.VELCLAW_RUNTIME_NETWORK || 'velclaw-runtime'
-const PUBLIC_DOMAIN = process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd'
+const PUBLIC_DOMAIN = 'velclaw.cfd'
 
 async function request(pathname, options = {}) {
   const response = await fetch(`${API}${pathname}`, options)
