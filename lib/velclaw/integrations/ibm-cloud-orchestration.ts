@@ -13,6 +13,12 @@ export type IbmCloudRuntimeRecord = {
   error?: string
 }
 
+export type IbmCloudInstanceStatus = {
+  status?: string
+  lifecycle_state?: string
+  lifecycle_reasons?: Array<{ code?: string; message?: string }>
+}
+
 export type IbmCloudRuntimeOrchestrationInput = {
   config: IbmCloudRuntimeConfig
   accessToken: string
@@ -36,6 +42,19 @@ export function createIbmCloudRuntimeIdempotencyKey(config: IbmCloudRuntimeConfi
     if (typeof value === 'string') requireValue(name, value)
   }
   return `ibm-vpc:${config.region}:${config.zone}:${config.instanceName}`
+}
+
+/** Maps the IBM instance status response into Velclaw's lifecycle state. */
+export function classifyIbmCloudInstanceStatus(
+  response: IbmCloudInstanceStatus,
+): IbmCloudRuntimeState {
+  const status = response.status?.toLowerCase()
+  const lifecycleState = response.lifecycle_state?.toLowerCase()
+
+  if (status === 'running' && lifecycleState === 'stable') return 'ready'
+  if (status === 'failed' || lifecycleState === 'failed' || lifecycleState === 'suspended') return 'failed'
+  if (status === 'stopped' || status === 'stopping' || status === 'starting') return 'failed'
+  return 'provisioning'
 }
 
 /** Pure decision layer: retries reuse the same key and never create a second VSI. */
