@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createIbmCloudRuntimePlan } from '@/lib/velclaw/integrations/ibm-cloud-runtime'
 
-test('IBM runtime targets the configured VPC and subnet', () => {
+test('IBM runtime targets the configured VPC and subnet and bootstraps Velclaw', () => {
   const plan = createIbmCloudRuntimePlan({
     accessToken: 'token',
     config: {
@@ -15,6 +15,10 @@ test('IBM runtime targets the configured VPC and subnet', () => {
   assert.equal(body.vpc.id, 'vpc-id')
   assert.equal(body.primary_network_interface.subnet.id, 'subnet-id')
   assert.equal(plan.headers.Authorization, 'Bearer token')
+  assert.match(plan.url, /version=2025-01-21&generation=2/)
+  assert.match(body.user_data, /github.com\/Velclaw\/Velclaw\.git/)
+  assert.match(body.user_data, /deploy\/ibm-cloud\/bootstrap\.sh/)
+  assert.match(body.user_data, /branch main/)
 })
 
 test('IBM runtime rejects insecure service URLs and missing credentials', () => {

@@ -22,7 +22,14 @@ export type IbmCloudApiPlan = IbmCloudApiRequest & {
   headers: Record<string, string>
 }
 
-const API_VERSION = '2025-01-01'
+export type IbmCloudInstanceSummary = {
+  id?: string
+  name?: string
+  status?: string
+  lifecycle_state?: string
+}
+
+const API_VERSION = '2025-01-21'
 
 function requireValue(name: string, value: string) {
   if (!value.trim()) throw new Error(`${name} is required`)
@@ -35,6 +42,7 @@ function buildPlan(config: IbmCloudVpcConfig, request: IbmCloudApiRequest): IbmC
   if (base.protocol !== 'https:') throw new Error('IBM Cloud serviceUrl must use HTTPS')
   const url = new URL(request.path, base)
   url.searchParams.set('version', API_VERSION)
+  url.searchParams.set('generation', '2')
   return {
     ...request,
     url: url.toString(),
@@ -65,6 +73,17 @@ export function createIbmCloudVpcInstancePlan(config: IbmCloudVpcConfig): IbmClo
       keys: [{ id: config.sshKeyId }],
     },
   })
+}
+
+export function createIbmCloudInstanceListPlan(config: IbmCloudVpcConfig) {
+  return buildPlan(config, { method: 'GET', path: '/v1/instances' })
+}
+
+export function findIbmCloudInstanceByName(
+  instances: IbmCloudInstanceSummary[],
+  instanceName: string,
+): IbmCloudInstanceSummary | undefined {
+  return instances.find((instance) => instance.name === instanceName)
 }
 
 export function createIbmCloudInstanceStatusPlan(config: IbmCloudVpcConfig, instanceId: string) {
