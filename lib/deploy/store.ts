@@ -74,6 +74,38 @@ export async function getDeployment(id: string) {
   return rows[0] || null
 }
 
+export async function claimNextDeployment() {
+  await ensureDeployStore()
+  const rows = await sql<Deployment[]>`
+    WITH next_job AS (
+      SELECT id FROM velclaw_deployments
+      WHERE status = 'queued'
+      ORDER BY created_at ASC
+      FOR UPDATE SKIP LOCKED
+      LIMIT 1
+    )
+    UPDATE velclaw_deployments d
+    SET status = 'building', updated_at = now(),
+        logs = d.logs || '["Build worker claimed deployment"]'::jsonb
+    FROM next_job
+    WHERE d.id = next_job.id
+    RETURNING d.id, d.project_name as "projectName", d.repo_url as "repoUrl", d.branch,
+      d.commit_sha as "commitSha", d.status, d.url, d.logs, d.error,
+      d.created_at as "createdAt", d.updated_at as "updatedAt"
+  `
+  return rows[0] || null
+}
+
+export async function finishDeployment(id: string, input: { status: 'ready' | 'failed'; logs: string[]; error?: string | null; url?: string | null }) {
+  await ensureDeployStore()
+  await sql`
+    UPDATE velclaw_deployments
+    SET status = ${input.status}, logs = ${JSON.stringify(input.logs)}::jsonb,
+        error = ${input.error || null}, url = ${input.url || null}, updated_at = now()
+    WHERE id = ${id}
+  `
+}
+
 export async function closeDeployStore() {
   await sql.end({ timeout: 1 })
 }
