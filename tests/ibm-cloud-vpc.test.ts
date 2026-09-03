@@ -1,21 +1,27 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createIbmCloudInstanceStatusPlan, createIbmCloudVpcInstancePlan, findIbmCloudInstanceByName } from '@/lib/velclaw/integrations/ibm-cloud-vpc'
+import {
+  createIbmCloudInstanceListPlan,
+  createIbmCloudInstanceStatusPlan,
+  createIbmCloudVpcInstancePlan,
+  findIbmCloudInstanceByName,
+} from '@/lib/velclaw/integrations/ibm-cloud-vpc'
+
+const config = {
+  serviceUrl: 'https://eu-de.iaas.cloud.ibm.com',
+  accessToken: 'test-token',
+  region: 'eu-de',
+  zone: 'eu-de-2',
+  vpcId: 'vpc-123',
+  subnetId: 'subnet-123',
+  sshKeyId: 'key-123',
+  imageId: 'image-123',
+  profileName: 'bx2-2x8',
+  instanceName: 'velclaw-runtime',
+}
 
 test('IBM Cloud VSI plan uses the VPC id separately from region', () => {
-  const plan = createIbmCloudVpcInstancePlan({
-    serviceUrl: 'https://eu-de.iaas.cloud.ibm.com',
-    accessToken: 'test-token',
-    region: 'eu-de',
-    zone: 'eu-de-2',
-    vpcId: 'vpc-123',
-    subnetId: 'subnet-123',
-    sshKeyId: 'key-123',
-    imageId: 'image-123',
-    profileName: 'bx2-2x8',
-    instanceName: 'velclaw-runtime',
-  })
-
+  const plan = createIbmCloudVpcInstancePlan(config)
   const body = JSON.parse(String(plan.body))
   assert.equal(plan.method, 'POST')
   assert.equal(body.vpc.id, 'vpc-123')
@@ -25,23 +31,10 @@ test('IBM Cloud VSI plan uses the VPC id separately from region', () => {
   assert.equal(plan.headers.Authorization, 'Bearer test-token')
 })
 
-test('IBM Cloud instance list plan can recover a deterministic instance by name', () => {
-  const plan = createIbmCloudInstanceStatusPlan({
-    serviceUrl: 'https://eu-de.iaas.cloud.ibm.com',
-    accessToken: 'test-token',
-    region: 'eu-de',
-    zone: 'eu-de-2',
-    vpcId: 'vpc-123',
-    subnetId: 'subnet-123',
-    sshKeyId: 'key-123',
-    imageId: 'image-123',
-    profileName: 'bx2-2x8',
-    instanceName: 'velclaw-runtime',
-  }, 'instance/123')
-
+test('IBM Cloud instance list plan supports orphan recovery by deterministic name', () => {
+  const plan = createIbmCloudInstanceListPlan(config)
   assert.equal(plan.method, 'GET')
-  assert.match(plan.url, /instances\/instance%2F123\?version=/)
-
+  assert.match(plan.url, /\/v1\/instances\?version=/)
   assert.equal(
     findIbmCloudInstanceByName(
       [{ id: 'instance-123', name: 'other' }, { id: 'instance-456', name: 'velclaw-runtime' }],
@@ -49,4 +42,10 @@ test('IBM Cloud instance list plan can recover a deterministic instance by name'
     )?.id,
     'instance-456',
   )
+})
+
+test('IBM Cloud instance status plan encodes the instance id', () => {
+  const plan = createIbmCloudInstanceStatusPlan(config, 'instance/123')
+  assert.equal(plan.method, 'GET')
+  assert.match(plan.url, /instances\/instance%2F123\?version=/)
 })
