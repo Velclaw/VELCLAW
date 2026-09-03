@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  classifyIbmCloudInstanceStatus,
   createIbmCloudRuntimeIdempotencyKey,
   createIbmCloudRuntimeOrchestrationPlan,
   transitionIbmCloudRuntimeState,
@@ -57,6 +58,14 @@ test('IBM Cloud orchestration is a no-op for ready runtime', () => {
   })
   assert.equal(plan.action, 'noop')
   assert.equal(plan.state, 'ready')
+})
+
+test('IBM Cloud status classifier only marks running and stable as ready', () => {
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'pending', lifecycle_state: 'pending' }), 'provisioning')
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'running', lifecycle_state: 'stable' }), 'ready')
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'failed', lifecycle_state: 'failed' }), 'failed')
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'running', lifecycle_state: 'suspended' }), 'failed')
+  assert.equal(classifyIbmCloudInstanceStatus({ status: 'stopped', lifecycle_state: 'stable' }), 'failed')
 })
 
 test('runtime state transition updates timestamp and rejects invalid ready rollback', () => {
