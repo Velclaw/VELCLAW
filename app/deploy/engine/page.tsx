@@ -15,11 +15,17 @@ interface Deployment {
   createdAt: string
 }
 
+const VELCLAW_PAGES_TARGET = {
+  projectName: 'velclaw-pages',
+  repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git',
+  branch: 'main',
+}
+
 export default function VelclawDeployEnginePage() {
   const [deployments, setDeployments] = useState<Deployment[]>([])
-  const [projectName, setProjectName] = useState('velclaw')
-  const [repoUrl, setRepoUrl] = useState('https://github.com/Velclaw/Velclaw.git')
-  const [branch, setBranch] = useState('main')
+  const [projectName, setProjectName] = useState(VELCLAW_PAGES_TARGET.projectName)
+  const [repoUrl, setRepoUrl] = useState(VELCLAW_PAGES_TARGET.repoUrl)
+  const [branch, setBranch] = useState(VELCLAW_PAGES_TARGET.branch)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,6 +41,13 @@ export default function VelclawDeployEnginePage() {
     const timer = window.setInterval(() => void refresh(), 5000)
     return () => window.clearInterval(timer)
   }, [])
+
+  function selectVelclawPages() {
+    setProjectName(VELCLAW_PAGES_TARGET.projectName)
+    setRepoUrl(VELCLAW_PAGES_TARGET.repoUrl)
+    setBranch(VELCLAW_PAGES_TARGET.branch)
+    setError('')
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -66,6 +79,19 @@ export default function VelclawDeployEnginePage() {
             Self-hosted deployment control plane. GitHub is the source of truth; the worker builds releases without relying on Vercel.
           </p>
         </header>
+
+        <section className="border border-violet-400/30 bg-violet-500/5 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300">Deployment target</p>
+              <h2 className="mt-1 text-lg font-semibold">velclaw-pages</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Velclaw Pages → IBM Cloud runtime → Traefik → first-party Velclaw hostname.</p>
+            </div>
+            <button type="button" onClick={selectVelclawPages} className="border border-violet-400/60 px-3 py-2 text-xs">
+              Use velclaw-pages
+            </button>
+          </div>
+        </section>
 
         <form onSubmit={submit} className="grid gap-3 border border-border bg-card p-4 md:grid-cols-4">
           <label className="space-y-1 text-xs">
@@ -108,6 +134,7 @@ export default function VelclawDeployEnginePage() {
                   <span className="border border-border px-2 py-1 font-mono text-[10px] uppercase">{deployment.status}</span>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">{deployment.repoUrl}</p>
+                {deployment.url && <a href={deployment.url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-violet-300 underline">Open deployment</a>}
                 {deployment.error && <p className="mt-2 text-xs text-red-300">{deployment.error}</p>}
                 <pre className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground">{(deployment.logs || []).join('\n')}</pre>
               </article>
