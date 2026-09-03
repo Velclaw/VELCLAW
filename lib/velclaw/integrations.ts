@@ -39,9 +39,9 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     id: 'gito-review',
     name: 'Gito AI review',
     kind: 'reviewer',
-    status: 'planned',
+    status: 'available',
     source: 'zskbot/Gito',
-    capabilities: ['review', 'findings', 'gate-input'],
+    capabilities: ['review', 'findings', 'gate-input', 'optional-review'],
   },
   {
     id: 'ollama-local',
