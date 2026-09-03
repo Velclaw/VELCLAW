@@ -12,10 +12,10 @@ services:
     networks: [velclaw-runtime]
 
   velclaw-publisher:
-    image: node:22-bookworm-slim
+    build:
+      context: .
+      dockerfile: publisher.Dockerfile
     restart: unless-stopped
-    working_dir: /workspace
-    command: ['node', 'deploy/runtime-publisher.mjs']
     env_file: .env
     environment:
       - VELCLAW_DEPLOY_API
@@ -24,7 +24,6 @@ services:
       - VELCLAW_HOST_SUFFIX=velclaw.cfd
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/workspace:ro
     networks: [velclaw-runtime]
     depends_on: [velclaw-control-plane]
 
