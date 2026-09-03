@@ -15,6 +15,8 @@ test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
   assert.equal(resolveVelclawVirtualDomain('velclaw.cfd'), 'velclaw.cfd')
   assert.equal(resolveVelclawVirtualDomain('velclaw.cfd:3000'), 'velclaw.cfd')
   assert.equal(isVelclawPublicDomain('velclaw.cfd'), true)
+  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.cfd'), true)
+  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.vercel.app'), false)
 })
 
 test('Velclaw product URLs are first-party and branch-derived', () => {
