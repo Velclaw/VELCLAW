@@ -93,10 +93,10 @@ export const VELCLAW_SKILLS: VelclawSkill[] = [
     id: 'velclaw-deployment',
     name: 'Velclaw Deployment',
     description:
-      'Prepares a validated Velclaw release for deployment and records provider-backed deployment evidence without treating preview URLs as the canonical domain.',
-    version: '1.0.0',
+      'Prepares a validated Velclaw release for the first-party Docker runtime and records runtime-backed deployment evidence.',
+    version: '1.1.0',
     status: 'available',
-    capabilities: ['release-preparation', 'deployment-evidence', 'preview-validation', 'production-gate'],
+    capabilities: ['release-preparation', 'docker-build', 'container-runtime', 'deployment-evidence', 'preview-validation', 'production-gate'],
     agents: ['claude', 'codex', 'copilot', 'cursor', 'gemini', 'opencode', 'ollama'],
     executorBinding: 'task-executor',
     sandbox: 'isolated',
