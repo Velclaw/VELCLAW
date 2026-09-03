@@ -9,6 +9,8 @@ services:
       - POSTGRES_URL
       - VELCLAW_DEPLOY_API_TOKEN
       - VELCLAW_PUBLIC_DOMAIN
+      - MODEL_ACCESS_KEY
+      - DO_INFERENCE_ROUTER
     labels:
       - traefik.enable=true
       - traefik.docker.network=velclaw-runtime
