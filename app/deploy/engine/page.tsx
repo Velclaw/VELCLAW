@@ -16,8 +16,8 @@ interface Deployment {
 }
 
 const DEPLOYMENT_TARGETS = [
-  { projectName: 'velclaw-pages', repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git', branch: 'main', description: 'Velclaw Pages static site' },
-  { projectName: 'velclaw-docs', repoUrl: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', description: 'docs.velclaw.ai documentation site' },
+  { projectName: 'velclaw-pages', repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git', branch: 'main', path: '/', description: 'Velclaw public product landing' },
+  { projectName: 'velclaw-docs', repoUrl: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', path: '/docs', description: 'Velclaw documentation surface' },
 ] as const
 
 const DEFAULT_TARGET = DEPLOYMENT_TARGETS[0]
@@ -86,7 +86,7 @@ export default function VelclawDeployEnginePage() {
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300">Deployment target</p>
                   <h2 className="mt-1 text-lg font-semibold">{target.projectName}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">{target.description} → IBM Cloud runtime → Traefik.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{target.description} → <span className="font-mono text-violet-300">https://velclaw.cfd{target.path}</span>.</p>
                 </div>
                 <button type="button" onClick={() => selectTarget(target)} className="border border-violet-400/60 px-3 py-2 text-xs">Use target</button>
               </div>
