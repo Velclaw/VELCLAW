@@ -22,6 +22,13 @@ export type IbmCloudApiPlan = IbmCloudApiRequest & {
   headers: Record<string, string>
 }
 
+export type IbmCloudInstanceSummary = {
+  id?: string
+  name?: string
+  status?: string
+  lifecycle_state?: string
+}
+
 const API_VERSION = '2025-01-21'
 
 function requireValue(name: string, value: string) {
@@ -66,6 +73,17 @@ export function createIbmCloudVpcInstancePlan(config: IbmCloudVpcConfig): IbmClo
       keys: [{ id: config.sshKeyId }],
     },
   })
+}
+
+export function createIbmCloudInstanceListPlan(config: IbmCloudVpcConfig) {
+  return buildPlan(config, { method: 'GET', path: '/v1/instances' })
+}
+
+export function findIbmCloudInstanceByName(
+  instances: IbmCloudInstanceSummary[],
+  instanceName: string,
+): IbmCloudInstanceSummary | undefined {
+  return instances.find((instance) => instance.name === instanceName)
 }
 
 export function createIbmCloudInstanceStatusPlan(config: IbmCloudVpcConfig, instanceId: string) {
