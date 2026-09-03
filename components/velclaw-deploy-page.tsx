@@ -45,13 +45,13 @@ const targets = [
   },
   {
     name: 'Velclaw Preview',
-    host: '*.velclaw.cfd',
+    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
     state: 'preview',
-    description: 'Velclaw-owned preview namespace. Platform-generated hostnames are never product URLs.',
+    description: 'Branch-derived Velclaw product URL. Example: velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd.',
   },
   {
     name: 'Task Deployment',
-    host: '<project>-<deployment-id>.velclaw.cfd',
+    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
     state: 'task-scoped',
     description: 'Runtime evidence associated with a Task and its release branch.',
   },
@@ -65,15 +65,11 @@ export function VelclawDeployPage() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.07)_1px,transparent_1px)] bg-[size:44px_44px]" />
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-violet-400/60 bg-violet-500/10">
-                <Cloud className="h-5 w-5 text-violet-300" />
-              </div>
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-violet-400/60 bg-violet-500/10"><Cloud className="h-5 w-5 text-violet-300" /></div>
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-violet-300">VELCLAW / DEPLOY</p>
                 <h1 className="mt-1 text-2xl font-semibold md:text-3xl">Velclaw Deploy</h1>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Deployment control plane riêng của Velclaw: release bằng Docker runtime của Velclaw, reverse proxy riêng và namespace public <code>*.velclaw.cfd</code>.
-                </p>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Deployment control plane riêng của Velclaw: release bằng Docker runtime của Velclaw, reverse proxy riêng và namespace public <code>*.velclaw.cfd</code>.</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -118,7 +114,7 @@ export function VelclawDeployPage() {
           <Card><CardHeader><CardTitle className="text-sm">Runtime evidence</CardTitle><CardDescription>Velclaw không tự nhận deployment thành công chỉ vì UI mở được.</CardDescription></CardHeader><CardContent className="space-y-3 text-xs leading-5 text-muted-foreground"><p>Deployment evidence phải đến từ Velclaw runtime publisher/API: job được claim, Docker image build, container launch và URL first-party. Credentials vẫn nằm ngoài Skill metadata và UI.</p><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" asChild><Link href="/tasks"><RefreshCw className="h-3.5 w-3.5" /> Task Deployments</Link></Button><Button variant="outline" size="sm" asChild><Link href="/api-keys"><KeyRound className="h-3.5 w-3.5" /> Deployment credentials</Link></Button></div></CardContent></Card>
         </section>
 
-        <section className="border border-border bg-card p-4 text-xs leading-5 text-muted-foreground"><p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-300">Domain boundary</p><p className="mt-2">Production là <code>velclaw.cfd</code>. Preview/release là <code>*.velclaw.cfd</code>. Hostname do nền tảng bên ngoài sinh ra không phải URL sản phẩm Velclaw và không được đưa vào UI, API response hay tài liệu public. Wildcard DNS + TLS + reverse proxy phải được cấu hình trên hạ tầng Velclaw trước khi preview hostname hoạt động.</p></section>
+        <section className="border border-border bg-card p-4 text-xs leading-5 text-muted-foreground"><p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-300">Domain boundary</p><p className="mt-2">Production là <code>velclaw.cfd</code>. Preview/release là <code>velclaw-git-&lt;branch-slug&gt;-velclaw.cfd</code>. Hostname do nền tảng bên ngoài sinh ra không phải URL sản phẩm Velclaw và không được đưa vào UI, API response hay tài liệu public. Wildcard DNS + TLS + reverse proxy phải được cấu hình trên hạ tầng Velclaw trước khi preview hostname hoạt động.</p></section>
 
         <div className="flex flex-wrap gap-2 border-t border-border pt-4 text-xs text-muted-foreground"><Link href="/plugins" className="inline-flex items-center gap-1 hover:text-violet-300">Plugins <ArrowRight className="h-3 w-3" /></Link><Link href="/mcp" className="inline-flex items-center gap-1 hover:text-violet-300">MCP <ArrowRight className="h-3 w-3" /></Link><Link href="/velclawhub" className="inline-flex items-center gap-1 hover:text-violet-300">VelclawHub <ArrowRight className="h-3 w-3" /></Link><Link href="/docs" className="inline-flex items-center gap-1 hover:text-violet-300">Docs <ArrowRight className="h-3 w-3" /></Link></div>
       </div>

@@ -7,7 +7,7 @@ import process from 'node:process'
 const API = process.env.VELCLAW_DEPLOY_API || 'http://127.0.0.1:3000'
 const POLL_MS = Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000)
 const RUNTIME_NETWORK = process.env.VELCLAW_RUNTIME_NETWORK || 'velclaw-runtime'
-const PUBLIC_DOMAIN = process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd'
+const PUBLIC_DOMAIN = 'velclaw.cfd'
 
 async function request(pathname, options = {}) {
   const response = await fetch(`${API}${pathname}`, options)
@@ -35,11 +35,22 @@ function gitEnv() {
   }
 }
 
+function productHostname(branchName) {
+  const slug = branchName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'main'
+  const available = 63 - 'velclaw-git-'.length - '-velclaw'.length
+  const bounded = slug.slice(0, available).replace(/-+$/g, '') || 'main'
+  return `velclaw-git-${bounded}-velclaw.${PUBLIC_DOMAIN}`
+}
+
 async function publish(job) {
   const logs = [...(job.logs || []), 'Runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${job.projectName}:${job.id}`
-  const hostname = `${job.projectName}-${job.id.slice(0, 8)}.${PUBLIC_DOMAIN}`
+  const hostname = productHostname(job.branch)
   const container = `velclaw-${job.id}`
   try {
     await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
