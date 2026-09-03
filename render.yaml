@@ -10,13 +10,19 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22.14.0"
-      - key: POSTGRES_URL
-        sync: false
-      - key: GITHUB_CLIENT_ID
+      - key: NEXT_PUBLIC_AUTH_PROVIDERS
+        value: github
+      - key: NEXT_PUBLIC_GITHUB_CLIENT_ID
         sync: false
       - key: GITHUB_CLIENT_SECRET
         sync: false
       - key: GITHUB_TOKEN
+        sync: false
+      - key: POSTGRES_URL
+        sync: false
+      - key: JWE_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
         sync: false
       - key: VELCLAW_DEPLOY_API_TOKEN
         sync: false
