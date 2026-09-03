@@ -30,8 +30,8 @@ export async function POST(request: Request, { params }: Params) {
         [id],
       )
 
-      if (currentRows.length === 0) return { error: 'Deployment not found', status: 404 } as const
-      const current = currentRows[0] as { id: string; project_name: string }
+      if (currentRows.length === 0) return { error: 'Deployment not found', httpStatus: 404 } as const
+      const current = currentRows[0] as unknown as { id: string; project_name: string }
 
       const previousRows = await tx.unsafe(
         `SELECT id, image
@@ -47,10 +47,10 @@ export async function POST(request: Request, { params }: Params) {
       )
 
       if (previousRows.length === 0) {
-        return { error: 'No previous ready deployment is available for rollback', status: 409 } as const
+        return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
       }
 
-      const previous = previousRows[0] as { id: string; image: string }
+      const previous = previousRows[0] as unknown as { id: string; image: string }
       await tx.unsafe(
         `UPDATE velclaw_deployments
          SET status = 'queued',
@@ -72,7 +72,7 @@ export async function POST(request: Request, { params }: Params) {
       }
     })
 
-    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status })
+    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.httpStatus })
     return NextResponse.json(result)
   } catch (error) {
     return NextResponse.json(
