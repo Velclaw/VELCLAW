@@ -90,18 +90,12 @@ export const VELCLAW_SKILLS: VelclawSkill[] = [
     source: 'velclaw://skills/velclaw-mcp-operation',
   },
   {
-    id: 'velclaw-deployment',
-    name: 'Velclaw Deployment',
-    description:
-      'Prepares a validated Velclaw release for the first-party Docker runtime and records runtime-backed deployment evidence.',
-    version: '1.1.0',
-    status: 'available',
+    id: 'velclaw-deployment', name: 'Velclaw Deployment',
+    description: 'Prepares a validated Velclaw release for the first-party Docker runtime and records runtime-backed deployment evidence.',
+    version: '1.1.0', status: 'available',
     capabilities: ['release-preparation', 'docker-build', 'container-runtime', 'deployment-evidence', 'preview-validation', 'production-gate'],
-    agents: ['claude', 'codex', 'copilot', 'cursor', 'gemini', 'opencode', 'ollama'],
-    executorBinding: 'task-executor',
-    sandbox: 'isolated',
-    permissions: ['read-task-context', 'read-github-checks', 'read-deployment-status', 'request-deployment'],
-    source: 'velclaw://skills/velclaw-deployment',
+    agents: ['claude', 'codex', 'copilot', 'cursor', 'gemini', 'opencode', 'ollama'], executorBinding: 'task-executor', sandbox: 'isolated',
+    permissions: ['read-task-context', 'read-github-checks', 'read-deployment-status', 'request-deployment'], source: 'velclaw://skills/velclaw-deployment',
   },
 ]
 
