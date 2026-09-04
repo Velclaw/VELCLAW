@@ -20,8 +20,30 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Velclaw — AI-native Software Workspace',
+  metadataBase: new URL('https://velclaw.cfd'),
+  title: {
+    default: 'Velclaw — AI-native Software Workspace',
+    template: '%s | Velclaw',
+  },
   description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
+  applicationName: 'Velclaw',
+  alternates: {
+    languages: {
+      vi: 'https://velclaw.cfd',
+      en: 'https://velclaw.cfd',
+    },
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Velclaw',
+    url: 'https://velclaw.cfd',
+    title: 'Velclaw — AI-native Software Workspace',
+    description: 'AI-native workspace for agents, code, builds, runtime, review and delivery.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({

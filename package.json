@@ -4,6 +4,9 @@
   "private": true,
   "description": "Velclaw — AI-native software workspace for agents, code, builds, runtime, storage and user services.",
   "main": "server/index.js",
+  "bin": {
+    "velclaw-deploy": "./bin/velclaw-deploy.mjs"
+  },
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",

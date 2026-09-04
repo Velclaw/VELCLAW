@@ -24,9 +24,24 @@ const runtimeFlow = [
 ] as const
 
 const targets = [
-  { name: 'Velclaw Production', host: 'velclaw.cfd', state: 'canonical', description: 'Primary Velclaw host. Production claims require verified runtime evidence.' },
-  { name: 'Velclaw Preview', host: '*.velclaw.cfd', state: 'preview', description: 'Velclaw-owned preview namespace. Platform-generated hostnames are never product URLs.' },
-  { name: 'Task Deployment', host: '<project>-<deployment-id>.velclaw.cfd', state: 'task-scoped', description: 'Runtime evidence associated with a Task and its release branch.' },
+  {
+    name: 'Velclaw Production',
+    host: 'velclaw.cfd',
+    state: 'canonical',
+    description: 'Primary Velclaw host. Production claims require verified runtime evidence.',
+  },
+  {
+    name: 'Velclaw Preview',
+    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
+    state: 'preview',
+    description: 'Branch-derived Velclaw product URL. Example: velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd.',
+  },
+  {
+    name: 'Task Deployment',
+    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
+    state: 'task-scoped',
+    description: 'Runtime evidence associated with a Task and its release branch.',
+  },
 ] as const
 
 export function VelclawDeployPage() {
@@ -72,6 +87,11 @@ export function VelclawDeployPage() {
             {runtimeFlow.map(([label, description], index) => <div key={label} className="border border-border bg-card p-3"><div className="flex items-center gap-2">{index === 3 ? <Container className="h-4 w-4 text-violet-300" /> : index === 4 ? <Network className="h-4 w-4 text-violet-300" /> : <Cloud className="h-4 w-4 text-violet-300" />}<p className="text-xs font-medium">{label}</p></div><p className="mt-2 text-[11px] leading-4 text-muted-foreground">{description}</p></div>)}
           </div>
           <div className="border border-violet-400/30 bg-violet-500/5 px-4 py-3 font-mono text-[11px] text-violet-200">GitHub → webhook → Velclaw queue → publisher → Docker runtime → Traefik → *.velclaw.cfd</div>
+          <div><h2 className="text-lg font-semibold">Velclaw runtime delivery</h2><p className="text-xs text-muted-foreground">Luồng deploy runtime của Velclaw: Docker build, container isolation và Traefik routing.</p></div>
+          <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {runtimeFlow.map(([label, description], index) => <div key={label} className="border border-border bg-card p-3"><div className="flex items-center gap-2">{index === 3 ? <Container className="h-4 w-4 text-violet-300" /> : index === 4 ? <Network className="h-4 w-4 text-violet-300" /> : <Cloud className="h-4 w-4 text-violet-300" />}<p className="text-xs font-medium">{label}</p></div><p className="mt-2 text-[11px] leading-4 text-muted-foreground">{description}</p></div>)}
+          </div>
+          <div className="border border-violet-400/30 bg-violet-500/5 px-4 py-3 font-mono text-[11px] text-violet-200">GitHub → webhook → Velclaw queue → publisher → root Dockerfile → Docker runtime → Traefik → *.velclaw.cfd</div>
         </section>
 
         <section className="space-y-3">

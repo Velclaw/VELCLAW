@@ -1,10 +1,42 @@
 const BASE = 'https://velclaw.cfd'
 
 const groups = [
-  { title: 'CORE WORKSPACE', items: [['Velclaw Workspace', '/'], ['Velclaw Task', '/new'], ['Velclaw Tasks', '/tasks'], ['Velclaw Dashboard', '/velclaw'], ['Velclaw Repo', '/repos/new'], ['Velclaw Deploy', '/deploy']] },
-  { title: 'AI + CAPABILITIES', items: [['Velclaw MCP', '/mcp'], ['Velclaw Plugins', '/plugins'], ['Velclaw Skills', '/skills'], ['Velclaw API Keys', '/api-keys'], ['Velclaw Wiki', '/wiki']] },
-  { title: 'AUTH + QA', items: [['Velclaw Sign In', '/auth/signin'], ['Velclaw UI Audit', '/velclaw/ui-audit'], ['VelclawHub', '/velclawhub']] },
-  { title: 'ECOSYSTEM PATHS', items: [['Velclaw Docs', '/docs'], ['VelclawHub Ecosystem', '/hub']] },
+  {
+    title: 'CORE WORKSPACE',
+    items: [
+      ['Velclaw Workspace', '/'],
+      ['Velclaw Task', '/new'],
+      ['Velclaw Tasks', '/tasks'],
+      ['Velclaw Dashboard', '/velclaw'],
+      ['Velclaw Repo', '/repos/new'],
+      ['Velclaw Deploy', '/deploy'],
+    ],
+  },
+  {
+    title: 'AI + CAPABILITIES',
+    items: [
+      ['Velclaw MCP', '/mcp'],
+      ['Velclaw Plugins', '/plugins'],
+      ['Velclaw Skills', '/skills'],
+      ['Velclaw API Keys', '/api-keys'],
+      ['Velclaw Wiki', '/wiki'],
+    ],
+  },
+  {
+    title: 'AUTH + QA',
+    items: [
+      ['Velclaw Sign In', '/auth/signin'],
+      ['Velclaw UI Audit', '/velclaw/ui-audit'],
+      ['VelclawHub', '/velclawhub'],
+    ],
+  },
+  {
+    title: 'ECOSYSTEM PATHS',
+    items: [
+      ['Velclaw Docs', '/docs'],
+      ['VelclawHub Ecosystem', '/hub'],
+    ],
+  },
 ] as const
 
 export default function VelclawHubPage() {
@@ -21,7 +53,9 @@ export default function VelclawHubPage() {
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-violet-300">VELCLAW / VELCLAWHUB</p>
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">VelclawHub</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cổng điều hướng và kiểm thử hệ sinh thái Velclaw trên domain canonical duy nhất.</p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  Cổng điều hướng và kiểm thử hệ sinh thái Velclaw trên domain canonical duy nhất.
+                </p>
               </div>
             </div>
             <div className="border border-border bg-background/70 px-4 py-3 font-mono text-xs">
@@ -40,7 +74,11 @@ export default function VelclawHubPage() {
               </div>
               <div className="grid gap-2">
                 {group.items.map(([name, path]) => (
-                  <a key={path} href={`${BASE}${path}`} className="group flex items-center justify-between border border-border/70 bg-background/50 px-4 py-3 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5">
+                  <a
+                    key={path}
+                    href={`${BASE}${path}`}
+                    className="group flex items-center justify-between border border-border/70 bg-background/50 px-4 py-3 transition-colors hover:border-violet-400/70 hover:bg-violet-500/5"
+                  >
                     <span className="text-sm font-medium">{name}</span>
                     <span className="font-mono text-xs text-muted-foreground group-hover:text-violet-300">{path}</span>
                   </a>
@@ -52,13 +90,28 @@ export default function VelclawHubPage() {
 
         <section className="border border-border bg-card p-5">
           <div className="grid gap-5 md:grid-cols-3">
-            <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Architecture</div><div className="mt-2 text-sm">Task → Skill → Executor → Review → Gate → GitHub → Deploy</div></div>
-            <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Identity</div><div className="mt-2 text-sm">Velclaw</div></div>
-            <div><div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Canonical host</div><div className="mt-2 text-sm">velclaw.cfd</div></div>
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Architecture
+              </div>
+              <div className="mt-2 text-sm">Task → Skill → Executor → Review → Gate → GitHub → Deploy</div>
+            </div>
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Identity</div>
+              <div className="mt-2 text-sm">Velclaw</div>
+            </div>
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Canonical host
+              </div>
+              <div className="mt-2 text-sm">velclaw.cfd</div>
+            </div>
           </div>
         </section>
 
-        <footer className="border-t border-border pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">VelclawHub ecosystem gateway · canonical host: velclaw.cfd</footer>
+        <footer className="border-t border-border pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+          VelclawHub ecosystem gateway · canonical host: velclaw.cfd
+        </footer>
       </div>
     </main>
   )

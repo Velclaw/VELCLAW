@@ -77,7 +77,10 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
 
     if (!tokenData.access_token) {
-      console.error('[GitHub Callback] GitHub token error:', tokenData.error_description || tokenData.error || 'Unknown error')
+      console.error(
+        '[GitHub Callback] GitHub token error:',
+        tokenData.error_description || tokenData.error || 'Unknown error',
+      )
       return Response.redirect(new URL('/?error=github_token', req.url))
     }
 

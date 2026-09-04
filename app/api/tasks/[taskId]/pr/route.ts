@@ -31,33 +31,57 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     if (task.prUrl) {
-      return NextResponse.json({ success: true, data: { prUrl: task.prUrl, prNumber: task.prNumber, alreadyExists: true } })
+      return NextResponse.json({
+        success: true,
+        data: { prUrl: task.prUrl, prNumber: task.prNumber, alreadyExists: true },
+      })
     }
 
     const snapshot = await getReviewSnapshot(taskId)
     if (!snapshot) {
-      return NextResponse.json({ error: 'Review gate is pending: run Gito review before creating a PR' }, { status: 409 })
+      return NextResponse.json(
+        { error: 'Review gate is pending: run Gito review before creating a PR' },
+        { status: 409 },
+      )
     }
 
     if (snapshot.status !== 'passed') {
-      return NextResponse.json({ error: `Review gate is ${snapshot.status}; PR creation requires a completed passing review` }, { status: 409 })
+      return NextResponse.json(
+        { error: `Review gate is ${snapshot.status}; PR creation requires a completed passing review` },
+        { status: 409 },
+      )
     }
 
     if (!snapshot.checksPassing) {
-      return NextResponse.json({ error: 'Review gate blocked pull request creation: required checks are not passing' }, { status: 422 })
+      return NextResponse.json(
+        { error: 'Review gate blocked pull request creation: required checks are not passing' },
+        { status: 422 },
+      )
     }
 
     const gate = evaluateReviewGate(snapshot.findings)
     if (!gate.passed) {
-      return NextResponse.json({ error: 'Review gate blocked pull request creation', blockingFindings: gate.blockingFindings }, { status: 422 })
+      return NextResponse.json(
+        { error: 'Review gate blocked pull request creation', blockingFindings: gate.blockingFindings },
+        { status: 422 },
+      )
     }
 
-    const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : task.title?.trim() || 'Velclaw changes'
-    const prBody = typeof body.body === 'string' ? body.body : `Created by Velclaw after Gito review for task ${taskId}.`
+    const title =
+      typeof body.title === 'string' && body.title.trim() ? body.title.trim() : task.title?.trim() || 'Velclaw changes'
+    const prBody =
+      typeof body.body === 'string' ? body.body : `Created by Velclaw after Gito review for task ${taskId}.`
     const baseBranch = typeof body.baseBranch === 'string' && body.baseBranch.trim() ? body.baseBranch.trim() : 'main'
 
-    const result = await createPullRequest({ repoUrl: task.repoUrl, branchName: task.branchName, title, body: prBody, baseBranch })
-    if (!result.success) return NextResponse.json({ error: result.error || 'Failed to create pull request' }, { status: 502 })
+    const result = await createPullRequest({
+      repoUrl: task.repoUrl,
+      branchName: task.branchName,
+      title,
+      body: prBody,
+      baseBranch,
+    })
+    if (!result.success)
+      return NextResponse.json({ error: result.error || 'Failed to create pull request' }, { status: 502 })
 
     const [updatedTask] = await db
       .update(tasks)
@@ -65,7 +89,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .where(eq(tasks.id, taskId))
       .returning()
 
-    return NextResponse.json({ success: true, data: { prUrl: result.prUrl, prNumber: result.prNumber, task: updatedTask } })
+    return NextResponse.json({
+      success: true,
+      data: { prUrl: result.prUrl, prNumber: result.prNumber, task: updatedTask },
+    })
   } catch (error) {
     console.error('Error creating pull request:', error)
     return NextResponse.json({ error: 'Failed to create pull request' }, { status: 500 })

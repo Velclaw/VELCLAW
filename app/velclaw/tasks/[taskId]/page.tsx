@@ -6,7 +6,9 @@ import { getServerSession } from '@/lib/session/get-server-session'
 import { getGitHubStars } from '@/lib/github-stars'
 import { getMaxSandboxDuration } from '@/lib/db/settings'
 
-interface Props { params: Promise<{ taskId: string }> }
+interface Props {
+  params: Promise<{ taskId: string }>
+}
 
 export default async function VelclawTaskPage({ params }: Props) {
   const { taskId } = await params

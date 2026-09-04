@@ -1,16 +1,9 @@
-export type VelclawAgent =
-  | 'claude'
-  | 'codex'
-  | 'copilot'
-  | 'cursor'
-  | 'gemini'
-  | 'opencode'
-  | 'ollama'
+export type VelclawAgent = 'claude' | 'codex' | 'copilot' | 'cursor' | 'gemini' | 'opencode' | 'ollama'
 
 export type VelclawIntegration = {
   id: string
   name: string
-  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'source-control' | 'identity'
+  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'database' | 'source-control' | 'identity'
   status: 'planned' | 'available'
   source: string
   capabilities?: string[]
@@ -35,6 +28,14 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     capabilities: ['oauth', 'workspace-auth'],
   },
   {
+    id: 'supabase-postgres',
+    name: 'Supabase Postgres',
+    kind: 'database',
+    status: 'available',
+    source: 'https://supabase.com/',
+    capabilities: ['postgresql', 'drizzle', 'connection-pooling', 'migrations'],
+  },
+  {
     id: 'mcp-runtime',
     name: 'MCP runtime',
     kind: 'skills',
@@ -46,9 +47,9 @@ export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
     id: 'gito-review',
     name: 'Gito AI review',
     kind: 'reviewer',
-    status: 'planned',
+    status: 'available',
     source: 'zskbot/Gito',
-    capabilities: ['review', 'findings', 'gate-input'],
+    capabilities: ['review', 'findings', 'gate-input', 'optional-review'],
   },
   {
     id: 'ollama-local',

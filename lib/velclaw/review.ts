@@ -15,9 +15,7 @@ export type ReviewGate = {
  * Provider-specific review adapters should normalize their output into ReviewFinding.
  */
 export function evaluateReviewGate(findings: ReviewFinding[]): ReviewGate {
-  const blockingFindings = findings.filter(
-    (finding) => finding.severity === 'critical' || finding.severity === 'high',
-  )
+  const blockingFindings = findings.filter((finding) => finding.severity === 'critical' || finding.severity === 'high')
 
   return {
     passed: blockingFindings.length === 0,
