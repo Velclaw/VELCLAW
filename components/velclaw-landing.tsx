@@ -3,21 +3,21 @@
 import Link from 'next/link'
 import styles from './velclaw-landing.module.css'
 
-const features = [
-  ['01', 'AI Agents', 'Agentic coding, review và automation trong cùng một workspace.'],
-  ['02', 'Workspace', 'Một không gian duy nhất cho task, repository, project và runtime.'],
-  ['03', 'Build', 'Build và kiểm tra ứng dụng với pipeline có thể quan sát được.'],
-  ['04', 'Runtime', 'Sandbox và self-hosted runtime cho các workload của Velclaw.'],
-  ['05', 'Storage', 'Lưu trữ dữ liệu ứng dụng và file một cách bền vững.'],
-  ['06', 'GitHub', 'Tích hợp repository, code review và quy trình bàn giao.'],
+const products = [
+  ['01', 'Tasks', 'Tạo và điều phối công việc cho agent.', '/tasks'],
+  ['02', 'Workspace', 'Code, repo, review và runtime trong một nơi.', '/velclaw'],
+  ['03', 'Deploy', 'Đưa ứng dụng từ GitHub tới production.', '/deploy'],
+  ['04', 'MCP', 'Kết nối tools và context cho agent.', '/mcp'],
+  ['05', 'Plugins', 'Mở rộng workspace bằng hệ sinh thái plugin.', '/plugins'],
+  ['06', 'Skills', 'Chuẩn hoá năng lực agent theo workflow.', '/skills'],
 ] as const
 
 const flow = [
-  ['01', 'Issue / Task'],
-  ['02', 'Agent + Developer'],
-  ['03', 'Build + Runtime'],
-  ['04', 'PR → Review → Merge'],
-  ['05', 'Deployment'],
+  ['01', 'Task'],
+  ['02', 'Agent'],
+  ['03', 'Build'],
+  ['04', 'Review'],
+  ['05', 'Deploy'],
 ] as const
 
 export function VelclawLanding() {
@@ -25,62 +25,70 @@ export function VelclawLanding() {
     <main className={styles.page}>
       <nav className={styles.topnav} aria-label="Velclaw navigation">
         <Link href="/" className={styles.brand} aria-label="Velclaw home">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 20L9 4M9 20L13 6M13 20L18 5M18 20L21 12" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
-          </svg>
-          velclaw
+          <span className={styles.brandMark} aria-hidden="true">V</span>
+          <span>velclaw</span>
         </Link>
         <div className={styles.navlinks}>
-          <a className={styles.active} href="#overview">Tổng quan</a>
+          <Link className={styles.active} href="#platform">Platform</Link>
           <Link href="/deploy">Deploy</Link>
           <Link href="/velclaw">Workspace</Link>
         </div>
       </nav>
 
-      <section id="overview" className={styles.hero}>
-        <div>
-          <div className={styles.eyebrow}><span />github.com/Velclaw/Velclaw · phần mềm private</div>
-          <h1>Không gian làm việc AI-native cho vòng đời phần mềm.</h1>
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <div className={styles.eyebrow}><span />AI-NATIVE SOFTWARE WORKSPACE</div>
+          <h1>Build. Review. Deploy.<br /><em>With Velclaw.</em></h1>
           <p className={styles.lead}>
-            Velclaw gom agent, code, project, build, runtime, storage, review và deployment vào một workspace duy nhất — để agent lập trình và developer không phải nhảy qua lại giữa các công cụ rời rạc.
+            Một workspace duy nhất để agent và developer đi từ task đến production — code, project, build, runtime, review và deployment nằm trong cùng một vòng đời.
           </p>
           <div className={styles.ctas}>
-            <a className={`${styles.btn} ${styles.primary}`} href="https://github.com/Velclaw/Velclaw" target="_blank" rel="noopener noreferrer">Xem trên GitHub</a>
-            <Link className={`${styles.btn} ${styles.ghost}`} href="/deploy">Xem trang Deploy</Link>
+            <Link className={`${styles.btn} ${styles.primary}`} href="/new">Tạo Task</Link>
+            <Link className={`${styles.btn} ${styles.ghost}`} href="/velclaw">Mở Workspace</Link>
+          </div>
+          <div className={styles.domainLine}>
+            <span className={styles.statusDot} />
+            <span>velclaw.cfd</span>
+            <span className={styles.separator}>·</span>
+            <span>AI-native software lifecycle</span>
           </div>
         </div>
 
-        <div className={styles.terminal}>
-          <div className={styles.terminalBar}><span /><span /><span /></div>
-          <pre>{`$ velclaw task create
-> repository: Velclaw/Velclaw
-> agent: codex
-> runtime: sandbox
-> review: gito
-
-✓ task accepted
-✓ executor ready
-✓ checks queued
-→ PR → review → deployment`}</pre>
+        <div className={styles.commandPanel} aria-label="Velclaw execution preview">
+          <div className={styles.panelHeader}>
+            <span>VELCLAW / EXECUTION</span>
+            <span className={styles.live}>READY</span>
+          </div>
+          <div className={styles.commandBody}>
+            <div><span className={styles.prompt}>$</span> velclaw task create</div>
+            <div className={styles.dim}>repository <b>Velclaw/Velclaw</b></div>
+            <div className={styles.dim}>agent <b>codex</b></div>
+            <div className={styles.dim}>runtime <b>sandbox</b></div>
+            <div className={styles.dim}>review <b>gito</b></div>
+            <div className={styles.divider} />
+            <div><span className={styles.ok}>✓</span> executor ready</div>
+            <div><span className={styles.ok}>✓</span> checks queued</div>
+            <div><span className={styles.arrow}>→</span> PR <span className={styles.arrow}>→</span> review <span className={styles.arrow}>→</span> deployment</div>
+          </div>
         </div>
       </section>
 
       <div className={styles.marquee} aria-hidden="true">
-        <div>AGENTS · WORKSPACE · BUILD · RUNTIME · STORAGE · REVIEW · GITHUB · DEPLOYMENT · AGENTS · WORKSPACE · BUILD · RUNTIME · STORAGE · REVIEW · GITHUB · DEPLOYMENT · </div>
+        <div>AGENTS · TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT · AGENTS · TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT · </div>
       </div>
 
-      <section className={styles.section}>
+      <section id="platform" className={styles.section}>
         <div className={styles.sectionHead}>
           <span className={styles.k}>01 / PLATFORM</span>
-          <h2>Một lớp điều phối thống nhất cho toàn bộ vòng đời software.</h2>
+          <h2>Mọi thứ agent cần để ship software, không cần nhảy giữa nhiều công cụ.</h2>
         </div>
-        <div className={styles.features}>
-          {features.map(([num, title, text]) => (
-            <article className={styles.feature} key={num}>
-              <div className={styles.num}>{num}</div>
+        <div className={styles.productGrid}>
+          {products.map(([num, title, text, href]) => (
+            <Link className={styles.productCard} href={href} key={num}>
+              <div className={styles.cardTop}><span>{num}</span><span className={styles.cardArrow}>↗</span></div>
               <h3>{title}</h3>
               <p>{text}</p>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
@@ -88,16 +96,16 @@ export function VelclawLanding() {
       <section className={styles.section}>
         <div className={styles.sectionHead}>
           <span className={styles.k}>02 / PIPELINE</span>
-          <h2>Task → execution → review → gate → GitHub → deployment.</h2>
+          <h2>Một đường đi rõ ràng từ ý tưởng tới production.</h2>
         </div>
         <div className={styles.flow}>
           {flow.map(([num, title], index) => (
             <div className={styles.flowGroup} key={num}>
               <div className={styles.flowStep}>
-                <div className={styles.flowNumber}>{num}</div>
-                <h4>{title}</h4>
+                <span>{num}</span>
+                <strong>{title}</strong>
               </div>
-              {index < flow.length - 1 && <div className={styles.arrow} aria-hidden="true">›</div>}
+              {index < flow.length - 1 && <span className={styles.flowArrow} aria-hidden="true">→</span>}
             </div>
           ))}
         </div>
@@ -105,10 +113,11 @@ export function VelclawLanding() {
 
       <section className={styles.ctaBand}>
         <div>
-          <h3>Đi từ task đến production mà không rời Velclaw.</h3>
+          <span className={styles.k}>03 / START</span>
+          <h3>Đưa task đầu tiên vào Velclaw.</h3>
           <p>Workspace hiện tại vẫn giữ nguyên tại /velclaw.</p>
         </div>
-        <Link className={`${styles.btn} ${styles.primary}`} href="/new">Tạo Task</Link>
+        <Link className={`${styles.btn} ${styles.primary}`} href="/new">Bắt đầu</Link>
       </section>
 
       <footer>
