@@ -84,8 +84,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ vars.VELCLAW_AUTOFIX_BASE_URL || 'https://velclaw-ai-playground.lovable.app/api/public/v1' }}
           VELCLAW_CI_RUN_ID: ${{ steps.event.outputs.run_id }}
-          VELCLAW_AUTOFIX_MODEL: ${{ vars.VELCLAW_AUTOFIX_MODEL || 'gpt-5.6' }}
+          VELCLAW_AUTOFIX_MODEL: ${{ vars.VELCLAW_AUTOFIX_MODEL || 'velclaw-fast' }}
         run: |
           set -euo pipefail
           if [[ -z "${LLM_API_KEY:-}" ]]; then
@@ -131,6 +132,6 @@ jobs:
               --head "$AUTOFIX_BRANCH" \
               --base main \
               --title "fix(autofix): repair CI run ${{ steps.event.outputs.run_id }}" \
-              --body "Velclaw AutoFix Agent detected a failed Core CI run and applied a guarded patch. The PR remains open while Core CI verifies the repair. Further failures on this branch will be analyzed and patched automatically until CI succeeds or the safety iteration limit is reached.")
+              --body "Velclaw AutoFix Agent detected a failed Core CI run and applied a guarded patch using the Velclaw AI OpenAI-compatible endpoint. The PR remains open while Core CI verifies the repair. Further failures on this branch will be analyzed and patched automatically until CI succeeds or the safety iteration limit is reached.")
           fi
           echo "AutoFix repair PR: $PR_URL"
