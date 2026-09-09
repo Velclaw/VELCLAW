@@ -1,6 +1,5 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { parseErrors } from './parse-errors.mjs'
 
@@ -10,12 +9,13 @@ const STATE_PATH = path.join(ROOT, '.velclaw/autofix/state.json')
 const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
 const state = JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'))
 const runId = process.env.VELCLAW_CI_RUN_ID
-const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY
-const model = process.env.VELCLAW_AUTOFIX_MODEL || config.model
+const apiKey = process.env.LLM_API_KEY
+const baseUrl = (process.env.VELCLAW_AUTOFIX_BASE_URL || 'https://velclaw-ai-playground.lovable.app/api/public/v1').replace(/\/+$/, '')
+const model = process.env.VELCLAW_AUTOFIX_MODEL || config.model || 'velclaw-fast'
 
 if (!config.enabled) process.exit(0)
 if (!runId) throw new Error('VELCLAW_CI_RUN_ID is required')
-if (!apiKey) throw new Error('OPENAI_API_KEY or LLM_API_KEY is required for AutoFix')
+if (!apiKey) throw new Error('LLM_API_KEY is required for AutoFix')
 if (state.iteration >= config.maxIterations) {
   console.log(`AutoFix stopped: maximum iterations (${config.maxIterations}) reached.`)
   process.exit(0)
@@ -50,6 +50,11 @@ function emitAnnotation(error) {
   }
 }
 
+function parseModelJson(content) {
+  const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+  return JSON.parse(cleaned)
+}
+
 const logs = run('gh', ['run', 'view', String(runId), '--log-failed'])
 const errors = parseErrors(logs)
 errors.forEach(emitAnnotation)
@@ -75,34 +80,26 @@ const prompt = `You are Velclaw AutoFix, an autonomous CI repair agent working o
   `Return JSON with exactly: summary (string), patch (unified git diff string). ` +
   `The patch must be applicable from the repository root with git apply. Empty patch is allowed only when the failure cannot be safely fixed from available context.`
 
-const response = await fetch('https://api.openai.com/v1/responses', {
+const response = await fetch(`${baseUrl}/chat/completions`, {
   method: 'POST',
   headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
   body: JSON.stringify({
     model,
-    instructions: 'Return only the requested JSON object. Do not expose secrets. Make minimal, production-safe code changes.',
-    input: prompt,
+    messages: [
+      { role: 'system', content: 'Return only the requested JSON object. Do not expose secrets. Make minimal, production-safe code changes.' },
+      { role: 'user', content: prompt },
+    ],
     temperature: 0,
-    max_output_tokens: 12000,
-    text: {
-      format: {
-        type: 'json_schema',
-        name: 'autofix_patch',
-        strict: true,
-        schema: {
-          type: 'object',
-          properties: { summary: { type: 'string' }, patch: { type: 'string' } },
-          required: ['summary', 'patch'],
-          additionalProperties: false,
-        },
-      },
-    },
+    max_tokens: 12000,
+    stream: false,
   }),
 })
 
-if (!response.ok) throw new Error(`OpenAI Responses API failed: ${response.status} ${await response.text()}`)
+if (!response.ok) throw new Error(`Velclaw AI Chat Completions API failed: ${response.status} ${await response.text()}`)
 const body = await response.json()
-const result = JSON.parse(body.output_text || '{}')
+const content = body?.choices?.[0]?.message?.content
+if (typeof content !== 'string' || !content.trim()) throw new Error('Velclaw AI returned no assistant message content.')
+const result = parseModelJson(content)
 const patch = typeof result.patch === 'string' ? result.patch.trim() : ''
 
 if (!patch) throw new Error(`AutoFix produced no patch: ${result.summary || 'unknown reason'}`)

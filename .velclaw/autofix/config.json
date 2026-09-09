@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "maxIterations": 12,
-  "model": "gpt-5.6",
+  "model": "velclaw-fast",
   "maxFilesPerPatch": 6,
   "maxDiffBytes": 60000,
   "protectedPaths": [
