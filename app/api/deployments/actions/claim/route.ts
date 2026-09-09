@@ -24,10 +24,20 @@ export async function POST(request: Request) {
         LIMIT 1
       )
       UPDATE velclaw_deployments AS d
-      SET status = 'building', updated_at = NOW()
+      SET
+        status = 'building',
+        updated_at = NOW(),
+        logs = d.logs || '["Runtime publisher claimed deployment"]'::jsonb
       FROM next_deployment AS n
       WHERE d.id = n.id
-      RETURNING d.id, d.project_name, d.github_url, d.branch, d.status, d.image
+      RETURNING
+        d.id,
+        d.project_name AS "projectName",
+        d.repo_url AS "repoUrl",
+        d.branch,
+        d.commit_sha AS "commitSha",
+        d.status,
+        d.logs
     `
 
     return NextResponse.json({ deployment: rows[0] ?? null })
