@@ -19,10 +19,9 @@ export async function POST(request: Request, { params }: Params) {
 
   const { id } = await params
   const body = await request.json().catch(() => ({}))
-
   const status = typeof body.status === 'string' ? body.status : 'failed'
   const url = typeof body.url === 'string' ? body.url : null
-  const logs = typeof body.logs === 'string' ? body.logs : null
+  const logs = Array.isArray(body.logs) ? body.logs.filter((item: unknown): item is string => typeof item === 'string') : []
   const error = typeof body.error === 'string' ? body.error : null
 
   if (!['building', 'ready', 'failed'].includes(status)) {
@@ -35,7 +34,7 @@ export async function POST(request: Request, { params }: Params) {
       SET
         status = ${status},
         url = COALESCE(${url}, url),
-        logs = COALESCE(${logs}, logs),
+        logs = ${JSON.stringify(logs)}::jsonb,
         error = ${error},
         updated_at = NOW()
       WHERE id = ${id}
