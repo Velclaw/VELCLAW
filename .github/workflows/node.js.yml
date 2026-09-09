@@ -1,10 +1,13 @@
-name: Node.js CI
+name: Velclaw Core CI
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -48,26 +51,16 @@ jobs:
         run: pnpm lint
 
       - name: Format check
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base="${{ github.event.pull_request.base.sha }}"
-          else
-            base="${{ github.event.before }}"
-          fi
-          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
-            base="HEAD^"
-          fi
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- '*.ts' '*.tsx')
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "No changed TypeScript files to format-check."
-            exit 0
-          fi
-          pnpm exec prettier --check "${files[@]}"
+        run: pnpm format:check
 
       - name: Test
         run: pnpm test
 
       - name: Build
         run: pnpm build
+
+      - name: Build production container
+        run: docker build --pull --tag velclaw:ci .
+
+      - name: Inspect production container
+        run: docker image inspect velclaw:ci >/dev/null
