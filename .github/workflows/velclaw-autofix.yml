@@ -49,7 +49,6 @@ jobs:
 
       - name: Prepare repair branch
         env:
-          GH_TOKEN: ${{ github.token }}
           HEAD_BRANCH: ${{ steps.event.outputs.head_branch }}
           HEAD_SHA: ${{ steps.event.outputs.head_sha }}
           RUN_ID: ${{ steps.event.outputs.run_id }}
@@ -84,13 +83,13 @@ jobs:
         id: patch
         env:
           GH_TOKEN: ${{ github.token }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.LLM_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           VELCLAW_CI_RUN_ID: ${{ steps.event.outputs.run_id }}
           VELCLAW_AUTOFIX_MODEL: ${{ vars.VELCLAW_AUTOFIX_MODEL || 'gpt-5.6' }}
         run: |
           set -euo pipefail
-          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-            echo 'AutoFix stopped: configure OPENAI_API_KEY or LLM_API_KEY.'
+          if [[ -z "${LLM_API_KEY:-}" ]]; then
+            echo 'AutoFix stopped: configure the existing LLM_API_KEY secret.'
             exit 0
           fi
           if ! node scripts/autofix/orchestrator.mjs; then
