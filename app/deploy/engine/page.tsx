@@ -15,18 +15,26 @@ interface Deployment {
   createdAt: string
 }
 
-const DEPLOYMENT_TARGETS = [
+type DeploymentTarget = {
+  projectName: string
+  repoUrl: string
+  branch: string
+  path: string
+  description: string
+}
+
+const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
   { projectName: 'velclaw-pages', repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git', branch: 'main', path: '/', description: 'Velclaw public product landing' },
   { projectName: 'velclaw-docs', repoUrl: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', path: '/docs', description: 'Velclaw documentation surface' },
-] as const
+]
 
 const DEFAULT_TARGET = DEPLOYMENT_TARGETS[0]
 
 export default function VelclawDeployEnginePage() {
   const [deployments, setDeployments] = useState<Deployment[]>([])
-  const [projectName, setProjectName] = useState(DEFAULT_TARGET.projectName)
-  const [repoUrl, setRepoUrl] = useState(DEFAULT_TARGET.repoUrl)
-  const [branch, setBranch] = useState(DEFAULT_TARGET.branch)
+  const [projectName, setProjectName] = useState<string>(DEFAULT_TARGET.projectName)
+  const [repoUrl, setRepoUrl] = useState<string>(DEFAULT_TARGET.repoUrl)
+  const [branch, setBranch] = useState<string>(DEFAULT_TARGET.branch)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -43,7 +51,7 @@ export default function VelclawDeployEnginePage() {
     return () => window.clearInterval(timer)
   }, [])
 
-  function selectTarget(target: (typeof DEPLOYMENT_TARGETS)[number]) {
+  function selectTarget(target: DeploymentTarget) {
     setProjectName(target.projectName)
     setRepoUrl(target.repoUrl)
     setBranch(target.branch)

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     await logger.info('Planning workspace changes')
 
     const run = async () => {
-      let sandbox: Awaited<ReturnType<typeof createSandbox>>['sandbox'] = null
+      let sandbox: Awaited<ReturnType<typeof createSandbox>>['sandbox'] | undefined
       try {
         await logger.updateStatus('processing', 'Agent build started')
         await logger.updateProgress(10, 'Inspecting repository')
@@ -97,8 +97,6 @@ export async function POST(req: NextRequest) {
         await logger.error(message)
         await logger.updateStatus('error', message)
       } finally {
-        // Keep the sandbox alive so the Preview and follow-up workspace remain usable.
-        // Vercel Sandbox will enforce the configured timeout; explicit shutdown is only opt-in.
         if (sandbox && process.env.AGENT_SHUTDOWN_AFTER_BUILD === 'true') {
           try { await sandbox.stop() } catch {}
         }
