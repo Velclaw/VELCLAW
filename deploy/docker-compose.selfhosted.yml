@@ -14,11 +14,11 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=velclaw-runtime
-      - traefik.http.routers.velclaw.rule=Host(`velclaw.cfd`)
-      - traefik.http.routers.velclaw.entrypoints=websecure
-      - traefik.http.routers.velclaw.tls=true
-      - traefik.http.routers.velclaw.tls.certresolver=letsencrypt
+      - traefik.http.routers.velclaw.rule=Host(`${VELCLAW_PUBLIC_DOMAIN:-velclaw.cfd}`)
+      - traefik.http.routers.velclaw.entrypoints=${VELCLAW_TRAEFIK_ENTRYPOINT:-websecure}
       - traefik.http.services.velclaw.loadbalancer.server.port=3000
+      - traefik.http.routers.velclaw.tls=${VELCLAW_TLS_ENABLED:-true}
+      - traefik.http.routers.velclaw.tls.certresolver=letsencrypt
     networks: [velclaw-runtime]
 
   velclaw-publisher:
@@ -31,7 +31,9 @@ services:
       - VELCLAW_DEPLOY_API
       - VELCLAW_DEPLOY_API_TOKEN
       - VELCLAW_RUNTIME_NETWORK=velclaw-runtime
-      - VELCLAW_PUBLIC_DOMAIN=velclaw.cfd
+      - VELCLAW_PUBLIC_DOMAIN
+      - VELCLAW_PUBLIC_SCHEME
+      - VELCLAW_TRAEFIK_ENTRYPOINT
       - GITHUB_TOKEN
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
