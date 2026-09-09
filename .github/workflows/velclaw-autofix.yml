@@ -1,0 +1,136 @@
+name: Velclaw AutoFix Agent
+
+on:
+  workflow_run:
+    workflows: ["Velclaw Core CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: velclaw-autofix-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Inspect failed run
+        id: event
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        run: |
+          set -euo pipefail
+          node -e '
+            const fs=require("fs");
+            const e=JSON.parse(fs.readFileSync(process.env.EVENT_PATH,"utf8"));
+            console.log(`run_id=${e.workflow_run.id}`);
+            console.log(`head_sha=${e.workflow_run.head_sha}`);
+            console.log(`head_branch=${e.workflow_run.head_branch}`);
+          ' >> "$GITHUB_OUTPUT"
+
+      - name: Checkout failed revision
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ steps.event.outputs.head_sha }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "velclaw-autofix[bot]"
+          git config user.email "velclaw-autofix[bot]@users.noreply.github.com"
+
+      - name: Prepare repair branch
+        env:
+          HEAD_BRANCH: ${{ steps.event.outputs.head_branch }}
+          HEAD_SHA: ${{ steps.event.outputs.head_sha }}
+          RUN_ID: ${{ steps.event.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ "$HEAD_BRANCH" == autofix/* ]]; then
+            BRANCH="$HEAD_BRANCH"
+            git fetch origin "$BRANCH"
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            BRANCH="autofix/ci-$RUN_ID"
+            git checkout -B "$BRANCH" "$HEAD_SHA"
+          fi
+          echo "AUTOFIX_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          version: 10
+          run_install: false
+
+      - name: Use Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Analyze and patch
+        id: patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          VELCLAW_CI_RUN_ID: ${{ steps.event.outputs.run_id }}
+          VELCLAW_AUTOFIX_MODEL: ${{ vars.VELCLAW_AUTOFIX_MODEL || 'gpt-5.6' }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${LLM_API_KEY:-}" ]]; then
+            echo 'AutoFix stopped: configure the existing LLM_API_KEY secret.'
+            exit 0
+          fi
+          if ! node scripts/autofix/orchestrator.mjs; then
+            echo 'AutoFix could not produce a safe patch; stopping this iteration.'
+            exit 0
+          fi
+          echo 'patched=true' >> "$GITHUB_OUTPUT"
+
+      - name: Validate patch
+        if: steps.patch.outputs.patched == 'true'
+        run: pnpm type-check
+
+      - name: Commit repair
+        if: steps.patch.outputs.patched == 'true'
+        run: |
+          set -euo pipefail
+          git status --short
+          git diff --check
+          git add -- . ':!.velclaw/autofix/current.patch'
+          git diff --cached --quiet && { echo 'No changes to commit.'; exit 1; }
+          git commit -m "fix(autofix): repair failed CI run ${{ steps.event.outputs.run_id }}"
+
+      - name: Push repair branch
+        if: steps.patch.outputs.patched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git push --force-with-lease origin "$AUTOFIX_BRANCH"
+
+      - name: Create or update repair PR
+        if: steps.patch.outputs.patched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PR_URL=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$AUTOFIX_BRANCH" --state open --json url --jq '.[0].url // empty')
+          if [[ -z "$PR_URL" ]]; then
+            PR_URL=$(gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$AUTOFIX_BRANCH" \
+              --base main \
+              --title "fix(autofix): repair CI run ${{ steps.event.outputs.run_id }}" \
+              --body "Velclaw AutoFix Agent detected a failed Core CI run and applied a guarded patch. The PR remains open while Core CI verifies the repair. Further failures on this branch will be analyzed and patched automatically until CI succeeds or the safety iteration limit is reached.")
+          fi
+          echo "AutoFix repair PR: $PR_URL"
