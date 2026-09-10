@@ -49,10 +49,13 @@ export async function createSession(tokens: Tokens): Promise<Session | undefined
 const COOKIE_TTL = ms('1y')
 
 export async function saveSession(res: Response, session: Session | undefined): Promise<string | undefined> {
+  const cookieDomain = process.env.SESSION_COOKIE_DOMAIN?.trim()
+  const domainAttribute = cookieDomain ? ` Domain=${cookieDomain};` : ''
+
   if (!session) {
     res.headers.append(
       'Set-Cookie',
-      `${SESSION_COOKIE_NAME}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}SameSite=Lax`,
+      `${SESSION_COOKIE_NAME}=; Path=/;${domainAttribute} Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}SameSite=Lax`,
     )
     return
   }
@@ -61,7 +64,7 @@ export async function saveSession(res: Response, session: Session | undefined): 
   const expires = new Date(Date.now() + COOKIE_TTL).toUTCString()
   res.headers.append(
     'Set-Cookie',
-    `${SESSION_COOKIE_NAME}=${value}; Path=/; Max-Age=${COOKIE_TTL / 1000}; Expires=${expires}; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}SameSite=Lax`,
+    `${SESSION_COOKIE_NAME}=${value}; Path=/;${domainAttribute} Max-Age=${COOKIE_TTL / 1000}; Expires=${expires}; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}SameSite=Lax`,
   )
   return value
 }
