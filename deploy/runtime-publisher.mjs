@@ -68,7 +68,7 @@ function traefikLabels(job, hostname) {
     '--label',
     `traefik.docker.network=${RUNTIME_NETWORK}`,
     '--label',
-    `traefik.http.routers.${job.id}.rule=Host(\\`${hostname}\\`)`,
+    'traefik.http.routers.' + job.id + '.rule=Host(`' + hostname + '`)',
     '--label',
     `traefik.http.routers.${job.id}.entrypoints=${TRAEFIK_ENTRYPOINT}`,
     '--label',
