@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const prompt = typeof body.message === 'string' ? body.message.trim() : ''
-    const repoUrl = typeof body.repoUrl === 'string' ? body.repoUrl.trim() : (process.env.AGENT_DEFAULT_REPO_URL || '').trim()
+    const repoUrl =
+      typeof body.repoUrl === 'string' ? body.repoUrl.trim() : (process.env.AGENT_DEFAULT_REPO_URL || '').trim()
 
     if (!prompt) return json({ error: 'message is required' }, 400)
     if (!repoUrl) return json({ error: 'repoUrl is required for sandbox builds' }, 400)
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     const taskId = generateId(12)
     const agent = allowedAgents.has(body.agent as AgentType)
       ? (body.agent as AgentType)
-      : ((process.env.AGENT_DEFAULT_TYPE as AgentType) || 'claude')
+      : (process.env.AGENT_DEFAULT_TYPE as AgentType) || 'claude'
     const model = typeof body.model === 'string' && body.model.trim() ? body.model.trim() : undefined
     const maxDuration = Math.min(Math.max(Number(body.maxDuration) || 20, 1), 110)
     const branchName = createFallbackBranchName(taskId)
@@ -135,7 +136,9 @@ export async function POST(req: NextRequest) {
 
         const agentInstruction = `You are Velclaw Agent operating inside an isolated Vercel Sandbox. Execute the requested build, not just describe it. Inspect the existing project first, edit the necessary files, run the project, run relevant tests/typechecks, and if a command fails, diagnose the failure, patch the code, rerun the failed command, and continue until the result is validated. Preserve existing conventions. Do not expose credentials. User request:\n\n${prompt}`
 
-        let validation = { success: false, checks: [], failureSummary: 'Validation has not run yet.' } as Awaited<ReturnType<typeof validateSandboxProject>>
+        let validation = { success: false, checks: [], failureSummary: 'Validation has not run yet.' } as Awaited<
+          ReturnType<typeof validateSandboxProject>
+        >
         let lastAgentResponse: string | undefined
 
         for (let attempt = 0; attempt <= MAX_VALIDATION_REPAIRS; attempt += 1) {
@@ -165,7 +168,10 @@ export async function POST(req: NextRequest) {
 
           lastAgentResponse = agentResult.agentResponse || lastAgentResponse
           if (agentResult.sessionId) {
-            await db.update(tasks).set({ agentSessionId: agentResult.sessionId, updatedAt: new Date() }).where(eq(tasks.id, taskId))
+            await db
+              .update(tasks)
+              .set({ agentSessionId: agentResult.sessionId, updatedAt: new Date() })
+              .where(eq(tasks.id, taskId))
           }
 
           await logger.updateProgress(75, `Validating generated changes (attempt ${attempt + 1})`)
@@ -180,7 +186,9 @@ export async function POST(req: NextRequest) {
         }
 
         if (lastAgentResponse) {
-          await db.insert(taskMessages).values({ id: generateId(12), taskId, role: 'agent', content: lastAgentResponse })
+          await db
+            .insert(taskMessages)
+            .values({ id: generateId(12), taskId, role: 'agent', content: lastAgentResponse })
         }
 
         await logger.info('Reviewing validated changes')
@@ -191,7 +199,13 @@ export async function POST(req: NextRequest) {
 
         await db
           .update(tasks)
-          .set({ status: 'completed', progress: 100, previewUrl: sandboxResult.domain || null, completedAt: new Date(), updatedAt: new Date() })
+          .set({
+            status: 'completed',
+            progress: 100,
+            previewUrl: sandboxResult.domain || null,
+            completedAt: new Date(),
+            updatedAt: new Date(),
+          })
           .where(eq(tasks.id, taskId))
 
         await logger.success('Build completed, validation passed, and preview is ready')
@@ -276,7 +290,9 @@ export async function PATCH(req: NextRequest) {
   const [task] = await db
     .select()
     .from(tasks)
-    .where(and(eq(tasks.id, taskId), eq(tasks.userId, process.env.VELCLAW_AGENT_USER_ID || ''), isNull(tasks.deletedAt)))
+    .where(
+      and(eq(tasks.id, taskId), eq(tasks.userId, process.env.VELCLAW_AGENT_USER_ID || ''), isNull(tasks.deletedAt)),
+    )
     .limit(1)
 
   if (!task) return json({ error: 'Task not found' }, 404)

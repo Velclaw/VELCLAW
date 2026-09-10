@@ -30,8 +30,15 @@ test('IBM runtime rejects non-HTTPS service endpoints', () => {
       createIbmCloudRuntimePlan({
         accessToken: 'token',
         config: {
-          region: 'us-south', zone: 'us-south-1', instanceName: 'x', imageId: 'i',
-          profileName: 'p', vpcId: 'v', subnetId: 's', sshKeyId: 'k', serviceUrl: 'http://example.com',
+          region: 'us-south',
+          zone: 'us-south-1',
+          instanceName: 'x',
+          imageId: 'i',
+          profileName: 'p',
+          vpcId: 'v',
+          subnetId: 's',
+          sshKeyId: 'k',
+          serviceUrl: 'http://example.com',
         },
       }),
     /HTTPS/,

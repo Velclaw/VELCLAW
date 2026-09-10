@@ -3,7 +3,17 @@ export type VelclawAgent = 'claude' | 'codex' | 'copilot' | 'cursor' | 'gemini' 
 export type VelclawIntegration = {
   id: string
   name: string
-  kind: 'agent' | 'reviewer' | 'workspace' | 'skills' | 'docs' | 'network' | 'cloud' | 'database' | 'source-control' | 'identity'
+  kind:
+    | 'agent'
+    | 'reviewer'
+    | 'workspace'
+    | 'skills'
+    | 'docs'
+    | 'network'
+    | 'cloud'
+    | 'database'
+    | 'source-control'
+    | 'identity'
   status: 'planned' | 'available'
   source: string
   capabilities?: string[]

@@ -37,7 +37,10 @@ test('IBM Cloud instance list plan supports orphan recovery by deterministic nam
   assert.match(plan.url, /\/v1\/instances\?version=/)
   assert.equal(
     findIbmCloudInstanceByName(
-      [{ id: 'instance-123', name: 'other' }, { id: 'instance-456', name: 'velclaw-runtime' }],
+      [
+        { id: 'instance-123', name: 'other' },
+        { id: 'instance-456', name: 'velclaw-runtime' },
+      ],
       'velclaw-runtime',
     )?.id,
     'instance-456',

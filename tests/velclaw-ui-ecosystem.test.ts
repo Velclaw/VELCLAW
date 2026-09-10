@@ -3,7 +3,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 import { VELCLAW_INTEGRATIONS } from '../lib/velclaw/integrations'
 import { VELCLAW_SKILLS } from '../lib/velclaw/skills'
-import { buildVelclawProductUrl, isVelclawProductUrl, VELCLAW_PRODUCT_DOMAIN, VELCLAW_PRODUCT_URL } from '../lib/velclaw/product-domain'
+import {
+  buildVelclawProductUrl,
+  isVelclawProductUrl,
+  VELCLAW_PRODUCT_DOMAIN,
+  VELCLAW_PRODUCT_URL,
+} from '../lib/velclaw/product-domain'
 import {
   VELCLAW_PUBLIC_DOMAIN,
   isVelclawPublicDomain,

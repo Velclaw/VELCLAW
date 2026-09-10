@@ -43,7 +43,12 @@ export async function ensureDeployStore() {
   initialized = true
 }
 
-export async function createDeployment(input: { projectName: string; repoUrl: string; branch: string; commitSha?: string | null }) {
+export async function createDeployment(input: {
+  projectName: string
+  repoUrl: string
+  branch: string
+  commitSha?: string | null
+}) {
   await ensureDeployStore()
   const id = randomUUID()
   const rows = await sql<Deployment[]>`
@@ -96,7 +101,10 @@ export async function claimNextDeployment() {
   return rows[0] || null
 }
 
-export async function finishDeployment(id: string, input: { status: 'ready' | 'failed'; logs: string[]; error?: string | null; url?: string | null }) {
+export async function finishDeployment(
+  id: string,
+  input: { status: 'ready' | 'failed'; logs: string[]; error?: string | null; url?: string | null },
+) {
   await ensureDeployStore()
   await sql`
     UPDATE velclaw_deployments

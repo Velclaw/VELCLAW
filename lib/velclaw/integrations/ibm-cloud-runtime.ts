@@ -30,9 +30,7 @@ const CANONICAL_REPO = 'https://github.com/Velclaw/Velclaw.git'
  * Builds a deterministic IBM Cloud VPC VSI request.
  * Credentials are supplied at runtime and never persisted in the plan body.
  */
-export function createIbmCloudRuntimePlan(
-  request: IbmCloudRuntimeRequest,
-): IbmCloudRuntimePlan {
+export function createIbmCloudRuntimePlan(request: IbmCloudRuntimeRequest): IbmCloudRuntimePlan {
   if (!request.accessToken.trim()) throw new Error('IBM Cloud access token is required')
 
   const c = request.config

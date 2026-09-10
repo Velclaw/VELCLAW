@@ -48,9 +48,6 @@ export async function POST(request: Request, { params }: Params) {
 
     return NextResponse.json({ ok: true, deployment: rows[0] })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Runtime update failed' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Runtime update failed' }, { status: 500 })
   }
 }

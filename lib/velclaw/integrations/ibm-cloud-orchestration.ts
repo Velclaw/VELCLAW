@@ -1,9 +1,6 @@
 import type { IbmCloudRuntimeConfig } from './ibm-cloud-runtime'
 import { createIbmCloudRuntimePlan } from './ibm-cloud-runtime'
-import {
-  createIbmCloudInstanceListPlan,
-  createIbmCloudInstanceStatusPlan,
-} from './ibm-cloud-vpc'
+import { createIbmCloudInstanceListPlan, createIbmCloudInstanceStatusPlan } from './ibm-cloud-vpc'
 
 export type IbmCloudRuntimeState = 'provisioning' | 'ready' | 'failed'
 
@@ -51,9 +48,7 @@ export function createIbmCloudRuntimeIdempotencyKey(config: IbmCloudRuntimeConfi
 }
 
 /** Maps IBM instance status into Velclaw lifecycle state without treating initial stopped as failure. */
-export function classifyIbmCloudInstanceStatus(
-  response: IbmCloudInstanceStatus,
-): IbmCloudRuntimeState {
+export function classifyIbmCloudInstanceStatus(response: IbmCloudInstanceStatus): IbmCloudRuntimeState {
   const status = response.status?.toLowerCase()
   const lifecycleState = response.lifecycle_state?.toLowerCase()
 

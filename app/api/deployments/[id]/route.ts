@@ -75,9 +75,6 @@ export async function POST(request: Request, { params }: Params) {
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.httpStatus })
     return NextResponse.json(result)
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Rollback failed' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Rollback failed' }, { status: 500 })
   }
 }

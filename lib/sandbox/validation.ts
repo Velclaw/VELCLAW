@@ -35,7 +35,11 @@ export async function validateSandboxProject(sandbox: Sandbox, logger: TaskLogge
   const packageJson = await runInProject(sandbox, 'cat', ['package.json'])
 
   if (!packageJson.success || !packageJson.output) {
-    checks.push({ name: 'project manifest', status: 'skipped', output: 'No package.json found; Node project checks skipped.' })
+    checks.push({
+      name: 'project manifest',
+      status: 'skipped',
+      output: 'No package.json found; Node project checks skipped.',
+    })
     return { success: true, checks }
   }
 

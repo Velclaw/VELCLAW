@@ -23,9 +23,8 @@ export async function POST(request: NextRequest) {
   const input = await request.json().catch(() => null)
   const repoUrl = typeof input?.repoUrl === 'string' ? input.repoUrl.trim() : ''
   const branch = typeof input?.branch === 'string' && input.branch.trim() ? input.branch.trim() : 'main'
-  const projectName = typeof input?.projectName === 'string' && input.projectName.trim()
-    ? input.projectName.trim()
-    : 'velclaw-app'
+  const projectName =
+    typeof input?.projectName === 'string' && input.projectName.trim() ? input.projectName.trim() : 'velclaw-app'
   const commitSha = typeof input?.commitSha === 'string' ? input.commitSha.trim() : null
 
   if (!REPO_PATTERN.test(repoUrl)) {

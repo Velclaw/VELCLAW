@@ -12,7 +12,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const { id } = await context.params
   const [target] = await sql`SELECT * FROM velclaw_deployments WHERE id = ${id} LIMIT 1`
   if (!target) return NextResponse.json({ error: 'Deployment not found' }, { status: 404 })
-  if (target.status !== 'ready' || !target.url) return NextResponse.json({ error: 'Only a ready deployment can be rolled back to' }, { status: 409 })
+  if (target.status !== 'ready' || !target.url)
+    return NextResponse.json({ error: 'Only a ready deployment can be rolled back to' }, { status: 409 })
 
   const [previous] = await sql`
     SELECT * FROM velclaw_deployments
