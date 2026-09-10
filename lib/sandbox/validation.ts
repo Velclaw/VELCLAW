@@ -14,9 +14,9 @@ export interface ValidationResult {
   failureSummary?: string
 }
 
-function commandForScript(packageManager: 'pnpm' | 'yarn' | 'npm', script: string) {
-  if (packageManager === 'npm') return ['npm', ['run', script]] as const
-  return [packageManager, [script]] as const
+function commandForScript(packageManager: 'pnpm' | 'yarn' | 'npm', script: string): [string, string[]] {
+  if (packageManager === 'npm') return ['npm', ['run', script]]
+  return [packageManager, [script]]
 }
 
 function compactOutput(value?: string, limit = 4000) {
