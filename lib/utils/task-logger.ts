@@ -3,6 +3,8 @@ import { tasks } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { createInfoLog, createCommandLog, createErrorLog, createSuccessLog, LogEntry } from './logging'
 
+export type TaskStatus = 'pending' | 'processing' | 'completed' | 'error' | 'stopped'
+
 export class TaskLogger {
   private taskId: string
 
@@ -10,12 +12,9 @@ export class TaskLogger {
     this.taskId = taskId
   }
 
-  /**
-   * Append a log entry to the database immediately
-   */
+  /** Append a log entry to the database immediately. */
   async append(type: 'info' | 'command' | 'error' | 'success', message: string): Promise<void> {
     try {
-      // Create the log entry with timestamp
       let logEntry: LogEntry
       switch (type) {
         case 'info':
@@ -34,29 +33,18 @@ export class TaskLogger {
           logEntry = createInfoLog(message)
       }
 
-      // Get current task to preserve existing logs
       const currentTask = await db.select().from(tasks).where(eq(tasks.id, this.taskId)).limit(1)
       const existingLogs = currentTask[0]?.logs || []
 
-      // Append the new log entry
       await db
         .update(tasks)
-        .set({
-          logs: [...existingLogs, logEntry],
-          updatedAt: new Date(),
-        })
+        .set({ logs: [...existingLogs, logEntry], updatedAt: new Date() })
         .where(eq(tasks.id, this.taskId))
-
-      // Task log: ${type.toUpperCase()}: ${message.substring(0, 100)}
     } catch {
-      // Failed to append log to database
-      // Don't throw - we don't want logging failures to break the main process
+      // Failed logging must never break task execution.
     }
   }
 
-  /**
-   * Convenience methods for different log types
-   */
   async info(message: string): Promise<void> {
     return this.append('info', message)
   }
@@ -73,44 +61,27 @@ export class TaskLogger {
     return this.append('success', message)
   }
 
-  /**
-   * Update task progress along with a log message
-   */
+  /** Update task progress and append the corresponding log entry. */
   async updateProgress(progress: number, message: string): Promise<void> {
     try {
+      const boundedProgress = Math.min(100, Math.max(0, Math.round(progress)))
       const logEntry = createInfoLog(message)
-
-      // Get current task to preserve existing logs
       const currentTask = await db.select().from(tasks).where(eq(tasks.id, this.taskId)).limit(1)
       const existingLogs = currentTask[0]?.logs || []
 
-      // Update both progress and logs
       await db
         .update(tasks)
-        .set({
-          progress,
-          logs: [...existingLogs, logEntry],
-          updatedAt: new Date(),
-        })
+        .set({ progress: boundedProgress, logs: [...existingLogs, logEntry], updatedAt: new Date() })
         .where(eq(tasks.id, this.taskId))
-
-      // Task progress: ${progress}%
     } catch {
-      // Failed to update progress
+      // Failed progress logging must never break task execution.
     }
   }
 
-  /**
-   * Update task status along with a log message
-   * Note: completedAt is only set when PR is merged, not when status changes to 'completed'
-   */
-  async updateStatus(status: 'pending' | 'processing' | 'completed' | 'error', message?: string): Promise<void> {
+  /** Update task status along with an optional log message. */
+  async updateStatus(status: TaskStatus, message?: string): Promise<void> {
     try {
-      const updates: {
-        status: 'pending' | 'processing' | 'completed' | 'error'
-        updatedAt: Date
-        logs?: LogEntry[]
-      } = {
+      const updates: { status: TaskStatus; updatedAt: Date; logs?: LogEntry[] } = {
         status,
         updatedAt: new Date(),
       }
@@ -123,17 +94,12 @@ export class TaskLogger {
       }
 
       await db.update(tasks).set(updates).where(eq(tasks.id, this.taskId))
-
-      // Task status: ${status}
     } catch {
-      // Failed to update status
+      // Failed status logging must never break task execution.
     }
   }
 }
 
-/**
- * Create a logger instance for a specific task
- */
 export function createTaskLogger(taskId: string): TaskLogger {
   return new TaskLogger(taskId)
 }
