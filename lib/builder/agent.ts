@@ -66,7 +66,7 @@ export async function runBuilderAgent(input: {
     tester:
       'You are the Velclaw Tester. Review package scripts and source for test/build/type-check risks. Do not claim tests were executed. Return a verification plan plus likely failures and exact commands the browser runtime should run.',
     deployer:
-      'You are the Velclaw Deployer. Inspect the workspace and explain deployment readiness, required build/start commands, exposed port assumptions, and configuration risks. Do not claim deployment occurred.',
+      'You are the Velclaw Deployer. Inspect the workspace and explain deployment readiness, required build/start commands, exposed port assumptions, configuration risks, and the exact handoff to Velclaw Hosting. Do not claim deployment occurred.',
   }[input.role]
 
   try {
@@ -95,7 +95,7 @@ export async function runBuilderWorkflow(input: {
 }) {
   let workspace = input.files.map((file) => ({ ...file }))
   validateWorkspace(workspace)
-  const steps: Array<{ role: 'coder' | 'tester' | 'reviewer'; output: string }> = []
+  const steps: Array<{ role: 'coder' | 'tester' | 'reviewer' | 'deployer'; output: string }> = []
 
   const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, model: input.model })
   steps.push({ role: 'coder', output: coder.output })
@@ -120,6 +120,14 @@ export async function runBuilderWorkflow(input: {
     model: input.model,
   })
   steps.push({ role: 'reviewer', output: reviewer.output })
+
+  const deployer = await runBuilderAgent({
+    role: 'deployer',
+    prompt: `Prepare this implementation for Velclaw Hosting for the request: ${input.prompt}. Identify required build/start configuration and any blocker before publishing. Do not claim deployment.`,
+    files: workspace,
+    model: input.model,
+  })
+  steps.push({ role: 'deployer', output: deployer.output })
 
   return {
     model: clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna',
