@@ -50,9 +50,6 @@ fi
 mkdir -p /home/velclaw/.config
 chown -R velclaw:velclaw /home/velclaw
 
-# gh was authenticated in this Ubuntu root shell. Generate the short-lived
-# runner registration token here while that authentication context is known to
-# work, then hand only the registration token to the unprivileged runner user.
 if ! gh auth status >/dev/null 2>&1; then
   echo "GitHub CLI is not authenticated inside Ubuntu."
   echo "Run as root in Ubuntu: gh auth login"
@@ -76,7 +73,6 @@ if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
 fi
 '
 
-# Configure and run the GitHub runner only as the dedicated non-root user.
 VELCLAW_REPO="$REPO" \
 VELCLAW_RUNNER_VERSION="$RUNNER_VERSION" \
 VELCLAW_RUNNER_DIR="$RUNNER_DIR" \
@@ -84,6 +80,13 @@ VELCLAW_RUNNER_NAME="$RUNNER_NAME" \
 proot-distro login ubuntu --user velclaw -- bash -lc '
 set -euo pipefail
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+# Android/PRoot can fail CoreCLR startup while .NET attempts a very large
+# virtual heap reservation. Keep the GitHub runner itself inside a bounded
+# managed heap; this affects the runner process, not project containers or the
+# browser-based Velclaw Builder.
+export DOTNET_GCHeapHardLimit="${DOTNET_GCHeapHardLimit:-67108864}"
+export DOTNET_EnableDiagnostics="${DOTNET_EnableDiagnostics:-0}"
 
 REGISTRATION_TOKEN_FILE="/home/velclaw/.config/velclaw-runner-registration-token"
 if [ ! -r "$REGISTRATION_TOKEN_FILE" ]; then
@@ -123,7 +126,7 @@ test -x "$RUNNER_DIR/bin/Runner.Listener"
   --labels "$LABELS" \
   --work _work
 
-trap '\''"$RUNNER_DIR/config.sh" remove --token "${REGISTRATION_TOKEN}" || true'\'' EXIT
+trap '\''"$RUNNER_DIR"/config.sh remove --token "${REGISTRATION_TOKEN}" || true'\'' EXIT
 
 echo
 echo "Velclaw self-hosted ARM64 runner is ONLINE."
