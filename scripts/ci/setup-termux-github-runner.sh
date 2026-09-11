@@ -41,9 +41,9 @@ if ! command -v gh >/dev/null 2>&1; then
   apt-get install -y gh
 fi
 
-# Reuse an authentication session that was created inside Ubuntu.
-# The Android host and Ubuntu PRoot userland have separate HOME/config trees,
-# so host-side gh auth cannot be assumed to exist inside Ubuntu.
+# Termux + PRoot presents Ubuntu as root. GitHub's dependency helper refuses
+# root/sudo execution, so do not invoke it here. Required runtime libraries
+# are installed explicitly above.
 if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   GH_TOKEN="$(gh auth token)"
   export GH_TOKEN
@@ -75,7 +75,10 @@ if [ ! -x ./run.sh ]; then
   rm -f "$ARCHIVE"
 fi
 
-./bin/installdependencies.sh || true
+# Validate the downloaded ARM64 runner without using the unsupported
+# root/sudo dependency installer.
+test -x ./run.sh
+test -x ./bin/Runner.Listener
 
 TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
 if [ -z "$TOKEN" ]; then
@@ -92,7 +95,7 @@ fi
   --labels "$LABELS" \
   --work _work
 
-trap '\''./config.sh remove --token "${TOKEN}" || true'\'' EXIT
+trap './config.sh remove --token "${TOKEN}" || true' EXIT
 
 echo
 echo "Velclaw self-hosted ARM64 runner is ONLINE."
