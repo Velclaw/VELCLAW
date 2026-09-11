@@ -17,14 +17,14 @@ permissions:
   contents: read
 
 jobs:
-  runner-probe-ubuntu:
-    name: Runner probe / Ubuntu 22.04
-    runs-on: ubuntu-22.04
+  runner-probe-slim:
+    name: Runner probe / Ubuntu Slim
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
       - name: Runner started
         run: |
-          echo "VELCLAW_RUNNER_PROBE=ubuntu-22.04"
+          echo "VELCLAW_RUNNER_PROBE=ubuntu-slim"
           uname -a
           node --version
 
@@ -47,10 +47,10 @@ jobs:
         uses: actions/checkout@v4
 
   quality:
-    name: Node 22 / Quality
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: runner-probe-ubuntu
+    name: Node 22 / Quality / Slim
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    needs: runner-probe-slim
 
     steps:
       - name: Checkout
