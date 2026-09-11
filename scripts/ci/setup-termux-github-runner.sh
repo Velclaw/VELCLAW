@@ -13,19 +13,23 @@ if ! command -v proot-distro >/dev/null 2>&1; then
   pkg install -y proot-distro
 fi
 
-if ! proot-distro list 2>/dev/null | grep -q '^ubuntu'; then
-  echo "Ubuntu image is not available in the local proot-distro catalog."
-  echo "Run: proot-distro install ubuntu"
-  exit 1
-fi
-
-if ! proot-distro list 2>/dev/null | grep -Eq '^ubuntu[[:space:]]+installed'; then
+if ! proot-distro login ubuntu -- true >/dev/null 2>&1; then
   echo "Installing Ubuntu ARM64 userland..."
   proot-distro install ubuntu
 fi
 
+GH_TOKEN_FROM_HOST="${GH_TOKEN:-}"
+if [ -z "$GH_TOKEN_FROM_HOST" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  GH_TOKEN_FROM_HOST="$(gh auth token)"
+fi
+
 echo "Entering Ubuntu userland. The runner is installed there, not in the Android host filesystem."
 
+GH_TOKEN="$GH_TOKEN_FROM_HOST" \
+VELCLAW_REPO="$REPO" \
+VELCLAW_RUNNER_VERSION="$RUNNER_VERSION" \
+VELCLAW_RUNNER_DIR="$RUNNER_DIR" \
+VELCLAW_RUNNER_NAME="$RUNNER_NAME" \
 proot-distro login ubuntu -- bash -lc '
 set -euo pipefail
 
@@ -37,11 +41,12 @@ if ! command -v gh >/dev/null 2>&1; then
   apt-get install -y gh
 fi
 
-if ! gh auth status >/dev/null 2>&1; then
+if [ -z "${GH_TOKEN:-}" ]; then
   echo
   echo "GitHub CLI authentication is required once inside Ubuntu."
   echo "Run: gh auth login"
   echo "Use GitHub.com -> HTTPS -> browser authentication."
+  echo "Then rerun this script."
   echo
   exit 20
 fi
@@ -64,7 +69,7 @@ fi
 
 ./bin/installdependencies.sh || true
 
-TOKEN="$(gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
+TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
 if [ -z "$TOKEN" ]; then
   echo "Could not obtain a runner registration token."
   exit 21
@@ -82,7 +87,7 @@ fi
 trap '\''./config.sh remove --token "${TOKEN}" || true'\'' EXIT
 
 echo
-printf "Velclaw self-hosted ARM64 runner is ONLINE.\n"
+echo "Velclaw self-hosted ARM64 runner is ONLINE."
 printf "Name: %s\nLabels: %s\n\n" "$RUNNER_NAME" "$LABELS"
 echo "Keep this process running while GitHub Actions uses the runner."
 exec ./run.sh
