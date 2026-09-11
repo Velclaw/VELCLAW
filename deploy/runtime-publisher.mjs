@@ -93,8 +93,10 @@ async function ensureDockerfile(workdir, logs) {
 
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) }
   const scripts = pkg.scripts || {}
-  const manager = await fs.access(path.join(workdir, 'pnpm-lock.yaml')).then(() => 'pnpm').catch(() => 'npm')
-  const install = manager === 'pnpm' ? 'corepack enable && pnpm install --frozen-lockfile' : 'npm ci'
+  const hasPnpmLock = await fs.access(path.join(workdir, 'pnpm-lock.yaml')).then(() => true).catch(() => false)
+  const hasNpmLock = await fs.access(path.join(workdir, 'package-lock.json')).then(() => true).catch(() => false)
+  const manager = hasPnpmLock ? 'pnpm' : 'npm'
+  const install = manager === 'pnpm' ? 'corepack enable && pnpm install --frozen-lockfile' : hasNpmLock ? 'npm ci' : 'npm install'
   const build = scripts.build ? `${manager} run build` : ''
   const start = scripts.start ? `${manager} start` : ''
   const isStatic = Boolean(deps.vite || deps['react-scripts']) && !scripts.start
@@ -102,14 +104,16 @@ async function ensureDockerfile(workdir, logs) {
   if (!build) throw new Error('Repository has no build script and no Dockerfile')
 
   if (isStatic) {
+    const lock = manager === 'pnpm' ? 'pnpm-lock.yaml' : hasNpmLock ? 'package-lock.json' : 'package.json'
     await fs.writeFile(path.join(workdir, 'velclaw-static-server.mjs'), `import { createServer } from 'node:http'\nimport { createReadStream, existsSync, statSync } from 'node:fs'\nimport { join, extname } from 'node:path'\nconst root = process.env.STATIC_ROOT || '/app/dist'\nconst types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' }\ncreateServer((req, res) => { const raw = decodeURIComponent((req.url || '/').split('?')[0]); const rel = raw === '/' ? '/index.html' : raw; const file = join(root, rel); const target = existsSync(file) && statSync(file).isFile() ? file : join(root, 'index.html'); if (!existsSync(target)) { res.statusCode = 404; res.end('Not found'); return } res.setHeader('Content-Type', types[extname(target)] || 'application/octet-stream'); createReadStream(target).pipe(res) }).listen(Number(process.env.PORT || 3000), '0.0.0.0')\n`)
-    await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${manager === 'pnpm' ? 'pnpm-lock.yaml' : 'package-lock.json'} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nCOPY velclaw-static-server.mjs ./velclaw-static-server.mjs\nENV PORT=3000\nEXPOSE 3000\nCMD ["node", "velclaw-static-server.mjs"]\n`)
+    await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${lock} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nCOPY velclaw-static-server.mjs ./velclaw-static-server.mjs\nENV PORT=3000\nEXPOSE 3000\nCMD ["node", "velclaw-static-server.mjs"]\n`)
     logs.push('Generated Dockerfile for static Node/Vite application')
     return
   }
 
   if (!start) throw new Error('Repository has no start script and no Dockerfile')
-  await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${manager === 'pnpm' ? 'pnpm-lock.yaml' : 'package-lock.json'} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nENV NODE_ENV=production\nENV PORT=3000\nEXPOSE 3000\nCMD ["${manager}", "start"]\n`)
+  const lock = manager === 'pnpm' ? 'pnpm-lock.yaml' : hasNpmLock ? 'package-lock.json' : 'package.json'
+  await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${lock} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nENV NODE_ENV=production\nENV PORT=3000\nEXPOSE 3000\nCMD ["${manager}", "start"]\n`)
   logs.push(`Generated Dockerfile for Node application (${manager})`)
 }
 
@@ -125,6 +129,14 @@ async function detectContainerPort(image, logs) {
   return 3000
 }
 
+async function checkoutRequestedCommit(workdir, job, logs) {
+  if (!job.commitSha) return
+  if (!/^[0-9a-f]{40}$/i.test(job.commitSha)) throw new Error('Invalid commit SHA')
+  await run('git', ['fetch', '--depth', '1', 'origin', job.commitSha], workdir, logs, gitEnv())
+  await run('git', ['checkout', '--detach', job.commitSha], workdir, logs, gitEnv())
+  logs.push(`Checked out requested commit ${job.commitSha}`)
+}
+
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
@@ -133,6 +145,7 @@ async function publish(job) {
   const container = `velclaw-${job.id}`
   try {
     await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
+    await checkoutRequestedCommit(workdir, job, logs)
     await ensureDockerfile(workdir, logs)
     await run('docker', ['build', '--pull', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
     const port = await detectContainerPort(image, logs)
