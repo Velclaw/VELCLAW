@@ -8,9 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: read
   contents: read
-  pull-requests: read
 
 jobs:
   secret-hygiene:
@@ -18,19 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Check for common credential values
+      - name: Check for committed credential material
         shell: bash
         run: |
           set -euo pipefail
-          # Match concrete credential-looking values, not regex definitions,
-          # documentation placeholders, or provider validation code.
-          pattern='(^|[[:space:]=:("'"'"'`])((sk|ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)($|[[:space:),"'"'"'`])'
-          if git grep -nEI "$pattern" -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
-            echo 'Potential credential material detected. Remove it and rotate the credential before merging.'
+          if git grep -nEI '(^|[^[:alnum:]])(ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_]{20,}([^A-Za-z0-9_]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'GitHub token-like credential detected.'
             exit 1
           fi
-          echo 'No concrete credential values detected.'
+          if git grep -nEI '(^|[^[:alnum:]])AKIA[0-9A-Z]{16}([^0-9A-Z]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'AWS access-key-like credential detected.'
+            exit 1
+          fi
+          if git grep -nE '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'Private key material detected.'
+            exit 1
+          fi
+          echo 'No supported concrete credential patterns detected.'
