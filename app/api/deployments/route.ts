@@ -4,6 +4,8 @@ import { createHostingDeployment } from '@/lib/hosting'
 import { listDeployments } from '@/lib/deploy/store'
 
 const REPO_PATTERN = /^https:\/\/(?:github\.com)\/[^/]+\/[^/]+(?:\.git)?$/i
+const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/
+const DOMAIN_PATTERN = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i
 
 export async function GET() {
   const session = await getServerSession()
@@ -27,6 +29,8 @@ export async function POST(request: NextRequest) {
   const projectName =
     typeof input?.projectName === 'string' && input.projectName.trim() ? input.projectName.trim() : 'velclaw-app'
   const commitSha = typeof input?.commitSha === 'string' ? input.commitSha.trim() : null
+  const customDomain = typeof input?.customDomain === 'string' ? input.customDomain.trim().toLowerCase() : null
+  const env = input?.env && typeof input.env === 'object' && !Array.isArray(input.env) ? input.env : null
 
   if (!REPO_PATTERN.test(repoUrl)) {
     return NextResponse.json({ error: 'Only HTTPS GitHub repository URLs are supported' }, { status: 400 })
@@ -37,6 +41,18 @@ export async function POST(request: NextRequest) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/.test(projectName)) {
     return NextResponse.json({ error: 'Invalid project name' }, { status: 400 })
   }
+  if (commitSha && !/^[0-9a-f]{40}$/i.test(commitSha)) {
+    return NextResponse.json({ error: 'Invalid commit SHA' }, { status: 400 })
+  }
+  if (customDomain && !DOMAIN_PATTERN.test(customDomain)) {
+    return NextResponse.json({ error: 'Invalid custom domain' }, { status: 400 })
+  }
+  if (env) {
+    const entries = Object.entries(env)
+    if (entries.length > 100 || entries.some(([key, value]) => !ENV_KEY_PATTERN.test(key) || typeof value !== 'string' || value.length > 8192)) {
+      return NextResponse.json({ error: 'Invalid environment variables' }, { status: 400 })
+    }
+  }
 
   try {
     const deployment = await createHostingDeployment({
@@ -45,6 +61,8 @@ export async function POST(request: NextRequest) {
       repoUrl,
       branch,
       commitSha,
+      env,
+      customDomain,
     })
     return NextResponse.json({ deployment }, { status: 202 })
   } catch (error) {
