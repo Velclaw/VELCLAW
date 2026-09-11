@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { Agent, OpenAIProvider, Runner, run, tool } from '@openai/agents'
+import { Agent, OpenAIProvider, Runner, tool } from '@openai/agents'
 import { z } from 'zod'
 import { getUserApiKey } from '@/lib/api-keys/user-keys'
 
