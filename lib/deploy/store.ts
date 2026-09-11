@@ -5,7 +5,6 @@ import { decrypt, encrypt } from '@/lib/crypto'
 const sql = postgres(process.env.POSTGRES_URL || '', { max: 5 })
 
 export type DeploymentStatus = 'queued' | 'building' | 'ready' | 'failed' | 'cancelled'
-
 export type DeploymentEnv = Record<string, string>
 
 export type Deployment = {
@@ -72,9 +71,7 @@ function normalizeEnv(value?: DeploymentEnv | null) {
 function normalizeDomain(value?: string | null) {
   if (!value?.trim()) return null
   const domain = value.trim().toLowerCase().replace(/\.$/, '')
-  if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain)) {
-    throw new Error('Invalid custom domain')
-  }
+  if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain)) throw new Error('Invalid custom domain')
   return domain
 }
 
@@ -131,7 +128,7 @@ export async function findLatestDeploymentForWebhook(repoUrl: string, branch: st
   const rows = await sql<Deployment[]>`
     SELECT ${publicDeploymentColumns()}
     FROM velclaw_deployments
-    WHERE regexp_replace(regexp_replace(rtrim(repo_url, '/'), '\\.git$', '', 'i'), '/$', '') = ${normalized}
+    WHERE regexp_replace(regexp_replace(rtrim(repo_url, '/'), '[.]git$', '', 'i'), '/$', '') = ${normalized}
       AND branch = ${branch}
     ORDER BY created_at DESC
     LIMIT 1
