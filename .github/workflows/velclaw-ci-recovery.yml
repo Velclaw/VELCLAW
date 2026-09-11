@@ -1,25 +1,56 @@
-name: Velclaw CI Recovery
+name: Velclaw CI Recovery v2
 
 on:
   push:
     branches:
-      - ci/recovery-v1
+      - ci/recovery-v2
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
-  group: velclaw-ci-recovery-${{ github.ref }}
+  group: velclaw-ci-recovery-v2-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  runner-probe-ubuntu:
+    name: Runner probe / Ubuntu 22.04
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Runner started
+        run: |
+          echo "VELCLAW_RUNNER_PROBE=ubuntu-22.04"
+          uname -a
+          node --version
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  runner-probe-windows:
+    name: Runner probe / Windows
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Runner started
+        shell: pwsh
+        run: |
+          Write-Host "VELCLAW_RUNNER_PROBE=windows-latest"
+          $PSVersionTable.PSVersion
+          node --version
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
   quality:
     name: Node 22 / Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
+    needs: runner-probe-ubuntu
 
     steps:
       - name: Checkout
@@ -62,7 +93,7 @@ jobs:
 
   docker:
     name: Docker build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     needs: quality
 
