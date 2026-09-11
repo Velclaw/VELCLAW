@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: Params) {
       }
 
       const previousRows = await tx`
-        SELECT id, commit_sha
+        SELECT id, commit_sha, env_json, custom_domain
         FROM velclaw_deployments
         WHERE user_id = ${current.user_id}
           AND project_name = ${current.project_name}
@@ -52,15 +52,15 @@ export async function POST(request: Request, { params }: Params) {
         LIMIT 1
         FOR UPDATE
       `
-      if (previousRows.length === 0) {
-        return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
-      }
+      if (previousRows.length === 0) return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
 
-      const previous = previousRows[0] as { id: string; commit_sha: string }
+      const previous = previousRows[0] as { id: string; commit_sha: string; env_json: string | null; custom_domain: string | null }
       await tx`
         UPDATE velclaw_deployments
         SET status = 'queued',
             commit_sha = ${previous.commit_sha},
+            env_json = ${previous.env_json},
+            custom_domain = ${previous.custom_domain},
             error = NULL,
             url = NULL,
             logs = logs || ${JSON.stringify([`Rollback queued to deployment ${previous.id} at ${previous.commit_sha}`])}::jsonb,
