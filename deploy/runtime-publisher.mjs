@@ -11,14 +11,11 @@ const PUBLIC_DOMAIN = (process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd').trim(
 const PUBLIC_SCHEME = (process.env.VELCLAW_PUBLIC_SCHEME || 'https').trim().toLowerCase()
 const TRAEFIK_ENTRYPOINT = (process.env.VELCLAW_TRAEFIK_ENTRYPOINT || (PUBLIC_SCHEME === 'http' ? 'web' : 'websecure')).trim()
 const ENABLE_TLS = PUBLIC_SCHEME === 'https'
+const DEPLOY_TOKEN = process.env.VELCLAW_DEPLOY_API_TOKEN || ''
 
-if (!PUBLIC_DOMAIN || /[/:\s]/.test(PUBLIC_DOMAIN)) {
-  throw new Error(`VELCLAW_PUBLIC_DOMAIN must be a hostname, received: ${PUBLIC_DOMAIN}`)
-}
-
-if (!['http', 'https'].includes(PUBLIC_SCHEME)) {
-  throw new Error(`VELCLAW_PUBLIC_SCHEME must be http or https, received: ${PUBLIC_SCHEME}`)
-}
+if (!PUBLIC_DOMAIN || /[/:\s]/.test(PUBLIC_DOMAIN)) throw new Error(`Invalid VELCLAW_PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}`)
+if (!['http', 'https'].includes(PUBLIC_SCHEME)) throw new Error(`Invalid VELCLAW_PUBLIC_SCHEME: ${PUBLIC_SCHEME}`)
+if (!DEPLOY_TOKEN) throw new Error('VELCLAW_DEPLOY_API_TOKEN is required')
 
 async function request(pathname, options = {}) {
   const response = await fetch(`${API}${pathname}`, options)
@@ -40,73 +37,47 @@ async function runCapture(cmd, args, cwd, logs, env = process.env) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
     let stdout = ''
-    let stderr = ''
+    child.stderr.on('data', (chunk) => {
+      const text = chunk.toString()
+      logs.push(text.trimEnd())
+    })
     child.stdout.on('data', (chunk) => {
       stdout += chunk.toString()
     })
-    child.stderr.on('data', (chunk) => {
-      stderr += chunk.toString()
-      logs.push(chunk.toString().trimEnd())
-    })
     child.on('error', reject)
-    child.on('close', (code) => {
-      if (code !== 0) return reject(new Error(`${cmd} exited with code ${code}`))
-      resolve({ stdout: stdout.trim(), stderr: stderr.trim() })
-    })
+    child.on('close', (code) => code === 0 ? resolve({ stdout: stdout.trim() }) : reject(new Error(`${cmd} exited with code ${code}`)))
   })
 }
 
 function gitEnv() {
   const token = process.env.GITHUB_TOKEN || process.env.GITHUB_APP_TOKEN
   if (!token) return process.env
-  return {
-    ...process.env,
-    GIT_CONFIG_COUNT: '1',
-    GIT_CONFIG_KEY_0: 'http.extraheader',
-    GIT_CONFIG_VALUE_0: `AUTHORIZATION: Bearer ${token}`,
-  }
+  return { ...process.env, GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'http.extraheader', GIT_CONFIG_VALUE_0: `AUTHORIZATION: Bearer ${token}` }
 }
 
 function slug(value) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'app'
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'app'
 }
 
 function productHostname(job) {
   const project = slug(job.projectName)
-  const suffix = String(job.id).replace(/[^a-z0-9-]/gi, '').slice(0, 8).toLowerCase()
+  const suffix = String(job.id).replace(/[^a-z0-9]/gi, '').slice(0, 8).toLowerCase()
   const maxProjectLength = Math.max(1, 63 - suffix.length - 2)
   return `${project.slice(0, maxProjectLength).replace(/-+$/g, '')}-${suffix}.${PUBLIC_DOMAIN}`
 }
 
 function traefikLabels(job, hostname, port) {
+  const router = `velclaw-${job.id.replace(/[^a-z0-9]/gi, '').slice(0, 48)}`
   const labels = [
-    '--label',
-    `velclaw.deployment=${job.id}`,
-    '--label',
-    `velclaw.project=${job.projectName}`,
-    '--label',
-    'traefik.enable=true',
-    '--label',
-    `traefik.docker.network=${RUNTIME_NETWORK}`,
-    '--label',
-    'traefik.http.routers.' + job.id + '.rule=Host(`' + hostname + '`)',
-    '--label',
-    `traefik.http.routers.${job.id}.entrypoints=${TRAEFIK_ENTRYPOINT}`,
-    '--label',
-    `traefik.http.services.${job.id}.loadbalancer.server.port=${port}`,
+    '--label', `velclaw.deployment=${job.id}`,
+    '--label', `velclaw.project=${job.projectName}`,
+    '--label', 'traefik.enable=true',
+    '--label', `traefik.docker.network=${RUNTIME_NETWORK}`,
+    '--label', `traefik.http.routers.${router}.rule=Host(\`${hostname}\`)`,
+    '--label', `traefik.http.routers.${router}.entrypoints=${TRAEFIK_ENTRYPOINT}`,
+    '--label', `traefik.http.services.${router}.loadbalancer.server.port=${port}`,
   ]
-  if (ENABLE_TLS) {
-    labels.push(
-      '--label',
-      `traefik.http.routers.${job.id}.tls=true`,
-      '--label',
-      `traefik.http.routers.${job.id}.tls.certresolver=letsencrypt`,
-    )
-  }
+  if (ENABLE_TLS) labels.push('--label', `traefik.http.routers.${router}.tls=true`, '--label', `traefik.http.routers.${router}.tls.certresolver=letsencrypt`)
   return labels
 }
 
@@ -115,12 +86,10 @@ async function detectContainerPort(image, logs) {
   if (result.stdout && result.stdout !== '<no value>') {
     try {
       const exposed = JSON.parse(result.stdout)
-      const port = Object.keys(exposed || {})
-        .map((value) => Number.parseInt(value.split('/')[0], 10))
-        .find((value) => Number.isInteger(value) && value > 0 && value < 65536)
+      const port = Object.keys(exposed || {}).map((value) => Number.parseInt(value.split('/')[0], 10)).find((value) => Number.isInteger(value) && value > 0 && value < 65536)
       if (port) return port
     } catch {
-      logs.push('Docker image exposed-port metadata could not be parsed; using port 3000')
+      logs.push('Could not parse Docker exposed-port metadata; using port 3000')
     }
   }
   return 3000
@@ -129,7 +98,7 @@ async function detectContainerPort(image, logs) {
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
-  const image = `velclaw/${job.projectName}:${job.id}`
+  const image = `velclaw/${slug(job.projectName)}:${job.id}`
   const hostname = productHostname(job)
   const container = `velclaw-${job.id}`
   try {
@@ -141,43 +110,11 @@ async function publish(job) {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
     })
     await run('docker', ['rm', '--force', container], process.cwd(), logs).catch(() => {})
-    await run(
-      'docker',
-      [
-        'run',
-        '--detach',
-        '--restart',
-        'unless-stopped',
-        '--network',
-        RUNTIME_NETWORK,
-        '--memory',
-        '768m',
-        '--cpus',
-        '1.0',
-        '--pids-limit',
-        '256',
-        '--security-opt',
-        'no-new-privileges:true',
-        ...traefikLabels(job, hostname, port),
-        '--name',
-        container,
-        image,
-      ],
-      process.cwd(),
-      logs,
-    )
-    await request(`/api/deployments/${job.id}/runtime`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
-      body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs }),
-    })
+    await run('docker', ['run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK, '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--security-opt', 'no-new-privileges:true', ...traefikLabels(job, hostname, port), '--name', container, image], process.cwd(), logs)
+    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs: logs.slice(-500) }) })
   } catch (error) {
     logs.push(`ERROR: ${error instanceof Error ? error.message : String(error)}`)
-    await request(`/api/deployments/${job.id}/runtime`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` },
-      body: JSON.stringify({ status: 'failed', logs, error: error instanceof Error ? error.message : String(error) }),
-    }).catch(() => {})
+    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'failed', logs: logs.slice(-500), error: error instanceof Error ? error.message : String(error) }) }).catch(() => {})
   } finally {
     await fs.rm(workdir, { recursive: true, force: true })
   }
@@ -187,7 +124,7 @@ async function main() {
   console.log(`Velclaw runtime publisher listening on ${API}; public runtime: ${PUBLIC_SCHEME}://${PUBLIC_DOMAIN}`)
   while (true) {
     try {
-      const { deployment } = await request('/api/deployments/claim', { method: 'POST', headers: { authorization: `Bearer ${process.env.VELCLAW_DEPLOY_API_TOKEN || ''}` } })
+      const { deployment } = await request('/api/deployments/claim', { method: 'POST', headers: { authorization: `Bearer ${DEPLOY_TOKEN}` } })
       if (deployment) await publish(deployment)
     } catch (error) {
       console.error(`[publisher] ${error instanceof Error ? error.message : String(error)}`)
