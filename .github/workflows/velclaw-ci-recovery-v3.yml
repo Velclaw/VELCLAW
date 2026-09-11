@@ -17,10 +17,35 @@ permissions:
   contents: read
 
 jobs:
+  probe-self-hosted:
+    name: Probe / Velclaw Termux ARM64
+    runs-on:
+      - self-hosted
+      - linux
+      - ARM64
+      - velclaw-termux
+    timeout-minutes: 10
+    steps:
+      - name: Start
+        run: |
+          echo "runner=velclaw-termux-localhost"
+          echo "arch=$(uname -m)"
+          echo "kernel=$(uname -sr)"
+          whoami
+          node --version
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Runner environment
+        run: |
+          echo "HOME=$HOME"
+          pwd
+          git --version
+
   probe-slim:
     name: Probe / Ubuntu Slim
     runs-on: ubuntu-slim
     timeout-minutes: 5
+    continue-on-error: true
     steps:
       - name: Start
         run: |
@@ -34,6 +59,7 @@ jobs:
     name: Probe / Ubuntu ARM64
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
+    continue-on-error: true
     steps:
       - name: Start
         run: |
@@ -47,6 +73,7 @@ jobs:
     name: Probe / Windows
     runs-on: windows-latest
     timeout-minutes: 5
+    continue-on-error: true
     steps:
       - name: Start
         shell: pwsh
@@ -56,6 +83,45 @@ jobs:
           node --version
       - name: Checkout
         uses: actions/checkout@v4
+
+  quality-self-hosted:
+    name: Quality / Velclaw Termux ARM64
+    runs-on:
+      - self-hosted
+      - linux
+      - ARM64
+      - velclaw-termux
+    timeout-minutes: 30
+    needs: probe-self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Toolchain
+        run: |
+          node --version
+          pnpm --version
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Type check
+        run: pnpm type-check
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
 
   quality-slim:
     name: Quality / Ubuntu Slim
