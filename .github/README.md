@@ -1,185 +1,238 @@
-# Git Credential Manager
+<div align="center">
 
-[![Build Status][build-status-badge]][workflow-status]
+<a href="https://github.com/Velclaw/Velclaw"><img src="assets/velclaw-intro.gif" alt="Velclaw" width="620"></a>
+
+# Velclaw
+
+**AI-native software workspace for agents, developers, and teams.**
+
+Build, inspect, test, deploy, and operate software from one developer-focused workspace.
+
+<p>
+<a href="https://github.com/Velclaw/Velclaw"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVelclaw-111827?style=flat-square&logo=github&logoColor=white"></a>
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-Framework-111827?style=flat-square&logo=nextdotjs&logoColor=white"></a>
+<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Code-3178C6?style=flat-square&logo=typescript&logoColor=white"></a>
+<a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=nodedotjs&logoColor=white"></a>
+</p>
+
+<p><a href="#quick-start">Get started</a> · <a href="#architecture">Architecture</a> · <a href="#capabilities">Capabilities</a> · <a href="#technology-ecosystem">Ecosystem</a> · <a href="#development">Development</a></p>
+
+</div>
 
 ---
 
-[Git Credential Manager][gcm] (GCM) is a secure
-[Git credential helper][git-credential-helper] built on [.NET][dotnet] that runs
-on Windows, macOS, and Linux. It aims to provide a consistent and secure
-authentication experience, including multi-factor auth, to every major source
-control hosting service and platform.
+<div align="center"><img src="assets/velclaw_footer_restored.png" alt="Velclaw animated introduction" width="900"></div>
 
-GCM supports (in alphabetical order) [Azure DevOps][azure-devops], Azure DevOps
-Server (formerly Team Foundation Server), Bitbucket, GitHub, and GitLab.
-Compare to Git's [built-in credential helpers][git-tools-credential-storage]
-(Windows: wincred, macOS: osxkeychain, Linux: gnome-keyring/libsecret), which
-provide single-factor authentication support for username/password only.
+## What is Velclaw?
 
-GCM replaces both the .NET Framework-based
-[Git Credential Manager for Windows][gcm-for-windows] and the Java-based
-[Git Credential Manager for Mac and Linux][gcm-for-mac-and-linux].
+Velclaw is an AI-native software workspace focused on the full software lifecycle: **agents, code, projects, builds, runtime, storage, services, review, and deployment**.
 
-## Install
+The goal is to give coding agents and developers one coherent environment instead of forcing every workflow through disconnected tools.
 
-See the [installation instructions][install] for the current version of GCM for
-install options for your operating system.
+> **Build software. Give agents context. Keep the workflow together.**
 
-## Current status
+## Architecture
 
-Git Credential Manager is currently available for Windows, macOS, and Linux and
-works with HTTP(S) remotes.
+```text
+                         ┌─────────────────────────┐
+                         │       AI AGENTS         │
+                         │ models · tools · tasks  │
+                         └────────────┬────────────┘
+                                      │
+                                      ▼
+┌──────────────────┐       ┌─────────────────────────┐       ┌──────────────────┐
+│ Projects & Files │ ◄──── │    VELCLAW WORKSPACE    │ ────► │ Build & Runtime  │
+│ code · context   │       │ projects · code · state │       │ build · execute  │
+└──────────────────┘       └────────────┬────────────┘       └──────────────────┘
+                                        │
+                         ┌──────────────┼──────────────┐
+                         ▼              ▼              ▼
+                    ┌─────────┐   ┌──────────┐   ┌─────────────┐
+                    │ Storage │   │ GitHub   │   │ Deployment  │
+                    │ data    │   │ review   │   │ delivery    │
+                    └─────────┘   └──────────┘   └─────────────┘
+```
 
-You can still use Git with SSH - see the specific documentation for your host on
-how to set up SSH: [Azure DevOps][azure-devops-ssh], [GitHub][github-ssh],
-[Bitbucket][bitbucket-ssh]
+## Capabilities
 
-Feature|Windows|macOS|Linux
--|:-:|:-:|:-:
-Installer/uninstaller|&#10003;|&#10003;|&#10003;
-Secure platform credential storage [(see more)][gcm-credstores]|&#10003;|&#10003;|&#10003;
-Entra authentication with broker support|[opt-in][gcm-windows-broker]|&#10007;|&#10007;
-Azure DevOps authentication|&#10003;|&#10003;|&#10003;
-GitHub & GHES authentication|&#10003;|&#10003;|&#10003;
-Bitbucket Cloud & DC authentication|&#10003;|&#10003;|&#10003;
-GitLab authentication|&#10003;|&#10003;|&#10003;
-Windows Integrated Authentication (NTLM/Kerberos)|&#10003;|_N/A_|_N/A_
-Generic OAuth authentication|&#10003;|&#10003;|&#10003;
-Basic HTTP authentication|&#10003;|&#10003;|&#10003;
-Network proxies|&#10003;|&#10003;|&#10003;
-`amd64` support|&#10003;|&#10003;|&#10003;
-`x86` support|&#10003;|_N/A_|&#10007;
-`arm64` support|best effort|&#10003;|&#10003;
-`armhf` support|_N/A_|_N/A_|&#10003;
+| Area | Purpose |
+| --- | --- |
+| **AI Agents** | Agent-driven development workflows and tool execution |
+| **Workspace** | Projects, files, code, persistent context and state |
+| **Build** | Build, validate and package software |
+| **Runtime** | Execute workloads and development processes |
+| **Storage** | Persist application data and files |
+| **GitHub** | Repository integration, code review and delivery workflows |
+| **Deployment** | Move validated software toward production |
+| **Developer UI** | A single workspace for the software lifecycle |
 
-## Supported Environments
+## Product URLs
 
-We aim to support the broadest set of operating systems and distributions,
-within reason. We aim to target and update to the latest current .NET LTS
-version as they become generally available.
+The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
 
-### Windows
+| Product surface | Canonical URL |
+| --- | --- |
+| Velclaw | `https://velclaw.cfd/` |
+| Velclaw Docs | `https://velclaw.cfd/docs` |
+| VelclawHub | `https://velclaw.cfd/velclawhub` |
+| VelclawHub Ecosystem | `https://velclaw.cfd/hub` |
+| Velclaw Deploy | `https://velclaw.cfd/deploy` |
+| Velclaw Skills | `https://velclaw.cfd/skills` |
+| Velclaw Plugins | `https://velclaw.cfd/plugins` |
+| Velclaw MCP | `https://velclaw.cfd/mcp` |
+| Velclaw Tasks | `https://velclaw.cfd/tasks` |
+| Velclaw Dashboard | `https://velclaw.cfd/velclaw` |
+| Velclaw Repo | `https://velclaw.cfd/repos/new` |
+| Velclaw API Keys | `https://velclaw.cfd/api-keys` |
 
-GCM supports Windows 10 and later, including Windows Server 2016 and later.
-This is the same [support matrix][dotnet-os-support] as the .NET runtime on
-Windows.
+Infrastructure-generated hostnames are not product URLs.
 
-#### Windows Subsystem for Linux (WSL)
+## Technology stack
 
-See detailed WSL information [here][gcm-wsl].
+<p align="center">
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-111827?style=for-the-badge&logo=nextdotjs&logoColor=white"></a>
+<a href="https://react.dev/"><img src="https://img.shields.io/badge/React-111827?style=for-the-badge&logo=react&logoColor=61DAFB"></a>
+<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-111827?style=for-the-badge&logo=typescript&logoColor=3178C6"></a>
+<a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-111827?style=for-the-badge&logo=nodedotjs&logoColor=339933"></a>
+<a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-111827?style=for-the-badge&logo=tailwindcss&logoColor=06B6D4"></a>
+<a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-111827?style=for-the-badge&logo=postgresql&logoColor=4169E1"></a>
+</p>
 
-#### Windows 7 and Windows 8.x
+## Quick start
 
-As of GCM version 3.x, Windows 7 and Windows 8.x are no longer supported.
-We continue to provide minimal, security-only support for GCM 2.9.x on Windows 7
-and Windows 8.x, but we recommend upgrading to a supported version of Windows.
+```bash
+git clone https://github.com/Velclaw/Velclaw.git
+cd Velclaw
+npm install
+npm run dev
+```
 
-The [`maint-v2`][maint-v2] and [`releases/v2`][releases-v2] branches are
-maintained to allow for security patches and releases for GCM v2.x for Windows 7
-and Windows 8.x only. These branches will **not** receive new features.
+Open `http://localhost:3000`.
 
-### macOS
+Validation:
 
-GCM supports macOS 14 and later.
-This is the same [support matrix][dotnet-os-support] as the .NET runtime on
-macOS.
+```bash
+npm run type-check
+npm run build
+```
 
-### Linux
+## Project structure
 
-GCM provides support only for [the Linux distributions that are officially
-supported by dotnet][dotnet-os-support].
+```text
+Velclaw/
+├── app/                 # Next.js application routes
+├── components/          # UI and workspace components
+├── lib/                 # application services and integrations
+├── public/              # public assets
+├── server/              # server-side runtime pieces
+├── drizzle/             # database schema/migrations
+├── .github/             # CI and automation
+└── README.md
+```
 
-### Git compatibility
+## GitHub workflow
 
-Git Credential Manager tries to be compatible with the broadest set of Git
-versions (within reason). However there are some known problematic releases of
-Git that are not compatible.
+```text
+Issue / Task
+     │
+     ▼
+Agent + Developer
+     │
+     ▼
+Workspace → Code → Build → Typecheck
+     │
+     ▼
+GitHub branch
+     │
+     ▼
+Pull Request → Review → Merge
+     │
+     ▼
+Deployment
+```
 
-- Git 1.x
+## Technology ecosystem
 
-  The initial major version of Git is not supported or tested with GCM.
+These are **open-source ecosystem references, tooling, inspiration, or attribution links**. They are not presented as sponsors unless a separate sponsorship relationship is formally established.
 
-- Git 2.26.2
+### Core ecosystem
 
-  This version of Git introduced a breaking change with parsing credential
-  configuration that GCM relies on. This issue was fixed in commit
-  [`12294990`][gcm-commit-12294990] of the Git project, and released in Git
-  2.27.0.
+- [Vercel](https://github.com/vercel/vercel)
+- [Next.js](https://github.com/vercel/next.js)
+- [tsx](https://github.com/privatenumber/tsx)
+- [Tenderdash](https://github.com/dashpay/tenderdash)
+- [Dash Platform](https://github.com/dashpay/platform)
 
-## How to use
+### Icons, assets and developer tooling
 
-Once it's installed and configured, Git Credential Manager is called implicitly
-by Git. You don't have to do anything special, and GCM isn't intended to be
-called directly by the user. For example, when pushing (`git push`) to
-[Azure DevOps][azure-devops], [Bitbucket][bitbucket], or [GitHub][github], a
-window will automatically open and walk you through the sign-in process.
+- [Simple Icons](https://github.com/simple-icons/simple-icons)
+- [VectorLogoZone](https://github.com/VectorLogoZone/vectorlogozone)
+- [thesvg](https://github.com/glincker/thesvg)
+- [developer-icons](https://github.com/zskbot/developer-icons)
+- [vscode-icons-svg](https://github.com/giovanigenerali/vscode-icons-svg)
+- [profile-readme-generator](https://github.com/maurodesouza/profile-readme-generator)
+- [GitAscii](https://github.com/Igorcbraz/GitAscii)
+- [GitHub Profile README Generator](https://rahuldkjain.github.io/gh-profile-readme-generator/)
 
-This process will look slightly different for each Git host, and even in some
-cases, whether you've connected to an on-premises or cloud-hosted Git host.
-Later Git commands in the same repository will re-use existing credentials or
-tokens that GCM has stored for as long as they're valid.
+## Credits and attribution
 
-Read full command line usage [here][gcm-usage].
+Velclaw references open-source software and community tooling. Each external project remains the property of its respective authors and maintainers; applicable licenses and attribution requirements should be preserved.
 
-### Configuring a proxy
+## Documentation
 
-See detailed information [here][gcm-http-proxy].
-
-## Additional Resources
-
-See the [documentation index][docs-index] for links to additional resources.
-
-## Experimental Features
-
-- (None at this time)
-
-## Future features
-
-Curious about what's coming next in the GCM project? Take a look at the [project
-roadmap][roadmap]! You can find more details about the construction of the
-roadmap and how to interpret it [here][roadmap-announcement].
+- [Velclaw repository](https://github.com/Velclaw/Velclaw)
+- [Issues](https://github.com/Velclaw/Velclaw/issues)
+- [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
+- Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
 
-This project welcomes contributions and suggestions.
-See the [contributing guide][gcm-contributing] to get started.
+1. Create a branch.
+2. Make the smallest coherent change.
+3. Run typecheck/build where applicable.
+4. Open a pull request.
+5. Address review feedback.
+6. Merge after required checks pass.
 
-This project follows [GitHub's Open Source Code of Conduct][gcm-coc].
+## Security
+
+Do not commit credentials, API keys, OAuth secrets, database URLs or private deployment tokens.
+
+## Roadmap
+
+The roadmap should reflect shipped work rather than fictional dates or commitments.
+
+- [x] Core workspace
+- [x] GitHub integration foundation
+- [x] Build/runtime workflow foundation
+- [ ] Expand agent workflows
+- [ ] Expand deployment automation
+- [ ] Production-grade observability
+- [ ] Broader ecosystem integrations
 
 ## License
 
-We're [MIT][gcm-license] licensed.
-When using GitHub logos, please be sure to follow the
-[GitHub logo guidelines][github-logos].
+The current project configuration identifies Velclaw as private software. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
 
-[azure-devops]: https://azure.microsoft.com/en-us/products/devops
-[azure-devops-ssh]: https://docs.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate?view=azure-devops
-[bitbucket]: https://bitbucket.org
-[bitbucket-ssh]: https://confluence.atlassian.com/bitbucket/ssh-keys-935365775.html
-[build-status-badge]: https://github.com/git-ecosystem/git-credential-manager/actions/workflows/continuous-integration.yml/badge.svg
-[docs-index]: docs/README.md
-[dotnet]: https://dotnet.microsoft.com
-[dotnet-os-support]: https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md
-[git-credential-helper]: https://git-scm.com/docs/gitcredentials
-[gcm]: https://github.com/git-ecosystem/git-credential-manager
-[gcm-coc]: CODE_OF_CONDUCT.md
-[gcm-commit-12294990]: https://github.com/git/git/commit/12294990c90e043862be9eb7eb22c3784b526340
-[gcm-contributing]: CONTRIBUTING.md
-[gcm-credstores]: docs/credstores.md
-[gcm-for-mac-and-linux]: https://github.com/microsoft/Git-Credential-Manager-for-Mac-and-Linux
-[gcm-for-windows]: https://github.com/microsoft/Git-Credential-Manager-for-Windows
-[gcm-http-proxy]: docs/netconfig.md#http-proxy
-[gcm-license]: LICENSE
-[gcm-usage]: docs/usage.md
-[gcm-wsl]: docs/wsl.md
-[gcm-windows-broker]: docs/windows-broker.md
-[git-tools-credential-storage]: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
-[github]: https://github.com
-[github-ssh]: https://help.github.com/en/articles/connecting-to-github-with-ssh
-[github-logos]: https://github.com/logos
-[install]: docs/install.md
-[maint-v2]: https://github.com/git-ecosystem/git-credential-manager/tree/maint-v2
-[releases-v2]: https://github.com/git-ecosystem/git-credential-manager/tree/releases/v2
-[roadmap]: https://github.com/git-ecosystem/git-credential-manager/milestones?direction=desc&sort=due_date&state=open
-[roadmap-announcement]: https://github.com/git-ecosystem/git-credential-manager/discussions/1203
-[workflow-status]: https://github.com/git-ecosystem/git-credential-manager/actions/workflows/continuous-integration.yml
+## Visual identity
+
+<div align="center">
+
+<img src="./assets/velclaw-terminal.gif" alt="Velclaw product introduction" width="760" />
+
+<br />
+
+<img src="./assets/velclaw_restored.png" alt="Velclaw mark" width="96" />
+
+</div>
+
+The repository includes the official Velclaw mark and a lightweight product-introduction GIF so the project identity remains visible throughout the README rather than only in the hero.
+
+---
+
+<div align="center">
+
+<img src="./assets/velclaw-wordmark.svg" alt="Velclaw" width="56" />
+
+**Velclaw**  
+*Code. Innovate. Elevate.*
