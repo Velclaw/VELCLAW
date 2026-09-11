@@ -16,6 +16,13 @@ function clean(value: unknown, max: number) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
 }
 
+function validateWorkspace(files: BuilderWorkspaceFile[]) {
+  if (files.length > 150) throw new Error('workspace contains too many files')
+  const totalBytes = files.reduce((sum, file) => sum + Buffer.byteLength(file.content, 'utf8'), 0)
+  if (totalBytes > 2_000_000) throw new Error('workspace exceeds the 2 MB agent context limit')
+  if (files.some((file) => !SAFE_PATH.test(file.path))) throw new Error('workspace contains an unsafe path')
+}
+
 function workspaceContext(files: BuilderWorkspaceFile[]) {
   return files
     .slice(0, 150)
@@ -34,10 +41,7 @@ export async function runBuilderAgent(input: {
 
   const prompt = clean(input.prompt, 12_000)
   if (!prompt) throw new Error('prompt is required')
-  if (input.files.length > 150) throw new Error('workspace contains too many files')
-  const totalBytes = input.files.reduce((sum, file) => sum + Buffer.byteLength(file.content, 'utf8'), 0)
-  if (totalBytes > 2_000_000) throw new Error('workspace exceeds the 2 MB agent context limit')
-  if (input.files.some((file) => !SAFE_PATH.test(file.path))) throw new Error('workspace contains an unsafe path')
+  validateWorkspace(input.files)
 
   const model = clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
   const context = workspaceContext(input.files)
@@ -81,5 +85,46 @@ export async function runBuilderAgent(input: {
     return { role: input.role, model, output: result.finalOutput, changes: collectedChanges }
   } finally {
     await provider.close().catch(() => undefined)
+  }
+}
+
+export async function runBuilderWorkflow(input: {
+  prompt: string
+  files: BuilderWorkspaceFile[]
+  model?: string
+}) {
+  let workspace = input.files.map((file) => ({ ...file }))
+  validateWorkspace(workspace)
+  const steps: Array<{ role: 'coder' | 'tester' | 'reviewer'; output: string }> = []
+
+  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, model: input.model })
+  steps.push({ role: 'coder', output: coder.output })
+  if (coder.changes.length) {
+    const map = new Map(workspace.map((file) => [file.path, file.content]))
+    for (const change of coder.changes) map.set(change.path, change.content)
+    workspace = Array.from(map, ([path, content]) => ({ path, content }))
+  }
+
+  const tester = await runBuilderAgent({
+    role: 'tester',
+    prompt: `Verify the implementation for this request: ${input.prompt}. Produce exact browser-terminal commands for install, type-check, test and build. Do not claim execution.`,
+    files: workspace,
+    model: input.model,
+  })
+  steps.push({ role: 'tester', output: tester.output })
+
+  const reviewer = await runBuilderAgent({
+    role: 'reviewer',
+    prompt: `Review the implementation for this request: ${input.prompt}. Focus on correctness, security, accessibility, runtime failures and deployment readiness.`,
+    files: workspace,
+    model: input.model,
+  })
+  steps.push({ role: 'reviewer', output: reviewer.output })
+
+  return {
+    model: clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna',
+    output: steps.map((step) => `[${step.role}]\n${step.output}`).join('\n\n'),
+    changes: workspace.filter((file) => !input.files.some((original) => original.path === file.path && original.content === file.content)),
+    steps,
   }
 }
