@@ -41,6 +41,14 @@ if ! command -v gh >/dev/null 2>&1; then
   apt-get install -y gh
 fi
 
+# Reuse an authentication session that was created inside Ubuntu.
+# The Android host and Ubuntu PRoot userland have separate HOME/config trees,
+# so host-side gh auth cannot be assumed to exist inside Ubuntu.
+if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  GH_TOKEN="$(gh auth token)"
+  export GH_TOKEN
+fi
+
 if [ -z "${GH_TOKEN:-}" ]; then
   echo
   echo "GitHub CLI authentication is required once inside Ubuntu."
