@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { createDeployment, findLatestDeploymentForWebhook } from '@/lib/deploy/store'
+import { claimGithubWebhookDelivery, createDeployment, findLatestDeploymentForWebhook } from '@/lib/deploy/store'
 
 const WEBHOOK_SECRET_ENV = 'GITHUB_WEBHOOK_SECRET'
 
@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
   if (!secret) return NextResponse.json({ error: 'Webhook endpoint is not configured' }, { status: 503 })
 
   const signature = request.headers.get('x-hub-signature-256')
-  const deliveryId = request.headers.get('x-github-delivery')
-  const event = request.headers.get('x-github-event')
+  const deliveryId = request.headers.get('x-github-delivery') || ''
+  const event = request.headers.get('x-github-event') || 'unknown'
   if (!signature) return NextResponse.json({ error: 'Missing X-Hub-Signature-256' }, { status: 401 })
 
   const payload = await request.text()
@@ -31,23 +31,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
-  if (event === 'ping') return NextResponse.json({ ok: true, verified: true, event, deliveryId })
-  if (event !== 'push') return NextResponse.json({ ok: true, verified: true, ignored: event || 'unknown', deliveryId })
-
-  const data = body as {
-    deleted?: boolean
-    ref?: string
-    after?: string
-    repository?: { clone_url?: string; html_url?: string; name?: string }
-  }
-  if (data.deleted || !data.ref?.startsWith('refs/heads/')) return NextResponse.json({ ok: true, verified: true, ignored: 'non-branch-push', deliveryId })
-
-  const repoUrl = data.repository?.clone_url || data.repository?.html_url || ''
-  const branch = data.ref.slice('refs/heads/'.length)
-  const commitSha = data.after || ''
-  if (!repoUrl || !branch || !commitSha || /^0+$/.test(commitSha)) return NextResponse.json({ ok: true, verified: true, ignored: 'invalid-push-payload', deliveryId })
-
   try {
+    if (deliveryId && !(await claimGithubWebhookDelivery(deliveryId, event))) {
+      return NextResponse.json({ ok: true, verified: true, duplicate: true, event, deliveryId })
+    }
+
+    if (event === 'ping') return NextResponse.json({ ok: true, verified: true, event, deliveryId })
+    if (event !== 'push') return NextResponse.json({ ok: true, verified: true, ignored: event, deliveryId })
+
+    const data = body as {
+      deleted?: boolean
+      ref?: string
+      after?: string
+      repository?: { clone_url?: string; html_url?: string; name?: string }
+    }
+    if (data.deleted || !data.ref?.startsWith('refs/heads/')) return NextResponse.json({ ok: true, verified: true, ignored: 'non-branch-push', deliveryId })
+
+    const repoUrl = data.repository?.clone_url || data.repository?.html_url || ''
+    const branch = data.ref.slice('refs/heads/'.length)
+    const commitSha = data.after || ''
+    if (!repoUrl || !branch || !commitSha || /^0+$/.test(commitSha)) return NextResponse.json({ ok: true, verified: true, ignored: 'invalid-push-payload', deliveryId })
+
     const existing = await findLatestDeploymentForWebhook(repoUrl, branch)
     if (!existing) return NextResponse.json({ ok: true, verified: true, ignored: 'repository-not-configured', deliveryId })
 
@@ -57,6 +61,8 @@ export async function POST(request: NextRequest) {
       repoUrl: existing.repoUrl,
       branch,
       commitSha,
+      env: null,
+      customDomain: existing.customDomain,
     })
     return NextResponse.json({ ok: true, verified: true, event, deliveryId, deployment }, { status: 202 })
   } catch (error) {
