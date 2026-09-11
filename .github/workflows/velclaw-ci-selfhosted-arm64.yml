@@ -1,0 +1,80 @@
+name: Velclaw CI Self-Hosted ARM64
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_dockerless_validation:
+        description: Run Dockerfile static/build validation without a Docker daemon
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality / Self-Hosted ARM64
+    runs-on: [self-hosted, linux, ARM64, velclaw-termux]
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          uname -a
+          node --version || true
+          npm --version || true
+          git --version
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
+  dockerfile:
+    name: Dockerfile / Self-Hosted ARM64
+    runs-on: [self-hosted, linux, ARM64, velclaw-termux]
+    timeout-minutes: 30
+    needs: quality
+    if: ${{ inputs.run_dockerless_validation == true }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dockerfile presence and syntax inputs
+        run: |
+          test -f Dockerfile
+          grep -q '^EXPOSE 3000' Dockerfile
+          grep -q 'USER velclaw' Dockerfile
+          grep -q 'CMD \["pnpm", "start"\]' Dockerfile
+          echo "Dockerfile contract checks passed."
+          echo "A real docker build remains a separate capability because Android/Termux does not provide a Docker daemon."
