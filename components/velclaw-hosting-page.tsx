@@ -23,6 +23,13 @@ const exampleProjects = [
   { name: 'Velclaw Docs', repo: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', host: 'docs.velclaw.cfd' },
 ]
 
+const platformStats = [
+  ['Platform', 'Velclaw Hosting', Cloud],
+  ['Runtime', 'Docker', Container],
+  ['Routing', '*.velclaw.cfd', Globe2],
+  ['Source', 'GitHub', Github],
+] as const
+
 function statusLabel(status: string) {
   return status.replaceAll('_', ' ')
 }
@@ -112,17 +119,12 @@ export function VelclawHostingPage() {
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            ['Platform', 'Velclaw Hosting', Cloud],
-            ['Runtime', 'Docker', Container],
-            ['Routing', '*.velclaw.cfd', Globe2],
-            ['Source', 'GitHub', Github],
-          ].map(([label, value, Icon]) => (
-            <div key={label as string} className="border border-border bg-card p-4">
+          {platformStats.map(([label, value, Icon]) => (
+            <div key={label} className="border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Icon className="h-4 w-4 text-violet-300" /> {label}
               </div>
-              <p className="mt-3 font-mono text-sm">{value as string}</p>
+              <p className="mt-3 font-mono text-sm">{value}</p>
             </div>
           ))}
         </section>
