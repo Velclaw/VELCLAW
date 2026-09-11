@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/session/get-server-session'
-import { runBuilderAgent, type BuilderWorkspaceFile } from '@/lib/builder/agent'
+import { runBuilderAgent, runBuilderWorkflow, type BuilderWorkspaceFile } from '@/lib/builder/agent'
 
 const roles = new Set(['coder', 'reviewer', 'tester', 'deployer'])
 
@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
   const role = typeof input?.role === 'string' ? input.role : 'coder'
   const prompt = typeof input?.prompt === 'string' ? input.prompt : ''
   const model = typeof input?.model === 'string' ? input.model : undefined
+  const auto = input?.auto !== false
   const files = Array.isArray(input?.files) ? input.files : []
 
   if (!roles.has(role)) return NextResponse.json({ error: 'Invalid agent role' }, { status: 400 })
@@ -21,6 +22,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    if (role === 'coder' && auto) {
+      return NextResponse.json(await runBuilderWorkflow({ prompt, model, files: files as BuilderWorkspaceFile[] }))
+    }
+
     const result = await runBuilderAgent({ role: role as 'coder' | 'reviewer' | 'tester' | 'deployer', prompt, model, files: files as BuilderWorkspaceFile[] })
     return NextResponse.json(result)
   } catch (error) {
