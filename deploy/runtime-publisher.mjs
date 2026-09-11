@@ -35,6 +35,27 @@ async function run(cmd, args, cwd, logs, env = process.env) {
   if (code !== 0) throw new Error(`${cmd} exited with code ${code}`)
 }
 
+async function runCapture(cmd, args, cwd, logs, env = process.env) {
+  logs.push(`$ ${cmd} ${args.join(' ')}`)
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString()
+    })
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString()
+      logs.push(chunk.toString().trimEnd())
+    })
+    child.on('error', reject)
+    child.on('close', (code) => {
+      if (code !== 0) return reject(new Error(`${cmd} exited with code ${code}`))
+      resolve({ stdout: stdout.trim(), stderr: stderr.trim() })
+    })
+  })
+}
+
 function gitEnv() {
   const token = process.env.GITHUB_TOKEN || process.env.GITHUB_APP_TOKEN
   if (!token) return process.env
@@ -46,18 +67,22 @@ function gitEnv() {
   }
 }
 
-function productHostname(branchName) {
-  const slug = branchName
+function slug(value) {
+  return value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'main'
-  const available = 63 - 'velclaw-git-'.length - '-velclaw'.length
-  const bounded = slug.slice(0, available).replace(/-+$/g, '') || 'main'
-  return `velclaw-git-${bounded}-velclaw.${PUBLIC_DOMAIN}`
+    .replace(/^-+|-+$/g, '') || 'app'
 }
 
-function traefikLabels(job, hostname) {
+function productHostname(job) {
+  const project = slug(job.projectName)
+  const suffix = String(job.id).replace(/[^a-z0-9-]/gi, '').slice(0, 8).toLowerCase()
+  const maxProjectLength = Math.max(1, 63 - suffix.length - 2)
+  return `${project.slice(0, maxProjectLength).replace(/-+$/g, '')}-${suffix}.${PUBLIC_DOMAIN}`
+}
+
+function traefikLabels(job, hostname, port) {
   const labels = [
     '--label',
     `velclaw.deployment=${job.id}`,
@@ -72,7 +97,7 @@ function traefikLabels(job, hostname) {
     '--label',
     `traefik.http.routers.${job.id}.entrypoints=${TRAEFIK_ENTRYPOINT}`,
     '--label',
-    `traefik.http.services.${job.id}.loadbalancer.server.port=3000`,
+    `traefik.http.services.${job.id}.loadbalancer.server.port=${port}`,
   ]
   if (ENABLE_TLS) {
     labels.push(
@@ -85,15 +110,33 @@ function traefikLabels(job, hostname) {
   return labels
 }
 
+async function detectContainerPort(image, logs) {
+  const result = await runCapture('docker', ['image', 'inspect', image, '--format', '{{json .Config.ExposedPorts}}'], process.cwd(), logs)
+  if (result.stdout && result.stdout !== '<no value>') {
+    try {
+      const exposed = JSON.parse(result.stdout)
+      const port = Object.keys(exposed || {})
+        .map((value) => Number.parseInt(value.split('/')[0], 10))
+        .find((value) => Number.isInteger(value) && value > 0 && value < 65536)
+      if (port) return port
+    } catch {
+      logs.push('Docker image exposed-port metadata could not be parsed; using port 3000')
+    }
+  }
+  return 3000
+}
+
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${job.projectName}:${job.id}`
-  const hostname = productHostname(job.branch)
+  const hostname = productHostname(job)
   const container = `velclaw-${job.id}`
   try {
     await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
-    await run('docker', ['build', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
+    await run('docker', ['build', '--pull', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
+    const port = await detectContainerPort(image, logs)
+    logs.push(`Detected application port: ${port}`)
     await run('docker', ['network', 'inspect', RUNTIME_NETWORK], process.cwd(), logs).catch(async () => {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
     })
@@ -115,7 +158,7 @@ async function publish(job) {
         '256',
         '--security-opt',
         'no-new-privileges:true',
-        ...traefikLabels(job, hostname),
+        ...traefikLabels(job, hostname, port),
         '--name',
         container,
         image,
