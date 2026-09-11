@@ -1,0 +1,59 @@
+name: Velclaw Builder Validation
+
+on:
+  push:
+    branches:
+      - feat/browser-builder
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: velclaw-builder-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Builder / Velclaw ARM64 Runner
+    runs-on:
+      - self-hosted
+      - linux
+      - ARM64
+      - velclaw-termux
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Setup pnpm
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.15.1 --activate
+      - name: Toolchain
+        run: |
+          node --version
+          pnpm --version
+          uname -a
+          node -p "process.arch"
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Type check
+        run: pnpm type-check
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+      - name: Builder dependency verification
+        run: node -e "const p=require('./package.json'); if(p.dependencies['@webcontainer/api']!=='1.6.4') process.exit(1); console.log('WebContainer API:', p.dependencies['@webcontainer/api'])"
