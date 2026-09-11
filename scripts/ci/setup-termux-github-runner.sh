@@ -34,16 +34,20 @@ proot-distro login ubuntu -- bash -lc '
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+# PRoot Ubuntu runs as root but may have a reduced root PATH. Keep sbin
+# directories available because ldconfig is provided by libc-bin there.
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
 apt-get update
-apt-get install -y ca-certificates curl git jq unzip tar gzip libicu-dev libssl-dev libkrb5-3 zlib1g libgcc-s1 libstdc++6 libatomic1
+apt-get install -y ca-certificates curl git jq unzip tar gzip libc-bin libicu-dev libssl-dev libkrb5-3 zlib1g libgcc-s1 libstdc++6 libatomic1
 
 if ! command -v gh >/dev/null 2>&1; then
   apt-get install -y gh
 fi
 
-# Termux + PRoot presents Ubuntu as root. GitHub's dependency helper refuses
-# root/sudo execution, so do not invoke it here. Required runtime libraries
-# are installed explicitly above.
+# Reuse an authentication session that was created inside Ubuntu.
+# The Android host and Ubuntu PRoot userland have separate HOME/config trees,
+# so host-side gh auth cannot be assumed to exist inside Ubuntu.
 if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   GH_TOKEN="$(gh auth token)"
   export GH_TOKEN
@@ -59,6 +63,17 @@ if [ -z "${GH_TOKEN:-}" ]; then
   exit 20
 fi
 
+# GitHub runner dependency setup calls ldconfig. In PRoot, verify the real
+# system utility exists before touching the runner. Do not invoke the
+# official installdependencies.sh helper because it intentionally refuses
+# root/sudo execution and is not compatible with this userland.
+if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
+  echo "ldconfig is unavailable after libc-bin installation."
+  exit 22
+fi
+
+ldconfig -p >/dev/null 2>&1 || true
+
 RUNNER_DIR="${VELCLAW_RUNNER_DIR:-$HOME/actions-runner-velclaw}"
 REPO="${VELCLAW_REPO:-Velclaw/Velclaw}"
 RUNNER_VERSION="${VELCLAW_RUNNER_VERSION:-2.337.0}"
@@ -67,18 +82,20 @@ LABELS="self-hosted,linux,ARM64,velclaw-termux"
 
 mkdir -p "$RUNNER_DIR"
 cd "$RUNNER_DIR"
+RUNNER_DIR="$(pwd -P)"
 
-if [ ! -x ./run.sh ]; then
+if [ ! -x ./run.sh ] || [ ! -x ./bin/Runner.Listener ]; then
   ARCHIVE="actions-runner-linux-arm64-${RUNNER_VERSION}.tar.gz"
+  rm -f "$ARCHIVE"
   curl -fL --retry 3 -o "$ARCHIVE" "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/${ARCHIVE}"
   tar -xzf "$ARCHIVE"
   rm -f "$ARCHIVE"
 fi
 
-# Validate the downloaded ARM64 runner without using the unsupported
-# root/sudo dependency installer.
-test -x ./run.sh
-test -x ./bin/Runner.Listener
+# Validate the downloaded ARM64 runner without executing the incompatible
+# dependency installer shipped in the archive.
+test -x "$RUNNER_DIR/run.sh"
+test -x "$RUNNER_DIR/bin/Runner.Listener"
 
 TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
 if [ -z "$TOKEN" ]; then
@@ -86,7 +103,7 @@ if [ -z "$TOKEN" ]; then
   exit 21
 fi
 
-./config.sh \
+"$RUNNER_DIR/config.sh" \
   --unattended \
   --replace \
   --url "https://github.com/${REPO}" \
@@ -95,11 +112,11 @@ fi
   --labels "$LABELS" \
   --work _work
 
-trap './config.sh remove --token "${TOKEN}" || true' EXIT
+trap '"$RUNNER_DIR/config.sh" remove --token "${TOKEN}" || true' EXIT
 
 echo
 echo "Velclaw self-hosted ARM64 runner is ONLINE."
 printf "Name: %s\nLabels: %s\n\n" "$RUNNER_NAME" "$LABELS"
 echo "Keep this process running while GitHub Actions uses the runner."
-exec ./run.sh
+exec "$RUNNER_DIR/run.sh"
 '
