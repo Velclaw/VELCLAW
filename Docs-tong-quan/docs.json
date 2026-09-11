@@ -1,0 +1,142 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "linden",
+  "name": "Velclaw",
+  "colors": {
+    "primary": "#7203c2",
+    "light": "#000000",
+    "dark": "#000000"
+  },
+  "favicon": {
+    "light": "/images/321871232.png",
+    "dark": "/images/321871232.png"
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "groups": [
+          {
+            "group": "Velclaw Documentation",
+            "expanded": true,
+            "pages": [
+              "index",
+              "quickstart",
+              "workspace",
+              "agents",
+              "build-runtime",
+              "github-delivery",
+              "security"
+            ]
+          }
+        ]
+      },
+      {
+        "language": "vi",
+        "groups": [
+          {
+            "group": "Tài liệu Velclaw",
+            "expanded": true,
+            "pages": [
+              "vi/index",
+              "vi/quickstart",
+              "vi/workspace",
+              "vi/agents",
+              "vi/build-runtime",
+              "vi/github-delivery",
+              "vi/security"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Velclaw Docs",
+          "href": "https://docs.velclaw.ai",
+          "icon": "book-open-cover"
+        },
+        {
+          "anchor": "Velclaw",
+          "icon": "house",
+          "href": "https://velclaw.cfd"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/images/321871232.png",
+    "dark": "/images/321871232.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "href": "https://gmail.com/huynhthuong.xyz@gmail.com",
+        "label": "Admin"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://app.mintlify.com"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/velclaw",
+      "github": "https://github.com/velclaw/velclaw",
+      "linkedin": "https://linkedin.com/company/velclaw"
+    }
+  },
+  "background": {
+    "color": {
+      "light": "#000000"
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "api": {
+    "params": {
+      "expanded": "all"
+    },
+    "playground": {
+      "display": "auth",
+      "credentials": true
+    },
+    "examples": {
+      "defaults": "all",
+      "prefill": true,
+      "autogenerate": true
+    },
+    "url": "full",
+    "mdx": {
+      "auth": {
+        "method": "basic"
+      },
+      "server": "https://velclaw.cfd"
+    }
+  },
+  "markdown": {
+    "schema": true
+  },
+  "seo": {
+    "indexing": "all"
+  }
+}

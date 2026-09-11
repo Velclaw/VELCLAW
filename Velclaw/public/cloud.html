@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Velclaw Cloud</title>
+<style>
+body{margin:0;background:#080a0d;color:#edf1f4;font-family:Arial,sans-serif}
+header{height:60px;border-bottom:1px solid #202631;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+main{max-width:1000px;margin:auto;padding:50px 20px}
+h1{font-size:48px;letter-spacing:-.05em}
+button{padding:10px 14px;background:#78BFE8;border:0;font-weight:bold}
+.card{background:#0e1116;border:1px solid #202631;padding:18px;margin:12px 0}
+.status{color:#78BFE8;font:12px monospace}
+.muted{color:#78818d;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<strong>Velclaw / Cloud</strong>
+<a href="/" style="color:#78818d">Workspace</a>
+</header>
+
+<main>
+<h1>Runtime</h1>
+<p class="muted">Manage project runtime environments.</p>
+<button onclick="create()">Create runtime</button>
+<div id="list"></div>
+</main>
+
+<script>
+async function create(){
+ await fetch('/api/runtimes',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({projectId:null})
+ });
+ load();
+}
+
+async function action(id,type){
+ await fetch('/api/runtimes/'+id+'/'+type,{method:'POST'});
+ load();
+}
+
+async function load(){
+ const r=await fetch('/api/runtimes');
+ const data=await r.json();
+
+ document.getElementById('list').innerHTML=data.reverse().map(x=>`
+ <div class="card">
+   <strong>${x.id}</strong>
+   <div class="status">${x.status}</div>
+   <div class="muted">Port: ${x.port||'—'}</div>
+   <p>
+    <button onclick="action('${x.id}','start')">Start</button>
+    <button onclick="action('${x.id}','stop')">Stop</button>
+   </p>
+   <div class="muted">${x.logs.join(' · ')}</div>
+ </div>
+ `).join('');
+}
+
+load();
+setInterval(load,1500);
+</script>
+</body>
+</html>

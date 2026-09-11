@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "repositories": [
+    {
+      "fullName": "Velclaw/Velclaw",
+      "visibility": "private",
+      "description": "Hệ thống lõi Velclaw",
+      "defaultBranch": "main",
+      "access": "github-authenticated"
+    },
+    {
+      "fullName": "Velclaw/docs.velclaw.ai",
+      "visibility": "private",
+      "description": "Docs và VelclawHub",
+      "defaultBranch": "main",
+      "access": "github-authenticated"
+    }
+  ],
+  "integration": {
+    "provider": "github",
+    "mode": "user-token",
+    "next": ["repository", "branch", "tree", "file", "diff", "commit", "pull-request"]
+  }
+}

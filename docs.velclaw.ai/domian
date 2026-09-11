@@ -1,0 +1,10 @@
+<script
+  type="module"
+  src="https://widget.mintlify.com/v1/embed.js"
+></script>
+
+<script type="module">
+  await window.MintlifyAssistant.init({
+    id: "mint_widget_25e76241-c5d8-4101-808c-d2a1b0597cca",
+  });
+</script>

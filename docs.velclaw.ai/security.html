@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Chính sách bảo mật thông tin xác thực của Velclaw.">
+<title>Security — Velclaw</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<header class="shell">
+<nav class="nav" aria-label="Điều hướng tài liệu">
+<a class="brand" href="index.html">
+<img src="assets/velclaw-wordmark.svg" width="172" height="28" alt="Velclaw wordmark logo">
+</a>
+<a class="back" href="index.html">← Trang tài liệu</a>
+</nav>
+</header>
+<main class="shell">
+<article>
+<div class="eyebrow">Security</div>
+<h1>Không đưa thông tin xác thực vào mã nguồn.</h1>
+<p class="notice">
+<strong>Quy tắc bắt buộc:</strong> không commit, dán vào issue/pull request, hay đưa vào tài liệu các keys, OAuth secrets, database URL hoặc deployment token.</p>
+<h2>Thông tin không được đưa vào kho mã</h2>
+<ul>
+<li>API keys, private keys, access tokens và secrets của nhà cung cấp.</li>
+<li>OAuth client secrets, refresh tokens, callback credentials và cấu hình định danh bí mật.</li>
+<li>Database URLs có mật khẩu, connection strings, bản sao dữ liệu hoặc credentials môi trường.</li>
+<li>Deployment tokens, webhook secrets và cấu hình cấp quyền cho CI/CD.</li>
+</ul>
+<h2>Cách xử lý an toàn</h2>
+<p>Lưu thông tin nhạy cảm trong secret manager hoặc biến môi trường của nền tảng triển khai; chỉ commit tên biến và một tệp mẫu đã loại bỏ giá trị bí mật. Hạn chế quyền theo nguyên tắc tối thiểu cần thiết, luân chuyển credential khi nghi ngờ lộ lọt, và thu hồi ngay credential đã xuất hiện trong lịch sử Git.</p>
+<h2>Báo cáo sự cố</h2>
+<p>Không mở issue công khai kèm secret. Hãy dùng kênh liên hệ riêng đã được nhóm Velclaw xác minh và chỉ cung cấp lượng thông tin cần thiết để tái hiện, đánh giá và xử lý sự cố.</p>
+<p class="meta">Cập nhật: 31 tháng 8, 2026.</p>
+</article>
+</main>
+<footer>
+<div class="shell">© 2026 Velclaw · <a href="privacy.html">Privacy</a> · <a href="license.html">License</a> · <a href="credits.html">Credits</a>
+</div>
+</footer>
+</body>
+</html>

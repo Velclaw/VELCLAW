@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 3,
+  "sourceVersion": "2.0.0",
+  "sourceCommit": "fe7d48e02f461dc0d1506e8508f9d6d50339c3df",
+  "sourceVerification": {
+    "repository": "https://github.com/Velclaw/Velclaw",
+    "checkedAt": "2026-09-04",
+    "status": "verified",
+    "note": "The source repository is accessible. Verification was refreshed against the current main tree, including package.json, pnpm-lock.yaml, README.md, app/, components/, lib/, deploy/, docs/, and .github/workflows/."
+  },
+  "product": {
+    "name": "Velclaw",
+    "version": "2.0.0",
+    "repository": "https://github.com/Velclaw/Velclaw",
+    "lastUpdated": "2026-09-04"
+  },
+  "translations": {
+    "en": {
+      "metaDescription": "Source-traceable documentation for Velclaw.",
+      "nav": { "overview": "Overview", "quickstart": "Local setup", "architecture": "Architecture", "capabilities": "Capabilities" },
+      "eyebrow": "Documentation · source verified",
+      "headline": "Velclaw documentation, traced to the source repository.",
+      "intro": "This documentation records implementation facts verified against Velclaw 2.0.0 and its source tree. Planned behavior remains explicitly labelled when it is not implemented or released.",
+      "primaryAction": "Start locally", "secondaryAction": "View source repository",
+      "quickStartTitle": "Run Velclaw locally",
+      "quickStartText": "The repository is a private Next.js 16 application using React 19 and TypeScript. The lockfile is pnpm v9. Current CI and deployment configuration are recorded in the source tree.",
+      "copy": "Copy", "copied": "Copied", "setupStatus": "Verified project commands",
+      "setupNotice": "package.json defines dev, build, start, lint, type-check, format, database migration, and database studio scripts. CI workflows are present under .github/workflows/.",
+      "architectureTitle": "Verified source architecture",
+      "architectureText": "The application uses Next.js App Router routes under app/, reusable UI under components/, server/data/security code under lib/ and server/, database configuration and migrations, and self-hosted deployment assets under deploy/.",
+      "workspace": "Workspace", "workspaceNote": "projects, repos, tasks and Velclaw application surfaces are present",
+      "agents": "Agents & integrations", "agentsNote": "sandbox agent implementations and connector integrations are present",
+      "projects": "Application structure", "projectsNote": "app/, components/, lib/, server/, and database-related code are present",
+      "build": "Build & CI", "buildNote": "Next.js webpack build plus GitHub Actions workflows are present",
+      "storage": "Database/storage", "github": "GitHub integration", "deployment": "Deployment/runtime",
+      "capabilitiesTitle": "Verified capabilities",
+      "capabilitiesText": "These areas are supported by concrete source-tree evidence. Individual features can still depend on configuration, credentials, or external services.",
+      "planned": "Planned / not verified",
+      "footer": "Code. Innovate. Elevate.", "source": "Source repository", "updated": "Last checked",
+      "trace": "Source trace", "version": "Source version", "commit": "Source commit", "verification": "Verification status"
+    },
+    "vi": {
+      "metaDescription": "Tài liệu Velclaw có khả năng truy vết theo source.",
+      "nav": { "overview": "Tổng quan", "quickstart": "Cấu hình local", "architecture": "Kiến trúc", "capabilities": "Khả năng" },
+      "eyebrow": "Tài liệu · đã xác minh source",
+      "headline": "Tài liệu Velclaw được truy vết theo kho mã nguồn.",
+      "intro": "Tài liệu này ghi nhận các thông tin đã kiểm tra trên Velclaw 2.0.0 và source tree. Những hành vi chưa được triển khai hoặc chưa có bằng chứng phát hành vẫn được gắn nhãn rõ ràng.",
+      "primaryAction": "Chạy local", "secondaryAction": "Xem kho mã nguồn",
+      "quickStartTitle": "Chạy Velclaw local",
+      "quickStartText": "Repository là ứng dụng Next.js 16 dùng React 19 và TypeScript. Lockfile là pnpm v9. Cấu hình CI và deployment hiện tại được ghi nhận trực tiếp trong source tree.",
+      "copy": "Sao chép", "copied": "Đã sao chép", "setupStatus": "Các lệnh dự án đã xác minh",
+      "setupNotice": "package.json có các script dev, build, start, lint, type-check, format, migration database và database studio. Các workflow CI nằm trong .github/workflows/.",
+      "architectureTitle": "Kiến trúc source đã xác minh",
+      "architectureText": "Ứng dụng dùng Next.js App Router trong app/, UI tái sử dụng trong components/, code server/data/security trong lib/ và server/, cấu hình/migration database, cùng tài nguyên self-hosted deployment trong deploy/.",
+      "workspace": "Workspace", "workspaceNote": "có project, repo, task và các surface của ứng dụng Velclaw",
+      "agents": "Agents & tích hợp", "agentsNote": "có implementation agent trong sandbox và các connector integration",
+      "projects": "Cấu trúc ứng dụng", "projectsNote": "có app/, components/, lib/, server/ và code liên quan database",
+      "build": "Build & CI", "buildNote": "có Next.js webpack build và các workflow GitHub Actions",
+      "storage": "Database/storage", "github": "Tích hợp GitHub", "deployment": "Deployment/runtime",
+      "capabilitiesTitle": "Các capability đã xác minh",
+      "capabilitiesText": "Các khu vực này có bằng chứng cụ thể trong source tree. Từng tính năng vẫn có thể phụ thuộc cấu hình, credential hoặc dịch vụ bên ngoài.",
+      "planned": "Planned / chưa xác minh",
+      "footer": "Code. Innovate. Elevate.", "source": "Kho mã nguồn", "updated": "Lần kiểm tra cuối",
+      "trace": "Truy vết source", "version": "Phiên bản source", "commit": "Source commit", "verification": "Trạng thái xác minh"
+    }
+  },
+  "capabilities": [
+    { "icon": "A", "status": "available", "title": { "en": "AI agents", "vi": "Tác tử AI" }, "description": { "en": "Sandbox agent implementations and agent-related tooling are present in the source tree.", "vi": "Source tree có implementation sandbox agent và tooling liên quan đến agent." } },
+    { "icon": "W", "status": "available", "title": { "en": "Workspace", "vi": "Workspace" }, "description": { "en": "Project, repository, task, file, and workspace UI surfaces are present.", "vi": "Có các surface cho project, repository, task, file và workspace." } },
+    { "icon": "B", "status": "available", "title": { "en": "Build & runtime", "vi": "Build & runtime" }, "description": { "en": "Next.js build/runtime scripts, self-hosted deployment assets, and CI workflows are present and versioned.", "vi": "Có script build/runtime Next.js, tài nguyên self-hosted deployment và workflow CI được version hóa." } },
+    { "icon": "G", "status": "preview", "title": { "en": "GitHub & delivery", "vi": "GitHub & delivery" }, "description": { "en": "GitHub API/auth/repository integration and pull-request UI are present; end-to-end delivery behavior depends on credentials and external configuration.", "vi": "Có tích hợp GitHub API/auth/repository và UI pull request; delivery end-to-end còn phụ thuộc credential và cấu hình bên ngoài." } }
+  ],
+  "commands": ["corepack enable", "pnpm install", "pnpm dev", "pnpm build", "pnpm lint", "pnpm type-check"],
+  "technology": [
+    "Node.js: CI 18.x / 20.x / 22.x",
+    "Package manager: pnpm lockfile v9",
+    "Framework: Next.js 16.3.3",
+    "UI: React 19.2.1 + TypeScript 5.9.x",
+    "Database: Drizzle ORM + PostgreSQL/Neon integration",
+    "CI: GitHub Actions",
+    "Self-hosted runtime: Docker + Traefik",
+    "Cloud runtime contract: IBM Cloud VPC"
+  ]
+}

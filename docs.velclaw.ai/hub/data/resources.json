@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "resources": [
+    {
+      "id": "agent.velclaw.quickstart",
+      "type": "agent",
+      "name": "Velclaw Quickstart Agent",
+      "version": "1.0.0",
+      "status": "published",
+      "author": "Velclaw",
+      "license": "Velclaw",
+      "description": "Agent mẫu dùng để kiểm tra luồng tài nguyên của VelclawHub.",
+      "tags": ["starter", "agent", "velclaw"]
+    },
+    {
+      "id": "workflow.velclaw.review-gate",
+      "type": "workflow",
+      "name": "Review Gate Workflow",
+      "version": "1.0.0",
+      "status": "verified",
+      "author": "Velclaw",
+      "license": "Velclaw",
+      "description": "Workflow mẫu cho luồng Task → Executor → Review → Gate.",
+      "tags": ["workflow", "review", "gate"]
+    },
+    {
+      "id": "template.velclaw.starter",
+      "type": "template",
+      "name": "Velclaw Starter Template",
+      "version": "0.1.0",
+      "status": "draft",
+      "author": "Velclaw",
+      "license": "Velclaw",
+      "description": "Template nền cho tài nguyên mới trong hệ sinh thái Velclaw.",
+      "tags": ["template", "starter"]
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+<!-- velclaw brand identity system -->
+<style>
+  #vc-root {
+    --graphite: #0B0D10;
+    --panel: #14181D;
+    --panel2: #1A1F26;
+    --line: #262C34;
+    --ink: #E9EDF0;
+    --ink-dim: #8B94A0;
+    --ocean: #4A7FA8;
+    --cyan: #9FE3F0;
+    --cyan-dim: #6FB9CC;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--graphite);
+    color: var(--ink);
+    padding: 48px 32px 80px;
+    border-radius: 16px;
+    line-height: 1.5;
+  }
+  #vc-root * { box-sizing: border-box; }
+  .vc-section { max-width: 1080px; margin: 0 auto 64px; }
+  .vc-eyebrow {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--cyan-dim); font-weight: 600; margin-bottom: 10px;
+  }
+  .vc-h1 {
+    font-size: 30px; font-weight: 650; letter-spacing: -0.02em; margin: 0 0 6px;
+  }
+  .vc-sub { color: var(--ink-dim); font-size: 14px; margin: 0 0 28px; max-width: 640px; }
+  .vc-grid { display: grid; gap: 16px; }
+  .vc-grid-2 { grid-template-columns: 1fr 1fr; }
+  .vc-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .vc-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px;
+    min-height: 180px;
+  }
+  .vc-card.light { background: #F3F5F7; border-color: #E2E6EA; }
+  .vc-label {
+    font-size: 11px; color: var(--ink-dim); letter-spacing: 0.06em;
+    text-transform: uppercase; text-align: center;
+  }
+  .vc-card.light .vc-label { color: #6B7280; }
+  .vc-swatches { display: flex; gap: 12px; flex-wrap: wrap; }
+  .vc-swatch { flex: 1; min-width: 140px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .vc-swatch-color { height: 64px; }
+  .vc-swatch-meta { padding: 10px 12px; background: var(--panel); font-size: 12px; }
+  .vc-swatch-name { font-weight: 600; color: var(--ink); }
+  .vc-swatch-hex { color: var(--ink-dim); font-family: 'SF Mono', Consolas, monospace; margin-top: 2px; }
+  .vc-row-sizes { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; padding: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+  .vc-size-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+</style>
+
+<div id="vc-root">
+
+  <!-- ============ HEADER ============ -->
+  <div class="vc-section" style="text-align:center; margin-bottom:56px;">
+    <div class="vc-eyebrow">Brand Identity System</div>
+    <svg width="260" height="72" viewBox="0 0 520 144" style="margin: 8px 0;">
+      <defs>
+        <linearGradient id="hero-cyan" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#9FE3F0"/>
+          <stop offset="100%" stop-color="#4A7FA8"/>
+        </linearGradient>
+      </defs>
+      <!-- mascot mini -->
+      <g transform="translate(0,10)">
+        <path d="M62 8 L98 26 Q104 29 104 36 L104 78 Q104 85 98 88 L62 106 Q56 109 50 106 L20 90 Q14 87 14 80 L14 36 Q14 29 20 26 Z" fill="#20262E" stroke="#0B0D10" stroke-width="1.5"/>
+        <path d="M104 36 L104 58 L64 106 L50 106 Q46 104 45 100 L74 58 Z" fill="url(#hero-cyan)" opacity="0.92"/>
+        <circle cx="55" cy="40" r="4.5" fill="#9FE3F0"/>
+        <path d="M46 100 L41 122 L46 124 L54 102 Z" fill="#161A1F"/>
+        <path d="M65 104 L65 128 L71 128 L71 104 Z" fill="#161A1F"/>
+        <path d="M84 100 L94 120 L88 123 L79 101 Z" fill="#161A1F"/>
+      </g>
+      <!-- wordmark -->
+      <text x="128" y="90" font-family="Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5" fill="#E9EDF0">velclaw</text>
+      <path d="M128 40 L146 30 L146 42 Z" fill="#0B0D10"/>
+    </svg>
+    <div class="vc-sub" style="margin: 12px auto 0;">AI-native software engineering platform — agents, code, cloud runtime, and shipping, unified.</div>
+  </div>
+
+  <!-- ============ WORDMARK RATIONALE ============ -->
+  <div class="vc-section">
+    <div class="vc-eyebrow">01 — Wordmark</div>
+    <div class="vc-h1">A cut, not a curve</div>
+    <div class="vc-sub">Lowercase geometric grotesque, custom-modified. Every ascender and terminal that can carry a 45° diagonal cut does — on the <b>v</b>, the crossbar of the <b>l</b>-stem, and the tail of the final <b>w</b>. This single repeated notch is the wordmark's private signature: a precision instrument's cut, not a decorative flourish. Tight negative space between letters reads as engineered, not loose or playful.</div>
+
+    <div class="vc-grid vc-grid-2">
+      <div class="vc-card">
+        <svg width="320" height="90" viewBox="0 0 640 180">
+          <text x="10" y="120" font-family="Arial, sans-serif" font-size="90" font-weight="700" letter-spacing="-3" fill="#E9EDF0">velclaw</text>
+          <path d="M10 55 L34 42 L34 57 Z" fill="#9FE3F0"/>
+        </svg>
+        <div class="vc-label">Primary wordmark — dark ground</div>
+      </div>
+      <div class="vc-card light">
+        <svg width="320" height="90" viewBox="0 0 640 180">
+          <text x="10" y="120" font-family="Arial, sans-serif" font-size="90" font-weight="700" letter-spacing="-3" fill="#0B0D10">velclaw</text>
+          <path d="M10 55 L34 42 L34 57 Z" fill="#4A7FA8"/>
+        </svg>
+        <div class="vc-label">Primary wordmark — light ground</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PRIMARY LOGO LOCKUP ============ -->
+  <div class="vc-section">
+    <div class="vc-eyebrow">02 — Primary Logo</div>
+    <div class="vc-h1">Horizontal lockup</div>
+    <div class="vc-sub">Mascot + wordmark, the default identity for product headers, docs, and marketing.</div>
+
+    <div class="vc-grid vc-grid-2">
+      <div class="vc-card">
+        <svg width="360" height="100" viewBox="0 0 720 200">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(10,10)">
+            <path d="M80 10 L128 34 Q136 38 136 47 L136 103 Q136 112 128 116 L80 140 Q72 144 64 140 L26 118 Q18 114 18 105 L18 47 Q18 38 26 34 Z" fill="#20262E" stroke="#0B0D10" stroke-width="2"/>
+            <path d="M136 47 L136 76 L84 140 L64 140 Q58 137 57 132 L96 76 Z" fill="url(#g1)" opacity="0.92"/>
+            <circle cx="70" cy="52" r="6" fill="#9FE3F0"/>
+            <path d="M58 132 L50 164 L58 167 L70 136 Z" fill="#161A1F"/>
+            <path d="M84 138 L84 170 L94 170 L94 138 Z" fill="#161A1F"/>
+            <path d="M110 132 L124 160 L115 165 L102 134 Z" fill="#161A1F"/>
+          </g>
+          <text x="180" y="122" font-family="Arial, sans-serif" font-size="76" font-weight="700" letter-spacing="-2.2" fill="#E9EDF0">velclaw</text>
+          <path d="M180 62 L202 50 L202 64 Z" fill="#9FE3F0"/>
+        </svg>
+        <div class="vc-label">Dark background</div>
+      </div>
+      <div class="vc-card light">
+        <svg width="360" height="100" viewBox="0 0 720 200">
+          <defs>
+            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4A7FA8"/><stop offset="100%" stop-color="#0B0D10"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(10,10)">
+            <path d="M80 10 L128 34 Q136 38 136 47 L136 103 Q136 112 128 116 L80 140 Q72 144 64 140 L26 118 Q18 114 18 105 L18 47 Q18 38 26 34 Z" fill="#0B0D10"/>
+            <path d="M136 47 L136 76 L84 140 L64 140 Q58 137 57 132 L96 76 Z" fill="url(#g2)" opacity="0.9"/>
+            <circle cx="70" cy="52" r="6" fill="#9FE3F0"/>
+            <path d="M58 132 L50 164 L58 167 L70 136 Z" fill="#0B0D10"/>
+            <path d="M84 138 L84 170 L94 170 L94 138 Z" fill="#0B0D10"/>
+            <path d="M110 132 L124 160 L115 165 L102 134 Z" fill="#0B0D10"/>
+          </g>
+          <text x="180" y="122" font-family="Arial, sans-serif" font-size="76" font-weight="700" letter-spacing="-2.2" fill="#0B0D10">velclaw</text>
+          <path d="M180 62 L202 50 L202 64 Z" fill="#4A7FA8"/>
+        </svg>
+        <div class="vc-label">Light background</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MASCOT ============ -->
+  <div class="vc-section">
+    <div class="vc-eyebrow">03 — Mascot: "the node"</div>
+    <div class="vc-h1">An instrument, not a character</div>
+    <div class="vc-sub">A rounded hexagonal capsule sliced by one asymmetric diagonal seam — half graphite mass, half lit sensor plane. Three uneven angular pins beneath read as calipers, a gripper, or landing gear, planting the form with mechanical precision. One small cyan point near the crown is the only "face": a status light, a cursor, a held breath. It never smiles, never has eyes — presence over personality.</div>
+
+    <div class="vc-grid vc-grid-4">
+      <div class="vc-card">
+        <svg width="140" height="150" viewBox="0 0 300 320">
+          <defs><linearGradient id="m1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/></linearGradient></defs>
+          <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#20262E" stroke="#0B0D10" stroke-width="2"/>
+          <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="url(#m1)" opacity="0.92"/>
+          <circle cx="128" cy="92" r="8" fill="#9FE3F0"/>
+          <path d="M110 226 L92 274 L108 280 L128 232 Z" fill="#161A1F"/>
+          <path d="M154 236 L154 288 L170 288 L170 236 Z" fill="#161A1F"/>
+          <path d="M196 226 L222 264 L204 274 L178 230 Z" fill="#161A1F"/>
+          <path d="M150 20 L172 8 L172 30 Z" fill="#0B0D10"/>
+        </svg>
+        <div class="vc-label">Standalone mascot</div>
+      </div>
+
+      <div class="vc-card" style="background:#161A1F;">
+        <svg width="120" height="120" viewBox="0 0 300 300">
+          <defs><linearGradient id="m2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/></linearGradient></defs>
+          <rect x="20" y="20" width="260" height="260" rx="56" fill="#0B0D10"/>
+          <g transform="translate(45,38) scale(0.7)">
+            <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#20262E" stroke="#0B0D10" stroke-width="2"/>
+            <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="url(#m2)" opacity="0.92"/>
+            <circle cx="128" cy="92" r="9" fill="#9FE3F0"/>
+            <path d="M110 226 L92 274 L108 280 L128 232 Z" fill="#161A1F"/>
+            <path d="M154 236 L154 288 L170 288 L170 236 Z" fill="#161A1F"/>
+            <path d="M196 226 L222 264 L204 274 L178 230 Z" fill="#161A1F"/>
+          </g>
+        </svg>
+        <div class="vc-label">App icon</div>
+      </div>
+
+      <div class="vc-card">
+        <svg width="140" height="150" viewBox="0 0 300 320">
+          <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#E9EDF0"/>
+          <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="#0B0D10" opacity="0.9"/>
+          <circle cx="128" cy="92" r="8" fill="#0B0D10"/>
+          <path d="M110 226 L92 274 L108 280 L128 232 Z" fill="#E9EDF0"/>
+          <path d="M154 236 L154 288 L170 288 L170 236 Z" fill="#E9EDF0"/>
+          <path d="M196 226 L222 264 L204 274 L178 230 Z" fill="#E9EDF0"/>
+          <path d="M150 20 L172 8 L172 30 Z" fill="#0B0D10"/>
+        </svg>
+        <div class="vc-label">Monochrome — dark ground</div>
+      </div>
+
+      <div class="vc-card light">
+        <svg width="140" height="150" viewBox="0 0 300 320">
+          <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#0B0D10"/>
+          <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="#E9EDF0" opacity="0.9"/>
+          <circle cx="128" cy="92" r="8" fill="#E9EDF0"/>
+          <path d="M110 226 L92 274 L108 280 L128 232 Z" fill="#0B0D10"/>
+          <path d="M154 236 L154 288 L170 288 L170 236 Z" fill="#0B0D10"/>
+          <path d="M196 226 L222 264 L204 274 L178 230 Z" fill="#0B0D10"/>
+          <path d="M150 20 L172 8 L172 30 Z" fill="#E9EDF0"/>
+        </svg>
+        <div class="vc-label">Monochrome — light ground</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SMALL SIZE TEST ============ -->
+  <div class="vc-section">
+    <div class="vc-eyebrow">04 — Legibility</div>
+    <div class="vc-h1">Small-size integrity</div>
+    <div class="vc-sub">The silhouette holds at favicon and tab scale — no internal detail depends on size to read.</div>
+    <div class="vc-row-sizes">
+      <div class="vc-size-item">
+        <svg width="64" height="64" viewBox="0 0 300 300">
+          <defs><linearGradient id="s1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/></linearGradient></defs>
+          <rect x="20" y="20" width="260" height="260" rx="56" fill="#0B0D10"/>
+          <g transform="translate(45,38) scale(0.7)">
+            <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#20262E"/>
+            <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="url(#s1)"/>
+            <circle cx="128" cy="92" r="9" fill="#9FE3F0"/>
+          </g>
+        </svg>
+        <div class="vc-label">64px</div>
+      </div>
+      <div class="vc-size-item">
+        <svg width="32" height="32" viewBox="0 0 300 300">
+          <defs><linearGradient id="s2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/></linearGradient></defs>
+          <rect x="20" y="20" width="260" height="260" rx="56" fill="#0B0D10"/>
+          <g transform="translate(45,38) scale(0.7)">
+            <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#20262E"/>
+            <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="url(#s2)"/>
+            <circle cx="128" cy="92" r="9" fill="#9FE3F0"/>
+          </g>
+        </svg>
+        <div class="vc-label">32px</div>
+      </div>
+      <div class="vc-size-item">
+        <svg width="16" height="16" viewBox="0 0 300 300">
+          <defs><linearGradient id="s3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9FE3F0"/><stop offset="100%" stop-color="#4A7FA8"/></linearGradient></defs>
+          <rect x="20" y="20" width="260" height="260" rx="56" fill="#0B0D10"/>
+          <g transform="translate(45,38) scale(0.7)">
+            <path d="M150 20 L226 62 Q238 68 238 80 L238 176 Q238 188 226 194 L150 236 Q142 240 134 236 L58 202 Q46 196 46 184 L46 80 Q46 68 58 62 Z" fill="#20262E"/>
+            <path d="M238 80 L238 132 L156 236 L134 236 Q126 232 124 224 L192 132 Z" fill="url(#s3)"/>
+            <circle cx="128" cy="92" r="9" fill="#9FE3F0"/>
+          </g>
+        </svg>
+        <div class="vc-label">16px (favicon)</div>
+      </div>
+      <div class="vc-size-item" style="flex:1; min-width:220px;">
+        <svg width="100%" height="28" viewBox="0 0 400 56">
+          <g transform="translate(0,4) scale(0.35)">
+            <path d="M62 8 L98 26 Q104 29 104 36 L104 78 Q104 85 98 88 L62 106 Q56 109 50 106 L20 90 Q14 87 14 80 L14 36 Q14 29 20 26 Z" fill="#20262E"/>
+            <path d="M104 36 L104 58 L64 106 L50 106 Q46 104 45 100 L74 58 Z" fill="#4A7FA8" opacity="0.92"/>
+            <circle cx="55" cy="40" r="4.5" fill="#9FE3F0"/>
+          </g>
+          <text x="42" y="38" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.6" fill="#E9EDF0">velclaw</text>
+        </svg>
+        <div class="vc-label" style="margin-top:12px;">Nav-bar scale</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ COLOR SYSTEM ============ -->
+  <div class="vc-section">
+    <div class="vc-eyebrow">05 — Color</div>
+    <div class="vc-h1">Palette</div>
+    <div class="vc-sub">Graphite-first. Ocean blue and cyan are reserved for the seam, the status light, and interactive accents — never used as flat fills across large areas.</div>
+    <div class="vc-swatches">
+      <div class="vc-swatch">
+        <div class="vc-swatch-color" style="background:#0B0D10;"></div>
+        <div class="vc-swatch-meta"><div class="vc-swatch-name">Graphite</div><div class="vc-swatch-hex">#0B0D10</div></div>
+      </div>
+      <div class="vc-swatch">
+        <div class="vc-swatch-color" style="background:#20262E;"></div>
+        <div class="vc-swatch-meta"><div class="vc-swatch-name">Panel</div><div class="vc-swatch-hex">#20262E</div></div>
+      </div>
+      <div class="vc-swatch">
+        <div class="vc-swatch-color" style="background:#4A7FA8;"></div>
+        <div class="vc-swatch-meta"><div class="vc-swatch-name">Ocean Blue</div><div class="vc-swatch-hex">#4A7FA8</div></div>
+      </div>
+      <div class="vc-swatch">
+        <div class="vc-swatch-color" style="background:#9FE3F0;"></div>
+        <div class="vc-swatch-meta"><div class="vc-swatch-name">Cyan Highlight</div><div class="vc-swatch-hex">#9FE3F0</div></div>
+      </div>
+      <div class="vc-swatch">
+        <div class="vc-swatch-color" style="background:#E9EDF0;"></div>
+        <div class="vc-swatch-meta"><div class="vc-swatch-name">Off-white</div><div class="vc-swatch-hex">#E9EDF0</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>

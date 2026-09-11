@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cách Velclaw xử lý workspace, logs và agent context đã được xác minh.">
+<title>Privacy & data handling — Velclaw</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<header class="shell">
+<nav class="nav" aria-label="Điều hướng tài liệu">
+<a class="brand" href="index.html">
+<img src="assets/velclaw-wordmark.svg" width="172" height="28" alt="Velclaw wordmark logo">
+</a>
+<a class="back" href="index.html">← Trang tài liệu</a>
+</nav>
+</header>
+<main class="shell">
+<article>
+<div class="eyebrow">Privacy & data handling</div>
+<h1>Xử lý dữ liệu theo phạm vi workspace đã xác minh.</h1>
+<p class="notice">Trang này chỉ mô tả các nguyên tắc xử lý đã được xác minh cho bản xem trước riêng tư; không suy diễn tính năng lưu giữ, chia sẻ hoặc đào tạo mô hình chưa được công bố.</p>
+<h2>Workspace</h2>
+<p>Dự án, tệp, mã nguồn và trạng thái thuộc workspace được xử lý để cung cấp trải nghiệm workspace và các thao tác do người dùng yêu cầu. Quyền truy cập cần được giới hạn theo workspace và vai trò đã được cấp.</p>
+<h2>Logs</h2>
+<p>Logs phục vụ vận hành, chẩn đoán lỗi và an toàn. Không dùng logs như nơi lưu secret; dữ liệu nhạy cảm cần được giảm thiểu hoặc loại bỏ trước khi ghi. Thời hạn lưu giữ và quyền truy cập chỉ được coi là cam kết khi đã được xác minh trong cấu hình hoặc thỏa thuận áp dụng.</p>
+<h2>Agent context</h2>
+<p>Ngữ cảnh được cung cấp cho tác tử chỉ nên gồm dữ liệu cần thiết cho tác vụ được yêu cầu. Người dùng và người vận hành cần kiểm tra phạm vi ngữ cảnh trước khi chạy công cụ, đồng thời tránh đưa credentials hoặc dữ liệu không liên quan vào prompt, tệp đính kèm hay output.</p>
+<h2>Thông tin đã xác minh</h2>
+<p>Khi có thông tin xử lý dữ liệu được xác minh, Velclaw sẽ ghi rõ phạm vi, mục đích, quyền truy cập và điều kiện lưu giữ tương ứng trong tài liệu hoặc thỏa thuận liên quan. Nếu chưa có xác nhận đó, không nên coi mô tả chung là một bảo đảm.</p>
+<p class="meta">Cập nhật: 31 tháng 8, 2026.</p>
+</article>
+</main>
+<footer>
+<div class="shell">© 2026 Velclaw · <a href="security.html">Security</a> · <a href="license.html">License</a> · <a href="credits.html">Credits</a>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Watson Shell",
+  "description": "Giả lập shell terminal thông minh tích hợp Watson AI, Cloudant Cloud Sync, Syntax Highlighting, và 2FA Security.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

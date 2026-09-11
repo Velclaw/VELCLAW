@@ -1,0 +1,25 @@
+---
+title: "Security"
+description: "Use explicit boundaries and review practices when working with Velclaw code, tools, and credentials."
+---
+
+# Security
+
+Velclaw uses explicit access boundaries and review practices for code, tools, credentials, and delivery paths.
+
+## Limit access
+
+Give users and tools only the access they need for the current task.
+
+## Protect secrets
+
+Keep credentials out of source files and documentation examples. Use environment-specific secret storage.
+
+```bash
+export VELCLAW_TOKEN="your-token"
+# Never commit this value
+```
+
+## Review sensitive changes
+
+Require deliberate review for changes that affect permissions, data handling, credentials, or delivery paths.

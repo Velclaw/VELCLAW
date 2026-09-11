@@ -1,0 +1,60 @@
+---
+title: "Giới thiệu"
+description: "Chào mừng đến với dự án của bạn"
+---
+
+# Velclaw
+
+**Không gian làm việc phần mềm AI-native dành cho agent, lập trình viên và các nhóm.**
+
+Velclaw gom agent, dự án, mã nguồn, build, runtime, review, tích hợp GitHub và triển khai vào một không gian làm việc tập trung cho lập trình viên.
+
+<CardGroup cols={2}>
+  <Card title="Bắt đầu" icon="rocket" href="/vi/quickstart">
+    Thiết lập không gian làm việc Velclaw và kiểm tra ứng dụng.
+  </Card>
+
+  <Card title="Không gian làm việc" icon="folder" href="/vi/workspace">
+    Hiểu về dự án, tệp, ngữ cảnh và trạng thái làm việc.
+  </Card>
+
+  <Card title="Agent" icon="robot" href="/vi/agents">
+    Làm việc với hạ tầng agent và sandbox của Velclaw.
+  </Card>
+
+  <Card title="Build & runtime" icon="server" href="/vi/build-runtime">
+    Build, kiểm tra kiểu, lint và chạy stack Velclaw.
+  </Card>
+</CardGroup>
+
+## Hệ sinh thái Velclaw
+
+Velclaw được tổ chức xoay quanh một vòng đời phần mềm liên kết:
+
+```text
+AI Agents
+    │
+    ▼
+Workspace → Code → Build → Runtime
+    │                     │
+    ▼                     ▼
+GitHub & Review ─────→ Deployment
+```
+
+Máy chủ sản phẩm chính thức của Velclaw là `velclaw.cfd`. Trang tài liệu là **docs.velclaw.ai**.
+
+## Nguồn tài liệu
+
+Tài liệu này được duy trì từ tư liệu dự án Velclaw đã xác minh trong `Velclaw/Velclaw` và kho tài liệu chuyên biệt `Velclaw/docs.velclaw.ai`.
+
+<Note>
+  Các tính năng được đánh dấu là preview trong tài liệu gốc không nên được coi là khả năng production đã phát hành rộng rãi.
+</Note>
+
+## Các lĩnh vực chính
+
+- **Không gian làm việc**: dự án, tệp, ngữ cảnh và trạng thái.
+- **Agent**: vai trò agent, công cụ, thực thi trong sandbox và review.
+- **Build & runtime**: stack ứng dụng Next.js, kiểm tra hợp lệ, CI và runtime.
+- **GitHub & phân phối**: tích hợp kho mã, review, CI và truy vết bản phát hành.
+- **Bảo mật**: ranh giới truy cập, bí mật và review các thay đổi nhạy cảm.
