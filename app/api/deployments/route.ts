@@ -7,10 +7,10 @@ const REPO_PATTERN = /^https:\/\/(?:github\.com)\/[^/]+\/[^/]+(?:\.git)?$/i
 
 export async function GET() {
   const session = await getServerSession()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    return NextResponse.json({ deployments: await listDeployments() })
+    return NextResponse.json({ deployments: await listDeployments(session.user.id) })
   } catch (error) {
     console.error('[deployments] list failed', error)
     return NextResponse.json({ error: 'Deployment store unavailable' }, { status: 503 })
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const input = await request.json().catch(() => null)
   const repoUrl = typeof input?.repoUrl === 'string' ? input.repoUrl.trim() : ''
@@ -39,7 +39,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const deployment = await createHostingDeployment({ projectName, repoUrl, branch, commitSha })
+    const deployment = await createHostingDeployment({
+      userId: session.user.id,
+      projectName,
+      repoUrl,
+      branch,
+      commitSha,
+    })
     return NextResponse.json({ deployment }, { status: 202 })
   } catch (error) {
     console.error('[deployments] create failed', error)
