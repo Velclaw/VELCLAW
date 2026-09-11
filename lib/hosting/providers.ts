@@ -6,6 +6,8 @@ export type HostingDeploymentInput = {
   repoUrl: string
   branch: string
   commitSha?: string | null
+  env?: Record<string, string> | null
+  customDomain?: string | null
 }
 
 export type HostingDeploymentResult = {
