@@ -34,8 +34,6 @@ proot-distro login ubuntu -- bash -lc '
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-# PRoot Ubuntu runs as root but may have a reduced root PATH. Keep sbin
-# directories available because ldconfig is provided by libc-bin there.
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 apt-get update
@@ -45,9 +43,6 @@ if ! command -v gh >/dev/null 2>&1; then
   apt-get install -y gh
 fi
 
-# Reuse an authentication session that was created inside Ubuntu.
-# The Android host and Ubuntu PRoot userland have separate HOME/config trees,
-# so host-side gh auth cannot be assumed to exist inside Ubuntu.
 if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   GH_TOKEN="$(gh auth token)"
   export GH_TOKEN
@@ -63,10 +58,6 @@ if [ -z "${GH_TOKEN:-}" ]; then
   exit 20
 fi
 
-# GitHub runner dependency setup calls ldconfig. In PRoot, verify the real
-# system utility exists before touching the runner. Do not invoke the
-# official installdependencies.sh helper because it intentionally refuses
-# root/sudo execution and is not compatible with this userland.
 if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
   echo "ldconfig is unavailable after libc-bin installation."
   exit 22
@@ -92,12 +83,12 @@ if [ ! -x ./run.sh ] || [ ! -x ./bin/Runner.Listener ]; then
   rm -f "$ARCHIVE"
 fi
 
-# Validate the downloaded ARM64 runner without executing the incompatible
-# dependency installer shipped in the archive.
 test -x "$RUNNER_DIR/run.sh"
 test -x "$RUNNER_DIR/bin/Runner.Listener"
 
-TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
+# GH_TOKEN is already exported above. Keep this command simple: the previous
+# nested quoted assignment caused bash -u to report "TOKEN: unbound variable".
+TOKEN="$(gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
 if [ -z "$TOKEN" ]; then
   echo "Could not obtain a runner registration token."
   exit 21
