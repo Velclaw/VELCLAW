@@ -18,20 +18,32 @@ export async function POST(request: Request, { params }: Params) {
   try {
     const result = await sql.begin(async (tx) => {
       const currentRows = await tx`
-        SELECT id, project_name, status
+        SELECT id, user_id, project_name, repo_url, branch, status
         FROM velclaw_deployments
         WHERE id = ${id}
         FOR UPDATE
       `
       if (currentRows.length === 0) return { error: 'Deployment not found', httpStatus: 404 } as const
 
-      const current = currentRows[0] as { id: string; project_name: string; status: string }
+      const current = currentRows[0] as {
+        id: string
+        user_id: string
+        project_name: string
+        repo_url: string
+        branch: string
+        status: string
+      }
+
       const previousRows = await tx`
-        SELECT id
+        SELECT id, commit_sha
         FROM velclaw_deployments
-        WHERE project_name = ${current.project_name}
+        WHERE user_id = ${current.user_id}
+          AND project_name = ${current.project_name}
+          AND repo_url = ${current.repo_url}
+          AND branch = ${current.branch}
           AND status = 'ready'
           AND id <> ${id}
+          AND commit_sha IS NOT NULL
         ORDER BY created_at DESC
         LIMIT 1
         FOR UPDATE
@@ -40,12 +52,13 @@ export async function POST(request: Request, { params }: Params) {
         return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
       }
 
-      const previous = previousRows[0] as { id: string }
+      const previous = previousRows[0] as { id: string; commit_sha: string }
       await tx`
         UPDATE velclaw_deployments
         SET status = 'queued',
+            commit_sha = ${previous.commit_sha},
             error = NULL,
-            logs = logs || ${JSON.stringify([`Rollback requested from deployment ${previous.id}`])}::jsonb,
+            logs = logs || ${JSON.stringify([`Rollback queued to deployment ${previous.id} at ${previous.commit_sha}`])}::jsonb,
             updated_at = NOW()
         WHERE id = ${id}
       `
@@ -56,6 +69,7 @@ export async function POST(request: Request, { params }: Params) {
         project_name: current.project_name,
         from_deployment: id,
         target_deployment: previous.id,
+        commit_sha: previous.commit_sha,
         status: 'queued' as const,
       }
     })
