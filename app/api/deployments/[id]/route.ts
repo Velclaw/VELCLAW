@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from '@/lib/session/get-server-session'
 import postgres from 'postgres'
 
 export const dynamic = 'force-dynamic'
@@ -8,19 +9,22 @@ const sql = postgres(process.env.POSTGRES_URL || '', { max: 3 })
 type Params = { params: Promise<{ id: string }> }
 
 export async function POST(request: Request, { params }: Params) {
-  const token = request.headers.get('x-velclaw-admin-token')
-  const expected = process.env.VELCLAW_DEPLOY_API_TOKEN
-  if (!expected || token !== expected) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getServerSession()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
   if (!id) return NextResponse.json({ error: 'Deployment id is required' }, { status: 400 })
+
+  const body = await request.json().catch(() => ({}))
+  const action = body?.action || 'rollback'
+  if (action !== 'rollback') return NextResponse.json({ error: 'Unsupported deployment action' }, { status: 400 })
 
   try {
     const result = await sql.begin(async (tx) => {
       const currentRows = await tx`
         SELECT id, user_id, project_name, repo_url, branch, status
         FROM velclaw_deployments
-        WHERE id = ${id}
+        WHERE id = ${id} AND user_id = ${session.user.id}
         FOR UPDATE
       `
       if (currentRows.length === 0) return { error: 'Deployment not found', httpStatus: 404 } as const
@@ -58,9 +62,10 @@ export async function POST(request: Request, { params }: Params) {
         SET status = 'queued',
             commit_sha = ${previous.commit_sha},
             error = NULL,
+            url = NULL,
             logs = logs || ${JSON.stringify([`Rollback queued to deployment ${previous.id} at ${previous.commit_sha}`])}::jsonb,
             updated_at = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id} AND user_id = ${session.user.id}
       `
 
       return {
@@ -77,6 +82,7 @@ export async function POST(request: Request, { params }: Params) {
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.httpStatus })
     return NextResponse.json(result)
   } catch (error) {
+    console.error('[deployments/rollback]', error)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Rollback failed' }, { status: 500 })
   }
 }
