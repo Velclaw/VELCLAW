@@ -6,8 +6,9 @@ import { getUserApiKey } from '@/lib/api-keys/user-keys'
 
 export type BuilderWorkspaceFile = { path: string; content: string }
 
+const SAFE_PATH = /^(?!\/)(?!.*\.\.)(?!.*(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage)(?:\/|$))[A-Za-z0-9._/-]+$/
 const changeSchema = z.object({
-  path: z.string().min(1).max(240),
+  path: z.string().min(1).max(240).regex(SAFE_PATH, 'unsafe workspace path'),
   content: z.string().max(300_000),
 })
 
@@ -33,6 +34,11 @@ export async function runBuilderAgent(input: {
 
   const prompt = clean(input.prompt, 12_000)
   if (!prompt) throw new Error('prompt is required')
+  if (input.files.length > 150) throw new Error('workspace contains too many files')
+  const totalBytes = input.files.reduce((sum, file) => sum + Buffer.byteLength(file.content, 'utf8'), 0)
+  if (totalBytes > 2_000_000) throw new Error('workspace exceeds the 2 MB agent context limit')
+  if (input.files.some((file) => !SAFE_PATH.test(file.path))) throw new Error('workspace contains an unsafe path')
+
   const model = clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
   const context = workspaceContext(input.files)
   const provider = new OpenAIProvider({ apiKey, useResponses: true })
