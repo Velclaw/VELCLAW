@@ -1,0 +1,136 @@
+import 'server-only'
+
+import { Agent, OpenAIProvider, Runner, run } from '@openai/agents'
+import { getUserApiKey } from '@/lib/api-keys/user-keys'
+
+type AgentMode = 'single' | 'multi'
+
+type AgentRunInput = {
+  message: string
+  model?: string
+  instructions?: string
+  mode?: AgentMode
+  maxConcurrentSubagents?: number
+}
+
+function cleanText(value: unknown, maxLength: number) {
+  return typeof value === 'string' ? value.trim().slice(0, maxLength) : ''
+}
+
+export async function runOpenAIAgent(input: AgentRunInput) {
+  const apiKey = await getUserApiKey('openai')
+  if (!apiKey) {
+    throw new Error('OpenAI API key is not configured for this user')
+  }
+
+  const message = cleanText(input.message, 12000)
+  if (!message) throw new Error('message is required')
+
+  const model = cleanText(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
+  const baseInstructions =
+    cleanText(input.instructions, 6000) ||
+    'You are Velclaw Agent. Be precise, inspect context before acting, use tools when provided, and clearly distinguish verified results from assumptions.'
+
+  const provider = new OpenAIProvider({ apiKey, useResponses: true })
+
+  try {
+    if (input.mode === 'multi') {
+      const researchAgent = new Agent({
+        name: 'Velclaw Research Agent',
+        model,
+        instructions: `${baseInstructions}\nYou are the research specialist. Focus on facts, evidence, dependencies, and unresolved questions.`,
+      })
+      const engineeringAgent = new Agent({
+        name: 'Velclaw Engineering Agent',
+        model,
+        instructions: `${baseInstructions}\nYou are the engineering specialist. Focus on implementation, architecture, debugging, testing, and operational consequences.`,
+      })
+      const rootAgent = new Agent({
+        name: 'Velclaw Orchestrator',
+        model,
+        instructions: `${baseInstructions}\nCoordinate the specialist agents and synthesize their findings into one actionable answer.`,
+        handoffs: [researchAgent, engineeringAgent],
+      })
+
+      const result = await run(rootAgent, message, {
+        modelProvider: provider,
+        maxTurns: 12,
+      })
+
+      return {
+        mode: 'multi' as const,
+        model,
+        output: result.finalOutput,
+      }
+    }
+
+    const agent = new Agent({
+      name: 'Velclaw Agent',
+      model,
+      instructions: baseInstructions,
+    })
+    const runner = new Runner({ modelProvider: provider })
+    const result = await runner.run(agent, message, { maxTurns: 12 })
+
+    return {
+      mode: 'single' as const,
+      model,
+      output: result.finalOutput,
+    }
+  } finally {
+    await provider.close().catch(() => undefined)
+  }
+}
+
+export async function createOpenAIAgentsSession(input: {
+  message: string
+  model?: string
+  instructions?: string
+  multiAgent?: boolean
+  maxConcurrentSubagents?: number
+  environment?: 'openai_hosted' | 'none'
+}) {
+  const apiKey = await getUserApiKey('openai')
+  if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
+
+  const message = cleanText(input.message, 12000)
+  if (!message) throw new Error('message is required')
+
+  const model = cleanText(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-6-astra'
+  const instructions =
+    cleanText(input.instructions, 6000) ||
+    'You are Velclaw Agent. Complete the requested task, verify your work, and report concrete results.'
+  const maxConcurrentSubagents = Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8)
+
+  const payload: Record<string, unknown> = {
+    agent: {
+      model,
+      instructions,
+      ...(input.multiAgent
+        ? { multi_agent: { enabled: true, max_concurrent_subagents: maxConcurrentSubagents } }
+        : {}),
+    },
+    environment: { type: input.environment || 'openai_hosted' },
+    input: message,
+  }
+
+  const response = await fetch('https://api.openai.com/v1/agents/sessions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'OpenAI-Beta': 'agents=v1',
+    },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  })
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    const message =
+      typeof data?.error?.message === 'string' ? data.error.message : `Agents API request failed (${response.status})`
+    throw new Error(message)
+  }
+
+  return data
+}
