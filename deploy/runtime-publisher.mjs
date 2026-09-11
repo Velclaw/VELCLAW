@@ -159,12 +159,16 @@ async function checkoutRequestedCommit(workdir, job, logs) {
 async function writeEnvFile(workdir, env) {
   const entries = Object.entries(env || {})
   if (entries.length === 0) return null
-  if (entries.some(([key, value]) => !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) || typeof value !== 'string' || /[\r\n]/.test(value))) {
-    throw new Error('Invalid deployment environment variable')
-  }
+  if (entries.some(([key, value]) => !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) || typeof value !== 'string' || /[\r\n]/.test(value))) throw new Error('Invalid deployment environment variable')
   const file = path.join(workdir, '.velclaw.env')
   await fs.writeFile(file, entries.map(([key, value]) => `${key}=${value}`).join('\n') + '\n', { mode: 0o600 })
   return file
+}
+
+async function removePreviousProjectContainers(projectName, logs) {
+  const result = await runCapture('docker', ['ps', '-aq', '--filter', `label=velclaw.project=${projectName}`], process.cwd(), logs)
+  const ids = result.stdout.split(/\s+/).filter(Boolean)
+  if (ids.length) await run('docker', ['rm', '--force', ...ids], process.cwd(), logs)
 }
 
 async function publish(job) {
@@ -185,7 +189,7 @@ async function publish(job) {
     await run('docker', ['network', 'inspect', RUNTIME_NETWORK], process.cwd(), logs).catch(async () => {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
     })
-    await run('docker', ['rm', '--force', container], process.cwd(), logs).catch(() => {})
+    await removePreviousProjectContainers(job.projectName, logs)
     const envArgs = envFile ? ['--env-file', envFile] : []
     await run('docker', ['run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK, '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true', '--tmpfs', '/tmp:rw,noexec,nosuid,size=64m', ...envArgs, ...traefikLabels(job, hostname, port), '--name', container, image], process.cwd(), logs)
     await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs: logs.slice(-LOG_LIMIT) }) })
