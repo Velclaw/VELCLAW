@@ -22,12 +22,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for common credential patterns
+      - name: Check for common credential values
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -nEI '(^|[^A-Za-z0-9_])(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+          # Match concrete credential-looking values, not regex definitions,
+          # documentation placeholders, or provider validation code.
+          pattern='(^|[[:space:]=:("'"'"'`])((sk|ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)($|[[:space:),"'"'"'`])'
+          if git grep -nEI "$pattern" -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
             echo 'Potential credential material detected. Remove it and rotate the credential before merging.'
             exit 1
           fi
-          echo 'No common credential patterns detected.'
+          echo 'No concrete credential values detected.'
