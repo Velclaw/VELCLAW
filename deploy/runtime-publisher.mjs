@@ -37,13 +37,8 @@ async function runCapture(cmd, args, cwd, logs, env = process.env) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
     let stdout = ''
-    child.stderr.on('data', (chunk) => {
-      const text = chunk.toString()
-      logs.push(text.trimEnd())
-    })
-    child.stdout.on('data', (chunk) => {
-      stdout += chunk.toString()
-    })
+    child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
+    child.stderr.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
     child.on('error', reject)
     child.on('close', (code) => code === 0 ? resolve({ stdout: stdout.trim() }) : reject(new Error(`${cmd} exited with code ${code}`)))
   })
@@ -81,6 +76,43 @@ function traefikLabels(job, hostname, port) {
   return labels
 }
 
+async function ensureDockerfile(workdir, logs) {
+  try {
+    await fs.access(path.join(workdir, 'Dockerfile'))
+    logs.push('Using repository Dockerfile')
+    return
+  } catch {}
+
+  const packagePath = path.join(workdir, 'package.json')
+  let pkg
+  try {
+    pkg = JSON.parse(await fs.readFile(packagePath, 'utf8'))
+  } catch {
+    throw new Error('Repository has no Dockerfile and no valid package.json; automatic Node build is unavailable')
+  }
+
+  const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) }
+  const scripts = pkg.scripts || {}
+  const manager = await fs.access(path.join(workdir, 'pnpm-lock.yaml')).then(() => 'pnpm').catch(() => 'npm')
+  const install = manager === 'pnpm' ? 'corepack enable && pnpm install --frozen-lockfile' : 'npm ci'
+  const build = scripts.build ? `${manager} run build` : ''
+  const start = scripts.start ? `${manager} start` : ''
+  const isStatic = Boolean(deps.vite || deps['react-scripts']) && !scripts.start
+
+  if (!build) throw new Error('Repository has no build script and no Dockerfile')
+
+  if (isStatic) {
+    await fs.writeFile(path.join(workdir, 'velclaw-static-server.mjs'), `import { createServer } from 'node:http'\nimport { createReadStream, existsSync, statSync } from 'node:fs'\nimport { join, extname } from 'node:path'\nconst root = process.env.STATIC_ROOT || '/app/dist'\nconst types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' }\ncreateServer((req, res) => { const raw = decodeURIComponent((req.url || '/').split('?')[0]); const rel = raw === '/' ? '/index.html' : raw; const file = join(root, rel); const target = existsSync(file) && statSync(file).isFile() ? file : join(root, 'index.html'); if (!existsSync(target)) { res.statusCode = 404; res.end('Not found'); return } res.setHeader('Content-Type', types[extname(target)] || 'application/octet-stream'); createReadStream(target).pipe(res) }).listen(Number(process.env.PORT || 3000), '0.0.0.0')\n`)
+    await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${manager === 'pnpm' ? 'pnpm-lock.yaml' : 'package-lock.json'} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nCOPY velclaw-static-server.mjs ./velclaw-static-server.mjs\nENV PORT=3000\nEXPOSE 3000\nCMD ["node", "velclaw-static-server.mjs"]\n`)
+    logs.push('Generated Dockerfile for static Node/Vite application')
+    return
+  }
+
+  if (!start) throw new Error('Repository has no start script and no Dockerfile')
+  await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${manager === 'pnpm' ? 'pnpm-lock.yaml' : 'package-lock.json'} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nENV NODE_ENV=production\nENV PORT=3000\nEXPOSE 3000\nCMD ["${manager}", "start"]\n`)
+  logs.push(`Generated Dockerfile for Node application (${manager})`)
+}
+
 async function detectContainerPort(image, logs) {
   const result = await runCapture('docker', ['image', 'inspect', image, '--format', '{{json .Config.ExposedPorts}}'], process.cwd(), logs)
   if (result.stdout && result.stdout !== '<no value>') {
@@ -88,9 +120,7 @@ async function detectContainerPort(image, logs) {
       const exposed = JSON.parse(result.stdout)
       const port = Object.keys(exposed || {}).map((value) => Number.parseInt(value.split('/')[0], 10)).find((value) => Number.isInteger(value) && value > 0 && value < 65536)
       if (port) return port
-    } catch {
-      logs.push('Could not parse Docker exposed-port metadata; using port 3000')
-    }
+    } catch { logs.push('Could not parse Docker exposed-port metadata; using port 3000') }
   }
   return 3000
 }
@@ -103,6 +133,7 @@ async function publish(job) {
   const container = `velclaw-${job.id}`
   try {
     await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
+    await ensureDockerfile(workdir, logs)
     await run('docker', ['build', '--pull', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
     const port = await detectContainerPort(image, logs)
     logs.push(`Detected application port: ${port}`)
