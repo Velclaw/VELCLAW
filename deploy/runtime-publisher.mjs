@@ -12,6 +12,8 @@ const PUBLIC_SCHEME = (process.env.VELCLAW_PUBLIC_SCHEME || 'https').trim().toLo
 const TRAEFIK_ENTRYPOINT = (process.env.VELCLAW_TRAEFIK_ENTRYPOINT || (PUBLIC_SCHEME === 'http' ? 'web' : 'websecure')).trim()
 const ENABLE_TLS = PUBLIC_SCHEME === 'https'
 const DEPLOY_TOKEN = process.env.VELCLAW_DEPLOY_API_TOKEN || ''
+const BUILD_TIMEOUT_MS = Math.max(60_000, Number(process.env.VELCLAW_BUILD_TIMEOUT_MS || 900_000))
+const LOG_LIMIT = 500
 
 if (!PUBLIC_DOMAIN || /[/:\s]/.test(PUBLIC_DOMAIN)) throw new Error(`Invalid VELCLAW_PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}`)
 if (!['http', 'https'].includes(PUBLIC_SCHEME)) throw new Error(`Invalid VELCLAW_PUBLIC_SCHEME: ${PUBLIC_SCHEME}`)
@@ -23,12 +25,26 @@ async function request(pathname, options = {}) {
   return response.json()
 }
 
-async function run(cmd, args, cwd, logs, env = process.env) {
+async function run(cmd, args, cwd, logs, env = process.env, timeoutMs = 0) {
   logs.push(`$ ${cmd} ${args.join(' ')}`)
   const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
-  child.stdout.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
-  child.stderr.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
-  const code = await new Promise((resolve) => child.on('close', resolve))
+  child.stdout.on('data', (chunk) => {
+    for (const line of chunk.toString().split(/\r?\n/)) if (line) logs.push(line.slice(0, 16_000))
+  })
+  child.stderr.on('data', (chunk) => {
+    for (const line of chunk.toString().split(/\r?\n/)) if (line) logs.push(line.slice(0, 16_000))
+  })
+  let timer
+  const code = await new Promise((resolve, reject) => {
+    child.on('error', reject)
+    child.on('close', resolve)
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        child.kill('SIGKILL')
+        reject(new Error(`${cmd} timed out after ${timeoutMs}ms`))
+      }, timeoutMs)
+    }
+  }).finally(() => clearTimeout(timer))
   if (code !== 0) throw new Error(`${cmd} exited with code ${code}`)
 }
 
@@ -38,7 +54,9 @@ async function runCapture(cmd, args, cwd, logs, env = process.env) {
     const child = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
     let stdout = ''
     child.stdout.on('data', (chunk) => { stdout += chunk.toString() })
-    child.stderr.on('data', (chunk) => logs.push(chunk.toString().trimEnd()))
+    child.stderr.on('data', (chunk) => {
+      for (const line of chunk.toString().split(/\r?\n/)) if (line) logs.push(line.slice(0, 16_000))
+    })
     child.on('error', reject)
     child.on('close', (code) => code === 0 ? resolve({ stdout: stdout.trim() }) : reject(new Error(`${cmd} exited with code ${code}`)))
   })
@@ -55,6 +73,7 @@ function slug(value) {
 }
 
 function productHostname(job) {
+  if (job.customDomain) return job.customDomain
   const project = slug(job.projectName)
   const suffix = String(job.id).replace(/[^a-z0-9]/gi, '').slice(0, 8).toLowerCase()
   const maxProjectLength = Math.max(1, 63 - suffix.length - 2)
@@ -137,29 +156,44 @@ async function checkoutRequestedCommit(workdir, job, logs) {
   logs.push(`Checked out requested commit ${job.commitSha}`)
 }
 
+async function writeEnvFile(workdir, env) {
+  const entries = Object.entries(env || {})
+  if (entries.length === 0) return null
+  if (entries.some(([key, value]) => !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) || typeof value !== 'string' || /[\r\n]/.test(value))) {
+    throw new Error('Invalid deployment environment variable')
+  }
+  const file = path.join(workdir, '.velclaw.env')
+  await fs.writeFile(file, entries.map(([key, value]) => `${key}=${value}`).join('\n') + '\n', { mode: 0o600 })
+  return file
+}
+
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${slug(job.projectName)}:${job.id}`
   const hostname = productHostname(job)
   const container = `velclaw-${job.id}`
+  let envFile = null
   try {
-    await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv())
+    await run('git', ['clone', '--depth', '1', '--branch', job.branch, job.repoUrl, workdir], process.cwd(), logs, gitEnv(), BUILD_TIMEOUT_MS)
     await checkoutRequestedCommit(workdir, job, logs)
     await ensureDockerfile(workdir, logs)
-    await run('docker', ['build', '--pull', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs)
+    envFile = await writeEnvFile(workdir, job.env)
+    await run('docker', ['build', '--pull', '--label', `velclaw.deployment=${job.id}`, '--tag', image, workdir], process.cwd(), logs, process.env, BUILD_TIMEOUT_MS)
     const port = await detectContainerPort(image, logs)
     logs.push(`Detected application port: ${port}`)
     await run('docker', ['network', 'inspect', RUNTIME_NETWORK], process.cwd(), logs).catch(async () => {
       await run('docker', ['network', 'create', '--driver', 'bridge', RUNTIME_NETWORK], process.cwd(), logs)
     })
     await run('docker', ['rm', '--force', container], process.cwd(), logs).catch(() => {})
-    await run('docker', ['run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK, '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--security-opt', 'no-new-privileges:true', ...traefikLabels(job, hostname, port), '--name', container, image], process.cwd(), logs)
-    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs: logs.slice(-500) }) })
+    const envArgs = envFile ? ['--env-file', envFile] : []
+    await run('docker', ['run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK, '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true', '--tmpfs', '/tmp:rw,noexec,nosuid,size=64m', ...envArgs, ...traefikLabels(job, hostname, port), '--name', container, image], process.cwd(), logs)
+    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs: logs.slice(-LOG_LIMIT) }) })
   } catch (error) {
     logs.push(`ERROR: ${error instanceof Error ? error.message : String(error)}`)
-    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'failed', logs: logs.slice(-500), error: error instanceof Error ? error.message : String(error) }) }).catch(() => {})
+    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'failed', logs: logs.slice(-LOG_LIMIT), error: error instanceof Error ? error.message : String(error) }) }).catch(() => {})
   } finally {
+    if (envFile) await fs.rm(envFile, { force: true }).catch(() => {})
     await fs.rm(workdir, { recursive: true, force: true })
   }
 }
