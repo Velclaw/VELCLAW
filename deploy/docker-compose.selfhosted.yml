@@ -9,8 +9,9 @@ services:
       - POSTGRES_URL
       - VELCLAW_DEPLOY_API_TOKEN
       - VELCLAW_PUBLIC_DOMAIN
-      - MODEL_ACCESS_KEY
-      - DO_INFERENCE_ROUTER
+      - VELCLAW_PUBLIC_SCHEME
+      - VELCLAW_DEPLOY_POLL_MS
+      - GITHUB_WEBHOOK_SECRET
     labels:
       - traefik.enable=true
       - traefik.docker.network=velclaw-runtime
