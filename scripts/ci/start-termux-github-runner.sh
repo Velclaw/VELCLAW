@@ -40,19 +40,10 @@ cleanup_transient_data() {
   proot-distro login ubuntu --user velclaw -- bash -lc '
     RUNNER_DIR="${VELCLAW_RUNNER_DIR:-/home/velclaw/actions-runner-velclaw}"
     WORK_DIR="$RUNNER_DIR/_work"
-
-    # Project checkouts, build output, dependency trees and job-generated files
-    # are disposable. Keep the runner installation/configuration itself.
     if [ -d "$WORK_DIR" ]; then
       find "$WORK_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
     fi
-
-    # Runner diagnostics are not the authoritative CI log; GitHub stores the
-    # job log remotely. Remove local diagnostics after every job.
     rm -rf "$RUNNER_DIR/_diag"/* 2>/dev/null || true
-
-    # Do not retain package-manager caches on the phone. This intentionally
-    # trades repeat downloads for minimal persistent storage.
     rm -rf "$HOME/.cache"/* "$HOME/.npm"/* "$HOME/.pnpm-store"/* \
       "$HOME/.local/share/pnpm/store"/* 2>/dev/null || true
   ' >>"$LOG_FILE" 2>&1 || true
@@ -62,11 +53,12 @@ cleanup_transient_data() {
 echo "Starting Velclaw GitHub Actions runner (ephemeral / low-storage mode)..." >>"$LOG_FILE"
 trim_log
 
-# --once makes the runner return after each job. The wrapper cleans all
-# disposable job data, then waits for the next GitHub Actions job.
 while true; do
   set +e
   proot-distro login ubuntu --user velclaw -- bash -lc '
+    set -euo pipefail
+    export DOTNET_GCHeapHardLimit="${DOTNET_GCHeapHardLimit:-67108864}"
+    export DOTNET_EnableDiagnostics="${DOTNET_EnableDiagnostics:-0}"
     cd "${VELCLAW_RUNNER_DIR:-/home/velclaw/actions-runner-velclaw}"
     ./run.sh --once
   ' >>"$LOG_FILE" 2>&1
@@ -75,7 +67,6 @@ while true; do
 
   cleanup_transient_data
 
-  # Never spin aggressively while GitHub/network is unavailable.
   if [ "$status" -eq 0 ]; then
     sleep 2
   else
