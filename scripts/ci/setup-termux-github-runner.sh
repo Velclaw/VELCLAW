@@ -6,6 +6,7 @@ RUNNER_VERSION="${VELCLAW_RUNNER_VERSION:-2.337.0}"
 RUNNER_DIR="${VELCLAW_RUNNER_DIR:-/home/velclaw/actions-runner-velclaw}"
 RUNNER_NAME="${VELCLAW_RUNNER_NAME:-velclaw-termux-$(hostname | tr -cd '[:alnum:]-' | cut -c1-24)}"
 LABELS="self-hosted,linux,ARM64,velclaw-termux"
+TOKEN_FILE="/home/velclaw/.config/velclaw-gh-token"
 
 if ! command -v proot-distro >/dev/null 2>&1; then
   echo "Installing proot-distro in Termux..."
@@ -21,12 +22,6 @@ fi
 GH_TOKEN_FROM_HOST="${GH_TOKEN:-}"
 if [ -z "$GH_TOKEN_FROM_HOST" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   GH_TOKEN_FROM_HOST="$(gh auth token)"
-fi
-
-if [ -z "$GH_TOKEN_FROM_HOST" ]; then
-  echo "GitHub CLI authentication is required on the Termux host."
-  echo "Run: gh auth login"
-  exit 20
 fi
 
 echo "Preparing Ubuntu userland. The runner will run as a non-root user."
@@ -54,8 +49,20 @@ if ! id -u velclaw >/dev/null 2>&1; then
   useradd --create-home --shell /bin/bash velclaw
 fi
 
-mkdir -p /home/velclaw
+mkdir -p /home/velclaw/.config
 chown -R velclaw:velclaw /home/velclaw
+
+# The user previously authenticated GitHub CLI inside Ubuntu as root. Reuse that
+# token for the unprivileged runner instead of forcing a second browser login.
+if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  GH_TOKEN="$(gh auth token)"
+fi
+if [ -n "${GH_TOKEN:-}" ]; then
+  umask 077
+  printf '%s\n' "$GH_TOKEN" > /home/velclaw/.config/velclaw-gh-token
+  chown velclaw:velclaw /home/velclaw/.config/velclaw-gh-token
+  chmod 600 /home/velclaw/.config/velclaw-gh-token
+fi
 
 if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
   echo "ldconfig is unavailable after libc-bin installation."
@@ -74,6 +81,13 @@ proot-distro login ubuntu --user velclaw -- bash -lc '
 set -euo pipefail
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
+TOKEN_FILE="/home/velclaw/.config/velclaw-gh-token"
+if [ -z "${GH_TOKEN:-}" ] && [ -r "$TOKEN_FILE" ]; then
+  GH_TOKEN="$(cat "$TOKEN_FILE")"
+  export GH_TOKEN
+  rm -f "$TOKEN_FILE"
+fi
+
 if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   GH_TOKEN="$(gh auth token)"
   export GH_TOKEN
@@ -81,6 +95,8 @@ fi
 
 if [ -z "${GH_TOKEN:-}" ]; then
   echo "GitHub authentication token is unavailable inside Ubuntu."
+  echo "Authenticate GitHub CLI in Ubuntu, then rerun this script."
+  echo "Run as root in Ubuntu: gh auth login"
   exit 20
 fi
 
@@ -105,7 +121,7 @@ fi
 test -x "$RUNNER_DIR/run.sh"
 test -x "$RUNNER_DIR/bin/Runner.Listener"
 
-TOKEN="$(gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
+TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
 if [ -z "$TOKEN" ]; then
   echo "Could not obtain a runner registration token."
   exit 21
