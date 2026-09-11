@@ -10,3 +10,11 @@
     },
   ]
 }
+
+"agent": {
+  "model": "gpt-6-astra",
+  "multi_agent": {
+    "enabled": true,
+    "max_concurrent_subagents": 3,
+  }
+}
