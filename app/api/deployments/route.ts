@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
   }
   if (env) {
     const entries = Object.entries(env)
-    if (entries.length > 100 || entries.some(([key, value]) => !ENV_KEY_PATTERN.test(key) || typeof value !== 'string' || value.length > 8192)) {
+    if (entries.length > 100 || entries.some(([key, value]) => !ENV_KEY_PATTERN.test(key) || typeof value !== 'string' || value.length > 8192 || /[\r\n]/.test(value))) {
       return NextResponse.json({ error: 'Invalid environment variables' }, { status: 400 })
     }
   }
