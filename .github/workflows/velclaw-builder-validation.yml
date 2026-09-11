@@ -1,0 +1,52 @@
+name: Velclaw Builder Validation
+
+on:
+  push:
+    branches:
+      - feat/browser-builder
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: velclaw-builder-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Builder / Self-hosted ARM64
+    runs-on:
+      - self-hosted
+      - linux
+      - ARM64
+      - velclaw-termux
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Type check
+        run: pnpm type-check
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
