@@ -6,7 +6,7 @@ RUNNER_VERSION="${VELCLAW_RUNNER_VERSION:-2.337.0}"
 RUNNER_DIR="${VELCLAW_RUNNER_DIR:-/home/velclaw/actions-runner-velclaw}"
 RUNNER_NAME="${VELCLAW_RUNNER_NAME:-velclaw-termux-$(hostname | tr -cd '[:alnum:]-' | cut -c1-24)}"
 LABELS="self-hosted,linux,ARM64,velclaw-termux"
-TOKEN_FILE="/home/velclaw/.config/velclaw-gh-token"
+REGISTRATION_TOKEN_FILE="/home/velclaw/.config/velclaw-runner-registration-token"
 
 if ! command -v proot-distro >/dev/null 2>&1; then
   echo "Installing proot-distro in Termux..."
@@ -26,8 +26,6 @@ fi
 
 echo "Preparing Ubuntu userland. The runner will run as a non-root user."
 
-# Runner configuration refuses root. PRoot presents uid 0 by default, so create
-# a dedicated unprivileged account first, then enter Ubuntu as that account.
 GH_TOKEN="$GH_TOKEN_FROM_HOST" \
 VELCLAW_REPO="$REPO" \
 VELCLAW_RUNNER_VERSION="$RUNNER_VERSION" \
@@ -52,17 +50,25 @@ fi
 mkdir -p /home/velclaw/.config
 chown -R velclaw:velclaw /home/velclaw
 
-# The user previously authenticated GitHub CLI inside Ubuntu as root. Reuse that
-# token for the unprivileged runner instead of forcing a second browser login.
-if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  GH_TOKEN="$(gh auth token)"
+# gh was authenticated in this Ubuntu root shell. Generate the short-lived
+# runner registration token here while that authentication context is known to
+# work, then hand only the registration token to the unprivileged runner user.
+if ! gh auth status >/dev/null 2>&1; then
+  echo "GitHub CLI is not authenticated inside Ubuntu."
+  echo "Run as root in Ubuntu: gh auth login"
+  exit 20
 fi
-if [ -n "${GH_TOKEN:-}" ]; then
-  umask 077
-  printf '%s\n' "$GH_TOKEN" > /home/velclaw/.config/velclaw-gh-token
-  chown velclaw:velclaw /home/velclaw/.config/velclaw-gh-token
-  chmod 600 /home/velclaw/.config/velclaw-gh-token
+
+REGISTRATION_TOKEN="$(gh api --method POST "/repos/${VELCLAW_REPO:-Velclaw/Velclaw}/actions/runners/registration-token" --jq .token)"
+if [ -z "$REGISTRATION_TOKEN" ]; then
+  echo "Could not obtain a runner registration token."
+  exit 21
 fi
+
+umask 077
+printf '%s\n' "$REGISTRATION_TOKEN" > /home/velclaw/.config/velclaw-runner-registration-token
+chown velclaw:velclaw /home/velclaw/.config/velclaw-runner-registration-token
+chmod 600 /home/velclaw/.config/velclaw-runner-registration-token
 
 if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
   echo "ldconfig is unavailable after libc-bin installation."
@@ -70,9 +76,7 @@ if ! command -v ldconfig >/dev/null 2>&1 || [ ! -x /sbin/ldconfig ]; then
 fi
 '
 
-# Run all runner operations as the dedicated non-root user. Preserve the token
-# and repository settings without asking the GitHub runner to run as root.
-GH_TOKEN="$GH_TOKEN_FROM_HOST" \
+# Configure and run the GitHub runner only as the dedicated non-root user.
 VELCLAW_REPO="$REPO" \
 VELCLAW_RUNNER_VERSION="$RUNNER_VERSION" \
 VELCLAW_RUNNER_DIR="$RUNNER_DIR" \
@@ -81,24 +85,13 @@ proot-distro login ubuntu --user velclaw -- bash -lc '
 set -euo pipefail
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
-TOKEN_FILE="/home/velclaw/.config/velclaw-gh-token"
-if [ -z "${GH_TOKEN:-}" ] && [ -r "$TOKEN_FILE" ]; then
-  GH_TOKEN="$(cat "$TOKEN_FILE")"
-  export GH_TOKEN
-  rm -f "$TOKEN_FILE"
+REGISTRATION_TOKEN_FILE="/home/velclaw/.config/velclaw-runner-registration-token"
+if [ ! -r "$REGISTRATION_TOKEN_FILE" ]; then
+  echo "Runner registration token is unavailable inside Ubuntu."
+  exit 21
 fi
-
-if [ -z "${GH_TOKEN:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  GH_TOKEN="$(gh auth token)"
-  export GH_TOKEN
-fi
-
-if [ -z "${GH_TOKEN:-}" ]; then
-  echo "GitHub authentication token is unavailable inside Ubuntu."
-  echo "Authenticate GitHub CLI in Ubuntu, then rerun this script."
-  echo "Run as root in Ubuntu: gh auth login"
-  exit 20
-fi
+REGISTRATION_TOKEN="$(cat "$REGISTRATION_TOKEN_FILE")"
+rm -f "$REGISTRATION_TOKEN_FILE"
 
 RUNNER_DIR="${VELCLAW_RUNNER_DIR:-$HOME/actions-runner-velclaw}"
 REPO="${VELCLAW_REPO:-Velclaw/Velclaw}"
@@ -121,24 +114,16 @@ fi
 test -x "$RUNNER_DIR/run.sh"
 test -x "$RUNNER_DIR/bin/Runner.Listener"
 
-TOKEN="$(GH_TOKEN="$GH_TOKEN" gh api --method POST "/repos/${REPO}/actions/runners/registration-token" --jq .token)"
-if [ -z "$TOKEN" ]; then
-  echo "Could not obtain a runner registration token."
-  exit 21
-fi
-
 "$RUNNER_DIR/config.sh" \
   --unattended \
   --replace \
   --url "https://github.com/${REPO}" \
-  --token "$TOKEN" \
+  --token "$REGISTRATION_TOKEN" \
   --name "$RUNNER_NAME" \
   --labels "$LABELS" \
   --work _work
 
-# Removal is best-effort on Ctrl-C/termination. Escape the variable so the
-# trap expands only inside this already non-root shell.
-trap '\''"$RUNNER_DIR/config.sh" remove --token "${TOKEN}" || true'\'' EXIT
+trap '\''"$RUNNER_DIR/config.sh" remove --token "${REGISTRATION_TOKEN}" || true'\'' EXIT
 
 echo
 echo "Velclaw self-hosted ARM64 runner is ONLINE."
