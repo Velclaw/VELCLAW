@@ -155,6 +155,25 @@ export async function findLatestDeploymentForWebhook(repoUrl: string, branch: st
   return rows[0] || null
 }
 
+export async function getWebhookDeploymentConfig(repoUrl: string, branch: string) {
+  await ensureDeployStore()
+  const normalized = repoUrl.trim().replace(/\/$/, '').replace(/\.git$/i, '')
+  const rows = await sql`
+    SELECT ${publicDeploymentColumns()}, env_json as "envJson"
+    FROM velclaw_deployments
+    WHERE regexp_replace(regexp_replace(rtrim(repo_url, '/'), '[.]git$', '', 'i'), '/$', '') = ${normalized}
+      AND branch = ${branch}
+    ORDER BY created_at DESC
+    LIMIT 1
+  `
+  const row = rows[0] as (Deployment & { envJson: string | null }) | undefined
+  if (!row) return null
+  let env: DeploymentEnv = {}
+  if (row.envJson) env = JSON.parse(decrypt(row.envJson)) as DeploymentEnv
+  const { envJson: _envJson, ...deployment } = row
+  return { deployment, env }
+}
+
 export async function claimNextDeployment() {
   await ensureDeployStore()
   const rows = await sql`
