@@ -19,11 +19,10 @@ export async function POST(request: Request, { params }: Params) {
 
   const { id } = await params
   const body = await request.json().catch(() => ({}))
-
   const status = typeof body.status === 'string' ? body.status : 'failed'
   const url = typeof body.url === 'string' ? body.url : null
-  const logs = typeof body.logs === 'string' ? body.logs : null
-  const error = typeof body.error === 'string' ? body.error : null
+  const logs = Array.isArray(body.logs) ? body.logs.filter((value: unknown): value is string => typeof value === 'string').slice(-500) : null
+  const error = typeof body.error === 'string' ? body.error.slice(0, 4000) : null
 
   if (!['building', 'ready', 'failed'].includes(status)) {
     return NextResponse.json({ error: 'Invalid deployment status' }, { status: 400 })
@@ -35,7 +34,7 @@ export async function POST(request: Request, { params }: Params) {
       SET
         status = ${status},
         url = COALESCE(${url}, url),
-        logs = COALESCE(${logs}, logs),
+        logs = COALESCE(${logs ? JSON.stringify(logs) : null}::jsonb, logs),
         error = ${error},
         updated_at = NOW()
       WHERE id = ${id}
