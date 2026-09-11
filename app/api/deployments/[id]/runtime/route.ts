@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { ensureDeployStore } from '@/lib/deploy/store'
 import postgres from 'postgres'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,8 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const { id } = await params
+  if (!id) return NextResponse.json({ error: 'Deployment id is required' }, { status: 400 })
+
   const body = await request.json().catch(() => ({}))
   const status = typeof body.status === 'string' ? body.status : 'failed'
   const url = typeof body.url === 'string' ? body.url : null
@@ -29,6 +32,7 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   try {
+    await ensureDeployStore()
     const rows = await sql`
       UPDATE velclaw_deployments
       SET
@@ -47,6 +51,7 @@ export async function POST(request: Request, { params }: Params) {
 
     return NextResponse.json({ ok: true, deployment: rows[0] })
   } catch (err) {
+    console.error('[deployments/runtime]', err)
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Runtime update failed' }, { status: 500 })
   }
 }
