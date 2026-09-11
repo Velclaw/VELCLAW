@@ -46,6 +46,7 @@ export async function ensureDeployStore() {
   await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET DEFAULT 'legacy'`
   await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET NOT NULL`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_user_created_idx ON velclaw_deployments (user_id, created_at DESC)`
+  await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_repo_branch_idx ON velclaw_deployments (repo_url, branch, created_at DESC)`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_created_idx ON velclaw_deployments (created_at DESC)`
   initialized = true
 }
@@ -83,6 +84,21 @@ export async function getDeployment(id: string, userId: string) {
     SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
       url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
     FROM velclaw_deployments WHERE id = ${id} AND user_id = ${userId} LIMIT 1
+  `
+  return rows[0] || null
+}
+
+export async function findLatestDeploymentForWebhook(repoUrl: string, branch: string) {
+  await ensureDeployStore()
+  const normalized = repoUrl.trim().replace(/\/$/, '').replace(/\.git$/i, '')
+  const rows = await sql<Deployment[]>`
+    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
+      url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
+    FROM velclaw_deployments
+    WHERE regexp_replace(regexp_replace(rtrim(repo_url, '/'), '\\.git$', '', 'i'), '/$', '') = ${normalized}
+      AND branch = ${branch}
+    ORDER BY created_at DESC
+    LIMIT 1
   `
   return rows[0] || null
 }
