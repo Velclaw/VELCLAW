@@ -16,13 +16,15 @@ services:
         value: https
       - key: RENDER_SERVICE_ID
         sync: false
+      - key: RENDER_REPOSITORY_URL
+        sync: false
+      - key: RENDER_BRANCH
+        value: main
       - key: RENDER_API_KEY
         sync: false
       - key: RENDER_PUBLIC_URL
         sync: false
       - key: POSTGRES_URL
         sync: false
-      - key: MODEL_ACCESS_KEY
-        sync: false
-      - key: DO_INFERENCE_ROUTER
+      - key: GITHUB_WEBHOOK_SECRET
         sync: false
