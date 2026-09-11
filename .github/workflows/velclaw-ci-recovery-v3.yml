@@ -1,0 +1,112 @@
+name: Velclaw CI Recovery v3
+
+on:
+  push:
+    branches:
+      - ci/recovery-v3
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: velclaw-ci-recovery-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  probe-slim:
+    name: Probe / Ubuntu Slim
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Start
+        run: |
+          echo "runner=ubuntu-slim"
+          uname -a
+          node --version
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  probe-arm:
+    name: Probe / Ubuntu ARM64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - name: Start
+        run: |
+          echo "runner=ubuntu-24.04-arm"
+          uname -a
+          node --version
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  probe-windows:
+    name: Probe / Windows
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Start
+        shell: pwsh
+        run: |
+          Write-Host "runner=windows-latest"
+          $PSVersionTable.PSVersion
+          node --version
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  quality-slim:
+    name: Quality / Ubuntu Slim
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    needs: probe-slim
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Toolchain
+        run: |
+          node --version
+          pnpm --version
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Type check
+        run: pnpm type-check
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+
+  docker:
+    name: Docker / Ubuntu 22.04
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: quality-slim
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Docker version
+        run: docker version
+      - name: Build
+        run: docker build --pull --tag velclaw:ci .
+      - name: Inspect
+        run: docker image inspect velclaw:ci >/dev/null
+      - name: Verify metadata
+        run: |
+          test "$(docker image inspect velclaw:ci --format '{{.Config.ExposedPorts}}')" = "map[3000/tcp:{}]"
+          test "$(docker image inspect velclaw:ci --format '{{.Config.User}}')" = "velclaw"
