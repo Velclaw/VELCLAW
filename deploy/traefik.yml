@@ -15,7 +15,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: ${VELCLAW_TLS_EMAIL}
+      email: ops@velclaw.cfd
       storage: /letsencrypt/acme.json
       httpChallenge:
         entryPoint: web
