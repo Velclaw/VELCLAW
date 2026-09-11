@@ -1,9 +1,12 @@
 import postgres from 'postgres'
 import { randomUUID } from 'node:crypto'
+import { decrypt, encrypt } from '@/lib/crypto'
 
 const sql = postgres(process.env.POSTGRES_URL || '', { max: 5 })
 
 export type DeploymentStatus = 'queued' | 'building' | 'ready' | 'failed' | 'cancelled'
+
+export type DeploymentEnv = Record<string, string>
 
 export type Deployment = {
   id: string
@@ -14,6 +17,7 @@ export type Deployment = {
   commitSha: string | null
   status: DeploymentStatus
   url: string | null
+  customDomain: string | null
   logs: string[]
   error: string | null
   createdAt: string
@@ -35,6 +39,8 @@ export async function ensureDeployStore() {
       commit_sha text,
       status text NOT NULL DEFAULT 'queued',
       url text,
+      custom_domain text,
+      env_json text,
       logs jsonb NOT NULL DEFAULT '[]'::jsonb,
       error text,
       created_at timestamptz NOT NULL DEFAULT now(),
@@ -45,10 +51,39 @@ export async function ensureDeployStore() {
   await sql`UPDATE velclaw_deployments SET user_id = 'legacy' WHERE user_id IS NULL`
   await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET DEFAULT 'legacy'`
   await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET NOT NULL`
+  await sql`ALTER TABLE velclaw_deployments ADD COLUMN IF NOT EXISTS custom_domain text`
+  await sql`ALTER TABLE velclaw_deployments ADD COLUMN IF NOT EXISTS env_json text`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_user_created_idx ON velclaw_deployments (user_id, created_at DESC)`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_repo_branch_idx ON velclaw_deployments (repo_url, branch, created_at DESC)`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_created_idx ON velclaw_deployments (created_at DESC)`
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS velclaw_deployments_custom_domain_idx ON velclaw_deployments (custom_domain) WHERE custom_domain IS NOT NULL`
   initialized = true
+}
+
+function normalizeEnv(value?: DeploymentEnv | null) {
+  if (!value) return null
+  const entries = Object.entries(value)
+    .filter(([key, val]) => /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) && typeof val === 'string')
+    .slice(0, 100)
+  if (entries.length === 0) return null
+  return Object.fromEntries(entries.map(([key, val]) => [key, val.slice(0, 8192)]))
+}
+
+function normalizeDomain(value?: string | null) {
+  if (!value?.trim()) return null
+  const domain = value.trim().toLowerCase().replace(/\.$/, '')
+  if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain)) {
+    throw new Error('Invalid custom domain')
+  }
+  return domain
+}
+
+function publicDeploymentColumns() {
+  return sql`
+    id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch,
+    commit_sha as "commitSha", status, url, custom_domain as "customDomain", logs, error,
+    created_at as "createdAt", updated_at as "updatedAt"
+  `
 }
 
 export async function createDeployment(input: {
@@ -57,14 +92,18 @@ export async function createDeployment(input: {
   repoUrl: string
   branch: string
   commitSha?: string | null
+  env?: DeploymentEnv | null
+  customDomain?: string | null
 }) {
   await ensureDeployStore()
   const id = randomUUID()
+  const env = normalizeEnv(input.env)
+  const customDomain = normalizeDomain(input.customDomain)
+  const encryptedEnv = env ? encrypt(JSON.stringify(env)) : null
   const rows = await sql<Deployment[]>`
-    INSERT INTO velclaw_deployments (id, user_id, project_name, repo_url, branch, commit_sha, status, logs)
-    VALUES (${id}, ${input.userId}, ${input.projectName}, ${input.repoUrl}, ${input.branch}, ${input.commitSha || null}, 'queued', ${JSON.stringify(['Deployment queued'])}::jsonb)
-    RETURNING id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
-      url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
+    INSERT INTO velclaw_deployments (id, user_id, project_name, repo_url, branch, commit_sha, status, url, custom_domain, env_json, logs)
+    VALUES (${id}, ${input.userId}, ${input.projectName}, ${input.repoUrl}, ${input.branch}, ${input.commitSha || null}, 'queued', NULL, ${customDomain}, ${encryptedEnv}, ${JSON.stringify(['Deployment queued'])}::jsonb)
+    RETURNING ${publicDeploymentColumns()}
   `
   return rows[0]
 }
@@ -72,17 +111,15 @@ export async function createDeployment(input: {
 export async function listDeployments(userId: string, limit = 50) {
   await ensureDeployStore()
   return sql<Deployment[]>`
-    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
-      url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
-    FROM velclaw_deployments WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT ${limit}
+    SELECT ${publicDeploymentColumns()}
+    FROM velclaw_deployments WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT ${Math.min(Math.max(limit, 1), 100)}
   `
 }
 
 export async function getDeployment(id: string, userId: string) {
   await ensureDeployStore()
   const rows = await sql<Deployment[]>`
-    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
-      url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
+    SELECT ${publicDeploymentColumns()}
     FROM velclaw_deployments WHERE id = ${id} AND user_id = ${userId} LIMIT 1
   `
   return rows[0] || null
@@ -92,8 +129,7 @@ export async function findLatestDeploymentForWebhook(repoUrl: string, branch: st
   await ensureDeployStore()
   const normalized = repoUrl.trim().replace(/\/$/, '').replace(/\.git$/i, '')
   const rows = await sql<Deployment[]>`
-    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
-      url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
+    SELECT ${publicDeploymentColumns()}
     FROM velclaw_deployments
     WHERE regexp_replace(regexp_replace(rtrim(repo_url, '/'), '\\.git$', '', 'i'), '/$', '') = ${normalized}
       AND branch = ${branch}
@@ -105,7 +141,7 @@ export async function findLatestDeploymentForWebhook(repoUrl: string, branch: st
 
 export async function claimNextDeployment() {
   await ensureDeployStore()
-  const rows = await sql<Deployment[]>`
+  const rows = await sql`
     WITH next_job AS (
       SELECT id FROM velclaw_deployments
       WHERE status = 'queued'
@@ -119,10 +155,23 @@ export async function claimNextDeployment() {
     FROM next_job
     WHERE d.id = next_job.id
     RETURNING d.id, d.user_id as "userId", d.project_name as "projectName", d.repo_url as "repoUrl", d.branch,
-      d.commit_sha as "commitSha", d.status, d.url, d.logs, d.error,
-      d.created_at as "createdAt", d.updated_at as "updatedAt"
+      d.commit_sha as "commitSha", d.status, d.url, d.custom_domain as "customDomain", d.env_json as "envJson", d.logs,
+      d.error, d.created_at as "createdAt", d.updated_at as "updatedAt"
   `
-  return rows[0] || null
+  const job = rows[0] as (Deployment & { envJson: string | null }) | undefined
+  if (!job) return null
+  let env: DeploymentEnv = {}
+  if (job.envJson) {
+    try {
+      const parsed = JSON.parse(decrypt(job.envJson))
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) env = parsed as DeploymentEnv
+    } catch (error) {
+      await finishDeployment(job.id, { status: 'failed', logs: [...(job.logs || []), 'ERROR: Unable to decrypt deployment environment'], error: error instanceof Error ? error.message : 'Environment decryption failed' })
+      return null
+    }
+  }
+  const { envJson: _envJson, ...safeJob } = job
+  return { ...safeJob, env }
 }
 
 export async function finishDeployment(
@@ -132,8 +181,8 @@ export async function finishDeployment(
   await ensureDeployStore()
   await sql`
     UPDATE velclaw_deployments
-    SET status = ${input.status}, logs = ${JSON.stringify(input.logs)}::jsonb,
-        error = ${input.error || null}, url = ${input.url || null}, updated_at = now()
+    SET status = ${input.status}, logs = ${JSON.stringify(input.logs.slice(-500))}::jsonb,
+        error = ${input.error || null}, url = COALESCE(${input.url || null}, url), updated_at = now()
     WHERE id = ${id}
   `
 }
