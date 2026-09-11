@@ -24,15 +24,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -nEI '(^|[^[:alnum:]])(ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_]{20,}([^A-Za-z0-9_]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+          if git grep -nEI -- '(^|[^[:alnum:]])(ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_]{20,}([^A-Za-z0-9_]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
             echo 'GitHub token-like credential detected.'
             exit 1
           fi
-          if git grep -nEI '(^|[^[:alnum:]])AKIA[0-9A-Z]{16}([^0-9A-Z]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+          if git grep -nEI -- '(^|[^[:alnum:]])AKIA[0-9A-Z]{16}([^0-9A-Z]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
             echo 'AWS access-key-like credential detected.'
             exit 1
           fi
-          if git grep -nE '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+          if git grep -nE -- '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
             echo 'Private key material detected.'
             exit 1
           fi
