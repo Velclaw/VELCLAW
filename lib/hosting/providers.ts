@@ -1,6 +1,7 @@
 export type HostingProvider = 'render' | 'self-hosted'
 
 export type HostingDeploymentInput = {
+  userId: string
   projectName: string
   repoUrl: string
   branch: string
