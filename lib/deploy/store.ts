@@ -7,6 +7,7 @@ export type DeploymentStatus = 'queued' | 'building' | 'ready' | 'failed' | 'can
 
 export type Deployment = {
   id: string
+  userId: string
   projectName: string
   repoUrl: string
   branch: string
@@ -27,6 +28,7 @@ export async function ensureDeployStore() {
   await sql`
     CREATE TABLE IF NOT EXISTS velclaw_deployments (
       id text PRIMARY KEY,
+      user_id text NOT NULL DEFAULT 'legacy',
       project_name text NOT NULL,
       repo_url text NOT NULL,
       branch text NOT NULL DEFAULT 'main',
@@ -39,11 +41,17 @@ export async function ensureDeployStore() {
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `
+  await sql`ALTER TABLE velclaw_deployments ADD COLUMN IF NOT EXISTS user_id text`
+  await sql`UPDATE velclaw_deployments SET user_id = 'legacy' WHERE user_id IS NULL`
+  await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET DEFAULT 'legacy'`
+  await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET NOT NULL`
+  await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_user_created_idx ON velclaw_deployments (user_id, created_at DESC)`
   await sql`CREATE INDEX IF NOT EXISTS velclaw_deployments_created_idx ON velclaw_deployments (created_at DESC)`
   initialized = true
 }
 
 export async function createDeployment(input: {
+  userId: string
   projectName: string
   repoUrl: string
   branch: string
@@ -52,29 +60,29 @@ export async function createDeployment(input: {
   await ensureDeployStore()
   const id = randomUUID()
   const rows = await sql<Deployment[]>`
-    INSERT INTO velclaw_deployments (id, project_name, repo_url, branch, commit_sha, status, logs)
-    VALUES (${id}, ${input.projectName}, ${input.repoUrl}, ${input.branch}, ${input.commitSha || null}, 'queued', ${JSON.stringify(['Deployment queued'])}::jsonb)
-    RETURNING id, project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
+    INSERT INTO velclaw_deployments (id, user_id, project_name, repo_url, branch, commit_sha, status, logs)
+    VALUES (${id}, ${input.userId}, ${input.projectName}, ${input.repoUrl}, ${input.branch}, ${input.commitSha || null}, 'queued', ${JSON.stringify(['Deployment queued'])}::jsonb)
+    RETURNING id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
       url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
   `
   return rows[0]
 }
 
-export async function listDeployments(limit = 50) {
+export async function listDeployments(userId: string, limit = 50) {
   await ensureDeployStore()
   return sql<Deployment[]>`
-    SELECT id, project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
+    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
       url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
-    FROM velclaw_deployments ORDER BY created_at DESC LIMIT ${limit}
+    FROM velclaw_deployments WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT ${limit}
   `
 }
 
-export async function getDeployment(id: string) {
+export async function getDeployment(id: string, userId: string) {
   await ensureDeployStore()
   const rows = await sql<Deployment[]>`
-    SELECT id, project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
+    SELECT id, user_id as "userId", project_name as "projectName", repo_url as "repoUrl", branch, commit_sha as "commitSha", status,
       url, logs, error, created_at as "createdAt", updated_at as "updatedAt"
-    FROM velclaw_deployments WHERE id = ${id} LIMIT 1
+    FROM velclaw_deployments WHERE id = ${id} AND user_id = ${userId} LIMIT 1
   `
   return rows[0] || null
 }
@@ -94,7 +102,7 @@ export async function claimNextDeployment() {
         logs = d.logs || '["Build worker claimed deployment"]'::jsonb
     FROM next_job
     WHERE d.id = next_job.id
-    RETURNING d.id, d.project_name as "projectName", d.repo_url as "repoUrl", d.branch,
+    RETURNING d.id, d.user_id as "userId", d.project_name as "projectName", d.repo_url as "repoUrl", d.branch,
       d.commit_sha as "commitSha", d.status, d.url, d.logs, d.error,
       d.created_at as "createdAt", d.updated_at as "updatedAt"
   `
