@@ -36,14 +36,14 @@ export async function runBuilderAgent(input: {
   const model = clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
   const context = workspaceContext(input.files)
   const provider = new OpenAIProvider({ apiKey, useResponses: true })
-  const changes: BuilderWorkspaceFile[] = []
+  const collectedChanges: BuilderWorkspaceFile[] = []
 
   const applyWorkspaceChanges = tool({
     name: 'apply_workspace_changes',
     description: 'Apply complete replacement contents for files in the current Velclaw Builder browser workspace. Use only for deliberate code changes requested by the user.',
     parameters: z.object({ changes: z.array(changeSchema).max(30) }),
     async execute({ changes: requested }) {
-      for (const change of requested) changes.push({ path: change.path, content: change.content })
+      for (const change of requested) collectedChanges.push(change)
       return `Accepted ${requested.length} workspace file changes. Return a concise summary of what was changed.`
     },
   })
@@ -72,7 +72,7 @@ export async function runBuilderAgent(input: {
       ...(input.role === 'coder' ? { modelSettings: { toolChoice: 'required' as const } } : {}),
     })
 
-    return { role: input.role, model, output: result.finalOutput, changes }
+    return { role: input.role, model, output: result.finalOutput, changes: collectedChanges }
   } finally {
     await provider.close().catch(() => undefined)
   }
