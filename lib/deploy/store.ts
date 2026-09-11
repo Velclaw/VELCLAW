@@ -46,6 +46,13 @@ export async function ensureDeployStore() {
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `
+  await sql`
+    CREATE TABLE IF NOT EXISTS velclaw_github_webhook_deliveries (
+      delivery_id text PRIMARY KEY,
+      event text NOT NULL,
+      received_at timestamptz NOT NULL DEFAULT now()
+    )
+  `
   await sql`ALTER TABLE velclaw_deployments ADD COLUMN IF NOT EXISTS user_id text`
   await sql`UPDATE velclaw_deployments SET user_id = 'legacy' WHERE user_id IS NULL`
   await sql`ALTER TABLE velclaw_deployments ALTER COLUMN user_id SET DEFAULT 'legacy'`
@@ -62,7 +69,7 @@ export async function ensureDeployStore() {
 function normalizeEnv(value?: DeploymentEnv | null) {
   if (!value) return null
   const entries = Object.entries(value)
-    .filter(([key, val]) => /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) && typeof val === 'string')
+    .filter(([key, val]) => /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(key) && typeof val === 'string' && !/[\r\n]/.test(val))
     .slice(0, 100)
   if (entries.length === 0) return null
   return Object.fromEntries(entries.map(([key, val]) => [key, val.slice(0, 8192)]))
@@ -81,6 +88,18 @@ function publicDeploymentColumns() {
     commit_sha as "commitSha", status, url, custom_domain as "customDomain", logs, error,
     created_at as "createdAt", updated_at as "updatedAt"
   `
+}
+
+export async function claimGithubWebhookDelivery(deliveryId: string, event: string) {
+  await ensureDeployStore()
+  if (!deliveryId) return true
+  const rows = await sql`
+    INSERT INTO velclaw_github_webhook_deliveries (delivery_id, event)
+    VALUES (${deliveryId}, ${event || 'unknown'})
+    ON CONFLICT (delivery_id) DO NOTHING
+    RETURNING delivery_id
+  `
+  return rows.length === 1
 }
 
 export async function createDeployment(input: {
