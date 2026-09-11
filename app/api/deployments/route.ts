@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/session/get-server-session'
-import { createDeployment, listDeployments } from '@/lib/deploy/store'
+import { createHostingDeployment } from '@/lib/hosting'
+import { listDeployments } from '@/lib/deploy/store'
 
 const REPO_PATTERN = /^https:\/\/(?:github\.com)\/[^/]+\/[^/]+(?:\.git)?$/i
 
@@ -38,10 +39,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const deployment = await createDeployment({ projectName, repoUrl, branch, commitSha })
+    const deployment = await createHostingDeployment({ projectName, repoUrl, branch, commitSha })
     return NextResponse.json({ deployment }, { status: 202 })
   } catch (error) {
     console.error('[deployments] create failed', error)
-    return NextResponse.json({ error: 'Deployment store unavailable' }, { status: 503 })
+    const message = error instanceof Error ? error.message : 'Deployment provider unavailable'
+    return NextResponse.json({ error: message }, { status: 503 })
   }
 }
