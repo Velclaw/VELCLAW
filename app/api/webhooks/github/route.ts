@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { claimGithubWebhookDelivery, createDeployment, findLatestDeploymentForWebhook } from '@/lib/deploy/store'
+import { claimGithubWebhookDelivery, createDeployment, getWebhookDeploymentConfig } from '@/lib/deploy/store'
 
 const WEBHOOK_SECRET_ENV = 'GITHUB_WEBHOOK_SECRET'
 
@@ -52,17 +52,17 @@ export async function POST(request: NextRequest) {
     const commitSha = data.after || ''
     if (!repoUrl || !branch || !commitSha || /^0+$/.test(commitSha)) return NextResponse.json({ ok: true, verified: true, ignored: 'invalid-push-payload', deliveryId })
 
-    const existing = await findLatestDeploymentForWebhook(repoUrl, branch)
-    if (!existing) return NextResponse.json({ ok: true, verified: true, ignored: 'repository-not-configured', deliveryId })
+    const config = await getWebhookDeploymentConfig(repoUrl, branch)
+    if (!config) return NextResponse.json({ ok: true, verified: true, ignored: 'repository-not-configured', deliveryId })
 
     const deployment = await createDeployment({
-      userId: existing.userId,
-      projectName: existing.projectName,
-      repoUrl: existing.repoUrl,
+      userId: config.deployment.userId,
+      projectName: config.deployment.projectName,
+      repoUrl: config.deployment.repoUrl,
       branch,
       commitSha,
-      env: null,
-      customDomain: existing.customDomain,
+      env: config.env,
+      customDomain: config.deployment.customDomain,
     })
     return NextResponse.json({ ok: true, verified: true, event, deliveryId, deployment }, { status: 202 })
   } catch (error) {
