@@ -3,4 +3,6 @@ kind: Kustomization
 namespace: velclaw-production
 resources:
   - namespace.yaml
+  - publisher-rbac.yaml
   - velclaw.yaml
+  - publisher.yaml
