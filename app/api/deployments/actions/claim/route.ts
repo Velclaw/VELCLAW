@@ -27,7 +27,15 @@ export async function POST(request: Request) {
       SET status = 'building', updated_at = NOW()
       FROM next_deployment AS n
       WHERE d.id = n.id
-      RETURNING d.id, d.project_name, d.github_url, d.branch, d.status, d.image
+      RETURNING
+        d.id,
+        d.project_name AS "projectName",
+        d.github_url AS "repoUrl",
+        d.branch,
+        d.commit_sha AS "commitSha",
+        d.image,
+        d.status,
+        d.logs
     `
 
     return NextResponse.json({ deployment: rows[0] ?? null })
