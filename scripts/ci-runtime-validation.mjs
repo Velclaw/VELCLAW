@@ -10,6 +10,13 @@ const required = [
   'deploy/docker-compose.selfhosted.yml',
   'deploy/publisher.Dockerfile',
   'deploy/runtime-publisher.mjs',
+  'deploy/kubernetes-publisher.mjs',
+  'deploy/kubernetes-publisher.Dockerfile',
+  'deploy/kubernetes/namespace.yaml',
+  'deploy/kubernetes/publisher-rbac.yaml',
+  'deploy/kubernetes/velclaw.yaml',
+  'deploy/kubernetes/publisher.yaml',
+  'deploy/kubernetes/kustomization.yaml',
   'deploy/traefik.yml',
   'app',
   'components',
@@ -60,8 +67,24 @@ for (const requiredToken of ['velclaw-control-plane:', 'velclaw-publisher:', 've
 
 const publisher = fs.readFileSync(path.join(root, 'deploy/runtime-publisher.mjs'), 'utf8')
 if (!publisher.includes('VELCLAW_PUBLIC_DOMAIN') || !publisher.includes('traefik.http.routers.')) {
-  console.error('Runtime validation failed: runtime publisher is missing first-party domain or Traefik routing contract.')
+  console.error('Runtime validation failed: Docker fallback publisher is missing first-party domain or Traefik routing contract.')
   process.exit(1)
 }
 
-console.log('Runtime validation passed: Velclaw Docker + publisher + Traefik self-hosted deployment configuration is compatible with server/API routes.')
+const k8sPublisher = fs.readFileSync(path.join(root, 'deploy/kubernetes-publisher.mjs'), 'utf8')
+for (const requiredToken of ['KUBERNETES_SERVICE_HOST', 'VELCLAW_DEPLOY_API_TOKEN', 'batch/v1', 'apps/v1', 'networking.k8s.io', 'gcr.io/kaniko-project/executor', 'velclaw-registry']) {
+  if (!k8sPublisher.includes(requiredToken)) {
+    console.error(`Runtime validation failed: Kubernetes publisher is missing required contract: ${requiredToken}`)
+    process.exit(1)
+  }
+}
+
+const kustomization = fs.readFileSync(path.join(root, 'deploy/kubernetes/kustomization.yaml'), 'utf8')
+for (const requiredToken of ['namespace.yaml', 'publisher-rbac.yaml', 'velclaw.yaml', 'publisher.yaml']) {
+  if (!kustomization.includes(requiredToken)) {
+    console.error(`Runtime validation failed: Kubernetes kustomization is missing: ${requiredToken}`)
+    process.exit(1)
+  }
+}
+
+console.log('Runtime validation passed: Velclaw Docker fallback + Kubernetes-native publisher + Traefik deployment contracts are present.')
