@@ -56,5 +56,5 @@ export async function verifyAccessToken(token: string) {
 }
 
 export function oauthMetadata() {
-  return { issuer, authorization_endpoint: `${issuer}/api/oauth/authorize`, token_endpoint: `${issuer}/api/oauth/token`, userinfo_endpoint: `${issuer}/api/oauth/userinfo`, jwks_uri: `${issuer}/api/oauth/jwks`, response_types_supported: ['code'], grant_types_supported: ['authorization_code'], subject_types_supported: ['public'], scopes_supported: ['openid', 'profile', 'email'], token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'none'], code_challenge_methods_supported: ['S256'] }
+  return { issuer, authorization_endpoint: `${issuer}/api/oauth/authorize`, token_endpoint: `${issuer}/api/oauth/token`, userinfo_endpoint: `${issuer}/api/oauth/userinfo`, response_types_supported: ['code'], grant_types_supported: ['authorization_code'], subject_types_supported: ['public'], scopes_supported: ['openid', 'profile', 'email'], token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'none'], code_challenge_methods_supported: ['S256'] }
 }
