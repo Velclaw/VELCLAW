@@ -37,7 +37,6 @@ jobs:
           sed -i 's/replace-with-strong-password/ci-postgres-password/g' .env.production
           sed -i 's/replace-with-64-byte-random-token/ci-api-token/g' .env.production
           sed -i 's/replace-with-different-64-byte-random-token/ci-runner-token/g' .env.production
-          sed -i 's#replace-me@postgres#ci-postgres-password@postgres#g' .env.production
       - name: Validate production compose syntax
         run: docker compose --env-file .env.production -f docker-compose.production.yml config
       - name: Build control plane image
@@ -70,8 +69,4 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          if [[ -f .env.production ]]; then
-            docker compose --env-file .env.production -f docker-compose.production.yml down -v
-          else
-            docker compose -f docker-compose.production.yml down -v
-          fi
+          docker compose --env-file .env.production -f docker-compose.production.yml down -v || true
