@@ -7,6 +7,7 @@ const DOMAIN = (process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd').trim().toLow
 const REGISTRY = (process.env.VELCLAW_IMAGE_REGISTRY || 'ghcr.io/velclaw').replace(/\/$/, '')
 const POLL_MS = Math.max(1000, Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000))
 const JOB_TIMEOUT_MS = Math.max(120_000, Number(process.env.VELCLAW_K8S_JOB_TIMEOUT_MS || 900_000))
+const ROLLOUT_TIMEOUT_MS = Math.max(60_000, Number(process.env.VELCLAW_K8S_ROLLOUT_TIMEOUT_MS || 600_000))
 const LOG_LIMIT = 500
 
 if (!TOKEN) throw new Error('VELCLAW_DEPLOY_API_TOKEN is required')
@@ -65,13 +66,7 @@ async function apply(resource) {
   }
 }
 
-async function remove(kind, resourceName, apiVersion) {
-  const plural = { Job: 'jobs', Deployment: 'deployments', Service: 'services', Secret: 'secrets', ConfigMap: 'configmaps', Ingress: 'ingresses' }[kind]
-  if (!plural) return
-  await k8s(`${apiBase(apiVersion, plural)}/${resourceName}`, { method: 'DELETE', body: JSON.stringify({ propagationPolicy: 'Foreground' }) })
-}
-
-function buildJob(job) {
+async function buildJob(job) {
   const app = appName(job)
   const image = imageName(job)
   const gitUrl = String(job.repoUrl).replace(/\.git$/i, '') + '.git'
@@ -131,13 +126,31 @@ async function waitJob(jobName) {
   throw new Error(`Kubernetes build job timed out after ${JOB_TIMEOUT_MS}ms`)
 }
 
+async function waitDeployment(app) {
+  const deadline = Date.now() + ROLLOUT_TIMEOUT_MS
+  while (Date.now() < deadline) {
+    const result = await k8s(`/apis/apps/v1/namespaces/${NAMESPACE}/deployments/${app}`)
+    if (result.status === 404) throw new Error('Application Deployment disappeared during rollout')
+    const status = result.data.status || {}
+    const desired = Number(result.data.spec?.replicas || 1)
+    const available = Number(status.availableReplicas || 0)
+    const updated = Number(status.updatedReplicas || 0)
+    const unavailable = Number(status.unavailableReplicas || 0)
+    if (available >= desired && updated >= desired && unavailable === 0) return
+    const failed = (status.conditions || []).find((condition) => condition.type === 'Progressing' && condition.reason === 'ProgressDeadlineExceeded')
+    if (failed) throw new Error(`Application rollout exceeded Kubernetes progress deadline: ${app}`)
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+  }
+  throw new Error(`Application rollout timed out after ${ROLLOUT_TIMEOUT_MS}ms`)
+}
+
 function appResources(job) {
   const app = appName(job)
   const host = hostname(job)
   const image = imageName(job)
   const env = Object.fromEntries(Object.entries(job.env || {}).filter(([k, v]) => /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(k) && typeof v === 'string' && !/[\r\n]/.test(v)).map(([k, v]) => [k, v.slice(0, 8192)]))
   const secret = { apiVersion: 'v1', kind: 'Secret', metadata: { name: `${app}-env`, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, type: 'Opaque', stringData: env }
-  const deployment = { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name: app, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { replicas: 1, revisionHistoryLimit: 3, strategy: { type: 'RollingUpdate', rollingUpdate: { maxSurge: 1, maxUnavailable: 0 } }, selector: { matchLabels: { 'app.kubernetes.io/name': app } }, template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { containers: [{ name: 'web', image, imagePullPolicy: 'Always', ports: [{ name: 'http', containerPort: 3000 }], envFrom: [{ secretRef: { name: `${app}-env` } }], resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '1', memory: '1Gi' } }, securityContext: { runAsNonRoot: true, runAsUser: 10001, runAsGroup: 10001, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] }, seccompProfile: { type: 'RuntimeDefault' } }, readinessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 6 }, livenessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 30, periodSeconds: 20, timeoutSeconds: 3, failureThreshold: 6 }] } } } }
+  const deployment = { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name: app, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { replicas: 1, revisionHistoryLimit: 3, progressDeadlineSeconds: 600, strategy: { type: 'RollingUpdate', rollingUpdate: { maxSurge: 1, maxUnavailable: 0 } }, selector: { matchLabels: { 'app.kubernetes.io/name': app } }, template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { containers: [{ name: 'web', image, imagePullPolicy: 'Always', ports: [{ name: 'http', containerPort: 3000 }], envFrom: [{ secretRef: { name: `${app}-env` } }], resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '1', memory: '1Gi' } }, securityContext: { runAsNonRoot: true, runAsUser: 10001, runAsGroup: 10001, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] }, seccompProfile: { type: 'RuntimeDefault' } }, readinessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 6 }, livenessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 30, periodSeconds: 20, timeoutSeconds: 3, failureThreshold: 6 }] } } } }
   const service = { apiVersion: 'v1', kind: 'Service', metadata: { name: app, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, spec: { selector: { 'app.kubernetes.io/name': app }, ports: [{ name: 'http', port: 80, targetPort: 'http' }] } }
   const ingress = { apiVersion: 'networking.k8s.io/v1', kind: 'Ingress', metadata: { name: app, namespace: NAMESPACE, annotations: { 'cert-manager.io/cluster-issuer': 'letsencrypt-prod', 'nginx.ingress.kubernetes.io/ssl-redirect': 'true' }, labels: { 'velclaw.deployment': job.id } }, spec: { ingressClassName: 'nginx', tls: [{ hosts: [host], secretName: `${app}-tls` }], rules: [{ host, http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: app, port: { name: 'http' } } } }] } }] } }
   return [secret, deployment, service, ingress]
@@ -147,13 +160,15 @@ async function publish(job) {
   const logs = [...(job.logs || []), 'Kubernetes publisher started']
   try {
     const app = appName(job)
-    const build = buildJob(job)
+    const build = await buildJob(job)
     await apply(build)
     logs.push(`Created Kubernetes build job ${build.metadata.name}`)
     await waitJob(build.metadata.name)
     logs.push('Build job completed and image pushed to registry')
     for (const resource of appResources(job)) await apply(resource)
     logs.push(`Applied Deployment/Service/Ingress for ${app}`)
+    await waitDeployment(app)
+    logs.push(`Deployment ${app} passed readiness rollout verification`)
     const url = `https://${hostname(job)}`
     await control(`/api/deployments/${job.id}/runtime`, { method: 'POST', body: JSON.stringify({ status: 'ready', url, logs: logs.slice(-LOG_LIMIT) }) })
   } catch (error) {
