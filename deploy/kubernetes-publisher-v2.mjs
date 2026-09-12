@@ -32,19 +32,13 @@ const hostname = job => {
 const imageName = job => `${REGISTRY}/${safe(job.projectName)}:${job.operation === 'rollback' && job.rollbackTargetId ? job.rollbackTargetId : job.id}`
 
 async function control(path, options = {}) {
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    headers: { authorization: `Bearer ${TOKEN}`, 'content-type': 'application/json', ...(options.headers || {}) },
-  })
+  const response = await fetch(`${API}${path}`, { ...options, headers: { authorization: `Bearer ${TOKEN}`, 'content-type': 'application/json', ...(options.headers || {}) } })
   if (!response.ok) throw new Error(`${response.status} ${await response.text()}`)
   return response.status === 204 ? null : response.json()
 }
 
 async function k8s(path, options = {}) {
-  const response = await fetch(`${K8S}${path}`, {
-    ...options,
-    headers: { authorization: `Bearer ${k8sToken}`, 'content-type': 'application/json', ...(options.headers || {}) },
-  })
+  const response = await fetch(`${K8S}${path}`, { ...options, headers: { authorization: `Bearer ${k8sToken}`, 'content-type': 'application/json', ...(options.headers || {}) } })
   if (!response.ok && response.status !== 404) throw new Error(`Kubernetes ${response.status}: ${await response.text()}`)
   return { status: response.status, data: response.status === 204 || response.status === 404 ? null : await response.json() }
 }
@@ -60,10 +54,7 @@ async function apply(resource) {
   const base = basePath(resource.apiVersion, plural)
   const existing = await k8s(`${base}/${resource.metadata.name}`)
   if (existing.status === 404) return k8s(base, { method: 'POST', body: JSON.stringify(resource) })
-  return k8s(`${base}/${resource.metadata.name}`, {
-    method: 'PUT',
-    body: JSON.stringify({ ...resource, metadata: { ...resource.metadata, resourceVersion: existing.data.metadata.resourceVersion } }),
-  })
+  return k8s(`${base}/${resource.metadata.name}`, { method: 'PUT', body: JSON.stringify({ ...resource, metadata: { ...resource.metadata, resourceVersion: existing.data.metadata.resourceVersion } }) })
 }
 
 function buildJob(job) {
@@ -72,15 +63,12 @@ function buildJob(job) {
   const repo = String(job.repoUrl).replace(/\.git$/i, '') + '.git'
   const branch = String(job.branch || 'main').replace(/[^A-Za-z0-9._/-]/g, '') || 'main'
   const checkout = `if [ -n \"$GITHUB_TOKEN\" ]; then git -c http.extraheader=\"AUTHORIZATION: Bearer $GITHUB_TOKEN\" clone --depth 1 --branch '${branch}' '${repo}' /workspace/src; else git clone --depth 1 --branch '${branch}' '${repo}' /workspace/src; fi${job.commitSha ? `; cd /workspace/src; git fetch --depth 1 origin '${job.commitSha}'; git checkout --detach '${job.commitSha}'` : ''}`
-  const prepare = `const fs=require('fs');const r='/workspace/src';const p=JSON.parse(fs.readFileSync(r+'/package.json','utf8'));const s=p.scripts||{};const has=f=>fs.existsSync(r+'/'+f);if(!has('Dockerfile')&&!s.build)throw new Error('Repository requires Dockerfile or package.json build script');if(!has('Dockerfile')){const m=has('pnpm-lock.yaml')?'pnpm':has('yarn.lock')?'yarn':'npm';const i=m==='pnpm'?'corepack enable && pnpm install --frozen-lockfile':m==='yarn'?'corepack enable && yarn install --immutable':has('package-lock.json')?'npm ci':'npm install';const start=s.start?'${'${'}m} start':'node -e "require(\\\"http\\\").createServer((_,r)=>r.end(\\\"Velclaw app\\\")).listen(3000,\\\"0.0.0.0\\\")';fs.writeFileSync(r+'/Dockerfile','FROM node:22-alpine\\nWORKDIR /app\\nCOPY . .\\nRUN '+i+'\\nRUN '+m+' run build\\nENV NODE_ENV=production\\nENV PORT=3000\\nEXPOSE 3000\\nCMD [\\"sh\\",\\"-c\\",\\"'+start+'\\"]\\n')}`
+  const prepare = `const fs=require('fs');const r='/workspace/src';const p=JSON.parse(fs.readFileSync(r+'/package.json','utf8'));const s=p.scripts||{};const has=f=>fs.existsSync(r+'/'+f);if(!has('Dockerfile')&&!s.build)throw new Error('Repository requires Dockerfile or package.json build script');if(!has('Dockerfile')){const m=has('pnpm-lock.yaml')?'pnpm':has('yarn.lock')?'yarn':'npm';const i=m==='pnpm'?'corepack enable && pnpm install --frozen-lockfile':m==='yarn'?'corepack enable && yarn install --immutable':has('package-lock.json')?'npm ci':'npm install';const start=s.start?m+' start':'node -e "require(\\\"http\\\").createServer((_,r)=>r.end(\\\"Velclaw app\\\")).listen(3000,\\\"0.0.0.0\\\")';fs.writeFileSync(r+'/Dockerfile','FROM node:22-alpine\\nWORKDIR /app\\nCOPY . .\\nRUN '+i+'\\nRUN '+m+' run build\\nENV NODE_ENV=production\\nENV PORT=3000\\nEXPOSE 3000\\nCMD [\\"sh\\",\\"-c\\",'+JSON.stringify(start)+']\\n')}`
   return {
     apiVersion: 'batch/v1', kind: 'Job', metadata: { name: `${app}-build`, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'velclaw.deployment': job.id } },
     spec: { backoffLimit: 0, ttlSecondsAfterFinished: 900, activeDeadlineSeconds: Math.ceil(JOB_TIMEOUT_MS / 1000), template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: {
       restartPolicy: 'Never', automountServiceAccountToken: false, securityContext: { seccompProfile: { type: 'RuntimeDefault' } },
-      volumes: [
-        { name: 'source', emptyDir: {} },
-        { name: 'docker-config', secret: { secretName: 'velclaw-registry', optional: false, items: [{ key: '.dockerconfigjson', path: 'config.json' }] } },
-      ],
+      volumes: [ { name: 'source', emptyDir: {} }, { name: 'docker-config', secret: { secretName: 'velclaw-registry', optional: false, items: [{ key: '.dockerconfigjson', path: 'config.json' }] } } ],
       initContainers: [
         { name: 'checkout', image: 'alpine/git:2.47.2', command: ['sh', '-ec'], args: [checkout], env: [{ name: 'GITHUB_TOKEN', valueFrom: { secretKeyRef: { name: 'velclaw-github', key: 'token', optional: true } } }], volumeMounts: [{ name: 'source', mountPath: '/workspace' }], securityContext: { runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] } } },
         { name: 'prepare', image: 'node:22-alpine', command: ['node', '-e'], args: [prepare], volumeMounts: [{ name: 'source', mountPath: '/workspace' }], securityContext: { runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] } } },
@@ -124,16 +112,15 @@ function resources(job) {
     { apiVersion: 'v1', kind: 'Secret', metadata: { name: `${app}-env`, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, type: 'Opaque', stringData: env },
     { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name: app, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { replicas: 1, revisionHistoryLimit: 5, progressDeadlineSeconds: 600, strategy: { type: 'RollingUpdate', rollingUpdate: { maxSurge: 1, maxUnavailable: 0 } }, selector: { matchLabels: { 'app.kubernetes.io/name': app } }, template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { containers: [{ name: 'web', image, imagePullPolicy: 'Always', ports: [{ name: 'http', containerPort: 3000 }], envFrom: [{ secretRef: { name: `${app}-env` } }], resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '1', memory: '1Gi' } }, securityContext: { runAsNonRoot: true, runAsUser: 10001, runAsGroup: 10001, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] }, seccompProfile: { type: 'RuntimeDefault' } }, readinessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 6 }, livenessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 30, periodSeconds: 20, timeoutSeconds: 3, failureThreshold: 6 } }] } } } },
     { apiVersion: 'v1', kind: 'Service', metadata: { name: app, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, spec: { selector: { 'app.kubernetes.io/name': app }, ports: [{ name: 'http', port: 80, targetPort: 'http' }] } },
-    { apiVersion: 'networking.k8s.io/v1', kind: 'Ingress', metadata: { name: app, namespace: NAMESPACE, annotations: { 'cert-manager.io/cluster-issuer': 'letsencrypt-prod', 'nginx.ingress.kubernetes.io/ssl-redirect': 'true' }, labels: { 'velclaw.deployment': job.id } }, spec: { ingressClassName: 'nginx', tls: [{ hosts: [host], secretName: `${app}-tls` }], rules: [{ host, http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: app, port: { name: 'http' } } } }] } }] } },
+    { apiVersion: 'networking.k8s.io/v1', kind: 'Ingress', metadata: { name: app, namespace: NAMESPACE, annotations: { 'cert-manager.io/cluster-issuer': 'letsencrypt-prod', 'nginx.ingress.kubernetes.io/ssl-redirect': 'true' }, labels: { 'velclaw.deployment': job.id } }, spec: { ingressClassName: 'nginx', tls: [{ hosts: [host], secretName: `${app}-tls`}], rules: [{ host, http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: app, port: { name: 'http' } } } }] } }] } },
   ]
 }
 
 async function publish(job) {
   const logs = [...(job.logs || []), `Kubernetes publisher started (${job.operation || 'deploy'})`]
   try {
-    if (job.operation === 'rollback' && job.rollbackTargetId) {
-      logs.push(`Rollback selected existing image from deployment ${job.rollbackTargetId}`)
-    } else {
+    if (job.operation === 'rollback' && job.rollbackTargetId) logs.push(`Rollback selected existing image from deployment ${job.rollbackTargetId}`)
+    else {
       const build = buildJob(job)
       await apply(build)
       logs.push(`Created build job ${build.metadata.name}`)
