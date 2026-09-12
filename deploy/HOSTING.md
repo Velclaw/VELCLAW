@@ -7,108 +7,78 @@ Velclaw Hosting is the first-party application hosting layer for the Velclaw eco
 The primary target is **KubeOps Cloud**, using the existing K3s production cluster. The Docker Compose stack remains a compatibility/self-hosted fallback for a single Linux host; it is not the preferred production architecture when a KubeOps Kubernetes cluster is available.
 
 ```text
-GitHub
-  |
-  v
-Velclaw Control Plane / Webhook
-  |
-  v
-PostgreSQL deployment queue
-  |
-  v
-Kubernetes-native publisher
-  |
-  +--> Kubernetes Job -> Git checkout -> generated Dockerfile -> Kaniko -> GHCR
-  |
-  +--> Deployment -> Pod
-  +--> Service -> ClusterIP
-  +--> Ingress -> nginx
-  +--> cert-manager -> TLS
-  |
-  v
-Cloudflare Edge
-  |
-  v
-velclaw.cfd / *.velclaw.cfd
+GitHub -> Velclaw Control Plane/Webhook -> PostgreSQL queue -> Kubernetes publisher
+                                                       -> Job -> Kaniko -> GHCR
+                                                       -> Deployment -> Service -> Ingress -> TLS
+Cloudflare Edge -> velclaw.cfd / *.velclaw.cfd
 ```
 
 ## Kubernetes deployment
 
-The canonical Kubernetes manifests are in `deploy/kubernetes/`:
+Canonical manifests live in `deploy/kubernetes/` and the publisher lives in `deploy/kubernetes-publisher.mjs`. The publisher uses the Kubernetes API and has no Docker socket access. `publisher-rbac.yaml` is namespace-scoped least-privilege RBAC and `kustomization.yaml` is the deployment entrypoint.
 
-- `namespace.yaml` — isolated `velclaw-production` namespace.
-- `velclaw.yaml` — Velclaw control-plane ServiceAccount, Deployment, Service, HPA, Ingress and PDB.
-- `publisher-rbac.yaml` — namespace-scoped least-privilege RBAC for the native publisher.
-- `publisher.yaml` — Kubernetes publisher Deployment; it has no Docker socket access.
-- `kustomization.yaml` — reproducible Kustomize entrypoint.
-- `deploy/kubernetes-publisher.mjs` — deployment worker using the Kubernetes API.
-- `deploy/kubernetes-publisher.Dockerfile` — publisher image definition.
-- `.github/workflows/kubeops-deploy.yml` — build/push/deploy workflow for both control plane and publisher images.
-
-The production Deployment uses the same `/api/health` contract already used by Velclaw runtime validation and deploy configurations. The workload runs as non-root UID/GID `1001`, drops Linux capabilities, and uses Kubernetes rolling updates with `maxUnavailable: 0`.
+The production workflow `.github/workflows/kubeops-deploy.yml` validates the application, builds and pushes both Velclaw and publisher images, applies Kustomize, then waits for both rollouts. Failed rollouts attempt an undo before the workflow exits unsuccessfully.
 
 ### Required GitHub Actions secret
-
-GitHub Actions expects:
 
 ```text
 KUBEOPS_KUBECONFIG_B64
 ```
 
-It must contain the base64-encoded kubeconfig for the KubeOps production cluster. Do not commit or paste the kubeconfig into the repository.
+This is the base64-encoded kubeconfig for the KubeOps production cluster. Keep it only in GitHub Actions secrets.
 
 ### Required Kubernetes secrets
 
-Create these in `velclaw-production` before enabling the publisher:
+These are created **out of band** and are intentionally not represented as Kubernetes Secret manifests with values:
 
 ```text
-velclaw-runtime
-velclaw-github
-velclaw-registry
+velclaw-production/velclaw-runtime
+velclaw-production/velclaw-github
+velclaw-production/velclaw-registry
 ```
 
-`velclaw-runtime` is consumed by the Velclaw control plane. It must contain the real application runtime configuration, including `POSTGRES_URL` and `VELCLAW_DEPLOY_API_TOKEN` where those values are required by the active deployment API.
+See `deploy/kubernetes/runtime-secrets.example.yaml` for the exact non-secret bootstrap template.
 
-`velclaw-github` must contain:
+Required keys:
 
-```text
-token=<GitHub token with the minimum repository read scope needed for private source checkouts>
-```
+| Secret | Key | Purpose |
+|---|---|---|
+| `velclaw-runtime` | `POSTGRES_URL` | PostgreSQL deployment queue/runtime |
+| `velclaw-runtime` | `VELCLAW_DEPLOY_API_TOKEN` | authenticated publisher/control-plane callback |
+| `velclaw-github` | `token` | minimum GitHub repository-read token for private source checkout |
+| `velclaw-registry` | `.dockerconfigjson` | GHCR push credentials for Kaniko |
 
-`velclaw-registry` must be a Kubernetes Docker registry secret containing `.dockerconfigjson` credentials that allow the Kaniko build Job to push to the configured registry (`ghcr.io/velclaw` by default).
+The publisher only has `get` access to Secrets and mutation access to its deployment resources. It has no cluster-admin, node, or Docker-daemon permissions.
 
-Never commit these secrets. Never put them in GitHub source files or browser/client bundles.
+## Native publisher lifecycle
 
-## Native publisher behavior
+1. A deployment enters PostgreSQL as `queued`.
+2. Exactly one worker claims it with a row lock and changes it to `building`.
+3. The worker creates an ephemeral Kubernetes Job.
+4. The Job checks out the requested Git branch/commit.
+5. If needed, a minimal Node Dockerfile is generated; an existing Dockerfile is preserved.
+6. Kaniko builds and pushes the immutable deployment image to GHCR.
+7. The publisher creates/updates the application Secret, Deployment, Service and Ingress.
+8. The publisher waits for Kubernetes readiness before reporting `ready`.
+9. Build or rollout failure is reported as `failed` with bounded logs.
+10. Rollback is represented as a new queue operation targeting the previous ready deployment image.
 
-`deploy/kubernetes-publisher.mjs` claims the same PostgreSQL deployment queue used by the existing API. For each job it:
+The application URL remains within the configured Velclaw product domain. The API rejects non-Velclaw runtime URLs and rejects deployment repositories outside HTTPS GitHub URLs.
 
-1. Creates a namespace-scoped Kubernetes `Job`.
-2. Checks out the requested Git branch/commit in an ephemeral `emptyDir` volume.
-3. Generates a minimal Node Dockerfile when the source repository has no Dockerfile but has a supported build script.
-4. Builds and pushes the image with Kaniko; no Docker daemon and no Docker socket are required.
-5. Creates/updates an application Secret, Deployment, Service and Ingress.
-6. Publishes the resulting `https://<project>-<deployment>.velclaw.cfd` runtime URL to the deployment API.
-7. Reports build/deployment errors back to the same queue record.
+## Production prerequisites
 
-Private repositories require `velclaw-github`. Public repositories can still use the same path; the token is retained for consistent private-repository support. The registry secret is always required because the runtime image is pushed to GHCR before the application rollout.
+KubeOps must provide:
 
-The application workload is isolated by generated Kubernetes resource names and labels. Publisher permissions are limited to the `velclaw-production` namespace; the publisher does not receive cluster-admin or node-level privileges.
+- nginx Ingress Controller
+- cert-manager with `letsencrypt-prod`
+- Kubernetes Metrics API/metrics-server for HPA
+- reachable Kubernetes API for GitHub Actions
+- GHCR access
+- PostgreSQL and Redis connectivity required by Velclaw
+- DNS/Cloudflare routing for `velclaw.cfd` and `*.velclaw.cfd`
+- the three runtime Secrets listed above
 
-## Production boundary
-
-The canonical Velclaw product host is `velclaw.cfd`. Public deployment hostnames must remain inside the Velclaw namespace, for example `my-app.velclaw.cfd` or a generated deployment hostname under `*.velclaw.cfd`.
-
-For KubeOps, the cluster must provide:
-
-1. nginx Ingress Controller.
-2. `letsencrypt-prod` cert-manager ClusterIssuer.
-3. Metrics API/metrics-server for HPA CPU and memory metrics.
-4. A working Kubernetes API endpoint reachable by the deployment workflow.
-5. GHCR access for both the Velclaw control-plane and publisher images.
-6. Kubernetes secrets `velclaw-runtime`, `velclaw-github`, and `velclaw-registry`.
-7. PostgreSQL and Redis connectivity required by the application.
-8. DNS/Cloudflare routing for `velclaw.cfd` and deployment subdomains.
+These prerequisites are infrastructure state; repository manifests alone do not prove that the cluster is live.
 
 ## Compose fallback
 
@@ -117,28 +87,20 @@ For a Linux host without Kubernetes:
 ```bash
 cd deploy
 cp .env.example .env
-# edit .env and add real secrets
+# add real secrets to .env
 
 docker compose -f docker-compose.selfhosted.yml up -d --build
 ```
 
-The Compose publisher remains a compatibility fallback and retains Docker socket access. The Kubernetes production publisher does not.
-
-## Deployment lifecycle
-
-A deployment starts as `queued`, is claimed by one worker as `building`, and ends as `ready` or `failed`. The PostgreSQL queue uses row locking with `SKIP LOCKED`, allowing multiple workers without claiming the same job.
-
-For Kubernetes production, image publication is pinned to the deployment ID/commit and the Velclaw control-plane workflow pins its own production image to the Git commit SHA. Application build Jobs use ephemeral source storage and are automatically garbage-collected after completion.
-
-The GitHub Actions workflow also verifies the control-plane and publisher rollout. A failed control-plane or publisher rollout attempts `kubectl rollout undo` before the workflow fails.
+The Compose publisher remains a compatibility fallback and may use the Docker socket. The Kubernetes production publisher does not.
 
 ## Security rules
 
 - Never commit `.env`, kubeconfigs, registry tokens, GitHub tokens, or real secrets.
-- Never expose `GITHUB_TOKEN`, `KUBEOPS_KUBECONFIG_B64`, or `VELCLAW_DEPLOY_API_TOKEN` to client-side code.
-- Do not grant the web UI direct Kubernetes API or Docker socket access.
+- Never expose deployment tokens or kubeconfigs to browser/client code.
+- Do not give the web UI Kubernetes API or Docker socket access.
 - Keep deployment workers isolated from the public application process.
-- Use namespace-scoped Kubernetes RBAC with the smallest practical permissions for production automation.
-- Do not give the Kubernetes publisher host-level Docker access.
-- Only publish URLs generated inside the configured Velclaw domain boundary.
-- Validate GitHub repository URLs before queueing a deployment.
+- Keep publisher RBAC namespace-scoped.
+- Validate repository URLs, branch names, environment variable names and deployment domains before queueing.
+- Keep deployment logs bounded and do not echo secret values.
+- Only publish URLs inside the Velclaw product domain.
