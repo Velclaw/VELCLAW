@@ -47,8 +47,8 @@ spec:
             - name: VELCLAW_DEPLOY_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: velclaw-publisher-auth
-                  key: deploy-api-token
+                  name: velclaw-runtime
+                  key: VELCLAW_DEPLOY_API_TOKEN
                   optional: false
           resources:
             requests:
