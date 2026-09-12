@@ -13,7 +13,6 @@ if (!TOKEN) throw new Error('VELCLAW_DEPLOY_API_TOKEN is required')
 if (!/^[a-z0-9.-]+$/.test(DOMAIN)) throw new Error('Invalid VELCLAW_PUBLIC_DOMAIN')
 
 const fs = await import('node:fs/promises')
-const ca = await fs.readFile('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt').catch(() => null)
 const k8sToken = await fs.readFile('/var/run/secrets/kubernetes.io/serviceaccount/token', 'utf8').catch(() => '')
 const k8sHost = process.env.KUBERNETES_SERVICE_HOST
 const k8sPort = process.env.KUBERNETES_SERVICE_PORT_HTTPS || '443'
@@ -42,36 +41,40 @@ async function control(pathname, options = {}) {
 
 async function k8s(pathname, options = {}) {
   const headers = { authorization: `Bearer ${k8sToken}`, 'content-type': 'application/json', ...(options.headers || {}) }
-  const response = await fetch(`${K8S}${pathname}`, { ...options, headers, ...(ca ? { dispatcher: undefined } : {}) })
+  const response = await fetch(`${K8S}${pathname}`, { ...options, headers })
   if (!response.ok && response.status !== 404) throw new Error(`Kubernetes ${response.status}: ${await response.text()}`)
   return { status: response.status, data: response.status === 204 || response.status === 404 ? null : await response.json() }
+}
+
+function apiBase(apiVersion, plural) {
+  const parts = apiVersion.split('/')
+  if (parts.length === 1) return `/api/${parts[0]}/namespaces/${NAMESPACE}/${plural}`
+  return `/apis/${parts[0]}/${parts[1]}/namespaces/${NAMESPACE}/${plural}`
 }
 
 async function apply(resource) {
   const plural = { Secret: 'secrets', ConfigMap: 'configmaps', Job: 'jobs', Deployment: 'deployments', Service: 'services', Ingress: 'ingresses' }[resource.kind]
   if (!plural) throw new Error(`Unsupported Kubernetes resource kind: ${resource.kind}`)
-  const base = `/apis/apps/v1/namespaces/${NAMESPACE}/${plural}`
-  const coreBase = resource.kind === 'Secret' || resource.kind === 'ConfigMap' || resource.kind === 'Service' ? `/api/v1/namespaces/${NAMESPACE}/${plural}` : base
-  const existing = await k8s(`${coreBase}/${resource.metadata.name}`)
+  const base = apiBase(resource.apiVersion, plural)
+  const existing = await k8s(`${base}/${resource.metadata.name}`)
   if (existing.status === 404) {
-    await k8s(coreBase, { method: 'POST', body: JSON.stringify(resource) })
+    await k8s(base, { method: 'POST', body: JSON.stringify(resource) })
   } else {
     const next = { ...resource, metadata: { ...resource.metadata, resourceVersion: existing.data.metadata.resourceVersion } }
-    await k8s(`${coreBase}/${resource.metadata.name}`, { method: 'PUT', body: JSON.stringify(next) })
+    await k8s(`${base}/${resource.metadata.name}`, { method: 'PUT', body: JSON.stringify(next) })
   }
 }
 
-async function remove(kind, resourceName) {
+async function remove(kind, resourceName, apiVersion) {
   const plural = { Job: 'jobs', Deployment: 'deployments', Service: 'services', Secret: 'secrets', ConfigMap: 'configmaps', Ingress: 'ingresses' }[kind]
-  const api = kind === 'Secret' || kind === 'ConfigMap' || kind === 'Service' ? '/api/v1' : '/apis/apps/v1'
-  await k8s(`${api}/namespaces/${NAMESPACE}/${plural}/${resourceName}`, { method: 'DELETE', body: JSON.stringify({ propagationPolicy: 'Foreground' }) })
+  if (!plural) return
+  await k8s(`${apiBase(apiVersion, plural)}/${resourceName}`, { method: 'DELETE', body: JSON.stringify({ propagationPolicy: 'Foreground' }) })
 }
 
 function buildJob(job) {
   const app = appName(job)
   const image = imageName(job)
   const gitUrl = String(job.repoUrl).replace(/\.git$/i, '') + '.git'
-  const env = job.env && typeof job.env === 'object' ? job.env : {}
   return {
     apiVersion: 'batch/v1', kind: 'Job',
     metadata: { name: `${app}-build`, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'velclaw.deployment': job.id } },
@@ -94,11 +97,11 @@ function buildJob(job) {
               command: ['sh', '-ec'], args: [`git -c http.extraheader="AUTHORIZATION: Bearer $GITHUB_TOKEN" clone --depth 1 --branch '${String(job.branch).replace(/[^A-Za-z0-9._/-]/g, '')}' '${gitUrl}' /workspace/src${job.commitSha ? ` && cd /workspace/src && git fetch --depth 1 origin '${job.commitSha}' && git checkout --detach '${job.commitSha}'` : ''}`],
               env: [{ name: 'GITHUB_TOKEN', valueFrom: { secretKeyRef: { name: 'velclaw-github', key: 'token', optional: false } } }],
               volumeMounts: [{ name: 'source', mountPath: '/workspace' }],
-              securityContext: { runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] } },
+              securityContext: { runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] } },
             },
             {
               name: 'prepare', image: 'node:22-alpine',
-              command: ['node', '-e'], args: [`const fs=require('fs'),p=require('path'),x=JSON.parse(fs.readFileSync('/workspace/src/package.json','utf8')); const s=x.scripts||{}; const has=(f)=>fs.existsSync('/workspace/src/'+f); const manager=has('pnpm-lock.yaml')?'pnpm':has('yarn.lock')?'yarn':'npm'; const install=manager==='pnpm'?'corepack enable && pnpm install --frozen-lockfile':manager==='yarn'?'corepack enable && yarn install --immutable':has('package-lock.json')?'npm ci':'npm install'; if(!s.build) throw new Error('No build script and no supported Dockerfile'); const start=s.start?'CMD ["'+manager+'","start"]':'CMD ["node","-e","require(\\\"http\\\").createServer((_,r)=>r.end(\\\"Velclaw app\\\")).listen(3000,\\\"0.0.0.0\\\")"]'; const docker=has('Dockerfile')?null:'FROM node:22-alpine\\nWORKDIR /app\\nCOPY package.json '+(has('pnpm-lock.yaml')?'pnpm-lock.yaml':has('yarn.lock')?'yarn.lock':has('package-lock.json')?'package-lock.json':'package.json')+' ./\\nRUN '+install+'\\nCOPY . .\\nRUN '+manager+' run build\\nENV NODE_ENV=production\\nENV PORT=3000\\nEXPOSE 3000\\n'+start+'\\n'; if(docker)fs.writeFileSync('/workspace/src/Dockerfile',docker);`],
+              command: ['node', '-e'], args: [`const fs=require('fs'),x=JSON.parse(fs.readFileSync('/workspace/src/package.json','utf8')); const s=x.scripts||{}; const has=(f)=>fs.existsSync('/workspace/src/'+f); const manager=has('pnpm-lock.yaml')?'pnpm':has('yarn.lock')?'yarn':'npm'; const install=manager==='pnpm'?'corepack enable && pnpm install --frozen-lockfile':manager==='yarn'?'corepack enable && yarn install --immutable':has('package-lock.json')?'npm ci':'npm install'; if(!s.build) throw new Error('No build script and no supported Dockerfile'); const start=s.start?'CMD ["'+manager+'","start"]':'CMD ["node","-e","require(\\\"http\\\").createServer((_,r)=>r.end(\\\"Velclaw app\\\")).listen(3000,\\\"0.0.0.0\\\")"]'; const docker=has('Dockerfile')?null:'FROM node:22-alpine\\nWORKDIR /app\\nCOPY package.json '+(has('pnpm-lock.yaml')?'pnpm-lock.yaml':has('yarn.lock')?'yarn.lock':has('package-lock.json')?'package-lock.json':'package.json')+' ./\\nRUN '+install+'\\nCOPY . .\\nRUN '+manager+' run build\\nENV NODE_ENV=production\\nENV PORT=3000\\nEXPOSE 3000\\n'+start+'\\n'; if(docker)fs.writeFileSync('/workspace/src/Dockerfile',docker);`],
               volumeMounts: [{ name: 'source', mountPath: '/workspace' }],
               securityContext: { runAsUser: 1000, runAsGroup: 1000, runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] } },
             },
@@ -115,7 +118,7 @@ function buildJob(job) {
   }
 }
 
-async function waitJob(jobName, logs) {
+async function waitJob(jobName) {
   const deadline = Date.now() + JOB_TIMEOUT_MS
   while (Date.now() < deadline) {
     const result = await k8s(`/apis/batch/v1/namespaces/${NAMESPACE}/jobs/${jobName}`)
@@ -147,7 +150,7 @@ async function publish(job) {
     const build = buildJob(job)
     await apply(build)
     logs.push(`Created Kubernetes build job ${build.metadata.name}`)
-    await waitJob(build.metadata.name, logs)
+    await waitJob(build.metadata.name)
     logs.push('Build job completed and image pushed to registry')
     for (const resource of appResources(job)) await apply(resource)
     logs.push(`Applied Deployment/Service/Ingress for ${app}`)
