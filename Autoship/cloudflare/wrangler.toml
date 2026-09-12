@@ -4,7 +4,7 @@ compatibility_date = "2026-09-07"
 workers_dev = true
 
 [vars]
-AUTOSHIP_PUBLIC_REPO = "zskbot/Autoship"
+AUTOSHIP_PUBLIC_REPO = "Velclaw/Velclaw"
 
 [[routes]]
 pattern = "autoship.velclaw.cfd"
