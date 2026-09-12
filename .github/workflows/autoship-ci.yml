@@ -1,0 +1,40 @@
+name: Autoship CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Autoship/**'
+      - '.github/workflows/autoship-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Autoship/**'
+      - '.github/workflows/autoship-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Autoship
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Autoship/package.json
+      - run: npm install
+      - name: Type-check
+        run: npm run lint
+      - name: Build UI and production server
+        run: npm run build
+      - name: API smoke test
+        run: npm run test:api
+      - name: Runner safety test
+        run: npm run test:runner
