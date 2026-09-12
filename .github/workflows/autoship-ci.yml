@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  build-test:
+  verify:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,15 +26,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: Autoship/package.json
+          node-version: 24
       - run: npm install
-      - name: Type-check
-        run: npm run lint
-      - name: Build UI and production server
-        run: npm run build
-      - name: API smoke test
-        run: npm run test:api
-      - name: Runner safety test
-        run: npm run test:runner
+      - run: npm run lint
+      - run: npm run test:runner
+      - run: npm run build
+      - run: npm run test:api
+      - run: docker build -t autoship:ci .
+      - run: docker build -f Dockerfile.runner -t autoship-runner:ci .
