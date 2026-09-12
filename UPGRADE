@@ -1,0 +1,400 @@
+PHP 8.6 UPGRADE NOTES
+
+1. Backward Incompatible Changes
+2. New Features
+3. Changes in SAPI modules
+4. Deprecated Functionality
+5. Changed Functions
+6. New Functions
+7. New Classes and Interfaces
+8. Removed Extensions and SAPIs
+9. Other Changes to Extensions
+10. New Global Constants
+11. Changes to INI File Handling
+12. Windows Support
+13. Other Changes
+14. Performance Improvements
+
+========================================
+1. Backward Incompatible Changes
+========================================
+
+- Core:
+  . ??/empty() on a magic property no longer call __get() when __isset()
+    has materialized the property by writing into the property table.
+    The freshly-written value is returned directly. isset() is unaffected.
+
+- COM:
+  . It is no longer possible to clone variant objects because the cloning
+    behavior was ill-defined.
+
+- Curl:
+  . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
+    when returning an integer other than 0, CURL_READFUNC_ABORT or
+    CURL_READFUNC_PAUSE.
+
+- DOM:
+  . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
+    DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding,
+    DOMEntity::$encoding, DOMEntity::$version) are now declared with asymmetric
+    visibility (public private(set)). Attempts to write to them from outside
+    the class now raise "Cannot modify private(set) property <class>::$<prop>
+    from global scope" instead of the prior readonly modification error.
+    ReflectionProperty::isWritable() also reports these properties
+    accurately.
+  . Array access on Dom\DtdNamedNodeMap objects now returns null for negative
+    integer indexes instead of returning the first node.
+  . Array access on Dom\DtdNamedNodeMap objects now raises a ValueError when
+    the integer index is greater than INT_MAX instead of overflowing to a
+    smaller index.
+
+- FTP:
+  . ftp_nb_fget(), ftp_nb_fput(), ftp_nb_get() and ftp_nb_put() now throw an
+    Error when the connection is already transferring, instead of emitting a
+    warning and returning false. ftp_close() already throws on the same
+    condition.
+
+- GD:
+  . imagesetstyle(), imagefilter() and imagecrop() filter the types / values of
+    their array arguments and raise a TypeError / ValueError accordingly.
+  . imageaffinematrixget() now enforces the documented array|float type for the
+    $options parameter, including the corresponding weak and strict typing
+    behavior.
+
+- GMP:
+  . GMP power and shift operators now throw a ValueError when GMP right operands
+    are outside the unsigned long range, instead of silently truncating them.
+  . GMP integer string parsing now throws a ValueError for strings containing NUL
+    bytes, instead of silently truncating them.
+
+- Intl:
+  . Passing a non-stringable object as a time zone to Intl APIs that accept
+    time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlIterator::current() now returns null when called before the iterator is
+    positioned, or after the iterator becomes invalid, instead of exposing an
+    undefined value.
+  . IntlBreakIterator::getLocale() now raises a ValueError when the type is
+    neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
+    returning false.
+  . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
+    int, rather than float, on 64-bit platforms when parsing integer values.
+  . The $type parameter of IntlBreakIterator::getPartsIterator() has been
+    changed from string to int to match the underlying implementation.
+  . UConverter::transcode() now rejects from_subst and to_subst option values
+    longer than 127 bytes instead of silently truncating the length before
+    passing it to ICU.
+  . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
+    resource lookups with "without fallback to <locale>" instead of the
+    malformed "without fallback from to <locale>".
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
+  . Collator::sort(), collator_sort(), Collator::asort(), and
+    collator_asort() now report UTF-8/UTF-16 conversion failures during
+    comparison through the intl error mechanism and return false. With
+    intl.use_exceptions enabled, these failures throw IntlException. Previously,
+    these paths emitted a warning and compared the value as an empty string.
+
+- PCNTL:
+  . pcntl_alarm() now raises a ValueError if the seconds argument is
+    lower than zero or greater than the platform's UINT_MAX.
+  . pcntl_exec() now raises a ValueError if the $args argument is not a list
+    array.
+
+- PCRE:
+  . preg_grep() now returns false instead of a partial array when a PCRE
+    execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
+    This is consistent with other preg_* functions.
+
+- PGSQL:
+  . pg_fetch_object() now reports the ValueError for a non-empty
+    $constructor_args on a class without a constructor on the
+    $constructor_args argument instead of $class. Errors raised when
+    the requested class is not instantiable (abstract, interface, enum)
+    now surface before the row is fetched.
+
+- Phar:
+  . Phar::mungServer() now raises a ValueError when an invalid argument value
+    is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects "/.phar" paths in addition to ".phar"
+    paths, and raises the same BadMethodCallException for attempts to create
+    the reserved magic ".phar" directory through that form.
+  . Phar::addEmptyDir() now treats non-magic names that merely share the
+    ".phar" prefix as ordinary directories.
+  . Files are only automatically interpreted as Phar archives when included
+    if ".phar" occurs as an extension in the filename component of their
+    paths. Previously, it could occur in a directory name or as part of an
+    extension such as ".pharma".
+
+- Posix:
+  . posix_access() now raises a ValueError when an invalid $flags
+    argument value is passed.
+  . posix_mkfifo() now raises a ValueError when an invalid $permissions
+    argument value is passed.
+
+- Session:
+  . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
+    to a value containing NUL bytes now emits a warning and leaves the setting
+    unchanged. Previously, NUL bytes were silently accepted: for cookie_path
+    and cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the NUL byte.
+  . A ValueError is thrown if $name is a string containing NUL bytes in
+    session_module_name().
+  . session_encode() now returns an empty string instead of false for empty
+    sessions. It only returns false now when the session data could not be
+    encoded. This mainly happens with the default serialization handler
+    if a key contains the pipe | character.
+  . When session.lazy_write is enabled and a session handler implements
+    SessionUpdateTimestampHandlerInterface, sessions that were read as empty
+    and remain empty at write time will now trigger updateTimestamp() instead
+    of write(). Previously, write() was always called for empty sessions
+    because session_encode() returned false, bypassing the lazy_write
+    comparison. Custom session handlers that rely on write() being called
+    with empty data (e.g. to destroy the session) should implement the same
+    logic in their updateTimestamp() method.
+  . The defaults of three session INI settings have changed to provide secure
+    behavior out of the box:
+      - session.use_strict_mode is now 1 (was 0). Strict mode rejects
+        uninitialized session IDs, mitigating session fixation. Custom session
+        handlers that previously relied on accepting externally supplied IDs
+        without a corresponding storage entry must either implement
+        validateId() / create_sid() or explicitly set this to 0.
+      - session.cookie_httponly is now 1 (was 0). Session cookies are no
+        longer accessible to JavaScript via document.cookie. Applications
+        that read the session cookie from JavaScript must explicitly set
+        this to 0.
+      - session.cookie_samesite is now "Lax" (was unset). Session cookies
+        are no longer sent on cross-site requests other than top-level
+        navigations using safe HTTP methods. Applications that depend on
+        session cookies being sent on cross-site POST submissions must
+        explicitly set this to "None" (and also set session.cookie_secure
+        to 1).
+    RFC: https://wiki.php.net/rfc/session_security_defaults
+  . SessionHandler::validateId() has been added and delegates to the
+    configured save handler. A subclass that declares validateId() without
+    a return type now emits a deprecation notice for the tentative bool
+    return type. A subclass that overrides open() without calling
+    parent::open() keeps its previous behavior and emits a warning when an
+    ID is validated.
+
+- Shmop:
+  . shmop_open() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
+- SimpleXML:
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes, matching simplexml_load_file(). With
+    $dataIsURL set, it previously truncated the path at the first NUL byte.
+    Without it, the string went to libxml, which with default options rejects a
+    NUL on current versions but accepts the truncated document on older ones
+    and under LIBXML_RECOVER.
+
+- SOAP:
+  . The "classmap" option of SoapClient and SoapServer now rejects arrays
+    containing integer keys. Previously, sparse integer-keyed and mixed-keyed
+    arrays could be accepted. SoapClient now throws TypeError for non-array
+    "classmap" options and ValueError for arrays containing integer keys, also
+    when the "exceptions" option is disabled.
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well.
+  . SOAP encoding errors now report the affected type or failing operation in
+    the error message instead of the generic "Encoding: Violation of encoding
+    rules" message. Code that compares the exact message may need to be
+    updated.
+
+- Sockets:
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF now requires an int
+    $value and a $level of SOL_SOCKET. Any other value type throws a TypeError
+    instead of being coerced, and any other level raises a warning and returns
+    false.
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a $value of 0 now
+    detaches the reuseport filter through SO_DETACH_REUSEPORT_BPF. It
+    previously used SO_DETACH_BPF, an alias of SO_DETACH_FILTER, which left the
+    reuseport program attached.
+
+- Sodium:
+  . The password-hashing functions sodium_crypto_pwhash(),
+    sodium_crypto_pwhash_str(),
+    sodium_crypto_pwhash_scryptsalsa208sha256() and
+    sodium_crypto_pwhash_scryptsalsa208sha256_str() now throw ValueError
+    instead of SodiumException when an argument is out of range, such as an
+    opslimit or memlimit below the documented minimum. SodiumException is
+    still thrown for internal libsodium failures.
+
+- SPL:
+  . SplObjectStorage::getHash() implementations may no longer mutate any
+    SplObjectStorage instance. Attempting to do so now throws an Error.
+  . SplFileObject::next() now advances the stream when no prior current()
+    call has cached a line. A subsequent current() call returns the new line
+    rather than the previous one.
+  . SplFileObject::fgets() no longer caches the returned line for subsequent
+    current() calls. current() now re-reads from the current stream position
+    instead of returning the line fgets() just returned.
+  . SplFileObject::next() past EOF no longer increments key() without bound.
+    SplFileObject::seek() past EOF now produces the same key() value as
+    SplTempFileObject; the two previously returned different values.
+  . DirectoryIterator::key() now returns int|string,
+    and DirectoryIterator::current() returns string|SplFileInfo|static.
+
+- Standard:
+  . array_intersect() with at least two arrays now converts values to strings
+    while scanning its inputs instead of during sort comparisons. This can
+    change the number and order of conversion warnings and __toString() calls,
+    which conversion exception is reached, and the result for stateful
+    __toString() implementations. Argument types are validated before checking
+    for empty arrays or converting values, so an invalid later argument can
+    suppress conversion side effects from earlier arrays. Values are not
+    converted if any input array is empty.
+  . Form feed (\f) is now added to the default trimmed characters of trim(),
+    rtrim() and ltrim().
+    RFC: https://wiki.php.net/rfc/trim_form_feed
+  . array_filter() now raises a ValueError when an invalid $mode argument value
+    is passed.
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed.
+  . getenv() and putenv() now raise a ValueError when the first argument
+    contains NUL bytes.
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes.
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes.
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes.
+  . setlocale() now raises a ValueError when a locale name contains NUL bytes,
+    instead of silently truncating it.
+    Arrays are now accepted only for the $locales argument. Passing an array as
+    a later variadic locale argument now throws a TypeError. Passing any
+    additional locale arguments when $locales is an array now throws an
+    ArgumentCountError.
+  . linkinfo() now raises a ValueError when the $path argument is empty.
+  . pathinfo() now raises a ValueError when an invalid $flag argument value is
+    passed.
+  . scandir() now raises a ValueError when an invalid $sorting_order argument
+    value is passed.
+  . number_format() now raises a ValueError when $decimals is outside the
+    integer range instead of silently clamping very large positive values.
+  . sleep() now raises a ValueError when $seconds is greater than the platform
+    limit (UINT_MAX seconds, or UINT_MAX / 1000 seconds on Windows) instead of
+    allowing the value to overflow.
+  . usleep() now raises a ValueError when $microseconds is greater than
+    UINT_MAX instead of allowing the value to overflow.
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes.
+  . base_convert(), bindec(), hexdec() and octdec() now raise a notice when
+    they cannot precisely convert the given number.
+  . The following functions now raise a ValueError when the $filename argument
+    contains NUL bytes:
+    - fileperms()
+    - fileinode()
+    - filesize()
+    - fileowner()
+    - filegroup()
+    - fileatime()
+    - filemtime()
+    - filectime()
+    - filetype()
+    - is_writable()
+    - is_readable()
+    - is_executable()
+    - is_file()
+    - is_dir()
+    - is_link()
+    - file_exists()
+    - lstat()
+    - stat()
+  . unpack() now reads a "<" or ">" immediately following a format code as an
+    endianness modifier rather than as the first character of the element name.
+    Formats such as "s<value" now produce the key "value" instead of "<value",
+    and "C>name" raises a ValueError because the C format code accepts no
+    endianness modifier. A name starting with these characters is unaffected
+    when a repeater precedes it, as in "s1<value".
+    RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
+
+- Sysvshm:
+  . shm_attach() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
+- Zip:
+  . ZipArchive::extractTo now raises a TypeError for the files argument if one
+    or more of the entries is not a string.
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    when the "remove_all_path" option is not of type bool, or when the
+    "comp_method", "comp_flags", or "enc_method" options are not of type int
+    (numeric strings are coerced), instead of emitting a warning.
+  . Serializing or unserializing a ZipArchive now throws an Exception. A
+    subclass can override __serialize() and __unserialize() to round-trip
+    through ZipArchive::closeString() and ZipArchive::openString().
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option "level",
+    "memory", "window", or "strategy" is not of type int.
+  . inflate_init() now raises a TypeError when the value for option "window" is
+    not of type int.
+
+========================================
+2. New Features
+========================================
+
+- Core:
+  . Readonly properties may now declare default values.
+    RFC: https://wiki.php.net/rfc/readonly_property_defaults
+  . It is now possible to use reference assignment on WeakMap without the key
+    needing to be present beforehand.
+  . It is now possible to define the __debugInfo() magic method on enums.
+    RFC: https://wiki.php.net/rfc/debugable-enums
+  . #[\Override] can now be applied to class constants, including enum cases.
+    RFC: https://wiki.php.net/rfc/override_constants
+  . Implemented partial function application
+    RFC: https://wiki.php.net/rfc/partial_function_application_v2
+  . Allow direct mutation of objects stored in constants or class constants via
+    OBJ->prop = $val.
+    RFC: https://wiki.php.net/rfc/const_object_property_write
+
+- Curl:
+  . curl_getinfo() return array now includes a new size_delivered key, which
+    indicates the total number of bytes passed to the download write callback.
+    This value can also be obtained by passing CURLINFO_SIZE_DELIVERED as the
+    $option parameter.
+    Requires libcurl 8.20.0 or later.
+  . Added CURLOPT_SEEKFUNCTION to register a callback that repositions a
+    streamed request body so libcurl can rewind and resend it on a redirect,
+    multi-pass authentication, or a retried reused connection instead of
+    failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
+    offset and origin, and must return one of CURL_SEEKFUNC_OK,
+    CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
+
+- Date:
+  . Added a new Time\Duration class.
+    RFC: https://wiki.php.net/rfc/duration_class
+
+- Fileinfo:
+  . finfo_file() now works with remote streams.
+
+- GMP:
+  . Added gmp_powm_sec() for side-channel quiet modular exponentiation.
+    Requires GNU MP 5.0.0 or later; it is not available on official Windows
+    builds using MPIR.
+  . Added gmp_prevprime() to get the largest prime smaller than the given
+    number. The optional $definitely_prime output parameter indicates whether
+    the returned number is definitely prime, as opposed to probably prime.
+    A ValueError is thrown if no such prime exists. This function is available
+    only when PHP is built against GNU MP 6.3.0 or later; it is not available
+    on official Windows builds using MPIR.
+
+- Intl:
+  . Added the static methods IntlDatePatternGenerator::getSkeleton() and
+    IntlDatePatternGenerator::getBaseSkeleton() to generate the unique skeleton
+    and base skeleton for a date/time pattern.
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the aliases locale_get_display_keyword() and
+    locale_get_display_keyword_value(), respectively.
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
+    IntlNumberRangeFormatter::COLLAPSE_NONE,
+    IntlNumberRangeFormatter::COLLAPSE_UNIT,
+    IntlNumberRangeFormatter::COL
