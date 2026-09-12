@@ -1,0 +1,15 @@
+# Copy to ~/.cloudflared/config.yml on the host running the velclaw-runtime tunnel.
+# Never commit the real credentials JSON.
+# Cloudflare requires a catch-all ingress rule as the final rule.
+
+tunnel: 21a89f01-11be-404f-8793-8938eab56f5e
+credentials-file: /root/.cloudflared/21a89f01-11be-404f-8793-8938eab56f5e.json
+
+# The local origin is the Velclaw control-plane HTTP server.
+# Change this to the actual local origin when running the tunnel on another host.
+ingress:
+  - hostname: velclaw.cfd
+    service: http://127.0.0.1:3000
+  - hostname: "*.velclaw.cfd"
+    service: http://127.0.0.1:3000
+  - service: http_status:404
