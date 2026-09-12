@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { getSessionFromCookie } from '@/lib/session/server'
 import { SESSION_COOKIE_NAME } from '@/lib/session/constants'
 import { findOAuthClient, normalizeScopes } from '@/lib/velclaw/oauth'
@@ -21,6 +20,8 @@ export default async function OAuthPage({ searchParams }: { searchParams: Search
   const requestedScope = first(params.scope) || 'openid profile email'
   const state = first(params.state) || ''
   const nonce = first(params.nonce) || ''
+  const codeChallenge = first(params.code_challenge) || ''
+  const codeChallengeMethod = first(params.code_challenge_method) || ''
 
   const client = findOAuthClient(clientId)
   if (!client || responseType !== 'code' || !client.redirectUris.includes(redirectUri)) {
@@ -31,8 +32,19 @@ export default async function OAuthPage({ searchParams }: { searchParams: Search
   const session = await getSessionFromCookie(cookieStore.get(SESSION_COOKIE_NAME)?.value)
   const scopes = normalizeScopes(requestedScope, client)
 
+  const oauthParams = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scopes.join(' '),
+    state,
+    nonce,
+  })
+  if (codeChallenge) oauthParams.set('code_challenge', codeChallenge)
+  if (codeChallengeMethod) oauthParams.set('code_challenge_method', codeChallengeMethod)
+
   if (!session) {
-    const next = `/oauth?${new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', scope: scopes.join(' '), state, nonce }).toString()}`
+    const next = `/oauth?${oauthParams.toString()}`
     const loginUrl = `/api/auth/signin/github?next=${encodeURIComponent(next)}`
     return (
       <main className="min-h-screen bg-[#050608] text-white flex items-center justify-center px-5">
@@ -61,7 +73,7 @@ export default async function OAuthPage({ searchParams }: { searchParams: Search
           {scopes.map((scope) => <div key={scope} className="flex items-center gap-3 rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-sm"><span className="h-2 w-2 rounded-full bg-white" />{scope === 'openid' ? 'Verify your Velclaw identity' : scope === 'profile' ? 'View your basic profile' : scope === 'email' ? 'View your email address' : `Access ${scope}`}</div>)}
         </div>
         <form action="/api/oauth/authorize" method="POST" className="mt-7 space-y-3">
-          <input type="hidden" name="client_id" value={clientId} /><input type="hidden" name="redirect_uri" value={redirectUri} /><input type="hidden" name="scope" value={scopes.join(' ')} /><input type="hidden" name="state" value={state} /><input type="hidden" name="nonce" value={nonce} />
+          <input type="hidden" name="client_id" value={clientId} /><input type="hidden" name="redirect_uri" value={redirectUri} /><input type="hidden" name="scope" value={scopes.join(' ')} /><input type="hidden" name="state" value={state} /><input type="hidden" name="nonce" value={nonce} /><input type="hidden" name="code_challenge" value={codeChallenge} /><input type="hidden" name="code_challenge_method" value={codeChallengeMethod} />
           <button name="decision" value="allow" className="h-12 w-full rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90">Allow access</button>
           <button name="decision" value="deny" className="h-12 w-full rounded-xl border border-white/10 text-sm font-medium text-white/70 hover:bg-white/5">Cancel</button>
         </form>
