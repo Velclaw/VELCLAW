@@ -18,9 +18,16 @@ const publisher = fs.readFileSync(path.join(root,'deploy/runtime-publisher.mjs')
 if (!publisher.includes('VELCLAW_PUBLIC_DOMAIN') || !publisher.includes('traefik.http.routers.')) { console.error('Runtime validation failed: Docker fallback publisher is missing first-party domain or Traefik routing contract.'); process.exit(1) }
 const k8sPublisher = fs.readFileSync(path.join(root,'deploy/kubernetes-publisher.mjs'),'utf8')
 for (const token of ['KUBERNETES_SERVICE_HOST','VELCLAW_DEPLOY_API_TOKEN','batch/v1','apps/v1','networking.k8s.io','gcr.io/kaniko-project/executor','velclaw-registry','velclaw-github']) if (!k8sPublisher.includes(token)) { console.error(`Runtime validation failed: Kubernetes publisher is missing required contract: ${token}`); process.exit(1) }
+if (!k8sPublisher.includes('imagePullPolicy')) { console.error('Runtime validation failed: Kubernetes publisher must use explicit image pull semantics.'); process.exit(1) }
 const rbac = fs.readFileSync(path.join(root,'deploy/kubernetes/publisher-rbac.yaml'),'utf8')
 for (const token of ['kind: ServiceAccount','kind: Role','kind: RoleBinding','resources: ["secrets"]','verbs: ["get"]','resources: ["deployments"]','resources: ["jobs"]','resources: ["services"]','resources: ["ingresses"]']) if (!rbac.includes(token)) { console.error(`Runtime validation failed: publisher RBAC is missing required least-privilege contract: ${token}`); process.exit(1) }
 if (rbac.includes('resources: ["secrets", "configmaps", "services", "pods"]') || rbac.includes('verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]')) { console.error('Runtime validation failed: publisher RBAC still grants broad secret/resource mutation permissions.'); process.exit(1) }
 const kustomization = fs.readFileSync(path.join(root,'deploy/kubernetes/kustomization.yaml'),'utf8')
 for (const token of ['namespace.yaml','publisher-rbac.yaml','velclaw.yaml','publisher.yaml']) if (!kustomization.includes(token)) { console.error(`Runtime validation failed: Kubernetes kustomization is missing: ${token}`); process.exit(1) }
-console.log('Runtime validation passed: Velclaw Docker fallback + Kubernetes publisher + domain routing + least-privilege RBAC contracts are present.')
+const claim = fs.readFileSync(path.join(root,'app/api/deployments/actions/claim/route.ts'),'utf8')
+for (const token of ["status = 'queued'","INTERVAL '20 minutes'","claimNextDeployment()"] ) if (!claim.includes(token)) { console.error(`Runtime validation failed: deployment queue recovery is missing: ${token}`); process.exit(1) }
+const rollback = fs.readFileSync(path.join(root,'app/api/deployments/[id]/rollback/route.ts'),'utf8')
+for (const token of ['getServerSession','queueRollback','Unauthorized']) if (!rollback.includes(token)) { console.error(`Runtime validation failed: rollback authorization/queue contract is missing: ${token}`); process.exit(1) }
+const deploymentApi = fs.readFileSync(path.join(root,'app/api/deployments/route.ts'),'utf8')
+for (const token of ['github\\.com','velclaw\\.cfd','getServerSession','createHostingDeployment']) if (!deploymentApi.includes(token)) { console.error(`Runtime validation failed: deployment API contract is missing: ${token}`); process.exit(1) }
+console.log('Runtime validation passed: Velclaw deployment queue, recovery, rollback authorization, Kubernetes publisher, domain isolation, and least-privilege RBAC contracts are present.')
