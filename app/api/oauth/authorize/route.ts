@@ -9,6 +9,22 @@ function redirectError(uri: string, error: string, state?: string) {
   return NextResponse.redirect(url)
 }
 
+function oauthQuery(form: FormData, scopes: string) {
+  const params = new URLSearchParams({
+    client_id: String(form.get('client_id') || ''),
+    redirect_uri: String(form.get('redirect_uri') || ''),
+    response_type: 'code',
+    scope: scopes,
+    state: String(form.get('state') || ''),
+    nonce: String(form.get('nonce') || ''),
+  })
+  const challenge = String(form.get('code_challenge') || '')
+  const method = String(form.get('code_challenge_method') || '')
+  if (challenge) params.set('code_challenge', challenge)
+  if (method) params.set('code_challenge_method', method)
+  return params
+}
+
 export async function GET(req: NextRequest) {
   const target = new URL('/oauth', req.url)
   req.nextUrl.searchParams.forEach((value, key) => target.searchParams.set(key, value))
@@ -29,13 +45,20 @@ export async function POST(req: NextRequest) {
   if (decision === 'deny') return redirectError(redirectUri, 'access_denied', state)
 
   const session = await getSessionFromReq(req)
+  const requestedScope = String(form.get('scope') || 'openid profile email')
+  const scopes = normalizeScopes(requestedScope, client)
   if (!session) {
-    const next = `/oauth?${new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', scope: String(form.get('scope') || 'openid profile email'), state, nonce: String(form.get('nonce') || '') }).toString()}`
+    const next = `/oauth?${oauthQuery(form, scopes.join(' ')).toString()}`
     return NextResponse.redirect(new URL(`/api/auth/signin/github?next=${encodeURIComponent(next)}`, req.url))
   }
 
-  const scopes = normalizeScopes(String(form.get('scope') || ''), client)
-  const code = await createAuthorizationCode({ userId: session.user.id, clientId, redirectUri, scopes, nonce: String(form.get('nonce') || '') || undefined })
+  const codeChallenge = String(form.get('code_challenge') || '')
+  const codeChallengeMethod = String(form.get('code_challenge_method') || '')
+  if (codeChallenge && codeChallengeMethod !== 'S256') {
+    return NextResponse.json({ error: 'invalid_request', error_description: 'Only S256 PKCE is supported' }, { status: 400 })
+  }
+
+  const code = await createAuthorizationCode({ userId: session.user.id, clientId, redirectUri, scopes, nonce: String(form.get('nonce') || '') || undefined, codeChallenge: codeChallenge || undefined, codeChallengeMethod: codeChallengeMethod || undefined })
   const callback = new URL(redirectUri)
   callback.searchParams.set('code', code)
   if (state) callback.searchParams.set('state', state)
