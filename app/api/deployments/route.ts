@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const deployment = await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
+    await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
+    const [deployment] = await listDeployments(session.user.id, 1)
     return NextResponse.json({ deployment }, { status: 202 })
   } catch (error) {
     console.error('[deployments] create failed', error)
