@@ -3,7 +3,7 @@ set -euo pipefail
 
 AUTOSHIP_HOST="${AUTOSHIP_HOST:-https://autoship.velclaw.cfd}"
 API_TOKEN="${AUTOSHIP_API_TOKEN:-}"
-REPOSITORY="${E2E_REPOSITORY:-https://github.com/zskbot/Autoship}"
+REPOSITORY="${E2E_REPOSITORY:-https://github.com/Velclaw/Velclaw}"
 BRANCH="${E2E_BRANCH:-main}"
 COMMIT_HASH="${E2E_COMMIT_HASH:-}"
 TIMEOUT_SECONDS="${E2E_TIMEOUT_SECONDS:-900}"
