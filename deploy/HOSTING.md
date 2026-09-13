@@ -15,7 +15,7 @@ Cloudflare Edge -> velclaw.cfd / *.velclaw.cfd
 
 ## Kubernetes deployment
 
-Canonical manifests live in `deploy/kubernetes/` and the publisher lives in `deploy/kubernetes-publisher.mjs`. The publisher uses the Kubernetes API and has no Docker socket access. `publisher-rbac.yaml` is namespace-scoped least-privilege RBAC and `kustomization.yaml` is the deployment entrypoint.
+Canonical manifests live in `deploy/kubernetes/`. The production publisher implementation is `deploy/kubernetes-publisher-v2.mjs`; `deploy/kubernetes-publisher.Dockerfile` packages that file. The publisher uses the Kubernetes API and has no Docker socket access. `publisher-rbac.yaml` is namespace-scoped least-privilege RBAC and `kustomization.yaml` is the deployment entrypoint.
 
 The production workflow `.github/workflows/kubeops-deploy.yml` validates the application, builds and pushes both Velclaw and publisher images, applies Kustomize, then waits for both rollouts. Failed rollouts attempt an undo before the workflow exits unsuccessfully.
 
@@ -29,7 +29,7 @@ This is the base64-encoded kubeconfig for the KubeOps production cluster. Keep i
 
 ### Required Kubernetes secrets
 
-These are created **out of band** and are intentionally not represented as Kubernetes Secret manifests with values:
+These are created out of band by `.github/workflows/kubeops-bootstrap-secrets.yml` and are intentionally not represented as Kubernetes Secret manifests with values:
 
 ```text
 velclaw-production/velclaw-runtime
@@ -37,7 +37,7 @@ velclaw-production/velclaw-github
 velclaw-production/velclaw-registry
 ```
 
-See `deploy/kubernetes/runtime-secrets.example.yaml` for the exact non-secret bootstrap template.
+See `deploy/kubernetes/runtime-secrets.example.yaml` for the non-secret bootstrap template.
 
 Required keys:
 
@@ -45,23 +45,24 @@ Required keys:
 |---|---|---|
 | `velclaw-runtime` | `POSTGRES_URL` | PostgreSQL deployment queue/runtime |
 | `velclaw-runtime` | `VELCLAW_DEPLOY_API_TOKEN` | authenticated publisher/control-plane callback |
-| `velclaw-github` | `token` | minimum GitHub repository-read token for private source checkout |
-| `velclaw-registry` | `.dockerconfigjson` | GHCR push credentials for Kaniko |
+| `velclaw-github` | `token` | GitHub repository-read token for private source checkout |
+| `velclaw-registry` | `.dockerconfigjson` | GHCR push/pull credentials for Kaniko and application pods |
 
-The publisher only has `get` access to Secrets and mutation access to its deployment resources. It has no cluster-admin, node, or Docker-daemon permissions.
+The publisher can read only the named runtime secrets and can mutate only Secrets, Jobs, Deployments, Services and Ingresses in its own namespace. It has no cluster-admin, node or Docker-daemon permissions.
 
 ## Native publisher lifecycle
 
 1. A deployment enters PostgreSQL as `queued`.
 2. Exactly one worker claims it with a row lock and changes it to `building`.
-3. The worker creates an ephemeral Kubernetes Job.
-4. The Job checks out the requested Git branch/commit.
-5. If needed, a minimal Node Dockerfile is generated; an existing Dockerfile is preserved.
-6. Kaniko builds and pushes the immutable deployment image to GHCR.
-7. The publisher creates/updates the application Secret, Deployment, Service and Ingress.
-8. The publisher waits for Kubernetes readiness before reporting `ready`.
-9. Build or rollout failure is reported as `failed` with bounded logs.
-10. Rollback is represented as a new queue operation targeting the previous ready deployment image.
+3. Stale `building` claims are automatically re-queued after the lease timeout.
+4. The worker creates an ephemeral Kubernetes Job.
+5. The Job checks out the requested Git branch/commit.
+6. If needed, a minimal Node Dockerfile is generated; an existing Dockerfile is preserved.
+7. Kaniko builds and pushes the immutable deployment image to GHCR.
+8. The publisher creates/updates the application Secret, stable Deployment, Service and Ingress.
+9. The publisher waits for Kubernetes readiness before reporting `ready`.
+10. Build or rollout failure is reported as `failed` with bounded logs.
+11. Rollback is represented as a new queue operation targeting the previous ready deployment image, so the public application identity remains stable.
 
 The application URL remains within the configured Velclaw product domain. The API rejects non-Velclaw runtime URLs and rejects deployment repositories outside HTTPS GitHub URLs.
 
