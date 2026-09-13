@@ -28,9 +28,12 @@ jobs:
           EVENT_PATH: ${{ github.event_path }}
         run: |
           set -euo pipefail
+          EVENT_PATH="${EVENT_PATH:-$GITHUB_EVENT_PATH}"
           node -e '
             const fs=require("fs");
-            const e=JSON.parse(fs.readFileSync(process.env.EVENT_PATH,"utf8"));
+            const path=process.env.EVENT_PATH;
+            if (!path) throw new Error("GitHub event payload path is unavailable");
+            const e=JSON.parse(fs.readFileSync(path,"utf8"));
             console.log(`run_id=${e.workflow_run.id}`);
             console.log(`head_sha=${e.workflow_run.head_sha}`);
             console.log(`head_branch=${e.workflow_run.head_branch}`);
