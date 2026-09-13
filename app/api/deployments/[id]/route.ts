@@ -8,6 +8,22 @@ const sql = postgres(process.env.POSTGRES_URL || '', { max: 3 })
 
 type Params = { params: Promise<{ id: string }> }
 
+type DeploymentRow = {
+  id: string
+  user_id: string
+  project_name: string
+  repo_url: string
+  branch: string
+  status: string
+}
+
+type PreviousDeploymentRow = {
+  id: string
+  commit_sha: string
+  env_json: string | null
+  custom_domain: string | null
+}
+
 export async function POST(request: Request, { params }: Params) {
   const session = await getServerSession()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -20,7 +36,9 @@ export async function POST(request: Request, { params }: Params) {
   if (action !== 'rollback') return NextResponse.json({ error: 'Unsupported deployment action' }, { status: 400 })
 
   try {
-    const result = await sql.begin(async (tx) => {
+    // postgres 3.4.8 has a TypeScript regression in TransactionSql's callable signature.
+    // Keep the transaction semantics while narrowing the affected callback locally.
+    const result = await sql.begin(async (tx: any) => {
       const currentRows = await tx`
         SELECT id, user_id, project_name, repo_url, branch, status
         FROM velclaw_deployments
@@ -29,14 +47,7 @@ export async function POST(request: Request, { params }: Params) {
       `
       if (currentRows.length === 0) return { error: 'Deployment not found', httpStatus: 404 } as const
 
-      const current = currentRows[0] as {
-        id: string
-        user_id: string
-        project_name: string
-        repo_url: string
-        branch: string
-        status: string
-      }
+      const current = currentRows[0] as DeploymentRow
 
       const previousRows = await tx`
         SELECT id, commit_sha, env_json, custom_domain
@@ -54,7 +65,7 @@ export async function POST(request: Request, { params }: Params) {
       `
       if (previousRows.length === 0) return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
 
-      const previous = previousRows[0] as { id: string; commit_sha: string; env_json: string | null; custom_domain: string | null }
+      const previous = previousRows[0] as PreviousDeploymentRow
       await tx`
         UPDATE velclaw_deployments
         SET status = 'queued',
