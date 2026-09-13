@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Menu } from 'lucide-react'
 import styles from './velclaw-landing.module.css'
 
 const products = [
@@ -27,7 +28,7 @@ export function VelclawLanding() {
       <header className={styles.topnav}>
         <details className={styles.mobileMenu}>
           <summary className={styles.menuButton} aria-label="Mở menu">
-            <span /><span /><span />
+            <Menu aria-hidden="true" size={17} strokeWidth={1.7} />
           </summary>
           <div className={styles.mobilePanel}>
             <Link href="#platform">Nền tảng</Link>
@@ -40,8 +41,7 @@ export function VelclawLanding() {
         </details>
 
         <Link href="/" className={styles.brand} aria-label="Velclaw home">
-          <span className={styles.brandMark} aria-hidden="true">V</span>
-          <span className={styles.brandName}>velclaw</span>
+          <img className={styles.brandLogo} src="/velclaw-logo.svg" alt="Velclaw.ai" />
         </Link>
 
         <nav className={styles.navlinks} aria-label="Velclaw navigation">
