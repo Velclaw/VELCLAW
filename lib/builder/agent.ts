@@ -31,7 +31,7 @@ export async function runBuilderAgent(input: {
   role: 'coder' | 'reviewer' | 'tester' | 'deployer'
   prompt: string
   files: BuilderWorkspaceFile[]
-  model: string | undefined
+  model?: string
 }) {
   const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
@@ -40,7 +40,7 @@ export async function runBuilderAgent(input: {
   if (!prompt) throw new Error('prompt is required')
   validateWorkspace(input.files)
 
-  const model = clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
+  const modelName = clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
   const context = workspaceContext(input.files)
   const provider = new OpenAIProvider({ apiKey, useResponses: true })
   const collectedChanges: BuilderWorkspaceFile[] = []
@@ -76,7 +76,7 @@ export async function runBuilderAgent(input: {
   try {
     const agent = new Agent({
       name: `Velclaw ${roleLabel} Agent`,
-      model,
+      model: modelName,
       instructions: `${roleInstructions}\n\nThe browser workspace is the source of truth. Never expose secrets from environment variables.\n\nWORKSPACE:${context}`,
       tools: input.role === 'coder' ? [applyWorkspaceChanges] : [],
     })
@@ -86,7 +86,8 @@ export async function runBuilderAgent(input: {
       ...(input.role === 'coder' ? { modelSettings: { toolChoice: 'required' as const } } : {}),
     })
 
-    return { role: input.role, model, output: result.finalOutput, changes: collectedChanges }
+    const output = result.finalOutput ?? ''
+    return { role: input.role, model: modelName, output, changes: collectedChanges }
   } finally {
     await provider.close().catch(() => undefined)
   }
@@ -97,7 +98,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
   validateWorkspace(workspace)
   const steps: Array<{ role: 'coder' | 'tester' | 'reviewer' | 'deployer'; output: string }> = []
 
-  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, model: input.model })
+  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, ...(input.model ? { model: input.model } : {}) })
   steps.push({ role: 'coder', output: coder.output })
   if (coder.changes.length) {
     const map = new Map(workspace.map((file) => [file.path, file.content]))
@@ -109,7 +110,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'tester',
     prompt: `Verify the implementation for this request: ${input.prompt}. Produce exact browser-terminal commands for install, type-check, test and build. Do not claim execution.`,
     files: workspace,
-    model: input.model,
+    ...(input.model ? { model: input.model } : {}),
   })
   steps.push({ role: 'tester', output: tester.output })
 
@@ -117,7 +118,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'reviewer',
     prompt: `Review the implementation for this request: ${input.prompt}. Focus on correctness, security, accessibility, runtime failures and deployment readiness.`,
     files: workspace,
-    model: input.model,
+    ...(input.model ? { model: input.model } : {}),
   })
   steps.push({ role: 'reviewer', output: reviewer.output })
 
@@ -125,7 +126,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'deployer',
     prompt: `Prepare this implementation for Velclaw Hosting for the request: ${input.prompt}. Identify required build/start configuration and any blocker before publishing. Do not claim deployment.`,
     files: workspace,
-    model: input.model,
+    ...(input.model ? { model: input.model } : {}),
   })
   steps.push({ role: 'deployer', output: deployer.output })
 
