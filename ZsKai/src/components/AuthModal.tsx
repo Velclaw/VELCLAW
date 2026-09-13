@@ -16,7 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onUpdateUser
 }) => {
   const [repoName, setRepoName] = useState(user.repoConnected || 'watson-cloudant-etl');
-  const [tokenInput, setTokenInput] = useState('ghp_watson_931849a029f2109');
+  const [tokenInput, setTokenInput] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -41,7 +41,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
       <div className="w-full max-w-md bg-black border-2 border-neutral-700 rounded-none shadow-2xl overflow-hidden text-white font-mono">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b-2 border-neutral-800 bg-black">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-cyan-400" />
@@ -63,7 +62,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
-          {/* User Profile Card */}
           <div className="p-3 bg-black rounded-none border-2 border-neutral-700 flex items-center space-x-3">
             <div className="w-10 h-10 rounded-none bg-cyan-400 flex items-center justify-center font-extrabold text-black text-sm">
               {user.username.slice(0, 2).toUpperCase()}
@@ -74,7 +72,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {/* 2FA Security Toggle */}
           <div className="space-y-3 pt-2 border-t-2 border-neutral-800">
             <div className="flex items-center justify-between">
               <div>
@@ -99,7 +96,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {/* Repository Integration */}
           <div className="space-y-3 pt-2 border-t-2 border-neutral-800">
             <div className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
               <Github className="w-4 h-4 text-cyan-400" />
@@ -146,7 +142,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {/* Encryption Note */}
           <div className="p-3 bg-black rounded-none border-2 border-neutral-800 text-[10px] text-neutral-400 font-mono space-y-1">
             <div className="text-cyan-300 font-bold flex items-center gap-1">
               <Lock className="w-3 h-3 text-cyan-400" />
@@ -156,7 +151,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-4 border-t-2 border-neutral-800 bg-black text-right">
           <button
             onClick={onClose}
