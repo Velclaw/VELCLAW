@@ -7,11 +7,14 @@ class SelfHostedProvider implements HostingProviderAdapter {
   async createDeployment(input: HostingDeploymentInput): Promise<HostingDeploymentResult> {
     const { createDeployment } = await import('@/lib/deploy/store')
     const deployment = await createDeployment(input)
+    const status: HostingDeploymentResult['status'] =
+      deployment.status === 'cancelled' ? 'failed' : deployment.status
+
     return {
       provider: 'self-hosted',
       externalId: deployment.id,
       url: deployment.url,
-      status: deployment.status,
+      status,
     }
   }
 }
