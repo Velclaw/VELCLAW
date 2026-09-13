@@ -31,7 +31,7 @@ export async function runBuilderAgent(input: {
   role: 'coder' | 'reviewer' | 'tester' | 'deployer'
   prompt: string
   files: BuilderWorkspaceFile[]
-  model?: string
+  model: string | undefined
 }) {
   const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
@@ -96,9 +96,8 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
   let workspace = input.files.map((file) => ({ ...file }))
   validateWorkspace(workspace)
   const steps: Array<{ role: 'coder' | 'tester' | 'reviewer' | 'deployer'; output: string }> = []
-  const modelOption = input.model ? { model: input.model } : {}
 
-  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, ...modelOption })
+  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, model: input.model })
   steps.push({ role: 'coder', output: coder.output })
   if (coder.changes.length) {
     const map = new Map(workspace.map((file) => [file.path, file.content]))
@@ -110,7 +109,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'tester',
     prompt: `Verify the implementation for this request: ${input.prompt}. Produce exact browser-terminal commands for install, type-check, test and build. Do not claim execution.`,
     files: workspace,
-    ...modelOption,
+    model: input.model,
   })
   steps.push({ role: 'tester', output: tester.output })
 
@@ -118,7 +117,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'reviewer',
     prompt: `Review the implementation for this request: ${input.prompt}. Focus on correctness, security, accessibility, runtime failures and deployment readiness.`,
     files: workspace,
-    ...modelOption,
+    model: input.model,
   })
   steps.push({ role: 'reviewer', output: reviewer.output })
 
@@ -126,7 +125,7 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
     role: 'deployer',
     prompt: `Prepare this implementation for Velclaw Hosting for the request: ${input.prompt}. Identify required build/start configuration and any blocker before publishing. Do not claim deployment.`,
     files: workspace,
-    ...modelOption,
+    model: input.model,
   })
   steps.push({ role: 'deployer', output: deployer.output })
 
