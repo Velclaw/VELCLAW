@@ -73,6 +73,9 @@ jobs:
           docker push "$PUBLISHER_IMAGE:${GITHUB_SHA}"
           docker push "$PUBLISHER_IMAGE:main"
 
+      - name: Validate Kubernetes resources against API
+        run: kubectl apply --dry-run=server -k deploy/kubernetes
+
       - name: Apply Velclaw Kubernetes resources
         run: kubectl apply -k deploy/kubernetes
 
