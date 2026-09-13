@@ -2,10 +2,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const root = process.cwd()
-const required = ['package.json','pnpm-lock.yaml','next.config.ts','Dockerfile','deploy/docker-compose.selfhosted.yml','deploy/publisher.Dockerfile','deploy/runtime-publisher.mjs','deploy/kubernetes-publisher.mjs','deploy/kubernetes-publisher.Dockerfile','deploy/kubernetes/namespace.yaml','deploy/kubernetes/publisher-rbac.yaml','deploy/kubernetes/velclaw.yaml','deploy/kubernetes/publisher.yaml','deploy/kubernetes/kustomization.yaml','deploy/traefik.yml','app','components','server']
+const required = ['package.json','pnpm-lock.yaml','next.config.ts','Dockerfile','deploy/docker-compose.selfhosted.yml','deploy/publisher.Dockerfile','deploy/runtime-publisher.mjs','deploy/kubernetes-publisher.mjs','deploy/kubernetes-publisher.Dockerfile','deploy/kubernetes/namespace.yaml','deploy/kubernetes/publisher-rbac.yaml','deploy/kubernetes/velclaw.yaml','deploy/kubernetes/publisher.yaml','deploy/kubernetes/kustomization.yaml','deploy/traefik.yml','app','components','server','.github/workflows/kubeops-bootstrap-secrets.yml']
 const missing = required.filter((entry) => !fs.existsSync(path.join(root, entry)))
 if (missing.length) { console.error(`Runtime validation failed. Missing: ${missing.join(', ')}`); process.exit(1) }
-const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
+const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'))
 for (const name of ['build','type-check']) if (!pkg.scripts?.[name]) { console.error(`Runtime validation failed. Missing package script: ${name}`); process.exit(1) }
 if (fs.existsSync(path.join(root,'vercel.json'))) { console.error('Runtime validation failed: legacy Vercel deployment configuration is not part of Velclaw self-hosted runtime.'); process.exit(1) }
 const config = fs.readFileSync(path.join(root,'next.config.ts'),'utf8')
@@ -30,4 +30,6 @@ const rollback = fs.readFileSync(path.join(root,'app/api/deployments/[id]/rollba
 for (const token of ['getServerSession','queueRollback','Unauthorized']) if (!rollback.includes(token)) { console.error(`Runtime validation failed: rollback authorization/queue contract is missing: ${token}`); process.exit(1) }
 const deploymentApi = fs.readFileSync(path.join(root,'app/api/deployments/route.ts'),'utf8')
 for (const token of ['github\\.com','velclaw\\.cfd','getServerSession','createHostingDeployment']) if (!deploymentApi.includes(token)) { console.error(`Runtime validation failed: deployment API contract is missing: ${token}`); process.exit(1) }
-console.log('Runtime validation passed: Velclaw deployment queue, recovery, rollback authorization, Kubernetes publisher, domain isolation, and least-privilege RBAC contracts are present.')
+const bootstrap = fs.readFileSync(path.join(root,'.github/workflows/kubeops-bootstrap-secrets.yml'),'utf8')
+for (const token of ['KUBEOPS_KUBECONFIG_B64','velclaw-runtime','velclaw-github','velclaw-registry','github.token','packages: write']) if (!bootstrap.includes(token)) { console.error(`Runtime validation failed: KubeOps secret bootstrap is missing required contract: ${token}`); process.exit(1) }
+console.log('Runtime validation passed: Velclaw deployment queue, recovery, rollback authorization, Kubernetes publisher, domain isolation, image pulls, secret bootstrap, and least-privilege RBAC contracts are present.')
