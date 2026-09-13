@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { Agent, OpenAIProvider, Runner, run } from '@openai/agents'
+import { Agent, OpenAIProvider, Runner } from '@openai/agents'
 import { getUserApiKey } from '@/lib/api-keys/user-keys'
 
 type AgentMode = 'single' | 'multi'
@@ -18,7 +18,7 @@ function cleanText(value: unknown, maxLength: number) {
 }
 
 function getOpenAIAgentModel(explicitModel?: string) {
-  return cleanText(explicitModel, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-6-astra'
+  return cleanText(explicitModel, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna'
 }
 
 function getOpenAIMcpTools() {
@@ -49,9 +49,7 @@ function getOpenAIVaultIds() {
 
 export async function runOpenAIAgent(input: AgentRunInput) {
   const apiKey = await getUserApiKey('openai')
-  if (!apiKey) {
-    throw new Error('OpenAI API key is not configured for this user')
-  }
+  if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
 
   const message = cleanText(input.message, 12000)
   if (!message) throw new Error('message is required')
@@ -64,6 +62,8 @@ export async function runOpenAIAgent(input: AgentRunInput) {
   const provider = new OpenAIProvider({ apiKey, useResponses: true })
 
   try {
+    const runner = new Runner({ modelProvider: provider })
+
     if (input.mode === 'multi') {
       const researchAgent = new Agent({
         name: 'Velclaw Research Agent',
@@ -82,31 +82,13 @@ export async function runOpenAIAgent(input: AgentRunInput) {
         handoffs: [researchAgent, engineeringAgent],
       })
 
-      const result = await run(rootAgent, message, {
-        modelProvider: provider,
-        maxTurns: 12,
-      })
-
-      return {
-        mode: 'multi' as const,
-        model,
-        output: result.finalOutput,
-      }
+      const result = await runner.run(rootAgent, message, { maxTurns: 12 })
+      return { mode: 'multi' as const, model, output: result.finalOutput }
     }
 
-    const agent = new Agent({
-      name: 'Velclaw Agent',
-      model,
-      instructions: baseInstructions,
-    })
-    const runner = new Runner({ modelProvider: provider })
+    const agent = new Agent({ name: 'Velclaw Agent', model, instructions: baseInstructions })
     const result = await runner.run(agent, message, { maxTurns: 12 })
-
-    return {
-      mode: 'single' as const,
-      model,
-      output: result.finalOutput,
-    }
+    return { mode: 'single' as const, model, output: result.finalOutput }
   } finally {
     await provider.close().catch(() => undefined)
   }
