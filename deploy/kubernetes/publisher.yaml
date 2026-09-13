@@ -21,6 +21,8 @@ spec:
         app.kubernetes.io/part-of: velclaw
     spec:
       serviceAccountName: velclaw-publisher
+      imagePullSecrets:
+        - name: velclaw-registry
       automountServiceAccountToken: true
       securityContext:
         seccompProfile:
