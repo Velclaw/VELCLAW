@@ -24,17 +24,43 @@ const flow = [
 export function VelclawLanding() {
   return (
     <main className={styles.page}>
-      <nav className={styles.topnav} aria-label="Velclaw navigation">
-        <Link href="/" className={styles.brand} aria-label="Velclaw home"><span className={styles.brandMark} aria-hidden="true">V</span><span>velclaw</span></Link>
-        <div className={styles.navlinks}><Link className={styles.active} href="#platform">Platform</Link><Link href="/builder">Builder</Link><Link href="/deploy">Deploy</Link><Link href="/velclaw">Workspace</Link></div>
-      </nav>
+      <header className={styles.topnav}>
+        <details className={styles.mobileMenu}>
+          <summary className={styles.menuButton} aria-label="Mở menu">
+            <span /><span /><span />
+          </summary>
+          <div className={styles.mobilePanel}>
+            <Link href="#platform">Nền tảng</Link>
+            <Link href="/builder">Nhà xây dựng</Link>
+            <Link href="/velclaw">Không gian làm việc</Link>
+            <Link href="/deploy">Deploy</Link>
+            <Link href="/skills">Skills</Link>
+            <Link href="/plugins">Plugins</Link>
+          </div>
+        </details>
+
+        <Link href="/" className={styles.brand} aria-label="Velclaw home">
+          <span className={styles.brandMark} aria-hidden="true">V</span>
+          <span className={styles.brandName}>velclaw</span>
+        </Link>
+
+        <nav className={styles.navlinks} aria-label="Velclaw navigation">
+          <Link className={styles.active} href="#platform">Nền tảng</Link>
+          <Link href="/builder">Nhà xây dựng</Link>
+          <Link href="/velclaw">Không gian làm việc</Link>
+        </nav>
+
+        <div className={styles.authActions}>
+          <Link className={styles.signIn} href="/api/auth/signin/github">Đăng nhập</Link>
+        </div>
+      </header>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <div className={styles.eyebrow}><span />AI-NATIVE SOFTWARE WORKSPACE</div>
           <h1>Build. Review. Deploy.<br /><em>With Velclaw.</em></h1>
           <p className={styles.lead}>Một workspace duy nhất để agent và developer đi từ task đến production — code, project, build, runtime, review và deployment nằm trong cùng một vòng đời.</p>
-          <div className={styles.ctas}><Link className={`${styles.btn} ${styles.primary}`} href="/builder">Mở Builder</Link><Link className={`${styles.btn} ${styles.ghost}`} href="/velclaw">Mở Workspace</Link></div>
+          <div className={styles.ctas}><Link className={`${styles.btn} ${styles.primary}`} href="/builder">Mở Nhà xây dựng</Link><Link className={`${styles.btn} ${styles.ghost}`} href="/velclaw">Không gian làm việc</Link></div>
           <div className={styles.domainLine}><span className={styles.statusDot} /><span>velclaw.cfd</span><span className={styles.separator}>·</span><span>Browser-first development</span></div>
         </div>
         <div className={styles.commandPanel} aria-label="Velclaw browser builder preview">
@@ -49,7 +75,7 @@ export function VelclawLanding() {
 
       <section className={styles.section}><div className={styles.sectionHead}><span className={styles.k}>02 / PIPELINE</span><h2>Một đường đi rõ ràng từ ý tưởng tới production.</h2></div><div className={styles.flow}>{flow.map(([num, title], index) => <div className={styles.flowGroup} key={num}><div className={styles.flowStep}><span>{num}</span><strong>{title}</strong></div>{index < flow.length - 1 && <span className={styles.flowArrow} aria-hidden="true">→</span>}</div>)}</div></section>
 
-      <section className={styles.ctaBand}><div><span className={styles.k}>03 / BUILD</span><h3>Build ngay trên điện thoại bằng trình duyệt.</h3><p>Velclaw Builder chạy Node.js và preview trong browser; không cần biến điện thoại thành server.</p></div><Link className={`${styles.btn} ${styles.primary}`} href="/builder">Mở Builder</Link></section>
+      <section className={styles.ctaBand}><div><span className={styles.k}>03 / BUILD</span><h3>Build ngay trên điện thoại bằng trình duyệt.</h3><p>Velclaw Builder chạy Node.js và preview trong browser; không cần biến điện thoại thành server.</p></div><Link className={`${styles.btn} ${styles.primary}`} href="/builder">Mở Nhà xây dựng</Link></section>
 
       <footer><span className={styles.mono}>velclaw.cfd</span><span>AI-native software lifecycle workspace</span></footer>
     </main>
