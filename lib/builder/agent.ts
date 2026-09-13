@@ -69,9 +69,11 @@ export async function runBuilderAgent(input: {
       'You are the Velclaw Deployer. Inspect the workspace and explain deployment readiness, required build/start commands, exposed port assumptions, configuration risks, and the exact handoff to Velclaw Hosting. Do not claim deployment occurred.',
   }[input.role]
 
+  const roleLabel = `${input.role.charAt(0).toUpperCase()}${input.role.slice(1)}`
+
   try {
     const agent = new Agent({
-      name: `Velclaw ${input.role[0].toUpperCase()}${input.role.slice(1)} Agent`,
+      name: `Velclaw ${roleLabel} Agent`,
       model,
       instructions: `${roleInstructions}\n\nThe browser workspace is the source of truth. Never expose secrets from environment variables.\n\nWORKSPACE:${context}`,
       tools: input.role === 'coder' ? [applyWorkspaceChanges] : [],
