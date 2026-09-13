@@ -28,7 +28,7 @@ export function VelclawLanding() {
       <header className={styles.topnav}>
         <details className={styles.mobileMenu}>
           <summary className={styles.menuButton} aria-label="Mở menu">
-            <Menu aria-hidden="true" size={17} strokeWidth={1.7} />
+            <Menu aria-hidden="true" size={17} strokeWidth={1.8} />
           </summary>
           <div className={styles.mobilePanel}>
             <Link href="#platform">Nền tảng</Link>
@@ -41,7 +41,8 @@ export function VelclawLanding() {
         </details>
 
         <Link href="/" className={styles.brand} aria-label="Velclaw home">
-          <img className={styles.brandLogo} src="/velclaw-logo.svg" alt="Velclaw.ai" />
+          <img className={styles.brandLogo} src="/velclaw-mark.svg" alt="Velclaw" />
+          <span className={styles.brandName}>velclaw</span>
         </Link>
 
         <nav className={styles.navlinks} aria-label="Velclaw navigation">
