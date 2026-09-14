@@ -3,7 +3,7 @@
 import { GitHubIcon } from '@/components/icons/github-icon'
 import { Button } from '@/components/ui/button'
 import { getEnabledAuthProviders } from '@/lib/auth/providers'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 
 type ProviderRowProps = {
@@ -71,16 +71,12 @@ export function VelclawSignInPanel({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? 'w-full' : 'w-full max-w-md'}>
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-6 flex items-center justify-center">
-          <img
-            src="/brand/velclaw-login-logo.png"
-            alt="Velclaw"
-            className="h-auto w-[min(100%,22rem)] object-contain"
-          />
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center border border-violet-400/30 bg-violet-500/5 shadow-[0_0_50px_rgba(124,58,237,.16)]">
+          <img src="/brand/velclaw-mark.svg" alt="" className="h-11 w-11 object-contain" />
         </div>
-        <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.28em] text-violet-300">VELCLAW WORKSPACE</p>
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.32em] text-violet-300">VELCLAW IDENTITY</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Chào mừng trở lại</h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
           Đăng nhập để tiếp tục vào workspace AI-native của Velclaw.
         </p>
       </div>
@@ -98,18 +94,19 @@ export function VelclawSignInPanel({ compact = false }: { compact?: boolean }) {
         <ProviderRow label="Tiếp tục với ChatGPT" icon={<ChatGPTIcon />} disabled available={false} />
       </div>
 
+      <div className="mt-6 flex items-start gap-3 border border-border/70 bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" />
+        <span>GitHub là phương thức đăng nhập production hiện đã được nối với Velclaw Identity. Google và ChatGPT chỉ bật sau khi callback OAuth tương ứng được cấu hình.</span>
+      </div>
+
       <div className="my-6 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground/60">
         <span className="h-px flex-1 bg-border" />
-        <span>hoặc</span>
+        <span>Secure access</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <div className="border border-border/70 bg-muted/20 p-3 text-xs leading-5 text-muted-foreground">
-        GitHub hiện là phương thức đăng nhập production đã được nối với backend. Google và ChatGPT sẽ chỉ được bật sau khi OAuth callback tương ứng được cấu hình.
-      </div>
-
-      <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60">
-        Code · Agents · Builds · Runtime · Review · Gate
+      <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60">
+        Code · Agents · Builds · Runtime · Review · Deploy
       </p>
     </div>
   )
