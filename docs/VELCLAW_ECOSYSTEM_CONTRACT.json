@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "project": "velclaw",
+  "canonicalRepository": "Velclaw/repo-Velclaw",
+  "canonicalBranch": "main",
+  "canonicalDomain": "velclaw.cfd",
+  "integrationModel": "independent-repositories-explicit-contracts",
+  "repositories": [
+    {"role":"core","repository":"Velclaw/repo-Velclaw","required":true},
+    {"role":"auth","repository":"Velclaw/Oauth","required":true},
+    {"role":"official-docs","repository":"Velclaw/docs.velclaw.ai","required":true},
+    {"role":"docs-pages","repository":"zskbot/repo-docs-Velclaw","required":true},
+    {"role":"deploy","repository":"Velclaw/deploy-velclaw","required":true},
+    {"role":"release","repository":"zskbot/Autoship","required":true},
+    {"role":"release","repository":"zskbot/autoship-velclaw","required":true},
+    {"role":"ide","repository":"zskbot/AgentsIDE","required":true},
+    {"role":"ide","repository":"zskbot/Zvelclaw","required":true},
+    {"role":"cli","repository":"zskbot/Zvelclaw-CLI","required":true},
+    {"role":"pages","repository":"zskbot/velclaw-pages","required":true},
+    {"role":"browser","repository":"zskbot/velclaw-browser","required":true},
+    {"role":"agent","repository":"Velclaw/zvelclaw-agent","required":true},
+    {"role":"agent-runtime","repository":"Velclaw/velclaw-eve","required":true},
+    {"role":"ai-terminal","repository":"zskbot/ZsKai","required":true},
+    {"role":"skills","repository":"zskbot/agent-skills","required":true},
+    {"role":"review","repository":"zskbot/ChatGPT-CodeReview","required":true}
+  ],
+  "contracts": ["github","http-api","webhooks","oauth","mcp-skills-plugins","artifacts","configuration"],
+  "deployment": {"provider":"render","region":"singapore","service":"velclaw-prod","autoDeploy":true},
+  "secretsPolicy": "environment-or-provider-secret-store-only"
+}
