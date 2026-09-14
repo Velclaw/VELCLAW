@@ -46,7 +46,7 @@ jobs:
           RUN_ID="${EVENT_RUN_ID:-$INPUT_RUN_ID}"
           printf '%s\n' "RUN_ID=$RUN_ID" > failure-meta.txt
           if [ -n "$RUN_ID" ]; then
-            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json name,status,conclusion,headSha,headBranch,event,url,jobs > failure-summary.json || true
+            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json name,status,conclusion,headSha,headBranch,event,runAttempt,url,jobs > failure-summary.json || true
             gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed > failure-report.txt || true
           else
             echo 'No workflow run ID supplied.' > failure-report.txt
@@ -56,21 +56,16 @@ jobs:
           git status --short >> failure-report.txt
 
       - name: Re-run failed jobs once
-        if: github.event_name == 'workflow_run'
+        if: >-
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.run_attempt == 1
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-        run: |
-          MARKER="/tmp/velclaw-heal-${RUN_ID}"
-          if [ -e "$MARKER" ]; then
-            echo 'Retry already requested for this run; skipping to avoid a retry loop.'
-            exit 0
-          fi
-          touch "$MARKER"
-          gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
+        run: gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
 
       - name: Run Codex repair agent
-        if: ${{ secrets.OPENAI_API_KEY != '' }}
+        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         id: codex
         uses: openai/codex-action@v1
         with:
@@ -90,7 +85,7 @@ jobs:
             Do not push or create a pull request yourself.
 
       - name: Create repair branch and commit
-        if: ${{ secrets.OPENAI_API_KEY != '' }}
+        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -110,7 +105,7 @@ jobs:
             --body-file codex-result.txt || true
 
       - name: Open diagnostic issue when repair is unavailable
-        if: ${{ secrets.OPENAI_API_KEY == '' }}
+        if: ${{ secrets.OPENAI_API_KEY == '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id || inputs.run_id }}
