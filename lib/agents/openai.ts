@@ -47,6 +47,14 @@ function getOpenAIVaultIds() {
     .slice(0, 20)
 }
 
+function getOpenAICapabilityDirectories() {
+  return (process.env.OPENAI_CAPABILITY_DIRECTORIES || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .slice(0, 20)
+}
+
 export async function runOpenAIAgent(input: AgentRunInput) {
   const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
@@ -111,14 +119,16 @@ export async function createOpenAIAgentsSession(input: {
   const model = getOpenAIAgentModel(input.model)
   const instructions =
     cleanText(input.instructions, 6000) ||
-    'You are Velclaw Agent. Complete the requested task, verify your work, and report concrete results.'
+    'You are Velclaw Agent. Complete the requested task, verify your work, and report concrete results. When using a hosted workspace, save durable findings and evidence under /workspace/outputs.'
   const maxConcurrentSubagents = Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8)
   const tools = getOpenAIMcpTools()
   const vaultIds = getOpenAIVaultIds()
+  const capabilityDirectories = getOpenAICapabilityDirectories()
 
   const payload: Record<string, unknown> = {
     agent: {
       model,
+      name: 'Velclaw Hosted Agent',
       instructions,
       ...(tools ? { tools } : {}),
       ...(input.multiAgent
@@ -126,7 +136,10 @@ export async function createOpenAIAgentsSession(input: {
         : {}),
     },
     ...(vaultIds.length ? { vault_ids: vaultIds } : {}),
-    environment: { type: input.environment || 'openai_hosted' },
+    environment: {
+      type: input.environment || 'openai_hosted',
+      ...(capabilityDirectories.length ? { capability_directories: capabilityDirectories } : {}),
+    },
     input: message,
   }
 
