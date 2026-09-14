@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
     autoDeploy: true
     envVars:
@@ -28,5 +28,7 @@ services:
         sync: false
       - key: VELCLAW_PUBLIC_DOMAIN
         value: velclaw.cfd
+      - key: VELCLAW_OAUTH_ISSUER
+        value: https://velclaw.cfd
       - key: VELCLAW_TLS_EMAIL
         sync: false
