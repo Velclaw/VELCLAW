@@ -22,7 +22,8 @@
     "db:studio": "drizzle-kit studio",
     "prepare": "husky",
     "validate:runtime": "node scripts/ci-runtime-validation.mjs",
-    "audit:ecosystem": "node scripts/verify-ecosystem.mjs"
+    "audit:ecosystem": "node scripts/verify-ecosystem.mjs",
+    "audit:ecosystem:live": "node scripts/verify-ecosystem-live.mjs"
   },
   "dependencies": {
     "@git-diff-view/file": "^0.0.32",
