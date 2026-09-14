@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2, Menu, PanelLeftClose } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { getSidebarWidth, setSidebarWidth, getSidebarOpen, setSidebarOpen } from '@/lib/utils/cookies'
 import { nanoid } from 'nanoid'
 import { ConnectorsProvider } from '@/components/connectors-provider'
@@ -49,6 +50,8 @@ function SidebarLoader({ width }: { width: number }) {
 }
 
 export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, initialIsMobile }: AppLayoutProps) {
+  const pathname = usePathname()
+  const isLanding = pathname === '/'
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => initialIsMobile ? false : (initialSidebarOpen ?? true))
@@ -80,8 +83,8 @@ export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, i
     finally { setIsLoading(false) }
   }, [])
 
-  useEffect(() => { fetchTasks() }, [fetchTasks])
-  useEffect(() => { const interval = setInterval(fetchTasks, 5000); return () => clearInterval(interval) }, [fetchTasks])
+  useEffect(() => { if (!isLanding) fetchTasks() }, [fetchTasks, isLanding])
+  useEffect(() => { if (isLanding) return; const interval = setInterval(fetchTasks, 5000); return () => clearInterval(interval) }, [fetchTasks, isLanding])
 
   const toggleSidebar = useCallback(() => updateSidebarOpen(!isSidebarOpen), [isSidebarOpen, updateSidebarOpen])
   useEffect(() => {
@@ -111,24 +114,26 @@ export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, i
   return (
     <TasksContext.Provider value={{ refreshTasks: fetchTasks, toggleSidebar, isSidebarOpen, isSidebarResizing: isResizing, addTaskOptimistically }}>
       <ConnectorsProvider>
-        <div className="h-dvh flex relative" style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
-          {isSidebarOpen && <div className="lg:hidden fixed inset-0 bg-black/60 z-30" onClick={closeSidebar} aria-hidden="true" />}
-          <aside className={`fixed inset-y-0 left-0 z-40 ${isResizing || !hasMounted ? '' : 'transition-transform duration-200 ease-out'} ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ width: `${sidebarWidth}px` }} aria-label="Velclaw workspace navigation">
-            <div className="h-full overflow-hidden">{isLoading ? <SidebarLoader width={sidebarWidth} /> : <TaskSidebar tasks={tasks} width={sidebarWidth} />}</div>
-          </aside>
-          <div className={`hidden lg:block fixed inset-y-0 cursor-col-resize group z-50 ${isSidebarOpen ? 'w-1 opacity-100' : 'w-0 opacity-0'}`} onMouseDown={isSidebarOpen ? handleMouseDown : undefined} style={{ left: isSidebarOpen ? `${sidebarWidth}px` : '0px' }} aria-hidden="true"><div className="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-          <main className={`flex-1 min-w-0 overflow-auto flex flex-col ${isResizing || !hasMounted ? '' : 'transition-[margin] duration-200 ease-out'}`} style={{ marginLeft: isDesktop && isSidebarOpen ? `${sidebarWidth + 4}px` : '0px' }}>
-            <div className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-              <Button variant="ghost" size="icon" className="size-8" onClick={toggleSidebar} aria-label={isSidebarOpen ? 'Close workspace sidebar' : 'Open workspace sidebar'}>
-                {isSidebarOpen ? <PanelLeftClose className="size-4" /> : <Menu className="size-4" />}
-              </Button>
-              <Link href="/" className="font-mono text-sm font-semibold tracking-tight">VELCLAW</Link>
-              <div className="ml-auto flex items-center gap-2 text-[10px] font-mono text-muted-foreground"><span className="hidden sm:inline">⌘K</span><span className="hidden md:inline">Command</span></div>
-            </div>
-            <div className="min-h-0 flex-1">{children}</div>
-          </main>
-          <CommandPalette />
-        </div>
+        {isLanding ? children : (
+          <div className="h-dvh flex relative" style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
+            {isSidebarOpen && <div className="lg:hidden fixed inset-0 bg-black/60 z-30" onClick={closeSidebar} aria-hidden="true" />}
+            <aside className={`fixed inset-y-0 left-0 z-40 ${isResizing || !hasMounted ? '' : 'transition-transform duration-200 ease-out'} ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ width: `${sidebarWidth}px` }} aria-label="Velclaw workspace navigation">
+              <div className="h-full overflow-hidden">{isLoading ? <SidebarLoader width={sidebarWidth} /> : <TaskSidebar tasks={tasks} width={sidebarWidth} />}</div>
+            </aside>
+            <div className={`hidden lg:block fixed inset-y-0 cursor-col-resize group z-50 ${isSidebarOpen ? 'w-1 opacity-100' : 'w-0 opacity-0'}`} onMouseDown={isSidebarOpen ? handleMouseDown : undefined} style={{ left: isSidebarOpen ? `${sidebarWidth}px` : '0px' }} aria-hidden="true"><div className="absolute inset-y-0 left-0 w-0.5 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
+            <main className={`flex-1 min-w-0 overflow-auto flex flex-col ${isResizing || !hasMounted ? '' : 'transition-[margin] duration-200 ease-out'}`} style={{ marginLeft: isDesktop && isSidebarOpen ? `${sidebarWidth + 4}px` : '0px' }}>
+              <div className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                <Button variant="ghost" size="icon" className="size-8" onClick={toggleSidebar} aria-label={isSidebarOpen ? 'Close workspace sidebar' : 'Open workspace sidebar'}>
+                  {isSidebarOpen ? <PanelLeftClose className="size-4" /> : <Menu className="size-4" />}
+                </Button>
+                <Link href="/" className="font-mono text-sm font-semibold tracking-tight">VELCLAW</Link>
+                <div className="ml-auto flex items-center gap-2 text-[10px] font-mono text-muted-foreground"><span className="hidden sm:inline">⌘K</span><span className="hidden md:inline">Command</span></div>
+              </div>
+              <div className="min-h-0 flex-1">{children}</div>
+            </main>
+            <CommandPalette />
+          </div>
+        )}
       </ConnectorsProvider>
     </TasksContext.Provider>
   )
