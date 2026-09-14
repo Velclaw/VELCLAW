@@ -49,11 +49,7 @@ Do not put `AUTOSHIP_API_TOKEN` into a browser bundle.
 
 ### VPS SSH
 
-```env
-AUTOSHIP_SSH_PRIVATE_KEY=-----BEGIN OPENSSH PRIVATE KEY-----...
-```
-
-The corresponding project must provide `serverIp`, optional `serverPort`, `serverUser`, and `deployPath`.
+Use a secret-managed environment variable containing the complete private key. Never commit key material or a private-key header/example to the repository.
 
 ### Webhook
 
