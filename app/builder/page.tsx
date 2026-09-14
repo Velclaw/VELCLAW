@@ -1,4 +1,5 @@
 import { VelclawBrowserBuilder } from '@/components/velclaw-browser-builder'
+import { UnifiedBuilderBar } from '@/components/unified-builder-bar'
 
 export const metadata = {
   title: 'Velclaw Builder',
@@ -6,5 +7,10 @@ export const metadata = {
 }
 
 export default function VelclawBuilderPage() {
-  return <VelclawBrowserBuilder />
+  return (
+    <div className="min-h-screen bg-[#07080b] text-zinc-100">
+      <UnifiedBuilderBar />
+      <VelclawBrowserBuilder />
+    </div>
+  )
 }
