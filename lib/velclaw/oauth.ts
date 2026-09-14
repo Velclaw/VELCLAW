@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { createHash } from 'node:crypto'
 
 const encoder = new TextEncoder()
-const issuer = process.env.VELCLAW_OAUTH_ISSUER || 'https://auth.velclaw.cfd'
+const issuer = process.env.VELCLAW_OAUTH_ISSUER || 'https://velclaw.cfd'
 const secretValue = process.env.VELCLAW_OAUTH_SECRET
 
 function secret() {
