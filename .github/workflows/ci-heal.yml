@@ -44,11 +44,13 @@ jobs:
           INPUT_RUN_ID: ${{ inputs.run_id }}
         run: |
           RUN_ID="${EVENT_RUN_ID:-$INPUT_RUN_ID}"
-          if [ -z "$RUN_ID" ]; then
-            echo 'No workflow run ID supplied.' > failure-report.txt
-          else
-            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json name,status,conclusion,headSha,headBranch,url,jobs > failure-summary.json || true
+          printf '%s\n' "RUN_ID=$RUN_ID" > failure-meta.txt
+          if [ -n "$RUN_ID" ]; then
+            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json name,status,conclusion,headSha,headBranch,event,url,jobs > failure-summary.json || true
             gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed > failure-report.txt || true
+          else
+            echo 'No workflow run ID supplied.' > failure-report.txt
+            echo '{}' > failure-summary.json
           fi
           printf '\n=== git status ===\n' >> failure-report.txt
           git status --short >> failure-report.txt
@@ -58,11 +60,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-        run: gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
-
-      - name: Wait for the retry window
-        if: github.event_name == 'workflow_run'
-        run: sleep 15
+        run: |
+          MARKER="/tmp/velclaw-heal-${RUN_ID}"
+          if [ -e "$MARKER" ]; then
+            echo 'Retry already requested for this run; skipping to avoid a retry loop.'
+            exit 0
+          fi
+          touch "$MARKER"
+          gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
 
       - name: Run Codex repair agent
         if: ${{ secrets.OPENAI_API_KEY != '' }}
@@ -76,15 +81,13 @@ jobs:
           prompt: |
             You are the Velclaw CI repair agent.
             Work only on the trusted main checkout of Velclaw/Velclaw.
-            Read AGENTS.md and the repository instructions first.
-            Read failure-report.txt and failure-summary.json if present.
-            Diagnose the concrete failure, make the smallest safe code/workflow/config change that fixes it,
-            and run the narrowest relevant validation locally. Do not invent secrets or credentials.
-            Do not modify production secrets. Do not weaken security checks merely to make CI green.
-            If the failure is caused by missing infrastructure credentials, improve the workflow so the missing
-            infrastructure is an explicit prerequisite or use the supported deployment path instead of silently
-            pretending deployment succeeded.
-            Leave the working tree with the proposed fix only; do not push or create a pull request yourself.
+            Read AGENTS.md and repository instructions first.
+            Read failure-report.txt and failure-summary.json.
+            Diagnose the concrete failure and make the smallest safe repository change that fixes it.
+            Run the narrowest relevant validation. Never invent secrets or credentials.
+            Never modify production secrets. Never weaken security checks just to make CI green.
+            If the failure is infrastructure-only, improve the workflow or documentation so the prerequisite is explicit.
+            Do not push or create a pull request yourself.
 
       - name: Create repair branch and commit
         if: ${{ secrets.OPENAI_API_KEY != '' }}
