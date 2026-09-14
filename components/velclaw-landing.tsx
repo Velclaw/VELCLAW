@@ -52,7 +52,7 @@ export function VelclawLanding() {
         </nav>
 
         <div className={styles.authActions}>
-          <Link className={styles.signIn} href="/api/auth/signin/github">Đăng nhập</Link>
+          <Link className={styles.signIn} href="/auth/signin">Đăng nhập</Link>
         </div>
       </header>
 
