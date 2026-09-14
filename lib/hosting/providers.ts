@@ -14,7 +14,7 @@ export type HostingDeploymentResult = {
   provider: HostingProvider
   externalId: string | null
   url: string | null
-  status: 'queued' | 'building' | 'ready' | 'failed'
+  status: 'queued' | 'building' | 'waiting_approval' | 'ready' | 'failed'
 }
 
 export interface HostingProviderAdapter {
