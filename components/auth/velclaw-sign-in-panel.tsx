@@ -71,8 +71,12 @@ export function VelclawSignInPanel({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? 'w-full' : 'w-full max-w-md'}>
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center border border-violet-400/70 bg-[#08070d] shadow-[0_0_34px_rgba(139,92,246,0.22)]">
-          <img src="/brand/velclaw-mark.svg" alt="Velclaw" className="h-16 w-16" />
+        <div className="mx-auto mb-6 flex items-center justify-center">
+          <img
+            src="/brand/velclaw-login-logo.png"
+            alt="Velclaw"
+            className="h-auto w-[min(100%,22rem)] object-contain"
+          />
         </div>
         <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.28em] text-violet-300">VELCLAW WORKSPACE</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Chào mừng trở lại</h1>
