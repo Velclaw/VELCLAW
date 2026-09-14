@@ -13,6 +13,9 @@ const TRAEFIK_ENTRYPOINT = (process.env.VELCLAW_TRAEFIK_ENTRYPOINT || (PUBLIC_SC
 const ENABLE_TLS = PUBLIC_SCHEME === 'https'
 const DEPLOY_TOKEN = process.env.VELCLAW_DEPLOY_API_TOKEN || ''
 const BUILD_TIMEOUT_MS = Math.max(60_000, Number(process.env.VELCLAW_BUILD_TIMEOUT_MS || 900_000))
+const SMOKE_TIMEOUT_MS = Math.max(5_000, Number(process.env.VELCLAW_SMOKE_TIMEOUT_MS || 30_000))
+const SMOKE_RETRIES = Math.max(1, Number(process.env.VELCLAW_SMOKE_RETRIES || 10))
+const SMOKE_DELAY_MS = Math.max(250, Number(process.env.VELCLAW_SMOKE_DELAY_MS || 1500))
 const LOG_LIMIT = 500
 
 if (!PUBLIC_DOMAIN || /[/:\s]/.test(PUBLIC_DOMAIN)) throw new Error(`Invalid VELCLAW_PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}`)
@@ -101,15 +104,9 @@ async function ensureDockerfile(workdir, logs) {
     logs.push('Using repository Dockerfile')
     return
   } catch {}
-
   const packagePath = path.join(workdir, 'package.json')
   let pkg
-  try {
-    pkg = JSON.parse(await fs.readFile(packagePath, 'utf8'))
-  } catch {
-    throw new Error('Repository has no Dockerfile and no valid package.json; automatic Node build is unavailable')
-  }
-
+  try { pkg = JSON.parse(await fs.readFile(packagePath, 'utf8')) } catch { throw new Error('Repository has no Dockerfile and no valid package.json; automatic Node build is unavailable') }
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) }
   const scripts = pkg.scripts || {}
   const hasPnpmLock = await fs.access(path.join(workdir, 'pnpm-lock.yaml')).then(() => true).catch(() => false)
@@ -119,9 +116,7 @@ async function ensureDockerfile(workdir, logs) {
   const build = scripts.build ? `${manager} run build` : ''
   const start = scripts.start ? `${manager} start` : ''
   const isStatic = Boolean(deps.vite || deps['react-scripts']) && !scripts.start
-
   if (!build) throw new Error('Repository has no build script and no Dockerfile')
-
   if (isStatic) {
     const lock = manager === 'pnpm' ? 'pnpm-lock.yaml' : hasNpmLock ? 'package-lock.json' : 'package.json'
     await fs.writeFile(path.join(workdir, 'velclaw-static-server.mjs'), `import { createServer } from 'node:http'\nimport { createReadStream, existsSync, statSync } from 'node:fs'\nimport { join, extname } from 'node:path'\nconst root = process.env.STATIC_ROOT || '/app/dist'\nconst types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' }\ncreateServer((req, res) => { const raw = decodeURIComponent((req.url || '/').split('?')[0]); const rel = raw === '/' ? '/index.html' : raw; const file = join(root, rel); const target = existsSync(file) && statSync(file).isFile() ? file : join(root, 'index.html'); if (!existsSync(target)) { res.statusCode = 404; res.end('Not found'); return } res.setHeader('Content-Type', types[extname(target)] || 'application/octet-stream'); createReadStream(target).pipe(res) }).listen(Number(process.env.PORT || 3000), '0.0.0.0')\n`)
@@ -129,7 +124,6 @@ async function ensureDockerfile(workdir, logs) {
     logs.push('Generated Dockerfile for static Node/Vite application')
     return
   }
-
   if (!start) throw new Error('Repository has no start script and no Dockerfile')
   const lock = manager === 'pnpm' ? 'pnpm-lock.yaml' : hasNpmLock ? 'package-lock.json' : 'package.json'
   await fs.writeFile(path.join(workdir, 'Dockerfile'), `FROM node:22-alpine\nWORKDIR /app\nCOPY package.json ${lock} ./\nRUN ${install}\nCOPY . .\nRUN ${build}\nENV NODE_ENV=production\nENV PORT=3000\nEXPOSE 3000\nCMD ["${manager}", "start"]\n`)
@@ -171,11 +165,37 @@ async function removePreviousProjectContainers(projectName, logs) {
   if (ids.length) await run('docker', ['rm', '--force', ...ids], process.cwd(), logs)
 }
 
+async function smokeCheck(url, logs) {
+  logs.push(`Smoke check: ${url}`)
+  let lastError = 'no response'
+  for (let attempt = 1; attempt <= SMOKE_RETRIES; attempt += 1) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), SMOKE_TIMEOUT_MS)
+    try {
+      const response = await fetch(url, { method: 'GET', redirect: 'manual', signal: controller.signal, headers: { 'user-agent': 'Velclaw-Smoke/1.0' } })
+      if (response.status >= 200 && response.status < 400) {
+        logs.push(`Smoke check passed on attempt ${attempt}: HTTP ${response.status}`)
+        return
+      }
+      lastError = `HTTP ${response.status}`
+      logs.push(`Smoke attempt ${attempt}/${SMOKE_RETRIES}: ${lastError}`)
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error)
+      logs.push(`Smoke attempt ${attempt}/${SMOKE_RETRIES}: ${lastError}`)
+    } finally {
+      clearTimeout(timer)
+    }
+    if (attempt < SMOKE_RETRIES) await new Promise((resolve) => setTimeout(resolve, SMOKE_DELAY_MS))
+  }
+  throw new Error(`Smoke check failed after ${SMOKE_RETRIES} attempts: ${lastError}`)
+}
+
 async function publish(job) {
   const logs = [...(job.logs || []), 'Velclaw runtime publisher started']
   const workdir = await fs.mkdtemp(path.join(os.tmpdir(), `velclaw-${job.id}-`))
   const image = `velclaw/${slug(job.projectName)}:${job.id}`
   const hostname = productHostname(job)
+  const url = `${PUBLIC_SCHEME}://${hostname}`
   const container = `velclaw-${job.id}`
   let envFile = null
   try {
@@ -192,7 +212,9 @@ async function publish(job) {
     await removePreviousProjectContainers(job.projectName, logs)
     const envArgs = envFile ? ['--env-file', envFile] : []
     await run('docker', ['run', '--detach', '--restart', 'unless-stopped', '--network', RUNTIME_NETWORK, '--memory', '768m', '--cpus', '1.0', '--pids-limit', '256', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true', '--tmpfs', '/tmp:rw,noexec,nosuid,size=64m', ...envArgs, ...traefikLabels(job, hostname, port), '--name', container, image], process.cwd(), logs)
-    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url: `${PUBLIC_SCHEME}://${hostname}`, logs: logs.slice(-LOG_LIMIT) }) })
+    await smokeCheck(url, logs)
+    logs.push('Smoke verification passed; marking release ready')
+    await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'ready', url, logs: logs.slice(-LOG_LIMIT) }) })
   } catch (error) {
     logs.push(`ERROR: ${error instanceof Error ? error.message : String(error)}`)
     await request(`/api/deployments/${job.id}/runtime`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${DEPLOY_TOKEN}` }, body: JSON.stringify({ status: 'failed', logs: logs.slice(-LOG_LIMIT), error: error instanceof Error ? error.message : String(error) }) }).catch(() => {})
