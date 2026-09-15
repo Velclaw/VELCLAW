@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next'
-
-const base = 'https://velclaw.cfd'
+import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
@@ -23,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ]
 
   return paths.map((path) => ({
-    url: `${base}${path}`,
+    url: `${VELCLAW_PUBLIC_ORIGIN}${path}`,
     changeFrequency: path === '/' ? 'daily' : 'weekly',
     priority: path === '/' ? 1 : 0.7,
   }))
