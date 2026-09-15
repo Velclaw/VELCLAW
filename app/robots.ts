@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/auth/session'],
     },
-    sitemap: 'https://velclaw.cfd/sitemap.xml',
-    host: 'https://velclaw.cfd',
+    sitemap: `${VELCLAW_PUBLIC_ORIGIN}/sitemap.xml`,
+    host: VELCLAW_PUBLIC_ORIGIN,
   }
 }
