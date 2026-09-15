@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (existing[0]) await db.update(connectors).set(values).where(eq(connectors.id, existing[0].id))
-    else await db.insert(connectors).values({ id: nanoid(16), userId: session.user.id, name: 'linear', userId: session.user.id, ...values })
+    else await db.insert(connectors).values({ id: nanoid(16), userId: session.user.id, name: 'linear', ...values })
 
     return NextResponse.redirect(new URL('/builder?linear=connected', request.url))
   } catch (error) {
