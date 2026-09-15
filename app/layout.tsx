@@ -8,6 +8,7 @@ import { SessionProvider } from '@/components/auth/session-provider'
 import { JotaiProvider } from '@/components/providers/jotai-provider'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,7 +21,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://velclaw.cfd'),
+  metadataBase: new URL(VELCLAW_PUBLIC_ORIGIN),
   title: {
     default: 'Velclaw — AI-native Software Workspace',
     template: '%s | Velclaw',
@@ -29,14 +30,14 @@ export const metadata: Metadata = {
   applicationName: 'Velclaw',
   alternates: {
     languages: {
-      vi: 'https://velclaw.cfd',
-      en: 'https://velclaw.cfd',
+      vi: VELCLAW_PUBLIC_ORIGIN,
+      en: VELCLAW_PUBLIC_ORIGIN,
     },
   },
   openGraph: {
     type: 'website',
     siteName: 'Velclaw',
-    url: 'https://velclaw.cfd',
+    url: VELCLAW_PUBLIC_ORIGIN,
     title: 'Velclaw — AI-native Software Workspace',
     description: 'AI-native workspace for agents, code, builds, runtime, review and delivery.',
   },
