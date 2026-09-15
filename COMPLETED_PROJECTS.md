@@ -5,7 +5,7 @@
 ---
 
 ## 📊 TỔNG QUAN TIẾN ĐỘ DỰ ÁN CHÍNH
-- **Dự án chính:** Velclaw Core Workspace (https://github.com)
+- **Dự án chính:** Velclaw Core Workspace (https://github.com/Velclaw/repo-Velclaw)
 - **Trạng thái tổng thể:** [Đang cập nhật dựa trên commit mới nhất]
 - **Tiến độ hiện tại:** `XX%` 
 
