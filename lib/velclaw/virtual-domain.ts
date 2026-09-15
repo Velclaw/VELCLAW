@@ -1,11 +1,13 @@
-export const VELCLAW_PUBLIC_DOMAIN = 'velclaw.cfd'
+import { VELCLAW_PUBLIC_DOMAIN } from '@/lib/velclaw/domain-config'
 
 /**
- * Canonical Velclaw hostname boundary.
+ * Public Velclaw hostname boundary.
  *
- * velclaw.cfd is the only domain identity used by the application; product
- * deployments may use first-party preview hosts in the Velclaw namespace.
+ * The hostname is deployment configuration, not application identity. This
+ * keeps the runtime independent from the current temporary or future TLD.
  */
+export { VELCLAW_PUBLIC_DOMAIN }
+
 export function resolveVelclawVirtualDomain(hostname: string | null | undefined): string {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
   return normalized || VELCLAW_PUBLIC_DOMAIN
@@ -13,5 +15,5 @@ export function resolveVelclawVirtualDomain(hostname: string | null | undefined)
 
 export function isVelclawPublicDomain(hostname: string | null | undefined): boolean {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
-  return normalized === VELCLAW_PUBLIC_DOMAIN || /^velclaw-git-[a-z0-9-]+-velclaw\.cfd$/.test(normalized)
+  return normalized === VELCLAW_PUBLIC_DOMAIN
 }
