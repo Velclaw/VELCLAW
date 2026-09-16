@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '../..');
 const configPath = resolve(root, '.velclaw/project.json');
+const opsWorkflowPath = resolve(root, '.github/workflows/ops-control-plane.yml');
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
+const opsWorkflow = readFileSync(opsWorkflowPath, 'utf8');
 
 const expected = {
   owner: config.project.repository.owner,
@@ -16,8 +18,7 @@ if (expected.owner !== 'Velclaw' || expected.name !== 'VELCLAW' || expected.bran
 }
 
 const levels = config.notifications?.levels ?? {};
-const requiredSilent = ['info', 'warning', 'error'];
-for (const level of requiredSilent) {
+for (const level of ['info', 'warning', 'error']) {
   if (levels[level] !== 'silent') {
     throw new Error(`Notification policy drift detected for level: ${level}`);
   }
@@ -31,6 +32,20 @@ for (const level of ['critical', 'security', 'production']) {
 
 if (config.notifications?.history !== true) {
   throw new Error('Notification history must remain enabled.');
+}
+
+if (config.notifications?.channels?.device !== false || config.notifications?.channels?.email !== false) {
+  throw new Error('Device and email notification channels must remain disabled by the project policy.');
+}
+
+if (opsWorkflow.includes('Velclaw Release Validation')) {
+  throw new Error('Generic release-validation failures must not notify the external ops channel.');
+}
+
+for (const workflow of ['Security Baseline', 'Autoship Production Verification']) {
+  if (!opsWorkflow.includes(workflow)) {
+    throw new Error(`Critical notification source is missing from ops policy: ${workflow}`);
+  }
 }
 
 console.log('Velclaw Control Plane reconciliation passed.');
