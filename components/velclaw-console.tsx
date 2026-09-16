@@ -7,13 +7,9 @@ import {
   Boxes,
   CircleCheck,
   CircleDot,
-  Clock3,
   Code2,
-  GitBranch,
   Layers3,
   Menu,
-  MoreHorizontal,
-  Play,
   Plus,
   Rocket,
   Search,
@@ -23,9 +19,11 @@ import {
 } from 'lucide-react'
 import styles from './velclaw-console.module.css'
 
+const canonicalRepoPath = '/repos/Velclaw/VELCLAW'
+
 const nav = [
   ['Overview', Activity, '/console'],
-  ['Projects', Boxes, '/repos/Velclaw/repo-Velclaw'],
+  ['Projects', Boxes, canonicalRepoPath],
   ['Agents', Bot, '/skills'],
   ['Code Space', Code2, '/builder'],
   ['Workflows', Workflow, '/tasks'],
@@ -34,7 +32,7 @@ const nav = [
 ] as const
 
 const projects = [
-  { name: 'Velclaw Core', repo: 'repo-Velclaw', state: 'Healthy', updated: '2 min ago', progress: 92, href: '/repos/Velclaw/repo-Velclaw' },
+  { name: 'Velclaw Core', repo: 'VELCLAW', state: 'Healthy', updated: '2 min ago', progress: 92, href: canonicalRepoPath },
   { name: 'Agent Runtime', repo: 'agent-runtime', state: 'Building', updated: '8 min ago', progress: 68, href: '/builder' },
   { name: 'Web Platform', repo: 'web-platform', state: 'Ready', updated: '31 min ago', progress: 100, href: '/deploy' },
 ]
@@ -42,7 +40,7 @@ const projects = [
 const activity = [
   ['Deployment completed', 'Production runtime is healthy', '2 min ago', CircleCheck],
   ['Agent run finished', 'Review snapshot is ready', '8 min ago', Bot],
-  ['Build started', 'Agent Runtime · main', '14 min ago', Play],
+  ['Build started', 'Agent Runtime · main', '14 min ago', CircleDot],
   ['Workspace updated', 'Environment variables synchronized', '31 min ago', Settings2],
 ] as const
 
@@ -96,7 +94,7 @@ export function VelclawConsole() {
               <p>Build, orchestrate and operate software from one workspace.</p>
             </div>
             <div className={styles.headerActions}>
-              <Link className={styles.secondary} href="/repos/Velclaw/repo-Velclaw"><Search size={15} /> Find project</Link>
+              <Link className={styles.secondary} href={canonicalRepoPath}><Search size={15} /> Find project</Link>
               <Link className={styles.primary} href="/builder"><Plus size={16} /> New project</Link>
             </div>
           </div>
@@ -112,40 +110,38 @@ export function VelclawConsole() {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <div><span className={styles.panelKicker}>PROJECTS</span><h2>Active work</h2></div>
-                <Link href="/repos/Velclaw/repo-Velclaw">View all <ArrowUpRight size={14} /></Link>
+                <Link href={canonicalRepoPath}>View all <ArrowUpRight size={14} /></Link>
               </div>
               <div className={styles.projectList}>
                 {projects.map(project => (
                   <Link href={project.href} className={styles.projectRow} key={project.name}>
                     <div className={styles.projectIcon}><Box size={17} /></div>
-                    <div className={styles.projectInfo}><strong>{project.name}</strong><span><GitBranch size={12} /> {project.repo}</span></div>
-                    <div className={styles.projectState}><span className={project.state === 'Building' ? styles.building : styles.healthy}>{project.state}</span><small>{project.updated}</small></div>
+                    <div className={styles.projectMain}>
+                      <strong>{project.name}</strong>
+                      <span>{project.repo} · {project.updated}</span>
+                    </div>
                     <div className={styles.progress}><i style={{ width: `${project.progress}%` }} /></div>
-                    <MoreHorizontal size={17} className={styles.more} />
+                    <span className={styles.state}>{project.state}</span>
                   </Link>
                 ))}
               </div>
             </section>
 
             <section className={styles.panel}>
-              <div className={styles.panelHeader}><div><span className={styles.panelKicker}>RUNTIME</span><h2>System state</h2></div><span className={styles.live}>LIVE</span></div>
-              <div className={styles.runtime}><div className={styles.runtimeRing}><span>98%</span></div><div><strong>All systems operational</strong><p>Agents, builds and deployment workers are responding normally.</p></div></div>
-              <div className={styles.runtimeStats}><div><span>Workers</span><b>8 / 8</b></div><div><span>Queue</span><b>03</b></div><div><span>Latency</span><b>142ms</b></div></div>
+              <div className={styles.panelHeader}>
+                <div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div>
+              </div>
+              <div className={styles.activityList}>
+                {activity.map(([title, detail, time, Icon]) => (
+                  <div className={styles.activityRow} key={`${title}-${time}`}>
+                    <div className={styles.activityIcon}><Icon size={15} /></div>
+                    <div><strong>{title}</strong><span>{detail}</span></div>
+                    <time>{time}</time>
+                  </div>
+                ))}
+              </div>
             </section>
           </div>
-
-          <section className={styles.panel}>
-            <div className={styles.panelHeader}><div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div><Link href="/tasks">Open activity <ArrowUpRight size={14} /></Link></div>
-            <div className={styles.activityList}>
-              {activity.map(([title, detail, time, Icon]) => (
-                <div className={styles.activityRow} key={title}>
-                  <div className={styles.activityIcon}><Icon size={15} /></div>
-                  <div><strong>{title}</strong><span>{detail}</span></div>
-                  <time><Clock3 size={13} /> {time}</time>
-                </div>
-              ))}
-            </div>
-          </section>
         </section>
       </div>
     </main>
