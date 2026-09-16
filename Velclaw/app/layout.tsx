@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     default: 'Velclaw — AI-native Software Workspace',
     template: '%s | Velclaw',
   },
-  description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
+  description: 'Velclaw is AI-native software workspace for agents, code, builds, runtime, review and delivery.',
   applicationName: 'Velclaw',
   alternates: {
     languages: {
