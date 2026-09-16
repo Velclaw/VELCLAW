@@ -17,7 +17,7 @@ type Issue = {
 
 type Props = { defaultRepoUrl?: string }
 
-export function LinearIdePanel({ defaultRepoUrl = 'https://github.com/Velclaw/repo-Velclaw' }: Props) {
+export function LinearIdePanel({ defaultRepoUrl = 'https://github.com/Velclaw/VELCLAW' }: Props) {
   const [connected, setConnected] = useState(false)
   const [teams, setTeams] = useState<Team[]>([])
   const [issues, setIssues] = useState<Issue[]>([])
@@ -107,7 +107,7 @@ export function LinearIdePanel({ defaultRepoUrl = 'https://github.com/Velclaw/re
 
   if (!connected && !loading) {
     return (
-      <aside className="w-[360px] shrink-0 border-l border-white/10 bg-[#0b0d11] p-5">
+      <aside className="w-full shrink-0 border-t border-white/10 bg-[#0b0d11] p-5 lg:w-[360px] lg:border-l lg:border-t-0">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black"><CircleDot size={19} /></div>
           <div><div className="text-sm font-semibold">Linear Build</div><div className="text-xs text-white/40">Issue → IDE → Build</div></div>
@@ -120,7 +120,7 @@ export function LinearIdePanel({ defaultRepoUrl = 'https://github.com/Velclaw/re
   }
 
   return (
-    <aside className="flex w-[390px] shrink-0 flex-col border-l border-white/10 bg-[#0b0d11]">
+    <aside className="flex w-full shrink-0 flex-col border-t border-white/10 bg-[#0b0d11] lg:w-[390px] lg:border-l lg:border-t-0">
       <div className="border-b border-white/10 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-black"><CircleDot size={17} /></div><div><div className="text-sm font-semibold">Linear Build</div><div className="text-[11px] text-emerald-300/80">CONNECTED</div></div></div>
