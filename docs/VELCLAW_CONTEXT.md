@@ -4,39 +4,32 @@
 
 ## Identity
 - Project: **Velclaw** / `velclaw`
-- Current canonical GitHub repository: **`Velclaw/repo-Velclaw`**
-- Planned canonical GitHub repository name: **`Velclaw/Velclaw`**
-- Current public domain: **deployment-configured; `velclaw.cfd` is legacy/transition only**
+- Current canonical GitHub repository: **`Velclaw/VELCLAW`**
 - Canonical default branch: `main`
+- Canonical product host: **configuration-driven**; current documented product host is `velclaw.cfd`
 
 ## Ecosystem structure
-`repo-Velclaw` is the current canonical core repository. The Velclaw ecosystem is intentionally multi-repository. Independent repositories remain independently deployable and integrate through explicit APIs, webhooks, OAuth, GitHub, MCP/skills/plugins, artifacts and documented configuration contracts.
+`Velclaw/VELCLAW` is the canonical core repository. The user's other Velclaw repositories remain preserved and are being consolidated into namespaced directories in the core repository without deleting the source repositories.
 
 ### Core ecosystem members
 - **Auth:** `Velclaw/Oauth`
 - **Official Docs:** `Velclaw/docs.velclaw.ai`
-- **Docs Pages:** `zskbot/repo-docs-velclaw`
+- **Docs Pages:** `zskbot/repo-docs-Velclaw`
 - **Deploy:** `Velclaw/deploy-velclaw`
-- **Release automation:** `zskbot/Autoship`, `zskbot/autoship-velclaw`
-- **IDE:** `zskbot/AgentsIDE`, `zskbot/Zvelclaw`, `zskbot/Zvelclaw-CLI`, `zskbot/velclaw-pages`, `zskbot/velclaw-browser`
-- **Agents:** `Velclaw/zvelclaw-agent`, `Velclaw/velclaw-eve`
-- **AI/developer surfaces:** `zskbot/ZsKai`, `zskbot/agent-skills`
-- **Review:** `zskbot/ChatGPT-CodeReview`
+- **Release automation:** `zskbot/autoship-velclaw`
+- **App:** `zskbot/app-velclaw`
+- **Pages:** `zskbot/velclaw-pages`
+- **Browser:** `zskbot/velclaw-browser`
+- **Agent runtime:** `Velclaw/velclaw-eve`
+- **Legacy/core source:** `zskbot/Velclaw`
+- **UI reference:** `Velclaw/Velclaw-velclaw-docs-ui-reference`
 
-Repositories that merely share an owner or name are not automatically ecosystem members; membership requires verified purpose or integration.
+Repositories are preserved unless an explicit future instruction says otherwise.
 
 ## Domain architecture
-The long-term namespace is split by role rather than duplicated websites:
+Domain names are configuration and identity boundaries. The application reads domain identity from environment variables such as `VELCLAW_PUBLIC_ORIGIN`, `VELCLAW_OAUTH_ISSUER`, `VELCLAW_APP_ORIGIN`, `VELCLAW_API_ORIGIN`, `VELCLAW_DOCS_ORIGIN` and `VELCLAW_ALLOWED_ORIGINS`.
 
-- `velclaw.com` — brand / corporate canonical identity.
-- `velclaw.ai` — AI, agents, models and intelligence surfaces.
-- `velclaw.dev` — developer platform, docs, SDK and CLI.
-- `velclaw.app` — main user-facing application.
-- `velclaw.io` — platform, API, gateway and runtime infrastructure.
-
-`velclaw.cfd` is a legacy/transition domain. It must not be introduced as a new dependency and must not be the hard-coded OAuth issuer, metadata base, sitemap host, robots host or CORS authority.
-
-The application reads domain identity from environment variables such as `VELCLAW_PUBLIC_ORIGIN`, `VELCLAW_OAUTH_ISSUER`, `VELCLAW_APP_ORIGIN`, `VELCLAW_API_ORIGIN`, `VELCLAW_DOCS_ORIGIN` and `VELCLAW_ALLOWED_ORIGINS`.
+The documented product host is `velclaw.cfd`; deployment-generated Vercel hostnames are infrastructure addresses and are not treated as canonical product identity.
 
 ## Core architecture
 Velclaw is an AI-native software workspace for agents, code, builds, runtime, storage, and user services.
@@ -66,3 +59,4 @@ Independent ecosystem services plug into this pipeline; they do not silently cre
 7. Normal GitHub flow: branch → commit → CI/check → PR → review → merge.
 8. Do not merge, delete, or destroy project data without explicit basis.
 9. Do not claim production deployment unless provider-backed evidence confirms it.
+10. Preserve source repositories during consolidation; migration must use isolated branches and reviewable PRs rather than direct writes to `main`.
