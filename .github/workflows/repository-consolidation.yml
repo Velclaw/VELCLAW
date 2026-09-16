@@ -11,13 +11,14 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   consolidate:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout canonical repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 1
           ref: main
@@ -27,33 +28,68 @@ jobs:
           git config user.name "Velclaw Consolidation Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Import repository snapshots
+      - name: Validate migration access
         env:
           MIGRATION_TOKEN: ${{ secrets.MIGRATION_TOKEN }}
-          INCLUDE_PRIVATE: ${{ inputs.include_private || 'true' }}
+          INCLUDE_PRIVATE: ${{ inputs.include_private }}
+        run: |
+          set -euo pipefail
+          if [[ "$INCLUDE_PRIVATE" == "true" && -z "$MIGRATION_TOKEN" ]]; then
+            echo "MIGRATION_TOKEN is required when private/internal repositories are enabled."
+            exit 1
+          fi
+
+          if [[ "$INCLUDE_PRIVATE" == "true" ]]; then
+            for source in \
+              "zskbot/app-velclaw" \
+              "zskbot/velclaw-browser" \
+              "Velclaw/Oauth" \
+              "Velclaw/deploy-velclaw" \
+              "Velclaw/docs.velclaw.ai" \
+              "Velclaw/Velclaw-velclaw-docs-ui-reference"; do
+              git -c http.extraheader="AUTHORIZATION: bearer ${MIGRATION_TOKEN}" ls-remote "https://github.com/${source}.git" HEAD >/dev/null
+              echo "Access verified: ${source}"
+            done
+          fi
+
+      - name: Import repository snapshots to a migration branch
+        env:
+          MIGRATION_TOKEN: ${{ secrets.MIGRATION_TOKEN }}
+          INCLUDE_PRIVATE: ${{ inputs.include_private }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          if [[ "$INCLUDE_PRIVATE" == "true" && -z "$MIGRATION_TOKEN" ]]; then
-            echo "MIGRATION_TOKEN is required for private/internal source repositories."
-            exit 1
-          fi
+          branch="migration/consolidation-${GITHUB_RUN_ID}"
+          git switch -c "$branch"
 
           import_repo() {
             local source="$1"
             local destination="$2"
             local visibility="$3"
             local workdir
+            local source_sha
             workdir="$(mktemp -d)"
 
             if [[ "$visibility" == "private" || "$visibility" == "internal" ]]; then
-              git clone --depth 1 "https://x-access-token:${MIGRATION_TOKEN}@github.com/${source}.git" "$workdir/repo"
+              source_sha="$(git -c http.extraheader="AUTHORIZATION: bearer ${MIGRATION_TOKEN}" ls-remote "https://github.com/${source}.git" HEAD | awk '{print $1}')"
+              git -c http.extraheader="AUTHORIZATION: bearer ${MIGRATION_TOKEN}" clone --depth 1 "https://github.com/${source}.git" "$workdir/repo"
             else
+              source_sha="$(git ls-remote "https://github.com/${source}.git" HEAD | awk '{print $1}')"
               git clone --depth 1 "https://github.com/${source}.git" "$workdir/repo"
             fi
 
             mkdir -p "$destination"
-            rsync -a --delete --exclude='.git' --exclude='users.json' "$workdir/repo/" "$destination/"
+            rsync -a \
+              --exclude='.git/' \
+              --exclude='users.json' \
+              --exclude='.env' \
+              --exclude='.env.*' \
+              --exclude='*.pem' \
+              --exclude='*.key' \
+              "$workdir/repo/" "$destination/"
+
+            printf '%s\n' "$source_sha" > "$destination/.source-commit"
             rm -rf "$workdir"
           }
 
@@ -69,14 +105,18 @@ jobs:
           import_repo "Velclaw/docs.velclaw.ai" "docs/site" private
           import_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" "docs/ui-reference" private
 
-          mkdir -p legacy/migrated
           cat > legacy/migrated/README.md <<'DOC'
           # Migrated repositories
 
           These directories are snapshot imports from existing Velclaw repositories.
           The original repositories remain intact and are not deleted by this consolidation.
 
-          Sensitive `users.json` data is intentionally excluded from the migration.
+          Each imported directory contains `.source-commit` with the source repository HEAD
+          used for the snapshot. Sensitive files such as `users.json`, `.env*`, private keys
+          and certificate material are intentionally excluded.
+
+          This workflow does not claim to preserve the original Git commit history. Full
+          history-preserving subtree migration is a separate operation.
           DOC
 
           git add -A
@@ -84,5 +124,12 @@ jobs:
             echo "No migration changes detected."
             exit 0
           fi
-          git commit -m "chore: consolidate Velclaw repositories"
-          git push origin HEAD:main
+
+          git commit -m "chore: stage Velclaw repository consolidation"
+          git push --set-upstream origin "$branch"
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --draft \
+            --title "chore: stage Velclaw repository consolidation" \
+            --body "Automated snapshot migration. Source repositories remain unchanged and are not deleted. Sensitive files are excluded. Review and verify the staged import before merging."
