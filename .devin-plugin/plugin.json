@@ -1,0 +1,14 @@
+{
+  "name": "review-tools",
+  "version": "1.0.0",
+  "description": "Code-review skills for our team",
+  "requiredPlugins": [
+    "acme/secure-base",
+    { "source": "github", "repo": "acme/audit-logging" }
+  ],
+  "optionalPlugins": [
+    "acme/deploy-tools",
+    { "source": "url", "url": "https://gitlab.com/acme/extra.git" }
+  ],
+  "forbiddenPlugins": ["sketchy-org/bad-plugin", "acme/*", "*"]
+}
