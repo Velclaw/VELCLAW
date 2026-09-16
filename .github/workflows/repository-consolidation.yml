@@ -1,0 +1,90 @@
+name: Velclaw Repository Consolidation
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_private:
+        description: 'Import private/internal Velclaw repositories (requires MIGRATION_TOKEN)'
+        required: true
+        default: 'true'
+        type: boolean
+  push:
+    branches:
+      - feat/repository-consolidation
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: feat/repository-consolidation
+
+      - name: Configure git
+        run: |
+          git config user.name "Velclaw Consolidation Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Import repository snapshots
+        env:
+          MIGRATION_TOKEN: ${{ secrets.MIGRATION_TOKEN }}
+          INCLUDE_PRIVATE: ${{ inputs.include_private || 'true' }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$INCLUDE_PRIVATE" == "true" && -z "$MIGRATION_TOKEN" ]]; then
+            echo "MIGRATION_TOKEN is required for private/internal source repositories."
+            exit 1
+          fi
+
+          import_repo() {
+            local source="$1"
+            local destination="$2"
+            local visibility="$3"
+            local workdir
+            workdir="$(mktemp -d)"
+
+            if [[ "$visibility" == "private" || "$visibility" == "internal" ]]; then
+              git clone --depth 1 "https://x-access-token:${MIGRATION_TOKEN}@github.com/${source}.git" "$workdir/repo"
+            else
+              git clone --depth 1 "https://github.com/${source}.git" "$workdir/repo"
+            fi
+
+            mkdir -p "$destination"
+            rsync -a --delete --exclude='.git' --exclude='users.json' "$workdir/repo/" "$destination/"
+            rm -rf "$workdir"
+          }
+
+          import_repo "zskbot/Velclaw" "legacy/migrated/zskbot-Velclaw" public
+          import_repo "zskbot/autoship-velclaw" "services/autoship" public
+          import_repo "zskbot/velclaw-pages" "apps/pages" public
+          import_repo "zskbot/repo-docs-Velclaw" "docs/migrated/repo-docs-Velclaw" public
+          import_repo "zskbot/app-velclaw" "apps/velclaw-app" private
+          import_repo "zskbot/velclaw-browser" "apps/browser" private
+          import_repo "Velclaw/Oauth" "apps/oauth" internal
+          import_repo "Velclaw/velclaw-eve" "agents/eve" public
+          import_repo "Velclaw/deploy-velclaw" "deploy/legacy/velclaw" private
+          import_repo "Velclaw/docs.velclaw.ai" "docs/site" private
+          import_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" "docs/ui-reference" private
+
+          cat > legacy/migrated/README.md <<'DOC'
+          # Migrated repositories
+
+          These directories are snapshot imports from existing Velclaw repositories.
+          The original repositories remain intact and are not deleted by this consolidation.
+
+          Sensitive `users.json` data is intentionally excluded from the migration.
+          DOC
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No migration changes detected."
+            exit 0
+          fi
+          git commit -m "chore: consolidate Velclaw repositories"
+          git push origin HEAD:feat/repository-consolidation
