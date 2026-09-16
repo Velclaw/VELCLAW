@@ -1,0 +1,80 @@
+# Choix d’un type d’entreprise pour GitHub Enterprise Cloud
+
+Découvrez les types d’entreprises disponibles dans GitHub Enterprise Cloud et déterminez si Enterprise Managed Users vous convient en vous posant quelques questions.
+
+**Avant** de créer votre compte d’entreprise, vous devez choisir un type d’entreprise :
+
+* Entreprise avec comptes personnels
+* Entreprise avec utilisateurs managés
+
+Pour décider quel est le meilleur pour votre entreprise, posez-vous les questions suivantes.
+
+## Vous souhaitez contrôler les comptes des utilisateurs ?
+
+Enterprise Managed Users peut être approprié pour votre entreprise si vous **ne souhaitez pas que les membres d’entreprise utilisent leurs propres comptes personnels** pour accéder aux ressources de votre entreprise.
+
+### Utilisateurs gérés
+
+Enterprise Managed Users offre une véritable expérience d’authentification unique pour les utilisateurs :
+
+* Vous approvisionnez les comptes pour vos utilisateurs.
+* Vous vous assurez que les comptes d’utilisateurs sont conformes à l’identité de votre entreprise, en contrôlant les noms d’utilisateurs et les adresse e-mail.
+* Les utilisateurs doivent s’authentifier auprès de votre système de gestion des identités à l’aide de SAML ou OIDC.
+
+Si vous demandez actuellement à vos utilisateurs de créer un nouveau compte personnel sur GitHub.com afin de contribuer aux ressources de votre entreprise, Enterprise Managed Users peut être une meilleure solution.
+
+### Comptes personnels
+
+Si vous ne choisissez pas Enterprise Managed Users :
+
+* Chaque utilisateur doit créer, gérer et se connecter à un **compte personnel** sur GitHub.com.
+* Vous pouvez configurer l’authentification SAML de sorte que les utilisateurs doivent **également** s’authentifier auprès de votre système externe de gestion des identités.
+  GitHub lie le compte personnel de l’utilisateur à une identité externe sur le système de gestion des identités.
+* Le provisionnement d’utilisateurs n’est pas disponible. Vous pouvez utiliser System for Cross-domain Identity Management (SCIM) pour approvisionner l’**accès** à des organisations individuelles.
+
+Envisagez des comptes personneles si l’utilisation de votre système externe de gestion des identités comme source de vérité pour la gestion des utilisateurs et des accès s’avère trop complexe. Par exemple, vous ne disposez pas d’un processus établi pour l’intégration des nouveaux utilisateurs dans le système.
+
+## Avez-vous besoin de choisir l’emplacement de stockage de vos données ?
+
+Pour vous aider à répondre aux exigences de conformité, GitHub Enterprise Cloud inclut l’option permettant de stocker le code et les données de votre entreprise dans une région spécifique, sur votre propre sous-domaine de GHE.com. Consultez « [À propos de GitHub Enterprise Cloud avec résidence des données](/fr/enterprise-cloud@latest/admin/data-residency/about-github-enterprise-cloud-with-data-residency) ».
+
+Si vous adoptez GitHub Enterprise Cloud avec résidence des données, vous **devez** utiliser Enterprise Managed Users.
+
+## Votre système externe de gestion des identités est-il pris en charge ?
+
+Déterminez si vous utilisez déjà ou pouvez adopter un système de gestion des identités pris en charge.
+
+### Utilisateurs gérés
+
+GitHub s’associe à certains développeurs de systèmes de gestion des identités pour fournir une intégration prête à l’emploi avec Enterprise Managed Users, qui comprend à la fois l’authentification et le provisionnement.
+
+Si vous ne pouvez pas utiliser une intégration « prête à l’emploi », vous pouvez utiliser un autre système de gestion des identités qui **répond à nos instructions**.
+
+Pour plus d’informations, consultez [À propos de Enterprise Managed Users](/fr/enterprise-cloud@latest/admin/concepts/identity-and-access-management/enterprise-managed-users#how-does-emus-integrate-with-identity-management-systems).
+
+### Comptes personnels
+
+Vous pouvez utiliser n’importe quel système de gestion des identités externe conforme à la norme **SAML 2.0**.
+
+GitHub prend officiellement en charge et teste certains systèmes. Consultez « [Configuration d'une authentification unique (SSO) SAML pour votre entreprise](/fr/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise#supported-identity-providers) ».
+
+## Avez-vous besoin de dépôts publics, de gists ou de sites GitHub Pages ?
+
+Pour empêcher les membres de l’entreprise de fuite accidentelle de contenu appartenant à l’entreprise au public, Enterprise Managed Users impose des **restrictions fortes** sur ce que les utilisateurs peuvent faire.
+
+* Comptes d’utilisateur managés ne peut pas créer de référentiels publics, de gists, quelle que soit leur visibilité, ni de sites GitHub Pages accessibles en dehors de l’entreprise.
+* Pour obtenir la liste complète des restrictions, consultez [Capacités et restrictions des comptes d’utilisateur managés](/fr/enterprise-cloud@latest/admin/managing-iam/understanding-iam-for-enterprises/abilities-and-restrictions-of-managed-user-accounts).
+
+Passez en revue les restrictions avec vos utilisateurs et vérifiez si elles entravent vos flux de travail existants. Dans ce cas, une entreprise avec des comptes personnels peut être un meilleur choix.
+
+## Avez-vous besoin d’une collaboration en dehors de votre entreprise ?
+
+Comptes d’utilisateur managés ne peut contribuer qu’à des dépôts appartenant à votre entreprise. Si vos développeurs doivent contribuer à des dépôts hors de votre entreprise (y compris des dépôts privés), Enterprise Managed Users pourrait ne pas vous convenir.
+
+Pour qu’un utilisateur géré collabore en dehors de votre entreprise, il doit également conserver un compte personnel distinct. La complexité du passage régulier d’un compte à l’autre peut accroître le risque de divulgation par erreur d’un code interne au public. Pour plus d’informations sur le flux de travail requis, consultez [Prise en main avec Enterprise Managed Users](/fr/enterprise-cloud@latest/admin/managing-iam/understanding-iam-for-enterprises/getting-started-with-enterprise-managed-users#support-developers-with-multiple-user-accounts).
+
+## Votre entreprise peut-elle tolérer les coûts de migration ?
+
+Si vous disposez déjà d’une entreprise qui utilise des comptes personnels sur GitHub.com, l’adoption de Enterprise Managed Users requiert la **migration vers un nouveau compte d’entreprise**. Pour discuter de ce processus, contactez [GitHubl’équipe des ventes.](https://enterprise.github.com/contact)
+
+Le processus de migration peut nécessiter du temps ou engager des coûts pour votre équipe. Vérifiez que ce processus de migration est acceptable pour votre entreprise et vos utilisateurs. Si ce n’est pas le cas, une entreprise avec des comptes personnels peut être le meilleur choix.
