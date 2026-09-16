@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function VelclawBuilderPage() {
   return (
-    <div className="flex min-h-screen bg-[#07080b] text-zinc-100">
+    <div className="flex min-h-screen flex-col bg-[#07080b] text-zinc-100 lg:flex-row">
       <main className="min-w-0 flex-1">
         <UnifiedBuilderBar />
         <VelclawBrowserBuilder />
