@@ -7,9 +7,13 @@ import {
   Boxes,
   CircleCheck,
   CircleDot,
+  Clock3,
   Code2,
+  GitBranch,
   Layers3,
   Menu,
+  MoreHorizontal,
+  Play,
   Plus,
   Rocket,
   Search,
@@ -40,7 +44,7 @@ const projects = [
 const activity = [
   ['Deployment completed', 'Production runtime is healthy', '2 min ago', CircleCheck],
   ['Agent run finished', 'Review snapshot is ready', '8 min ago', Bot],
-  ['Build started', 'Agent Runtime · main', '14 min ago', CircleDot],
+  ['Build started', 'Agent Runtime · main', '14 min ago', Play],
   ['Workspace updated', 'Environment variables synchronized', '31 min ago', Settings2],
 ] as const
 
@@ -116,32 +120,34 @@ export function VelclawConsole() {
                 {projects.map(project => (
                   <Link href={project.href} className={styles.projectRow} key={project.name}>
                     <div className={styles.projectIcon}><Box size={17} /></div>
-                    <div className={styles.projectMain}>
-                      <strong>{project.name}</strong>
-                      <span>{project.repo} · {project.updated}</span>
-                    </div>
+                    <div className={styles.projectInfo}><strong>{project.name}</strong><span><GitBranch size={12} /> {project.repo}</span></div>
+                    <div className={styles.projectState}><span className={project.state === 'Building' ? styles.building : styles.healthy}>{project.state}</span><small>{project.updated}</small></div>
                     <div className={styles.progress}><i style={{ width: `${project.progress}%` }} /></div>
-                    <span className={styles.state}>{project.state}</span>
+                    <MoreHorizontal size={17} className={styles.more} />
                   </Link>
                 ))}
               </div>
             </section>
 
             <section className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div>
-              </div>
-              <div className={styles.activityList}>
-                {activity.map(([title, detail, time, Icon]) => (
-                  <div className={styles.activityRow} key={`${title}-${time}`}>
-                    <div className={styles.activityIcon}><Icon size={15} /></div>
-                    <div><strong>{title}</strong><span>{detail}</span></div>
-                    <time>{time}</time>
-                  </div>
-                ))}
-              </div>
+              <div className={styles.panelHeader}><div><span className={styles.panelKicker}>RUNTIME</span><h2>System state</h2></div><span className={styles.live}>LIVE</span></div>
+              <div className={styles.runtime}><div className={styles.runtimeRing}><span>98%</span></div><div><strong>All systems operational</strong><p>Agents, builds and deployment workers are responding normally.</p></div></div>
+              <div className={styles.runtimeStats}><div><span>Workers</span><b>8 / 8</b></div><div><span>Queue</span><b>03</b></div><div><span>Latency</span><b>142ms</b></div></div>
             </section>
           </div>
+
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}><div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div><Link href="/tasks">Open activity <ArrowUpRight size={14} /></Link></div>
+            <div className={styles.activityList}>
+              {activity.map(([title, detail, time, Icon]) => (
+                <div className={styles.activityRow} key={title}>
+                  <div className={styles.activityIcon}><Icon size={15} /></div>
+                  <div><strong>{title}</strong><span>{detail}</span></div>
+                  <time><Clock3 size={13} /> {time}</time>
+                </div>
+              ))}
+            </div>
+          </section>
         </section>
       </div>
     </main>
