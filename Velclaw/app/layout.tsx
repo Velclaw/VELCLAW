@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { AppLayoutWrapper } from '@/components/app-layout-wrapper'
 import { SessionProvider } from '@/components/auth/session-provider'
 import { JotaiProvider } from '@/components/providers/jotai-provider'
-import { Analytics } from '@vercel/analytics/react'
+import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const geistSans = Geist({
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     default: 'Velclaw — AI-native Software Workspace',
     template: '%s | Velclaw',
   },
-  description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
+  description: 'Velclaw is AI-native software workspace for agents, code, builds, runtime, review and delivery.',
   applicationName: 'Velclaw',
   alternates: {
     languages: {
