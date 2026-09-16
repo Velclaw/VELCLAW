@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "id": "velclaw",
+    "repository": {
+      "owner": "Velclaw",
+      "name": "VELCLAW",
+      "defaultBranch": "main"
+    }
+  },
+  "sync": {
+    "mode": "reconcile",
+    "sourceOfTruth": ".velclaw/project.json",
+    "autoReconcile": true
+  },
+  "notifications": {
+    "history": true,
+    "default": "silent",
+    "levels": {
+      "info": "silent",
+      "warning": "silent",
+      "error": "silent",
+      "critical": "notify",
+      "security": "notify",
+      "production": "notify"
+    },
+    "channels": {
+      "device": false,
+      "email": false,
+      "webhook": "policy"
+    }
+  }
+}
