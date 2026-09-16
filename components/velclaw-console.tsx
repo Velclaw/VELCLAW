@@ -25,7 +25,7 @@ import styles from './velclaw-console.module.css'
 
 const nav = [
   ['Overview', Activity, '/console'],
-  ['Projects', Boxes, '/Velclaw/repo-Velclaw'],
+  ['Projects', Boxes, '/repos/Velclaw/repo-Velclaw'],
   ['Agents', Bot, '/skills'],
   ['Code Space', Code2, '/builder'],
   ['Workflows', Workflow, '/tasks'],
@@ -34,7 +34,7 @@ const nav = [
 ] as const
 
 const projects = [
-  { name: 'Velclaw Core', repo: 'repo-Velclaw', state: 'Healthy', updated: '2 min ago', progress: 92, href: '/Velclaw/repo-Velclaw' },
+  { name: 'Velclaw Core', repo: 'repo-Velclaw', state: 'Healthy', updated: '2 min ago', progress: 92, href: '/repos/Velclaw/repo-Velclaw' },
   { name: 'Agent Runtime', repo: 'agent-runtime', state: 'Building', updated: '8 min ago', progress: 68, href: '/builder' },
   { name: 'Web Platform', repo: 'web-platform', state: 'Ready', updated: '31 min ago', progress: 100, href: '/deploy' },
 ]
@@ -96,7 +96,7 @@ export function VelclawConsole() {
               <p>Build, orchestrate and operate software from one workspace.</p>
             </div>
             <div className={styles.headerActions}>
-              <Link className={styles.secondary} href="/Velclaw/repo-Velclaw"><Search size={15} /> Find project</Link>
+              <Link className={styles.secondary} href="/repos/Velclaw/repo-Velclaw"><Search size={15} /> Find project</Link>
               <Link className={styles.primary} href="/builder"><Plus size={16} /> New project</Link>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function VelclawConsole() {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <div><span className={styles.panelKicker}>PROJECTS</span><h2>Active work</h2></div>
-                <Link href="/Velclaw/repo-Velclaw">View all <ArrowUpRight size={14} /></Link>
+                <Link href="/repos/Velclaw/repo-Velclaw">View all <ArrowUpRight size={14} /></Link>
               </div>
               <div className={styles.projectList}>
                 {projects.map(project => (
