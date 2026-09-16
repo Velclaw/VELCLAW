@@ -24,19 +24,19 @@ import {
 import styles from './velclaw-console.module.css'
 
 const nav = [
-  ['Overview', Activity],
-  ['Projects', Boxes],
-  ['Agents', Bot],
-  ['Code Space', Code2],
-  ['Workflows', Workflow],
-  ['Deployments', Rocket],
-  ['Runtime', TerminalSquare],
+  ['Overview', Activity, '/console'],
+  ['Projects', Boxes, '/repos/Velclaw/repo-Velclaw'],
+  ['Agents', Bot, '/skills'],
+  ['Code Space', Code2, '/builder'],
+  ['Workflows', Workflow, '/tasks'],
+  ['Deployments', Rocket, '/deploy'],
+  ['Runtime', TerminalSquare, '/hosting'],
 ] as const
 
 const projects = [
-  { name: 'Velclaw Core', repo: 'repo-Velclaw', state: 'Healthy', updated: '2 min ago', progress: 92 },
-  { name: 'Agent Runtime', repo: 'agent-runtime', state: 'Building', updated: '8 min ago', progress: 68 },
-  { name: 'Web Platform', repo: 'web-platform', state: 'Ready', updated: '31 min ago', progress: 100 },
+  { name: 'Velclaw Core', repo: 'repo-Velclaw', state: 'Healthy', updated: '2 min ago', progress: 92, href: '/repos/Velclaw/repo-Velclaw' },
+  { name: 'Agent Runtime', repo: 'agent-runtime', state: 'Building', updated: '8 min ago', progress: 68, href: '/builder' },
+  { name: 'Web Platform', repo: 'web-platform', state: 'Ready', updated: '31 min ago', progress: 100, href: '/deploy' },
 ]
 
 const activity = [
@@ -62,9 +62,9 @@ export function VelclawConsole() {
           <button className={styles.workspaceButton}>production <span>⌄</span></button>
         </div>
         <div className={styles.topActions}>
-          <button className={styles.searchButton}><Search size={16} /><span>Search</span><kbd>⌘ K</kbd></button>
+          <button className={styles.searchButton} aria-label="Search workspace"><Search size={16} /><span>Search</span><kbd>⌘ K</kbd></button>
           <button className={styles.iconButton} aria-label="Settings"><Settings2 size={17} /></button>
-          <div className={styles.avatar}>V</div>
+          <div className={styles.avatar} aria-label="Velclaw workspace">V</div>
         </div>
       </header>
 
@@ -72,19 +72,19 @@ export function VelclawConsole() {
         <aside className={styles.sidebar}>
           <div className={styles.sidebarTop}>
             <span className={styles.sectionLabel}>WORKSPACE</span>
-            <span className={styles.online}><CircleDot size={10} /> Online</span>
+            <span className={styles.online}><CircleDot size={10} /> <span>Online</span></span>
           </div>
           <nav className={styles.nav} aria-label="Console navigation">
-            {nav.map(([label, Icon], index) => (
-              <Link key={label} href={index === 0 ? '/console' : '#'} className={index === 0 ? styles.active : styles.navItem}>
+            {nav.map(([label, Icon, href], index) => (
+              <Link key={label} href={href} className={index === 0 ? styles.active : styles.navItem}>
                 <Icon size={17} />
                 <span>{label}</span>
               </Link>
             ))}
           </nav>
           <div className={styles.sidebarFooter}>
-            <Link href="#"><Layers3 size={16} /> Environments</Link>
-            <Link href="#"><Settings2 size={16} /> Workspace settings</Link>
+            <Link href="/hosting"><Layers3 size={16} /> <span>Environments</span></Link>
+            <Link href="/settings"><Settings2 size={16} /> <span>Workspace settings</span></Link>
           </div>
         </aside>
 
@@ -96,8 +96,8 @@ export function VelclawConsole() {
               <p>Build, orchestrate and operate software from one workspace.</p>
             </div>
             <div className={styles.headerActions}>
-              <button className={styles.secondary}><Search size={15} /> Find project</button>
-              <button className={styles.primary}><Plus size={16} /> New project</button>
+              <Link className={styles.secondary} href="/repos/Velclaw/repo-Velclaw"><Search size={15} /> Find project</Link>
+              <Link className={styles.primary} href="/builder"><Plus size={16} /> New project</Link>
             </div>
           </div>
 
@@ -112,11 +112,11 @@ export function VelclawConsole() {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <div><span className={styles.panelKicker}>PROJECTS</span><h2>Active work</h2></div>
-                <Link href="#">View all <ArrowUpRight size={14} /></Link>
+                <Link href="/repos/Velclaw/repo-Velclaw">View all <ArrowUpRight size={14} /></Link>
               </div>
               <div className={styles.projectList}>
                 {projects.map(project => (
-                  <Link href="#" className={styles.projectRow} key={project.name}>
+                  <Link href={project.href} className={styles.projectRow} key={project.name}>
                     <div className={styles.projectIcon}><Box size={17} /></div>
                     <div className={styles.projectInfo}><strong>{project.name}</strong><span><GitBranch size={12} /> {project.repo}</span></div>
                     <div className={styles.projectState}><span className={project.state === 'Building' ? styles.building : styles.healthy}>{project.state}</span><small>{project.updated}</small></div>
@@ -135,7 +135,7 @@ export function VelclawConsole() {
           </div>
 
           <section className={styles.panel}>
-            <div className={styles.panelHeader}><div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div><Link href="#">Open activity <ArrowUpRight size={14} /></Link></div>
+            <div className={styles.panelHeader}><div><span className={styles.panelKicker}>ACTIVITY</span><h2>Recent operations</h2></div><Link href="/tasks">Open activity <ArrowUpRight size={14} /></Link></div>
             <div className={styles.activityList}>
               {activity.map(([title, detail, time, Icon]) => (
                 <div className={styles.activityRow} key={title}>
