@@ -4,13 +4,12 @@
 
 ## Identity
 - Project: **Velclaw** / `velclaw`
-- Current canonical GitHub repository: **`Velclaw/repo-Velclaw`**
-- Planned canonical GitHub repository name: **`Velclaw/Velclaw`**
-- Current public domain: **deployment-configured; `velclaw.cfd` is legacy/transition only**
+- Current canonical GitHub repository: **`Velclaw/VELCLAW`**
 - Canonical default branch: `main`
+- Current public domain: **deployment-configured; `velclaw.cfd` is legacy/transition only**
 
 ## Ecosystem structure
-`repo-Velclaw` is the current canonical core repository. The Velclaw ecosystem is intentionally multi-repository. Independent repositories remain independently deployable and integrate through explicit APIs, webhooks, OAuth, GitHub, MCP/skills/plugins, artifacts and documented configuration contracts.
+`Velclaw/VELCLAW` is the current canonical core repository. The Velclaw ecosystem is intentionally multi-repository. Independent repositories remain independently deployable and integrate through explicit APIs, webhooks, OAuth, GitHub, MCP/skills/plugins, artifacts and documented configuration contracts.
 
 ### Core ecosystem members
 - **Auth:** `Velclaw/Oauth`
