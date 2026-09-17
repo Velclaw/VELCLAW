@@ -2,8 +2,12 @@ name: Velclaw Ops Control Plane
 
 on:
   workflow_run:
-    workflows: ["Velclaw Release Validation"]
+    workflows: ["Security Baseline", "Autoship Production Verification"]
     types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   notify-ops:
