@@ -2,7 +2,7 @@
 
 This document is the registry for the independent repositories that form the Velclaw ecosystem.
 
-The ecosystem is intentionally multi-repository. `Velclaw/repo-Velclaw` is the current core platform; independent repositories remain separate products, tools, runtimes, or supporting surfaces and are integrated through explicit contracts.
+The ecosystem is intentionally multi-repository. `Velclaw/VELCLAW` is the current canonical core platform; independent repositories remain separate products, tools, runtimes, or supporting surfaces and are integrated through explicit contracts.
 
 ## Canonical structure
 
@@ -10,7 +10,7 @@ The ecosystem is intentionally multi-repository. `Velclaw/repo-Velclaw` is the c
 VELCLAW ECOSYSTEM
 │
 ├── Core
-│   └── Velclaw/repo-Velclaw
+│   └── Velclaw/VELCLAW
 │
 ├── Authentication
 │   └── Velclaw/Oauth
@@ -51,7 +51,7 @@ VELCLAW ECOSYSTEM
 
 | Repository | Class | Integration target | Current assessment |
 |---|---|---|---|
-| `Velclaw/repo-Velclaw` | Core platform | Canonical application APIs, UI, deploy control | **CORE** |
+| `Velclaw/VELCLAW` | Core platform | Canonical application APIs, UI, deploy control | **CORE** |
 | `Velclaw/Oauth` | Auth UI | OAuth authorization endpoints / callbacks | **INTEGRATE** |
 | `Velclaw/docs.velclaw.ai` | Official docs | Core product contracts and routes | **INTEGRATE** |
 | `zskbot/repo-docs-velclaw` | Docs Pages | Documentation/page publishing | **INTEGRATE** |
@@ -76,7 +76,7 @@ VELCLAW ECOSYSTEM
 
 ### Core
 
-`Velclaw/repo-Velclaw` describes itself as an AI-native software workspace covering agents, projects, code, builds, runtime, storage, GitHub, review and deployment. Its README also defines the canonical product surface around `velclaw.cfd`. The README currently contains historical references to `Velclaw/Velclaw`; these must be treated as stale repository names and replaced during documentation cleanup.
+`Velclaw/VELCLAW` is the canonical core platform repository. Its README and product surfaces cover agents, projects, code, builds, runtime, storage, GitHub, review and deployment. Historical references to former repository names are treated as stale identity references and are removed from active contracts.
 
 ### AgentsIDE
 
@@ -120,7 +120,7 @@ Independent repositories should communicate with the core through explicit inter
 - Do not silently rename an independent repository because its name contains Velclaw.
 - Do not treat every repository owned by `zskbot` as a Velclaw repository. Ownership is not sufficient evidence of ecosystem membership.
 - A repository becomes an ecosystem member when its purpose, code, deployment, documentation or integration contract is verified.
-- `Velclaw/repo-Velclaw` is the only canonical core platform repository.
+- `Velclaw/VELCLAW` is the only canonical core platform repository.
 - `Velclaw/docs.velclaw.ai` is the canonical documentation repository.
 - `zskbot/repo-docs-velclaw` remains a secondary Docs Pages repository.
 - Product URLs should use the canonical Velclaw domain rather than infrastructure-generated hostnames where applicable.

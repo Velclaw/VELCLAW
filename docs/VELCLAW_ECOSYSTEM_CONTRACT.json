@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "project": "velclaw",
-  "canonicalRepository": "Velclaw/repo-Velclaw",
+  "canonicalRepository": "Velclaw/VELCLAW",
   "canonicalBranch": "main",
   "canonicalDomain": "velclaw.cfd",
   "integrationModel": "independent-repositories-explicit-contracts",
   "repositories": [
-    {"role":"core","repository":"Velclaw/repo-Velclaw","required":true},
+    {"role":"core","repository":"Velclaw/VELCLAW","required":true},
     {"role":"auth","repository":"Velclaw/Oauth","required":true},
     {"role":"official-docs","repository":"Velclaw/docs.velclaw.ai","required":true},
     {"role":"docs-pages","repository":"zskbot/repo-docs-Velclaw","required":true},

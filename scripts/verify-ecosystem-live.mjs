@@ -11,7 +11,7 @@ if (!token) {
 }
 
 const failures = []
-if (contract.canonicalRepository !== 'Velclaw/repo-Velclaw') failures.push('canonical repository mismatch')
+if (contract.canonicalRepository !== 'Velclaw/VELCLAW') failures.push('canonical repository mismatch')
 if (contract.canonicalDomain !== 'velclaw.cfd') failures.push('canonical domain mismatch')
 
 for (const item of contract.repositories) {
