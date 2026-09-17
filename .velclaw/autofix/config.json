@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "maxIterations": 12,
+  "model": "velclaw-fast",
+  "maxFilesPerPatch": 6,
+  "maxDiffBytes": 60000,
+  "protectedPaths": [
+    ".env",
+    ".env.*",
+    ".github/workflows/velclaw-autofix.yml",
+    ".github/workflows/node.js.yml",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    ".velclaw/autofix/state.json"
+  ],
+  "allowedExtensions": [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".mjs",
+    ".cjs",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".css",
+    ".md"
+  ]
+}

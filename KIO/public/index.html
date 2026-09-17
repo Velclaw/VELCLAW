@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b0f">
+  <title>KIO.AI — AI Co-Pilot</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <span></span><span></span>
+      </div>
+      <strong>KIO<span>.AI</span></strong>
+    </div>
+
+    <div class="history">
+      <button>‹</button>
+      <button>›</button>
+    </div>
+
+    <div class="search">
+      <span>⌕</span>
+      <input placeholder="Search..." />
+      <kbd>⌘K</kbd>
+    </div>
+
+    <div class="top-actions">
+      <button class="upgrade">♔ Upgrade Plan</button>
+      <button class="icon-btn">⊞</button>
+      <button class="icon-btn">▣</button>
+      <button class="icon-btn active">♟</button>
+      <button class="avatar">K</button>
+    </div>
+
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+  </header>
+
+  <!-- MAIN -->
+  <main class="workspace">
+
+    <!-- LEFT RAIL -->
+    <aside class="rail">
+      <button class="rail-btn active">▣</button>
+      <button class="rail-btn">⌕</button>
+      <button class="rail-btn">⑂</button>
+      <button class="rail-btn">▷</button>
+      <button class="rail-btn">⊞</button>
+      <button class="rail-btn">◇</button>
+      <button class="rail-btn">♧</button>
+      <div class="rail-spacer"></div>
+      <button class="rail-btn">⚙</button>
+    </aside>
+
+    <!-- EXPLORER -->
+    <aside class="explorer" id="explorer">
+      <div class="panel-title">EXPLORER</div>
+
+      <div class="project">
+        <div class="tree-row project-name">
+          <span class="chevron">⌄</span>
+          <span>MyProject</span>
+        </div>
+
+        <div class="tree">
+          <div class="tree-row">
+            <span class="chevron">⌄</span>
+            <span class="folder">▱</span>
+            <span>apps</span>
+          </div>
+
+          <div class="tree nested">
+            <div class="tree-row">
+              <span class="empty"></span>
+              <span class="folder">▱</span>
+              <span>api</span>
+            </div>
+            <div class="tree-row">
+              <span class="empty"></span>
+              <span class="folder">▱</span>
+              <span>web</span>
+            </div>
+          </div>
+
+          <div class="tree-row">
+            <span class="chevron"></span>
+            <span class="folder">▱</span>
+            <span>components</span>
+          </div>
+
+          <div class="tree-row">
+            <span class="chevron"></span>
+            <span class="folder">▱</span>
+            <span>lib</span>
+          </div>
+
+          <div class="tree-row file">
+            <span class="empty"></span>
+            <b class="file-icon env">♣</b>
+            <span>.env</span>
+          </div>
+
+          <div class="tree-row file">
+            <span class="empty"></span>
+            <b class="file-icon git">◇</b>
+            <span>.gitignore</span>
+          </div>
+
+          <div class="tree-row file">
+            <span class="empty"></span>
+            <b class="file-icon node">⬡</b>
+            <span>package.json</span>
+          </div>
+
+          <div class="tree-row file">
+            <span class="empty"></span>
+            <b class="file-icon md">M</b>
+            <span>README.md</span>
+          </div>
+
+          <div class="tree-row file">
+            <span class="empty"></span>
+            <b class="file-icon ts">TS</b>
+            <span>tsconfig.json</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- COPILOT CENTER -->
+    <section class="copilot-panel">
+      <div class="panel-header">
+        <div class="pill">KIO Copilot</div>
+        <button>✣</button>
+      </div>
+
+      <div class="copilot-content">
+        <div class="robot">
+          <div class="glow"></div>
+          <div class="robot-body">
+            <div class="robot-head">
+              <div class="robot-ear left"></div>
+              <div class="robot-ear right"></div>
+              <div class="robot-face">
+                <i></i><i></i>
+              </div>
+            </div>
+            <div class="robot-neck"></div>
+            <div class="robot-torso"></div>
+            <div class="robot-arm left"></div>
+            <div class="robot-arm right"></div>
+            <div class="robot-foot left"></div>
+            <div class="robot-foot right"></div>
+          </div>
+          <div class="robot-floor"></div>
+        </div>
+
+        <p class="getting-started">Getting Started with KIO.AI</p>
+
+        <button class="start-action">
+          <span>▣</span>
+          <span>Go to Docs</span>
+          <b>↗</b>
+        </button>
+
+        <button class="start-action">
+          <span>⌘</span>
+          <span>Show All Commands</span>
+          <b>↗</b>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT AI WORKSPACE -->
+    <section class="ai-panel">
+
+      <div class="panel-header">
+        <div class="pill">KIO.AI Copilot</div>
+        <div class="panel-tools">
+          <button>⟳</button>
+          <button>⛶</button>
+          <button>⚙</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h1>
+          Where <em>Design</em> Meets<br>
+          <em>Dev</em> in Real-Time
+        </h1>
+
+        <p>
+          Your all-in-one product studio that helps you plan,
+          build, and launch your app.
+        </p>
+      </div>
+
+      <div class="quick-links">
+        <button>◈ Plugins</button>
+        <button>⊞ Components</button>
+        <button>⌘ Integrations</button>
+        <button>◫</button>
+        <button>ϟ</button>
+        <button>♧</button>
+      </div>
+
+      <div class="chat-card">
+
+        <div class="chat-tabs">
+          <button class="selected">♧ KIO Copilot</button>
+          <button>⌘ Terminal</button>
+          <button>⌘ Preview</button>
+        </div>
+
+        <div class="prompt">
+          <textarea id="prompt"
+            placeholder="Ask anything to work on this project..."></textarea>
+
+          <button class="send" id="send">➤</button>
+        </div>
+
+        <div class="models">
+          <button>Agent⌄</button>
+          <button>GPT-4o</button>
+          <button>Claude 3.5</button>
+          <button>KIO Large</button>
+        </div>
+      </div>
+
+      <div class="tasks" id="tasks">
+        <div class="task">
+          <span class="task-icon">▣</span>
+          <span>Generate Component: <b>Button.tsx</b></span>
+          <strong>Done</strong>
+        </div>
+
+        <div class="task">
+          <span class="task-icon">▣</span>
+          <span>Update File: <b>api/user/route.ts</b></span>
+          <strong>Done ✓</strong>
+        </div>
+
+        <div class="task">
+          <span class="task-icon">▣</span>
+          <span>Run Tests: <b class="number">23 passed</b></span>
+          <strong>Done ✓</strong>
+        </div>
+      </div>
+
+      <div class="mini-bot"></div>
+    </section>
+  </main>
+
+  <!-- STATUS BAR -->
+  <footer class="statusbar">
+    <div>⑂ main &nbsp; ◐</div>
+    <div>ⓘ 0 &nbsp; ⚠ 0</div>
+    <div class="status-right">
+      <span>Ln 1, Col 1</span>
+      <span>Spaces: 2</span>
+      <span>UTF-8</span>
+      <span>LF</span>
+      <span>{ } JSON</span>
+      <span>♧</span>
+    </div>
+  </footer>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+curl --location 'https://inference.do-ai.run/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--header "Authorization: Bearer $MODEL_ACCESS_KEY" \
+--data '{
+    "model": "router:velclaw",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Are there any syntax issues here? Code: \nPython \nprices_usd = {'laptop': 1200, 'mouse': 25, 'monitor': 300, 'cable': 12} \nexchange_rate = 0.92 \n# The line below is the focus \nexpensive_items_eur = {k: v * exchange_rate for k, v in prices_usd.items() if v > 50} \nprint(expensive_items_eur)"
+      }
+    ],
+    "stream": true
+}'

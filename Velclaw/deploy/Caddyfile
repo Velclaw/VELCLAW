@@ -1,0 +1,15 @@
+{
+  email {$VELCLAW_TLS_EMAIL}
+}
+
+velclaw.cfd {
+  reverse_proxy velclaw-control-plane:3000
+}
+
+*.velclaw.cfd {
+  @deployment host_regexp deployment ^(?P<deployment>velclaw-git-[a-z0-9][a-z0-9-]{0,60}-velclaw)\.velclaw\.cfd$
+  handle @deployment {
+    reverse_proxy {$VELCLAW_RUNTIME_TARGET:velclaw-runtime-router:8080}
+  }
+  respond 404
+}

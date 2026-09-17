@@ -1,0 +1,39 @@
+name: Security Baseline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secret-hygiene:
+    name: Secret hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Check for committed credential material
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nEI -- '(^|[^[:alnum:]])(ghp|gho|ghu|ghs|github_pat)_[A-Za-z0-9_]{20,}([^A-Za-z0-9_]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'GitHub token-like credential detected.'
+            exit 1
+          fi
+          if git grep -nEI -- '(^|[^[:alnum:]])AKIA[0-9A-Z]{16}([^0-9A-Z]|$)' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'AWS access-key-like credential detected.'
+            exit 1
+          fi
+          if git grep -nE -- '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' -- ':!pnpm-lock.yaml' ':!package-lock.json'; then
+            echo 'Private key material detected.'
+            exit 1
+          fi
+          echo 'No supported concrete credential patterns detected.'

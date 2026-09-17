@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Tài liệu Velclaw có truy vết theo source"><title>Velclaw Docs</title>
+<link rel="stylesheet" href="docs.css">
+<style>
+.home-brand{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--text);font-size:1rem;font-weight:800;letter-spacing:-.06em;text-transform:lowercase}.home-brand img{width:30px;height:30px;display:block}.home-main{max-width:1480px;margin:auto;padding:0 28px 80px}.home-hero{position:relative;padding:58px 0 44px;border-bottom:1px solid var(--line);overflow:hidden}.home-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent)}.home-hero>*{position:relative}.home-kicker{color:var(--purple-2);font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.home-hero h1{max-width:920px;margin:14px 0 18px;font-size:clamp(2.6rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.085em}.home-hero .lead{max-width:760px;margin:0;color:var(--muted);font-size:.95rem}.home-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.home-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:22px;margin-top:26px}.home-panel{min-width:0;border-top:1px solid var(--line);padding-top:18px}.home-panel h2{margin:0 0 14px;padding:0;border:0;color:var(--text);font-size:1rem}.home-panel h2:before{content:""}.docs-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.home-card{display:block;padding:14px;border:1px solid var(--line);background:var(--surface);transition:border-color .12s,background .12s,transform .12s}.home-card:hover{border-color:var(--purple);background:var(--purple-soft);transform:translateY(-1px)}.home-card .num{display:block;margin-bottom:10px;color:var(--dim);font-size:.62rem}.home-card h3{margin:0 0 4px;font-size:.82rem}.home-card p{margin:0;color:var(--muted);font-size:.67rem}.home-card .arrow{float:right;color:var(--purple-2)}.source-stack{display:grid;gap:8px}.source-row{padding:12px;border:1px solid var(--line);background:var(--surface)}.source-row strong{display:block;font-size:.72rem}.source-row span{display:block;margin-top:3px;color:var(--muted);font-size:.64rem;overflow-wrap:anywhere}.source-row code{font-size:.62rem}.home-note{margin-top:22px;padding:14px 16px;border:1px solid var(--line-strong);background:var(--surface)}.home-note strong{font-size:.72rem}.home-note p{margin:5px 0 0;font-size:.68rem}.home-footer{margin-top:42px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--dim);font-size:.62rem}.home-footer strong{color:var(--purple-2)}
+@media(max-width:800px){.home-main{padding:0 18px 60px}.home-hero{padding:42px 0 34px}.home-hero h1{font-size:clamp(2.35rem,11vw,3.5rem)}.home-hero .lead{font-size:.82rem}.home-grid{grid-template-columns:1fr;gap:30px}.docs-card-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.home-main{padding-left:18px;padding-right:18px}.home-hero h1{font-size:2.15rem}.home-actions .button{width:100%;justify-content:center}.docs-card-grid{grid-template-columns:1fr}.home-footer{display:block}.home-footer span{display:block;margin:4px 0}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<button class="menu-toggle" id="menu-toggle" type="button" aria-label="Mở menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<a class="wordmark home-brand" href="index.html"><img src="assets/velclaw-animated-mark.svg" alt="Velclaw"><span>velclaw</span></a>
+<div class="top-actions">
+<label class="search" aria-label="Tìm kiếm tài liệu"><span>⌕</span><input id="doc-search" type="search" placeholder="Tìm kiếm..." autocomplete="off"><kbd>⌘K</kbd></label>
+<a href="#docs">Docs</a><a href="https://github.com/Velclaw/Velclaw" target="_blank" rel="noreferrer">GitHub ↗</a>
+<button class="theme-toggle" id="theme-toggle" type="button">☼</button>
+<select id="language" aria-label="Ngôn ngữ"><option value="vi">VI</option><option value="en">EN</option></select>
+</div>
+</header>
+<aside class="sidebar" id="home-sidebar">
+<div class="drawer-head"><strong>Xem tài liệu</strong><button class="drawer-close" id="drawer-close" type="button" aria-label="Đóng menu">×</button></div>
+<div class="sidebar-title">Phần</div><nav id="sidebar-nav"></nav>
+</aside>
+<main class="home-main">
+<section class="home-hero"><div class="home-kicker" id="eyebrow">TÀI LIỆU · ĐÃ XÁC MINH SOURCE</div><h1 id="headline">Tài liệu Velclaw được truy vết theo kho mã nguồn.</h1><p class="lead" id="intro">Các thông tin công bố được đối chiếu với source repository.</p><div class="home-actions"><a class="button" href="#docs" id="start">Bắt đầu đọc tài liệu →</a><a class="button" href="#source">Source trace</a></div></section>
+<div class="home-grid"><section class="home-panel" id="docs"><h2>Tài liệu</h2><div id="cards" class="docs-card-grid"></div></section><section class="home-panel" id="source"><h2>Source trace</h2><div class="source-stack"><div class="source-row"><strong>TRẠNG THÁI</strong><span>VERIFIED</span></div><div class="source-row"><strong>COMMIT</strong><span><code id="commit">—</code></span></div><div class="source-row"><strong>REPOSITORY</strong><span><a id="repo" target="_blank" rel="noreferrer">—</a></span></div></div><div class="home-note"><strong>Nguyên tắc tài liệu</strong><p>Chỉ công bố nội dung có thể truy vết về source. Phần chưa có bằng chứng phát hành phải được đánh dấu rõ ràng.</p></div></section></div>
+<footer class="home-footer"><span><strong>VELCLAW</strong> · Source-traceable documentation</span><span>Code. Innovate. Elevate.</span></footer>
+</main>
+<script src="ui-polish.js"></script>
+<script>
+const slugs=window.VELCLAW_DOCS;const labels=window.VELCLAW_LABELS;
+async function load(){const data=await(await fetch('./data.json')).json();const q=new URLSearchParams(location.search).get('lang');const lang=data.translations[q]?q:(localStorage.getItem('velclaw-language')||'vi');document.documentElement.lang=lang;document.getElementById('language').value=lang;const c=data.translations[lang];document.getElementById('eyebrow').textContent=c.eyebrow;document.getElementById('headline').textContent=c.headline;document.getElementById('intro').textContent=c.intro;document.getElementById('start').textContent=c.primaryAction+' →';document.getElementById('commit').textContent=data.sourceCommit;document.getElementById('repo').textContent=data.product.repository;document.getElementById('repo').href=data.product.repository;document.getElementById('cards').innerHTML=slugs.map((s,i)=>`<a class="home-card" href="doc.html?doc=${encodeURIComponent(s)}&lang=${lang}"><span class="num">${String(i+1).padStart(2,'0')} <span class="arrow">→</span></span><h3>${labels[lang][s]}</h3><p>${lang==='vi'?'Đọc tài liệu và chi tiết triển khai.':'Read documentation and implementation details.'}</p></a>`).join('');document.getElementById('sidebar-nav').innerHTML=slugs.map(s=>`<a class="side-link" href="doc.html?doc=${encodeURIComponent(s)}&lang=${lang}">${labels[lang][s]}</a>`).join('');bindHomeSearch()}function bindHomeSearch(){const input=document.getElementById('doc-search');if(!input)return;input.oninput=()=>{const q=input.value.trim().toLowerCase();document.querySelectorAll('#cards .home-card').forEach(el=>el.hidden=!!q&&!el.textContent.toLowerCase().includes(q))}}document.getElementById('language').addEventListener('change',e=>{localStorage.setItem('velclaw-language',e.target.value);location.href='index.html?lang='+e.target.value});load().catch(e=>console.error(e));
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+name: AgentsIDE Autoship Deploy
+
+on:
+  workflow_run:
+    workflows: ["AgentsIDE CI"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bootstrap Autoship project and trigger deployment
+        env:
+          # Temporary endpoint through the Autoship service-binding gateway while the custom domain is unavailable.
+          AUTOSHIP_URL: https://autoship-control-plane-gateway.nvht25052002.workers.dev
+          AUTOSHIP_API_TOKEN: ${{ secrets.AUTOSHIP_API_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "${AUTOSHIP_API_TOKEN:-}" || { echo "AUTOSHIP_API_TOKEN secret is required."; exit 1; }
+          AUTH_ARGS=(-H "Authorization: Bearer ${AUTOSHIP_API_TOKEN}")
+
+          PROJECT_JSON=$(curl --fail-with-body --silent --show-error \
+            -X POST "${AUTOSHIP_URL}/api/projects/upsert" \
+            -H 'Content-Type: application/json' \
+            "${AUTH_ARGS[@]}" \
+            --data '{"name":"AgentsIDE","repoUrl":"https://github.com/zskbot/AgentsIDE","branch":"main","target":"static-server","framework":"react-vite","buildCommand":"npm ci && npm run build","autoDeployOnPush":true,"notifyOnSuccess":true,"notifyOnFailure":true}')
+
+          PROJECT_ID=$(python -c 'import json,sys; print(json.load(sys.stdin)["project"]["id"])' <<<"${PROJECT_JSON}")
+          test -n "${PROJECT_ID}"
+
+          PROJECT_ID="${PROJECT_ID}" curl --fail-with-body --silent --show-error \
+            -X POST "${AUTOSHIP_URL}/api/pipelines/trigger" \
+            -H 'Content-Type: application/json' \
+            "${AUTH_ARGS[@]}" \
+            --data "$(PROJECT_ID="${PROJECT_ID}" COMMIT_SHA="${COMMIT_SHA}" python - <<'PY'
+          import json, os
+          print(json.dumps({
+            'projectId': os.environ['PROJECT_ID'],
+            'commitHash': os.environ['COMMIT_SHA'],
+            'commitMessage': os.environ.get('COMMIT_MESSAGE') or 'deploy: AgentsIDE through Autoship',
+            'branch': 'main',
+            'author': 'github-actions',
+            'triggeredBy': 'github-actions',
+          }))
+          PY
+          )" \
+            > deploy-response.json
+
+          cat deploy-response.json
+          echo "Autoship deployment trigger accepted for ${COMMIT_SHA}."

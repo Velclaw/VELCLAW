@@ -1,0 +1,27 @@
+name: Velclaw Control Plane Reconciliation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: velclaw-control-plane-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reconcile:
+    name: Reconcile canonical project state
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Reconcile canonical configuration
+        run: node scripts/control-plane/reconcile.mjs

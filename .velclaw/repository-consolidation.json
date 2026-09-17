@@ -1,0 +1,23 @@
+{
+  "canonicalRepository": "Velclaw/VELCLAW",
+  "defaultBranch": "main",
+  "policy": {
+    "preserveSourceRepositories": true,
+    "deleteSourceRepositories": false,
+    "snapshotMode": true,
+    "excludeSensitiveFiles": ["users.json"]
+  },
+  "repositories": [
+    {"source":"zskbot/Velclaw","destination":"legacy/migrated/zskbot-Velclaw","visibility":"public"},
+    {"source":"zskbot/autoship-velclaw","destination":"services/autoship","visibility":"public"},
+    {"source":"zskbot/velclaw-pages","destination":"apps/pages","visibility":"public"},
+    {"source":"zskbot/repo-docs-Velclaw","destination":"docs/migrated/repo-docs-Velclaw","visibility":"public"},
+    {"source":"zskbot/app-velclaw","destination":"apps/velclaw-app","visibility":"private"},
+    {"source":"zskbot/velclaw-browser","destination":"apps/browser","visibility":"private"},
+    {"source":"Velclaw/Oauth","destination":"apps/oauth","visibility":"internal"},
+    {"source":"Velclaw/velclaw-eve","destination":"agents/eve","visibility":"public"},
+    {"source":"Velclaw/deploy-velclaw","destination":"deploy/legacy/velclaw","visibility":"private"},
+    {"source":"Velclaw/docs.velclaw.ai","destination":"docs/site","visibility":"private"},
+    {"source":"Velclaw/Velclaw-velclaw-docs-ui-reference","destination":"docs/ui-reference","visibility":"private"}
+  ]
+}

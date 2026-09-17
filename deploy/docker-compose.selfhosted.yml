@@ -1,0 +1,64 @@
+services:
+  velclaw-control-plane:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - POSTGRES_URL
+      - VELCLAW_DEPLOY_API_TOKEN
+      - VELCLAW_PUBLIC_DOMAIN
+      - VELCLAW_PUBLIC_SCHEME
+      - VELCLAW_DEPLOY_POLL_MS
+      - GITHUB_WEBHOOK_SECRET
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=velclaw-runtime
+      - traefik.http.routers.velclaw.rule=Host(`${VELCLAW_PUBLIC_DOMAIN:-velclaw.cfd}`)
+      - traefik.http.routers.velclaw.entrypoints=${VELCLAW_TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.services.velclaw.loadbalancer.server.port=3000
+      - traefik.http.routers.velclaw.tls=${VELCLAW_TLS_ENABLED:-true}
+      - traefik.http.routers.velclaw.tls.certresolver=letsencrypt
+    networks: [velclaw-runtime]
+
+  velclaw-publisher:
+    build:
+      context: .
+      dockerfile: publisher.Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - VELCLAW_DEPLOY_API
+      - VELCLAW_DEPLOY_API_TOKEN
+      - VELCLAW_RUNTIME_NETWORK=velclaw-runtime
+      - VELCLAW_PUBLIC_DOMAIN
+      - VELCLAW_PUBLIC_SCHEME
+      - VELCLAW_TRAEFIK_ENTRYPOINT
+      - GITHUB_TOKEN
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [velclaw-runtime]
+    depends_on: [velclaw-control-plane]
+
+  velclaw-proxy:
+    image: traefik:v3.5
+    restart: unless-stopped
+    env_file: .env
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - letsencrypt:/letsencrypt
+    networks: [velclaw-runtime]
+
+networks:
+  velclaw-runtime:
+    name: velclaw-runtime
+
+volumes:
+  letsencrypt:

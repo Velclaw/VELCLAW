@@ -1,0 +1,11 @@
+// One declaration file
+{ "mcpServers": "config/mcp.json" }
+
+// Several, read in the order listed
+{ "mcpServers": ["config/mcp.json", "config/extra.json"] }
+
+// Only these files — suppresses the root .mcp.json / mcp.json convention
+{ "mcpServers": { "paths": ["config/mcp.json"], "exclusive": true } }
+
+// Inline server map (suppresses the root convention when non-empty)
+{ "mcpServers": { "linear": { "command": "npx", "args": ["-y", "linear-mcp"] } } }

@@ -1,0 +1,1 @@
+Gito adapter is sandbox-bound and uses the existing `gito review` CLI. Its output is normalized into Velclaw review findings, where critical/high findings are merge-blocking. Secrets are expected from sandbox environment configuration.

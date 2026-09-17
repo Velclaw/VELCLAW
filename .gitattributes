@@ -1,0 +1,4 @@
+tests/** review-test
+docs/** review-documentation
+generated/** linguist-generated=true
+*.stories.tsx -review-test

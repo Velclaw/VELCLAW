@@ -1,0 +1,10 @@
+.editor-layout { display: flex; min-height: calc(100vh - 184px); border-top: 1px solid #27272a; border-bottom: 1px solid #27272a; background: #0d0d0f; }
+.file-explorer { display: none; width: 220px; flex: 0 0 220px; border-right: 1px solid #27272a; background: #111113; padding: 12px 8px; overflow: auto; }
+.explorer-title { padding: 4px 8px 10px; color: #71717a; font: 500 10px 'DM Mono', monospace; letter-spacing: .12em; }
+.tree-folder, .tree-file { width: 100%; display: flex; align-items: center; gap: 7px; min-height: 30px; padding: 5px 8px; border-radius: 6px; background: transparent; color: #a1a1aa; text-align: left; font-size: 12px; }
+.tree-folder:hover, .tree-file:hover, .tree-file.active { background: #27272a; color: #f4f4f5; }
+.tree-file { padding-left: 25px; }
+.real-editor { min-width: 0; flex: 1; }
+.editor-filebar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #1f1f22; color: #d4d4d8; font: 11px 'DM Mono', monospace; }
+.editor-language { color: #52525b; }
+@media (min-width: 760px) { .file-explorer { display: block; } .editor-layout { border-radius: 10px; overflow: hidden; } }

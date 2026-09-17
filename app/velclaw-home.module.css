@@ -1,0 +1,59 @@
+.home {
+  min-height: 100%;
+}
+
+/* Homepage identity is rendered by the real Velclaw wordmark in SharedHeader. */
+.home :global(h1) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.08em;
+  font-size: 0;
+}
+
+.home :global(h1)::before,
+.home :global(h1)::after {
+  content: none !important;
+  display: none !important;
+}
+
+.home :global(h1 + p) {
+  font-size: 0;
+  max-width: 44rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home :global(h1 + p)::after {
+  content: "Agent workspace for building, reviewing, and shipping software with your AI coding providers.";
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* No Vercel template promotion/deploy chrome on the product homepage. */
+.home :global(a[href*="vercel-labs/coding-agent-template"]),
+.home :global(a[href*="vercel.com/new/clone"]),
+.home :global(a[href*="vercel.com/new"]),
+.home :global(a[href*="vercel.com/templates"]) {
+  display: none !important;
+}
+
+.home :global(.rounded-2xl),
+.home :global(.rounded-xl),
+.home :global(.rounded-lg),
+.home :global(.rounded-md),
+.home :global(.rounded-sm),
+.home :global(button),
+.home :global([role="button"]),
+.home :global(input),
+.home :global(textarea) {
+  border-radius: 0 !important;
+}
+
+.home :global(textarea) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+@media (max-width: 767px) {
+  .home :global(h1 + p)::after {
+    font-size: 0.9rem;
+  }
+}

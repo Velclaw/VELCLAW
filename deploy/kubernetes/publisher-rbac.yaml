@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: velclaw-publisher
+  namespace: velclaw-production
+  labels:
+    app.kubernetes.io/part-of: velclaw
+    app.kubernetes.io/name: publisher
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: velclaw-publisher
+  namespace: velclaw-production
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "create", "update", "patch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: velclaw-publisher
+  namespace: velclaw-production
+subjects:
+  - kind: ServiceAccount
+    name: velclaw-publisher
+    namespace: velclaw-production
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: velclaw-publisher

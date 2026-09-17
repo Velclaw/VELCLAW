@@ -6,8 +6,9 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { AppLayoutWrapper } from '@/components/app-layout-wrapper'
 import { SessionProvider } from '@/components/auth/session-provider'
 import { JotaiProvider } from '@/components/providers/jotai-provider'
-import { Analytics } from '@vercel/analytics/react'
+import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,9 +21,30 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Coding Agent Template',
-  description:
-    'AI-powered coding agent template supporting Claude Code, OpenAI Codex CLI, Cursor CLI, and opencode with Vercel Sandbox',
+  metadataBase: new URL(VELCLAW_PUBLIC_ORIGIN),
+  title: {
+    default: 'Velclaw — AI-native Software Workspace',
+    template: '%s | Velclaw',
+  },
+  description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
+  applicationName: 'Velclaw',
+  alternates: {
+    languages: {
+      vi: VELCLAW_PUBLIC_ORIGIN,
+      en: VELCLAW_PUBLIC_ORIGIN,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Velclaw',
+    url: VELCLAW_PUBLIC_ORIGIN,
+    title: 'Velclaw — AI-native Software Workspace',
+    description: 'AI-native workspace for agents, code, builds, runtime, review and delivery.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
@@ -31,10 +53,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <JotaiProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <SessionProvider />
             <AppLayoutWrapper>{children}</AppLayoutWrapper>
             <Toaster />

@@ -1,0 +1,11 @@
+# Default owner for all project changes
+* @zskbot
+
+# Security and CI configuration
+/.github/ @zskbot
+/SECURITY.md @zskbot
+
+# Application and UI source
+/app/ @zskbot
+/components/ @zskbot
+/public/ @zskbot

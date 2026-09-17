@@ -1,0 +1,31 @@
+name: Velclaw Ops Control Plane
+
+on:
+  workflow_run:
+    workflows: ["Security Baseline", "Autoship Production Verification"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-ops:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Ops Control Plane
+        env:
+          OPS_URL: ${{ secrets.VELCLAW_OPS_WEBHOOK_URL }}
+          OPS_SECRET: ${{ secrets.VELCLAW_GITHUB_WEBHOOK_SECRET }}
+        run: |
+          test -n "$OPS_URL" || { echo "VELCLAW_OPS_WEBHOOK_URL is not configured"; exit 0; }
+          test -n "$OPS_SECRET" || { echo "VELCLAW_GITHUB_WEBHOOK_SECRET is not configured"; exit 0; }
+          BODY='${{ toJson(github.event) }}'
+          SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$OPS_SECRET" | sed 's/^.* //')
+          curl --fail-with-body --silent --show-error \
+            -X POST "$OPS_URL" \
+            -H 'content-type: application/json' \
+            -H 'x-github-event: workflow_run' \
+            -H "x-hub-signature-256: sha256=$SIG" \
+            --data-binary "$BODY"

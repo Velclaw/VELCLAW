@@ -1,0 +1,115 @@
+name: Velclaw CI Heal
+
+on:
+  workflow_run:
+    workflows: [Velclaw Release Validation]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Failed workflow run ID to diagnose
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: velclaw-ci-heal-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  heal:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'failure' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.event != 'pull_request')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout trusted main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Collect failure evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_RUN_ID: ${{ github.event.workflow_run.id }}
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          RUN_ID="${EVENT_RUN_ID:-$INPUT_RUN_ID}"
+          printf '%s\n' "RUN_ID=$RUN_ID" > failure-meta.txt
+          if [ -n "$RUN_ID" ]; then
+            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json name,status,conclusion,headSha,headBranch,event,runAttempt,url,jobs > failure-summary.json || true
+            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed > failure-report.txt || true
+          else
+            echo 'No workflow run ID supplied.' > failure-report.txt
+            echo '{}' > failure-summary.json
+          fi
+          printf '\n=== git status ===\n' >> failure-report.txt
+          git status --short >> failure-report.txt
+
+      - name: Re-run failed jobs once
+        if: >-
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
+
+      - name: Run Codex repair agent
+        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ':workspace'
+          safety-strategy: drop-sudo
+          output-file: codex-result.txt
+          prompt: |
+            You are the Velclaw CI repair agent.
+            Work only on the trusted main checkout of Velclaw/Velclaw.
+            Read AGENTS.md and repository instructions first.
+            Read failure-report.txt and failure-summary.json.
+            Diagnose the concrete failure and make the smallest safe repository change that fixes it.
+            Run the narrowest relevant validation. Never invent secrets or credentials.
+            Never modify production secrets. Never weaken security checks just to make CI green.
+            If the failure is infrastructure-only, improve the workflow or documentation so the prerequisite is explicit.
+            Do not push or create a pull request yourself.
+
+      - name: Create repair branch and commit
+        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo 'Codex produced no repository changes.'
+            exit 0
+          fi
+          BRANCH="automation/ci-heal-${GITHUB_RUN_ID}"
+          git config user.name 'Velclaw CI Heal'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$BRANCH"
+          git add -A
+          git commit -m 'fix(ci): automated repair from failed validation'
+          git push --set-upstream origin "$BRANCH"
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+            --title 'fix(ci): automated repair from failed validation' \
+            --body-file codex-result.txt || true
+
+      - name: Open diagnostic issue when repair is unavailable
+        if: ${{ secrets.OPENAI_API_KEY == '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id || inputs.run_id }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "CI failure requires repair agent: run ${RUN_ID}" \
+            --body-file failure-report.txt || true

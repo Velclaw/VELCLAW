@@ -1,0 +1,24 @@
+name: Autoship CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm install
+      - run: npm run lint
+      - run: npm run test:runner
+      - run: npm run build
+      - run: npm run test:api
+      - run: docker build -t autoship:ci .
+      - run: docker build -f Dockerfile.runner -t autoship-runner:ci .

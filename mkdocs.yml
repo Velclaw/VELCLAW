@@ -1,0 +1,31 @@
+site_name: Velclaw
+site_description: Velclaw — AI-native software workspace for agents, code, builds, runtime, storage and user services.
+site_url: https://docs.velclaw.ai
+repo_url: https://github.com/Velclaw/Velclaw
+repo_name: Velclaw/Velclaw
+
+# Keep the documentation source in the existing docs/ directory.
+docs_dir: docs
+
+nav:
+  - Home: readme.md
+  - Ecosystem Scope: ECOSYSTEM_SCOPE.md
+  - Velclaw Context: VELCLAW_CONTEXT.md
+  - Velclaw Deploy: VELCLAW_DEPLOY.md
+  - Velclaw Skills: VELCLAW_SKILLS.md
+  - Velclaw Autofix: VELCLAW_AUTOFIX.md
+  - Product URLs: VELCLAW_PRODUCT_URLS.md
+  - Self Hosted: VELCLAW_SELF_HOSTED.md
+  - Render: VELCLAW_RENDER.md
+  - Storage Inventory: STORAGE_INVENTORY.md
+  - Operations: velclaw-operations.md
+  - OpenShift: openshift.md
+
+theme:
+  name: mkdocs
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
