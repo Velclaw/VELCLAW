@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://github.com/Velclaw/Velclaw"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
 
 # Velclaw
 
@@ -9,7 +9,7 @@
 Build, inspect, test, deploy, and operate software from one developer-focused workspace.
 
 <p>
-<a href="https://github.com/Velclaw/Velclaw"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVelclaw-111827?style=flat-square&logo=github&logoColor=white"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVELCLAW-111827?style=flat-square&logo=github&logoColor=white"></a>
 <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-Framework-111827?style=flat-square&logo=nextdotjs&logoColor=white"></a>
 <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Code-3178C6?style=flat-square&logo=typescript&logoColor=white"></a>
 <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=nodedotjs&logoColor=white"></a>
@@ -101,8 +101,8 @@ Infrastructure-generated hostnames are not product URLs.
 ## Quick start
 
 ```bash
-git clone https://github.com/Velclaw/Velclaw.git
-cd Velclaw
+git clone https://github.com/Velclaw/VELCLAW.git
+cd VELCLAW
 npm install
 npm run dev
 ```
@@ -119,7 +119,7 @@ npm run build
 ## Project structure
 
 ```text
-Velclaw/
+VELCLAW/
 ├── app/                 # Next.js application routes
 ├── components/          # UI and workspace components
 ├── lib/                 # application services and integrations
@@ -180,9 +180,9 @@ Velclaw references open-source software and community tooling. Each external pro
 
 ## Documentation
 
-- [Velclaw repository](https://github.com/Velclaw/Velclaw)
-- [Issues](https://github.com/Velclaw/Velclaw/issues)
-- [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
+- [Velclaw repository](https://github.com/Velclaw/VELCLAW)
+- [Issues](https://github.com/Velclaw/VELCLAW/issues)
+- [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
 - Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
@@ -212,7 +212,7 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 
 ## License
 
-The current project configuration identifies Velclaw as private software. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
+The repository is publicly visible, but the current project configuration does not declare an open-source license. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
 
 ## Visual identity
 
