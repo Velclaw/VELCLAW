@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   consolidate:
@@ -27,17 +28,50 @@ jobs:
           git config user.name "Velclaw Consolidation Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Import repository snapshots
+      - name: Validate source access
         env:
           MIGRATION_TOKEN: ${{ secrets.MIGRATION_TOKEN }}
-          INCLUDE_PRIVATE: ${{ inputs.include_private || 'true' }}
+          INCLUDE_PRIVATE: ${{ inputs.include_private }}
         run: |
           set -euo pipefail
 
           if [[ "$INCLUDE_PRIVATE" == "true" && -z "$MIGRATION_TOKEN" ]]; then
-            echo "MIGRATION_TOKEN is required for private/internal source repositories."
+            echo "MIGRATION_TOKEN is required when private/internal repositories are enabled."
             exit 1
           fi
+
+          check_repo() {
+            local source="$1"
+            local visibility="$2"
+            if [[ "$visibility" == "private" || "$visibility" == "internal" ]]; then
+              git ls-remote "https://x-access-token:${MIGRATION_TOKEN}@github.com/${source}.git" HEAD >/dev/null
+            else
+              git ls-remote "https://github.com/${source}.git" HEAD >/dev/null
+            fi
+            echo "Source access OK: ${source} (${visibility})"
+          }
+
+          check_repo "zskbot/Velclaw" public
+          check_repo "zskbot/autoship-velclaw" public
+          check_repo "zskbot/velclaw-pages" public
+          check_repo "zskbot/repo-docs-Velclaw" public
+          check_repo "Velclaw/velclaw-eve" public
+
+          if [[ "$INCLUDE_PRIVATE" == "true" ]]; then
+            check_repo "zskbot/app-velclaw" private
+            check_repo "zskbot/velclaw-browser" private
+            check_repo "Velclaw/Oauth" internal
+            check_repo "Velclaw/deploy-velclaw" private
+            check_repo "Velclaw/docs.velclaw.ai" private
+            check_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" private
+          fi
+
+      - name: Import repository snapshots
+        env:
+          MIGRATION_TOKEN: ${{ secrets.MIGRATION_TOKEN }}
+          INCLUDE_PRIVATE: ${{ inputs.include_private }}
+        run: |
+          set -euo pipefail
 
           import_repo() {
             local source="$1"
@@ -53,7 +87,14 @@ jobs:
             fi
 
             mkdir -p "$destination"
-            rsync -a --delete --exclude='.git' --exclude='users.json' "$workdir/repo/" "$destination/"
+            rsync -a --delete \
+              --exclude='.git' \
+              --exclude='users.json' \
+              --exclude='.env' \
+              --exclude='.env.*' \
+              --exclude='*.pem' \
+              --exclude='*.key' \
+              "$workdir/repo/" "$destination/"
             rm -rf "$workdir"
           }
 
@@ -61,13 +102,16 @@ jobs:
           import_repo "zskbot/autoship-velclaw" "services/autoship" public
           import_repo "zskbot/velclaw-pages" "apps/pages" public
           import_repo "zskbot/repo-docs-Velclaw" "docs/migrated/repo-docs-Velclaw" public
-          import_repo "zskbot/app-velclaw" "apps/velclaw-app" private
-          import_repo "zskbot/velclaw-browser" "apps/browser" private
-          import_repo "Velclaw/Oauth" "apps/oauth" internal
           import_repo "Velclaw/velclaw-eve" "agents/eve" public
-          import_repo "Velclaw/deploy-velclaw" "deploy/legacy/velclaw" private
-          import_repo "Velclaw/docs.velclaw.ai" "docs/site" private
-          import_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" "docs/ui-reference" private
+
+          if [[ "$INCLUDE_PRIVATE" == "true" ]]; then
+            import_repo "zskbot/app-velclaw" "apps/velclaw-app" private
+            import_repo "zskbot/velclaw-browser" "apps/browser" private
+            import_repo "Velclaw/Oauth" "apps/oauth" internal
+            import_repo "Velclaw/deploy-velclaw" "deploy/legacy/velclaw" private
+            import_repo "Velclaw/docs.velclaw.ai" "docs/site" private
+            import_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" "docs/ui-reference" private
+          fi
 
           mkdir -p legacy/migrated
           cat > legacy/migrated/README.md <<'DOC'
@@ -76,13 +120,28 @@ jobs:
           These directories are snapshot imports from existing Velclaw repositories.
           The original repositories remain intact and are not deleted by this consolidation.
 
-          Sensitive `users.json` data is intentionally excluded from the migration.
+          Sensitive files including `users.json`, `.env*`, PEM files, and private keys are intentionally excluded.
           DOC
+
+      - name: Create migration branch and pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
 
           git add -A
           if git diff --cached --quiet; then
             echo "No migration changes detected."
             exit 0
           fi
+
+          branch="migration/consolidation-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
           git commit -m "chore: consolidate Velclaw repositories"
-          git push origin HEAD:main
+          git push --set-upstream origin "$branch"
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore: consolidate Velclaw repositories" \
+            --body "Automated snapshot consolidation. Source repositories remain intact and are not deleted. Sensitive files are excluded. Review the changed files and CI before merging."
