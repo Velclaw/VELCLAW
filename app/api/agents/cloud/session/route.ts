@@ -1,9 +1,4 @@
-// SỬA DÒNG NÀY:
-// import { createOpenAIAgent } from '@/lib/agents/openai'
-
-// THÀNH DÒNG NÀY:
-import { runOpenAIAgent } from '@/lib/agents/openai'
-
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/session/get-server-session'
 import { createOpenAIAgentsSession } from '@/lib/agents/openai'
 
@@ -23,6 +18,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await createOpenAIAgentsSession({
+      userId: session.user.id,
       message,
       model: typeof body?.model === 'string' ? body.model : undefined,
       instructions: typeof body?.instructions === 'string' ? body.instructions : undefined,
