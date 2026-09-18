@@ -1,4 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+// SỬA DÒNG NÀY:
+// import { createOpenAIAgent } from '@/lib/agents/openai'
+
+// THÀNH DÒNG NÀY:
+import { runOpenAIAgent } from '@/lib/agents/openai'
+
 import { getServerSession } from '@/lib/session/get-server-session'
 import { createOpenAIAgentsSession } from '@/lib/agents/openai'
 
