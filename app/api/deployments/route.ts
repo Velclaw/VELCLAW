@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/session/get-server-session'
 import { createHostingDeployment } from '@/lib/hosting'
-import { listDeployments } from '@/lib/deploy/store'
+import { getDeployment, listDeployments } from '@/lib/deploy/store'
 
 const REPO_PATTERN = /^https:\/\/(?:github\.com)\/[^/]+\/[^/]+(?:\.git)?$/i
 const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/
@@ -36,9 +36,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
-    const [deployment] = await listDeployments(session.user.id, 1)
-    return NextResponse.json({ deployment }, { status: 202 })
+    const created = await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
+    if (created.provider === 'self-hosted' && created.externalId) {
+      const deployment = await getDeployment(created.externalId, session.user.id)
+      if (deployment) return NextResponse.json({ deployment }, { status: 202 })
+      throw new Error('Created deployment could not be loaded')
+    }
+
+    return NextResponse.json({ deployment: created }, { status: 202 })
   } catch (error) {
     console.error('[deployments] create failed', error)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Deployment provider unavailable' }, { status: 503 })
