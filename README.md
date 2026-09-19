@@ -66,6 +66,17 @@ The goal is to give coding agents and developers one coherent environment instea
 | **Deployment** | Move validated software toward production |
 | **Developer UI** | A single workspace for the software lifecycle |
 
+## Authentication
+
+Authentication is separated into the dedicated Velclaw OAuth repository.
+
+| Surface | Repository | Purpose |
+| --- | --- | --- |
+| Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
+| Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
+
+OAuth integration target: https://auth.velclaw.cfd
+
 ## Product URLs
 
 The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
