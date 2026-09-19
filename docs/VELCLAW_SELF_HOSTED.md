@@ -28,7 +28,7 @@ GitHub → GitHub webhook → Velclaw queue → publisher → Docker runtime →
 
 ## Temporary domain-lock mode
 
-When the production domain `velclaw.cfd` is locked or unavailable, do not point the runtime at it and do not claim production readiness. Use a temporary hostname that you control instead.
+When the production domain `velclaw.com` is locked or unavailable, do not point the runtime at it and do not claim production readiness. Use a temporary hostname that you control instead.
 
 For a temporary HTTP verification host, configure:
 
@@ -39,14 +39,14 @@ VELCLAW_TRAEFIK_ENTRYPOINT=web
 VELCLAW_TLS_ENABLED=false
 ```
 
-Then point `deploy-test.example.com` and `*.deploy-test.example.com` at the runtime host. This validates the complete GitHub → queue → publisher → Docker → Traefik path without depending on the locked production domain. Replace the temporary values with `velclaw.cfd` and HTTPS after the production domain is restored.
+Then point `deploy-test.example.com` and `*.deploy-test.example.com` at the runtime host. This validates the complete GitHub → queue → publisher → Docker → Traefik path without depending on the locked production domain. Replace the temporary values with `velclaw.com` and HTTPS after the production domain is restored.
 
 Do not use a hostname you do not control. An IP address can be used for basic control-plane HTTP testing, but branch preview hostnames require DNS unless the client explicitly supplies matching host entries.
 
 ## Public URL contract
 
-- Production: `https://velclaw.cfd`
-- Branch preview: `https://velclaw-git-<branch-slug>-velclaw.cfd`
+- Production: `https://velclaw.com`
+- Branch preview: `https://velclaw-git-<branch-slug>-velclaw.dev`
 - Temporary mode follows the same hostname pattern under `VELCLAW_PUBLIC_DOMAIN`.
 - Provider-generated hostnames are infrastructure details and are never the product URL.
 
