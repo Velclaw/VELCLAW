@@ -7,7 +7,7 @@ export async function GET() {
     {
       ok: true,
       service: 'velclaw-control-plane',
-      domain: process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd',
+      domain: process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.com',
       timestamp: new Date().toISOString(),
     },
     {
