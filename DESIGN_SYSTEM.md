@@ -44,7 +44,7 @@ Velclaw has five official first-party domains with fixed roles:
 | `velclaw.io` | API, gateway and runtime infrastructure |
 | `velclaw.app` | User-facing application and identity |
 
-Preview deployments use `*.velclaw.dev`. The legacy `velclaw.cfd` namespace is removed from the product contract and must not be introduced in source, UI, tests, documentation or deployment configuration.
+Preview deployments use `*.velclaw.dev`. Legacy domain namespaces are excluded from the product contract and must not be introduced in source, UI, tests, documentation or deployment configuration.
 
 DNS/proxy state is managed by the hosting infrastructure. The application must treat the five-domain registry as the only first-party domain boundary.
 
