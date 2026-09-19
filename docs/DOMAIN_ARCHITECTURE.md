@@ -4,7 +4,7 @@
 
 Velclaw is **domain-agnostic at the application layer**.
 
-`velclaw.cfd` is a legacy/transition domain and must not be treated as a core dependency. The current public hostname is deployment configuration and may change without a source-code rewrite.
+`velclaw.com` is a legacy/transition domain and must not be treated as a core dependency. The current public hostname is deployment configuration and may change without a source-code rewrite.
 
 ## Future canonical roles
 
@@ -139,4 +139,4 @@ Recommended policy:
 
 Never encode a temporary domain into application logic, OAuth issuer defaults, CORS defaults, metadata, sitemap, robots, or deployment configuration that can be supplied by environment.
 
-When a new canonical TLD is purchased, change deployment configuration first, validate OAuth/CORS/metadata, then add redirects from legacy domains. Do not make `velclaw.cfd` a new dependency during the transition.
+When a new canonical TLD is purchased, change deployment configuration first, validate OAuth/CORS/metadata, then add redirects from legacy domains. Do not make `velclaw.com` a new dependency during the transition.
