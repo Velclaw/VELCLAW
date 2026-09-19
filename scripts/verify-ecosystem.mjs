@@ -45,7 +45,7 @@ if (!registryText.includes('Velclaw/VELCLAW')) {
 for (const repo of requiredRepos) {
   if (!registryText.includes(repo)) failures.push(`registry missing ${repo}`)
 }
-if (!contextText.includes('velclaw.cfd')) failures.push('canonical domain missing')
+if (!contextText.includes('velclaw.com')) failures.push('canonical domain missing')
 if (!registryText.includes('HTTP APIs')) failures.push('HTTP API contract missing')
 if (!registryText.includes('Webhooks')) failures.push('webhook contract missing')
 if (!registryText.includes('OAuth')) failures.push('OAuth contract missing')
