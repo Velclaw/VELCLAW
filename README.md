@@ -77,29 +77,19 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 
 **OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
 
-## Product URLs
+## Product Domains
 
-The public product surface uses **`velclaw.com`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+Velclaw uses five official first-party domains, each with a fixed responsibility. The domain registry is part of the core platform contract.
 
+| Domain | Role | Examples |
+| --- | --- | --- |
+| `velclaw.com` | Brand / canonical product | `https://velclaw.com` |
+| `velclaw.ai` | AI / agents / intelligence | `https://agents.velclaw.ai` |
+| `velclaw.dev` | Developer platform / docs / SDK / CLI | `https://docs.velclaw.dev` |
+| `velclaw.io` | API / gateway / runtime infrastructure | `https://api.velclaw.io` |
+| `velclaw.app` | User-facing application / identity | `https://velclaw.app` |
 
-The public product surface uses **`velclaw.com`** as the canonical host. Product areas are path-based instead of separate product subdomains.
-
-| Product surface | Canonical URL |
-| --- | --- |
-| Velclaw | `https://velclaw.com/` |
-| Velclaw Docs | `https://velclaw.com/docs` |
-| VelclawHub | `https://velclaw.com/velclawhub` |
-| VelclawHub Ecosystem | `https://velclaw.com/hub` |
-| Velclaw Deploy | `https://velclaw.com/deploy` |
-| Velclaw Skills | `https://velclaw.com/skills` |
-| Velclaw Plugins | `https://velclaw.com/plugins` |
-| Velclaw MCP | `https://velclaw.com/mcp` |
-| Velclaw Tasks | `https://velclaw.com/tasks` |
-| Velclaw Dashboard | `https://velclaw.com/velclaw` |
-| Velclaw Repo | `https://velclaw.com/repos/new` |
-| Velclaw API Keys | `https://velclaw.com/api-keys` |
-
-Infrastructure-generated hostnames are not product URLs.
+Product code must not introduce `velclaw.cfd`. Preview deployments use the `*.velclaw.dev` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
