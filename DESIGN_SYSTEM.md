@@ -34,21 +34,21 @@ Giao diện Velclaw phải dùng chung design system của hệ sinh thái.
 
 ## Domain identity
 
-**`velclaw.cfd` là domain duy nhất của Velclaw.**
+**`velclaw.com` là domain duy nhất của Velclaw.**
 
 Không sử dụng domain cũ, domain thử nghiệm hoặc virtual hostname khác trong source code, UI, test gateway, wiki hoặc ecosystem navigation.
 
 Các route ecosystem dùng cùng canonical host:
 
-- `https://velclaw.cfd/`
-- `https://velclaw.cfd/docs`
-- `https://velclaw.cfd/hub`
-- `https://velclaw.cfd/mcp`
-- `https://velclaw.cfd/api-keys`
-- `https://velclaw.cfd/wiki`
-- `https://velclaw.cfd/test`
+- `https://velclaw.com/`
+- `https://velclaw.com/docs`
+- `https://velclaw.com/hub`
+- `https://velclaw.com/mcp`
+- `https://velclaw.com/api-keys`
+- `https://velclaw.com/wiki`
+- `https://velclaw.com/test`
 
-Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code chỉ duy trì canonical domain `velclaw.cfd`.
+Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code chỉ duy trì canonical domain `velclaw.com`.
 
 ## Quy tắc cho dự án con
 
@@ -60,4 +60,4 @@ Thay đổi giao diện phải được xem xét về khả năng tương thích
 
 ## Mục tiêu
 
-Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất và domain canonical `velclaw.cfd`.
+Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất và domain canonical `velclaw.com`.
