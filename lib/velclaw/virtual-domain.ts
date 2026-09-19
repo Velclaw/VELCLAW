@@ -1,12 +1,9 @@
-import { VELCLAW_PUBLIC_DOMAIN } from '@/lib/velclaw/domain-config'
+import { VELCLAW_DOMAINS } from '@/lib/velclaw/product-domain'
 
-/**
- * Public Velclaw hostname boundary.
- *
- * The hostname is deployment configuration, not application identity. This
- * keeps the runtime independent from the current temporary or future TLD.
- */
-export { VELCLAW_PUBLIC_DOMAIN }
+export { VELCLAW_DOMAINS }
+
+export const VELCLAW_PUBLIC_DOMAIN = VELCLAW_DOMAINS.brand
+const FIRST_PARTY = /^(?:[a-z0-9-]+\.)*velclaw\.(?:com|ai|dev|app|io)$/i
 
 export function resolveVelclawVirtualDomain(hostname: string | null | undefined): string {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
@@ -15,5 +12,5 @@ export function resolveVelclawVirtualDomain(hostname: string | null | undefined)
 
 export function isVelclawPublicDomain(hostname: string | null | undefined): boolean {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
-  return normalized === VELCLAW_PUBLIC_DOMAIN
+  return FIRST_PARTY.test(normalized)
 }
