@@ -34,21 +34,19 @@ Giao diện Velclaw phải dùng chung design system của hệ sinh thái.
 
 ## Domain identity
 
-**`velclaw.com` là domain duy nhất của Velclaw.**
+Velclaw has five official first-party domains with fixed roles:
 
-Không sử dụng domain cũ, domain thử nghiệm hoặc virtual hostname khác trong source code, UI, test gateway, wiki hoặc ecosystem navigation.
+| Domain | Role |
+| --- | --- |
+| `velclaw.com` | Canonical brand and primary product |
+| `velclaw.ai` | AI, agents and intelligence |
+| `velclaw.dev` | Developer platform, documentation, SDK and CLI |
+| `velclaw.io` | API, gateway and runtime infrastructure |
+| `velclaw.app` | User-facing application and identity |
 
-Các route ecosystem dùng cùng canonical host:
+Preview deployments use `*.velclaw.dev`. The legacy `velclaw.cfd` namespace is removed from the product contract and must not be introduced in source, UI, tests, documentation or deployment configuration.
 
-- `https://velclaw.com/`
-- `https://velclaw.com/docs`
-- `https://velclaw.com/hub`
-- `https://velclaw.com/mcp`
-- `https://velclaw.com/api-keys`
-- `https://velclaw.com/wiki`
-- `https://velclaw.com/test`
-
-Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code chỉ duy trì canonical domain `velclaw.com`.
+DNS/proxy state is managed by the hosting infrastructure. The application must treat the five-domain registry as the only first-party domain boundary.
 
 ## Quy tắc cho dự án con
 
