@@ -3,7 +3,7 @@ import process from 'node:process'
 const API = process.env.VELCLAW_DEPLOY_API || 'http://velclaw.velclaw-production.svc.cluster.local'
 const TOKEN = process.env.VELCLAW_DEPLOY_API_TOKEN || ''
 const NAMESPACE = process.env.VELCLAW_RUNTIME_NAMESPACE || 'velclaw-production'
-const DOMAIN = (process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.cfd').trim().toLowerCase()
+const DOMAIN = (process.env.VELCLAW_PUBLIC_DOMAIN || 'velclaw.com').trim().toLowerCase()
 const REGISTRY = (process.env.VELCLAW_IMAGE_REGISTRY || 'ghcr.io/velclaw').replace(/\/$/, '')
 const POLL_MS = Math.max(1000, Number(process.env.VELCLAW_DEPLOY_POLL_MS || 3000))
 const JOB_TIMEOUT_MS = Math.max(120_000, Number(process.env.VELCLAW_K8S_JOB_TIMEOUT_MS || 900_000))
