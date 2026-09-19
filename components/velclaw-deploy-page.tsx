@@ -33,25 +33,25 @@ const runtimeFlow = [
   ['Velclaw publisher', 'Clones the branch and builds the root Dockerfile.'],
   ['Docker runtime', 'Runs the release in an isolated container.'],
   ['Velclaw proxy', 'Traefik routes HTTPS to the deployment container.'],
-  ['*.velclaw.cfd', 'Public first-party deployment hostname.'],
+  ['*.velclaw.dev', 'Public first-party deployment hostname.'],
 ] as const
 
 const targets = [
   {
     name: 'Velclaw Production',
-    host: 'velclaw.cfd',
+    host: 'velclaw.com',
     state: 'canonical',
     description: 'Primary Velclaw host. Production claims require verified runtime evidence.',
   },
   {
     name: 'Velclaw Preview',
-    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
+    host: 'velclaw-git-<branch-slug>-velclaw.com',
     state: 'preview',
-    description: 'Branch-derived Velclaw product URL. Example: velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd.',
+    description: 'Branch-derived Velclaw product URL. Example: velclaw-git-feat-velclaw-deploy-page3-velclaw.com.',
   },
   {
     name: 'Task Deployment',
-    host: 'velclaw-git-<branch-slug>-velclaw.cfd',
+    host: 'velclaw-git-<branch-slug>-velclaw.com',
     state: 'task-scoped',
     description: 'Runtime evidence associated with a Task and its release branch.',
   },
@@ -73,7 +73,7 @@ export function VelclawDeployPage() {
                 <h1 className="mt-1 text-2xl font-semibold md:text-3xl">Velclaw Deploy</h1>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                   Deployment control plane riêng của Velclaw: release bằng Docker runtime của Velclaw, reverse proxy
-                  riêng và namespace public <code>*.velclaw.cfd</code>.
+                  riêng và namespace public <code>*.velclaw.dev</code>.
                 </p>
               </div>
             </div>
@@ -89,7 +89,7 @@ export function VelclawDeployPage() {
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <a href="https://velclaw.cfd" target="_blank" rel="noreferrer">
+                <a href="https://velclaw.com" target="_blank" rel="noreferrer">
                   <ExternalLink className="h-4 w-4" /> Open Production
                 </a>
               </Button>
@@ -103,7 +103,7 @@ export function VelclawDeployPage() {
               <CardTitle className="text-sm">Canonical target</CardTitle>
               <CardDescription>Host chính thức của Velclaw.</CardDescription>
             </CardHeader>
-            <CardContent className="px-4 pb-4 font-mono text-sm text-violet-200">velclaw.cfd</CardContent>
+            <CardContent className="px-4 pb-4 font-mono text-sm text-violet-200">velclaw.com</CardContent>
           </Card>
           <Card>
             <CardHeader className="p-4">
@@ -171,7 +171,7 @@ export function VelclawDeployPage() {
             ))}
           </div>
           <div className="border border-violet-400/30 bg-violet-500/5 px-4 py-3 font-mono text-[11px] text-violet-200">
-            GitHub → webhook → Velclaw queue → publisher → Docker runtime → Traefik → *.velclaw.cfd
+            GitHub → webhook → Velclaw queue → publisher → Docker runtime → Traefik → *.velclaw.dev
           </div>
           <div>
             <h2 className="text-lg font-semibold">Velclaw runtime delivery</h2>
@@ -197,7 +197,7 @@ export function VelclawDeployPage() {
             ))}
           </div>
           <div className="border border-violet-400/30 bg-violet-500/5 px-4 py-3 font-mono text-[11px] text-violet-200">
-            GitHub → webhook → Velclaw queue → publisher → root Dockerfile → Docker runtime → Traefik → *.velclaw.cfd
+            GitHub → webhook → Velclaw queue → publisher → root Dockerfile → Docker runtime → Traefik → *.velclaw.dev
           </div>
         </section>
 
@@ -243,7 +243,7 @@ export function VelclawDeployPage() {
                 'GitHub commit/PR đã được tạo',
                 'Docker image build thành công',
                 'Container runtime healthy',
-                'Deployment URL thuộc *.velclaw.cfd và đã được xác nhận',
+                'Deployment URL thuộc *.velclaw.dev và đã được xác nhận',
               ].map((item) => (
                 <div key={item} className="flex gap-2">
                   <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-300" />
@@ -281,7 +281,7 @@ export function VelclawDeployPage() {
         <section className="border border-border bg-card p-4 text-xs leading-5 text-muted-foreground">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-300">Domain boundary</p>
           <p className="mt-2">
-            Production là <code>velclaw.cfd</code>. Preview/release là <code>*.velclaw.cfd</code>. Hostname do nền tảng
+            Production là <code>velclaw.com</code>. Preview/release là <code>*.velclaw.dev</code>. Hostname do nền tảng
             bên ngoài sinh ra không phải URL sản phẩm Velclaw và không được đưa vào UI, API response hay tài liệu
             public. Wildcard DNS + TLS + reverse proxy phải được cấu hình trên hạ tầng Velclaw trước khi preview
             hostname hoạt động.
