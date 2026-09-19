@@ -12,7 +12,7 @@ if (!token) {
 
 const failures = []
 if (contract.canonicalRepository !== 'Velclaw/VELCLAW') failures.push('canonical repository mismatch')
-if (contract.canonicalDomain !== 'velclaw.cfd') failures.push('canonical domain mismatch')
+if (contract.canonicalDomain !== 'velclaw.com') failures.push('canonical domain mismatch')
 
 for (const item of contract.repositories) {
   const response = await fetch(`https://api.github.com/repos/${item.repository}`, {
