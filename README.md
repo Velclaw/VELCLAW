@@ -75,9 +75,12 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 | Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
 | Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-OAuth integration target: https://auth.velclaw.cfd
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.cfd` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
 
 ## Product URLs
+
+The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+
 
 The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
 
