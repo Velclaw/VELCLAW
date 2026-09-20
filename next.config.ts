@@ -32,8 +32,8 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      { source: '/docs/', destination: 'https://docs.velclaw.ai/' },
-      { source: '/docs/:path*', destination: 'https://docs.velclaw.ai/:path*' },
+      { source: '/docs/', destination: 'https://velclaw.cfd/docs/' },
+      { source: '/docs/:path*', destination: 'https://velclaw.cfd/docs/:path*' },
     ]
   },
 }
