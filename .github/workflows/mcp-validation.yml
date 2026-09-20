@@ -1,0 +1,45 @@
+name: MCP Registry Validation
+
+on:
+  pull_request:
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+  push:
+    branches: [main]
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Validate MCP registry
+        run: pnpm mcp:config-check
+
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('config/mcp.json','utf8')); JSON.parse(require('fs').readFileSync('.mcp.json','utf8')); console.log('MCP JSON valid')"
