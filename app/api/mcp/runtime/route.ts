@@ -3,6 +3,7 @@ import { getServerSession } from '@/lib/session/get-server-session'
 import { getMcpRuntimeSummary } from '@/lib/mcp/registry'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET() {
   const session = await getServerSession()
