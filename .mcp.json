@@ -1,9 +1,3 @@
 {
-  "$schema": "https://modelcontextprotocol.io/schema/2025-06-18/mcp.json",
-  "mcpServers": {
-    "paths": [
-      "config/mcp.json"
-    ],
-    "exclusive": true
-  }
+  "mcpServers": "config/mcp.json"
 }
