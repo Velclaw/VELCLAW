@@ -79,17 +79,14 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 
 ## Product Domains
 
-Velclaw uses five official first-party domains, each with a fixed responsibility. The domain registry is part of the core platform contract.
+Velclaw currently uses `velclaw.cfd` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
 
 | Domain | Role | Examples |
 | --- | --- | --- |
 | `velclaw.cfd` | Brand / canonical product | `https://velclaw.cfd` |
-| `velclaw.cfd` | AI / agents / intelligence | `https://agents.velclaw.cfd` |
-| `velclaw.cfd` | Developer platform / docs / SDK / CLI | `https://docs.velclaw.cfd` |
-| `velclaw.cfd` | API / gateway / runtime infrastructure | `https://api.velclaw.cfd` |
-| `velclaw.cfd` | User-facing application / identity | `https://velclaw.cfd` |
+| `velclaw.cfd` | All active Velclaw surfaces | `https://velclaw.cfd`, `https://velclaw.cfd/docs`, `https://velclaw.cfd/api/*` |
 
-Product code must not introduce `velclaw.cfd`. Preview deployments use the `*.velclaw.cfd` namespace; platform-generated hostnames are not product URLs.
+Product code must use `velclaw.cfd` as the active canonical runtime domain. Preview deployments use the `*.velclaw.cfd` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
