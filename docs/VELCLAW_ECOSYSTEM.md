@@ -16,7 +16,7 @@ VELCLAW ECOSYSTEM
 │   └── Velclaw/Oauth
 │
 ├── Official documentation
-│   └── Velclaw/docs.velclaw.ai
+│   └── Velclaw/velclaw.cfd/docs
 │
 ├── Documentation Pages companion
 │   └── zskbot/repo-docs-velclaw
@@ -53,7 +53,7 @@ VELCLAW ECOSYSTEM
 |---|---|---|---|
 | `Velclaw/VELCLAW` | Core platform | Canonical application APIs, UI, deploy control | **CORE** |
 | `Velclaw/Oauth` | Auth UI | OAuth authorization endpoints / callbacks | **INTEGRATE** |
-| `Velclaw/docs.velclaw.ai` | Official docs | Core product contracts and routes | **INTEGRATE** |
+| `Velclaw/velclaw.cfd/docs` | Official docs | Core product contracts and routes | **INTEGRATE** |
 | `zskbot/repo-docs-velclaw` | Docs Pages | Documentation/page publishing | **INTEGRATE** |
 | `zskbot/Autoship` | Release automation | GitHub + release lifecycle | **INTEGRATE** |
 | `zskbot/autoship-velclaw` | Velclaw Autoship variant | Velclaw release/deploy workflow | **INTEGRATE** |
@@ -121,7 +121,7 @@ Independent repositories should communicate with the core through explicit inter
 - Do not treat every repository owned by `zskbot` as a Velclaw repository. Ownership is not sufficient evidence of ecosystem membership.
 - A repository becomes an ecosystem member when its purpose, code, deployment, documentation or integration contract is verified.
 - `Velclaw/VELCLAW` is the only canonical core platform repository.
-- `Velclaw/docs.velclaw.ai` is the canonical documentation repository.
+- `Velclaw/velclaw.cfd/docs` is the canonical documentation repository.
 - `zskbot/repo-docs-velclaw` remains a secondary Docs Pages repository.
 - Product URLs should use the canonical Velclaw domain rather than infrastructure-generated hostnames where applicable.
 
