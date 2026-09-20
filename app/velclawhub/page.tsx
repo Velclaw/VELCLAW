@@ -1,4 +1,4 @@
-const BASE = 'https://velclaw.com'
+const BASE = 'https://velclaw.cfd'
 
 const groups = [
   {
@@ -104,13 +104,13 @@ export default function VelclawHubPage() {
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Canonical host
               </div>
-              <div className="mt-2 text-sm">velclaw.com</div>
+              <div className="mt-2 text-sm">velclaw.cfd</div>
             </div>
           </div>
         </section>
 
         <footer className="border-t border-border pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-          VelclawHub ecosystem gateway · canonical host: velclaw.com
+          VelclawHub ecosystem gateway · canonical host: velclaw.cfd
         </footer>
       </div>
     </main>
