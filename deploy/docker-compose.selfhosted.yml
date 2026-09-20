@@ -15,7 +15,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=velclaw-runtime
-      - traefik.http.routers.velclaw.rule=Host(`${VELCLAW_PUBLIC_DOMAIN:-velclaw.com}`)
+      - traefik.http.routers.velclaw.rule=Host(`${VELCLAW_PUBLIC_DOMAIN:-velclaw.cfd}`)
       - traefik.http.routers.velclaw.entrypoints=${VELCLAW_TRAEFIK_ENTRYPOINT:-websecure}
       - traefik.http.services.velclaw.loadbalancer.server.port=3000
       - traefik.http.routers.velclaw.tls=${VELCLAW_TLS_ENABLED:-true}
