@@ -9,7 +9,7 @@ Velclaw uses a continuous implementation loop. After each completed report, the 
 - Primary repository: `Velclaw/Velclaw`
 - Default branch: `main`
 - Production product domain: `https://velclaw.cfd`
-- Supporting docs repository: `Velclaw/docs.velclaw.ai`
+- Supporting docs repository: `Velclaw/velclaw.cfd/docs`
 
 ## Execution loop
 
