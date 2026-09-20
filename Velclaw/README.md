@@ -68,22 +68,22 @@ The goal is to give coding agents and developers one coherent environment instea
 
 ## Product URLs
 
-The public product surface uses **`velclaw.com`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
 
 | Product surface | Canonical URL |
 | --- | --- |
-| Velclaw | `https://velclaw.com/` |
-| Velclaw Docs | `https://velclaw.com/docs` |
-| VelclawHub | `https://velclaw.com/velclawhub` |
-| VelclawHub Ecosystem | `https://velclaw.com/hub` |
-| Velclaw Deploy | `https://velclaw.com/deploy` |
-| Velclaw Skills | `https://velclaw.com/skills` |
-| Velclaw Plugins | `https://velclaw.com/plugins` |
-| Velclaw MCP | `https://velclaw.com/mcp` |
-| Velclaw Tasks | `https://velclaw.com/tasks` |
-| Velclaw Dashboard | `https://velclaw.com/velclaw` |
-| Velclaw Repo | `https://velclaw.com/repos/new` |
-| Velclaw API Keys | `https://velclaw.com/api-keys` |
+| Velclaw | `https://velclaw.cfd/` |
+| Velclaw Docs | `https://velclaw.cfd/docs` |
+| VelclawHub | `https://velclaw.cfd/velclawhub` |
+| VelclawHub Ecosystem | `https://velclaw.cfd/hub` |
+| Velclaw Deploy | `https://velclaw.cfd/deploy` |
+| Velclaw Skills | `https://velclaw.cfd/skills` |
+| Velclaw Plugins | `https://velclaw.cfd/plugins` |
+| Velclaw MCP | `https://velclaw.cfd/mcp` |
+| Velclaw Tasks | `https://velclaw.cfd/tasks` |
+| Velclaw Dashboard | `https://velclaw.cfd/velclaw` |
+| Velclaw Repo | `https://velclaw.cfd/repos/new` |
+| Velclaw API Keys | `https://velclaw.cfd/api-keys` |
 
 Infrastructure-generated hostnames are not product URLs.
 
@@ -183,7 +183,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/Velclaw)
 - [Issues](https://github.com/Velclaw/Velclaw/issues)
 - [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
-- Official documentation: `https://velclaw.com/docs`
+- Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
 
