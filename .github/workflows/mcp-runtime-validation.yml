@@ -22,6 +22,10 @@ on:
       - 'skills/agents/sequential-thinking/**'
       - 'package.json'
       - '.env.example'
+      - 'lib/mcp/**'
+      - 'app/api/mcp/**'
+      - 'components/mcp-page.tsx'
+      - 'tests/mcp-runtime-registry.test.ts'
 
 permissions:
   contents: read
