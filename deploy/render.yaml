@@ -11,7 +11,7 @@ services:
       - key: VELCLAW_HOSTING_PROVIDER
         value: render
       - key: VELCLAW_PUBLIC_DOMAIN
-        value: velclaw.com
+        value: velclaw.cfd
       - key: VELCLAW_PUBLIC_SCHEME
         value: https
       - key: ENCRYPTION_KEY
