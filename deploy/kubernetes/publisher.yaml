@@ -41,7 +41,7 @@ spec:
             - name: VELCLAW_RUNTIME_NAMESPACE
               value: velclaw-production
             - name: VELCLAW_PUBLIC_DOMAIN
-              value: velclaw.com
+              value: velclaw.cfd
             - name: VELCLAW_IMAGE_REGISTRY
               value: ghcr.io/velclaw
             - name: VELCLAW_DEPLOY_POLL_MS
