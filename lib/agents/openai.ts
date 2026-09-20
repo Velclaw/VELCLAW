@@ -49,7 +49,7 @@ function getOpenAIVaultIds() {
 }
 
 export async function runOpenAIAgent(input: AgentRunInput) {
-  const apiKey = await getUserApiKey(input.userId)
+  const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
 
   const message = cleanText(input.message, 12000)
