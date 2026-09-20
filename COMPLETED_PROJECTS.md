@@ -26,10 +26,10 @@ Mỗi khi một phân hệ hoặc tính năng AI-native chạy ổn định tron
 
 | Tên Dự Án / Phân Hệ | Mô Tả Chức Năng | Tiến Độ | Link Triển Khai (Canonical Host) |
 | :--- | :--- | :--- | :--- |
-| **Velclaw Core** | Không gian làm việc AI-native cốt lõi cho agent | `[x] 100%` | [Truy cập giao diện](https://velclaw.com/) |
-| **Velclaw Docs** | Tài liệu kỹ thuật và hướng dẫn hệ thống | `[x] 100%` | [Xem tài liệu](https://velclaw.com/docs) |
-| **Velclaw Deploy** | Tự động hóa quy trình đóng gói và phân phối | `[-] 45%` | [Trang cấu hình](https://velclaw.com/deploy) |
-| **Velclaw Runtime Health Probe** | Endpoint health/readiness an toàn cho monitor, CI/CD và deployment | `[-] 90%` | [Health API](https://velclaw.com/api/health) |
+| **Velclaw Core** | Không gian làm việc AI-native cốt lõi cho agent | `[x] 100%` | [Truy cập giao diện](https://velclaw.cfd/) |
+| **Velclaw Docs** | Tài liệu kỹ thuật và hướng dẫn hệ thống | `[x] 100%` | [Xem tài liệu](https://velclaw.cfd/docs) |
+| **Velclaw Deploy** | Tự động hóa quy trình đóng gói và phân phối | `[-] 45%` | [Trang cấu hình](https://velclaw.cfd/deploy) |
+| **Velclaw Runtime Health Probe** | Endpoint health/readiness an toàn cho monitor, CI/CD và deployment | `[-] 90%` | [Health API](https://velclaw.cfd/api/health) |
 
 ---
 
