@@ -104,7 +104,7 @@ export async function createOpenAIAgentsSession(input: {
   maxConcurrentSubagents?: number
   environment?: 'openai_hosted' | 'none'
 }) {
-  const apiKey = await getUserApiKey(input.userId)
+  const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
 
   const message = cleanText(input.message, 12000)
