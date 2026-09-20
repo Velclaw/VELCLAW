@@ -1,9 +1,7 @@
-import { VELCLAW_DOMAINS } from '@/lib/velclaw/product-domain'
+import { VELCLAW_PRODUCT_DOMAIN } from '@/lib/velclaw/product-domain'
 
-export { VELCLAW_DOMAINS }
-
-export const VELCLAW_PUBLIC_DOMAIN = VELCLAW_DOMAINS.brand
-const FIRST_PARTY = /^(?:[a-z0-9-]+\.)*velclaw\.(?:com|ai|dev|app|io)$/i
+export const VELCLAW_PUBLIC_DOMAIN = VELCLAW_PRODUCT_DOMAIN
+const FIRST_PARTY = /^(?:[a-z0-9-]+\.)*velclaw\.cfd$/i
 
 export function resolveVelclawVirtualDomain(hostname: string | null | undefined): string {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
