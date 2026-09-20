@@ -70,11 +70,11 @@ export function loadMcpRegistry(): McpServerDefinition[] {
     const headers: Record<string, string> = {}
 
     for (const [key, value] of Object.entries(server.env || {})) {
-      env[key] = sanitize(resolveEnv(value).value)
+      env[key] = resolveEnv(value).value
     }
 
     for (const [key, value] of Object.entries(server.headers || {})) {
-      headers[key] = sanitize(resolveEnv(value).value)
+      headers[key] = resolveEnv(value).value
     }
 
     return {
