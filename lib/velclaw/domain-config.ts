@@ -8,21 +8,17 @@ function normalizeOrigin(value: string | undefined, fallback: string): string {
 }
 
 export const VELCLAW_DOMAIN_ROLES = {
-  brand: 'https://velclaw.cfd',
-  ai: 'https://velclaw.cfd',
-  dev: 'https://velclaw.cfd',
-  app: 'https://velclaw.cfd',
-  io: 'https://velclaw.cfd',
+  canonical: 'https://velclaw.cfd',
 } as const
 
-export const VELCLAW_PUBLIC_ORIGIN = normalizeOrigin(process.env.VELCLAW_PUBLIC_ORIGIN, VELCLAW_DOMAIN_ROLES.brand)
-export const VELCLAW_OAUTH_ISSUER = normalizeOrigin(process.env.VELCLAW_OAUTH_ISSUER, VELCLAW_DOMAIN_ROLES.app)
-export const VELCLAW_APP_ORIGIN = normalizeOrigin(process.env.VELCLAW_APP_ORIGIN, VELCLAW_DOMAIN_ROLES.app)
-export const VELCLAW_API_ORIGIN = normalizeOrigin(process.env.VELCLAW_API_ORIGIN, `${VELCLAW_DOMAIN_ROLES.io}`)
-export const VELCLAW_DOCS_ORIGIN = normalizeOrigin(process.env.VELCLAW_DOCS_ORIGIN, VELCLAW_DOMAIN_ROLES.dev)
+export const VELCLAW_PUBLIC_ORIGIN = normalizeOrigin(process.env.VELCLAW_PUBLIC_ORIGIN, VELCLAW_DOMAIN_ROLES.canonical)
+export const VELCLAW_OAUTH_ISSUER = normalizeOrigin(process.env.VELCLAW_OAUTH_ISSUER, VELCLAW_DOMAIN_ROLES.canonical)
+export const VELCLAW_APP_ORIGIN = normalizeOrigin(process.env.VELCLAW_APP_ORIGIN, VELCLAW_DOMAIN_ROLES.canonical)
+export const VELCLAW_API_ORIGIN = normalizeOrigin(process.env.VELCLAW_API_ORIGIN, VELCLAW_DOMAIN_ROLES.canonical)
+export const VELCLAW_DOCS_ORIGIN = normalizeOrigin(process.env.VELCLAW_DOCS_ORIGIN, VELCLAW_DOMAIN_ROLES.canonical)
 export const VELCLAW_PUBLIC_DOMAIN = new URL(VELCLAW_PUBLIC_ORIGIN).hostname
 
-export const VELCLAW_ALLOWED_ORIGINS = (process.env.VELCLAW_ALLOWED_ORIGINS || Object.values(VELCLAW_DOMAIN_ROLES).join(','))
+export const VELCLAW_ALLOWED_ORIGINS = (process.env.VELCLAW_ALLOWED_ORIGINS || VELCLAW_DOMAIN_ROLES.canonical)
   .split(',')
   .map((value) => value.trim())
   .filter(Boolean)
