@@ -26,7 +26,9 @@
     "validate:runtime": "node scripts/ci-runtime-validation.mjs",
     "audit:ecosystem": "node scripts/verify-ecosystem.mjs",
     "audit:ecosystem:live": "node scripts/verify-ecosystem-live.mjs",
-    "reconcile:control-plane": "node scripts/control-plane/reconcile.mjs"
+    "reconcile:control-plane": "node scripts/control-plane/reconcile.mjs",
+    "mcp:setup": "node scripts/mcp/setup-sequential-thinking-recall.mjs",
+    "mcp:config-check": "node scripts/mcp/verify-config.mjs"
   },
   "dependencies": {
     "@git-diff-view/file": "^0.0.32",
