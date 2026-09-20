@@ -75,7 +75,7 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 | Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
 | Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.cfd` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
 
 ## Product Domains
 
@@ -83,13 +83,13 @@ Velclaw uses five official first-party domains, each with a fixed responsibility
 
 | Domain | Role | Examples |
 | --- | --- | --- |
-| `velclaw.com` | Brand / canonical product | `https://velclaw.com` |
-| `velclaw.ai` | AI / agents / intelligence | `https://agents.velclaw.ai` |
-| `velclaw.dev` | Developer platform / docs / SDK / CLI | `https://docs.velclaw.dev` |
-| `velclaw.io` | API / gateway / runtime infrastructure | `https://api.velclaw.io` |
-| `velclaw.app` | User-facing application / identity | `https://velclaw.app` |
+| `velclaw.cfd` | Brand / canonical product | `https://velclaw.cfd` |
+| `velclaw.cfd` | AI / agents / intelligence | `https://agents.velclaw.cfd` |
+| `velclaw.cfd` | Developer platform / docs / SDK / CLI | `https://docs.velclaw.cfd` |
+| `velclaw.cfd` | API / gateway / runtime infrastructure | `https://api.velclaw.cfd` |
+| `velclaw.cfd` | User-facing application / identity | `https://velclaw.cfd` |
 
-Product code must not introduce `velclaw.cfd`. Preview deployments use the `*.velclaw.dev` namespace; platform-generated hostnames are not product URLs.
+Product code must not introduce `velclaw.cfd`. Preview deployments use the `*.velclaw.cfd` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
@@ -187,7 +187,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/VELCLAW)
 - [Issues](https://github.com/Velclaw/VELCLAW/issues)
 - [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
-- Official documentation: `https://velclaw.com/docs`
+- Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
 

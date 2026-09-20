@@ -4,38 +4,38 @@
 
 Velclaw is **domain-agnostic at the application layer**.
 
-`velclaw.com` is a legacy/transition domain and must not be treated as a core dependency. The current public hostname is deployment configuration and may change without a source-code rewrite.
+`velclaw.cfd` is a legacy/transition domain and must not be treated as a core dependency. The current public hostname is deployment configuration and may change without a source-code rewrite.
 
 ## Future canonical roles
 
 | Domain | Role | Priority |
 | --- | --- | --- |
-| `velclaw.com` | Brand / corporate | P0 |
-| `velclaw.ai` | AI / agents / intelligence | P0 |
-| `velclaw.dev` | Developer platform / docs / SDK / CLI | P0 |
-| `velclaw.app` | Main user-facing application | P1 |
-| `velclaw.io` | Platform / API / runtime / infrastructure | P1 |
+| `velclaw.cfd` | Brand / corporate | P0 |
+| `velclaw.cfd` | AI / agents / intelligence | P0 |
+| `velclaw.cfd` | Developer platform / docs / SDK / CLI | P0 |
+| `velclaw.cfd` | Main user-facing application | P1 |
+| `velclaw.cfd` | Platform / API / runtime / infrastructure | P1 |
 
 These domains represent namespaces, not separate infrastructure stacks.
 
 ## Target URL map
 
 ```text
-velclaw.com
+velclaw.cfd
   Brand / corporate
 
-velclaw.ai
-  agents.velclaw.ai
-  models.velclaw.ai
-  playground.velclaw.ai
+velclaw.cfd
+  agents.velclaw.cfd
+  models.velclaw.cfd
+  playground.velclaw.cfd
 
-velclaw.dev
-  docs.velclaw.dev
-  sdk.velclaw.dev
-  cli.velclaw.dev
-  status.velclaw.dev
+velclaw.cfd
+  docs.velclaw.cfd
+  sdk.velclaw.cfd
+  cli.velclaw.cfd
+  status.velclaw.cfd
 
-velclaw.app
+velclaw.cfd
   /login
   /workspace
   /projects
@@ -44,12 +44,12 @@ velclaw.app
   /deployments
   /settings
 
-velclaw.io
-  api.velclaw.io
-  gateway.velclaw.io
-  runtime.velclaw.io
-  events.velclaw.io
-  status.velclaw.io
+velclaw.cfd
+  api.velclaw.cfd
+  gateway.velclaw.cfd
+  runtime.velclaw.cfd
+  events.velclaw.cfd
+  status.velclaw.cfd
 ```
 
 ## Temporary zero-cost topology
@@ -101,12 +101,12 @@ VELCLAW_ALLOWED_ORIGINS=https://velclaw.is-a.dev
 Future:
 
 ```env
-VELCLAW_PUBLIC_ORIGIN=https://velclaw.com
-VELCLAW_OAUTH_ISSUER=https://velclaw.com
-VELCLAW_APP_ORIGIN=https://velclaw.app
-VELCLAW_API_ORIGIN=https://api.velclaw.io
-VELCLAW_DOCS_ORIGIN=https://docs.velclaw.dev
-VELCLAW_ALLOWED_ORIGINS=https://velclaw.com,https://velclaw.app,https://velclaw.ai,https://velclaw.dev
+VELCLAW_PUBLIC_ORIGIN=https://velclaw.cfd
+VELCLAW_OAUTH_ISSUER=https://velclaw.cfd
+VELCLAW_APP_ORIGIN=https://velclaw.cfd
+VELCLAW_API_ORIGIN=https://api.velclaw.cfd
+VELCLAW_DOCS_ORIGIN=https://docs.velclaw.cfd
+VELCLAW_ALLOWED_ORIGINS=https://velclaw.cfd,https://velclaw.cfd,https://velclaw.cfd,https://velclaw.cfd
 ```
 
 ## GitHub namespace strategy
@@ -139,4 +139,4 @@ Recommended policy:
 
 Never encode a temporary domain into application logic, OAuth issuer defaults, CORS defaults, metadata, sitemap, robots, or deployment configuration that can be supplied by environment.
 
-When a new canonical TLD is purchased, change deployment configuration first, validate OAuth/CORS/metadata, then add redirects from legacy domains. Do not make `velclaw.com` a new dependency during the transition.
+When a new canonical TLD is purchased, change deployment configuration first, validate OAuth/CORS/metadata, then add redirects from legacy domains. Do not make `velclaw.cfd` a new dependency during the transition.

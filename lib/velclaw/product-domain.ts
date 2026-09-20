@@ -1,9 +1,9 @@
 export const VELCLAW_DOMAINS = {
-  brand: 'velclaw.com',
-  ai: 'velclaw.ai',
-  dev: 'velclaw.dev',
-  app: 'velclaw.app',
-  io: 'velclaw.io',
+  brand: 'velclaw.cfd',
+  ai: 'velclaw.cfd',
+  dev: 'velclaw.cfd',
+  app: 'velclaw.cfd',
+  io: 'velclaw.cfd',
 } as const
 
 export const VELCLAW_PRODUCT_DOMAIN = VELCLAW_DOMAINS.brand

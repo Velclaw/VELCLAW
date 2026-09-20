@@ -6,14 +6,14 @@
 - Project: **Velclaw** / `velclaw`
 - Current canonical GitHub repository: **`Velclaw/VELCLAW`**
 - Canonical default branch: `main`
-- Current public domain: **deployment-configured; `velclaw.com` is legacy/transition only**
+- Current public domain: **deployment-configured; `velclaw.cfd` is legacy/transition only**
 
 ## Ecosystem structure
 `Velclaw/VELCLAW` is the current canonical core repository. The Velclaw ecosystem is intentionally multi-repository. Independent repositories remain independently deployable and integrate through explicit APIs, webhooks, OAuth, GitHub, MCP/skills/plugins, artifacts and documented configuration contracts.
 
 ### Core ecosystem members
 - **Auth:** `Velclaw/Oauth`
-- **Official Docs:** `Velclaw/docs.velclaw.ai`
+- **Official Docs:** `Velclaw/velclaw.cfd/docs`
 - **Docs Pages:** `zskbot/repo-docs-velclaw`
 - **Deploy:** `Velclaw/deploy-velclaw`
 - **Release automation:** `zskbot/Autoship`, `zskbot/autoship-velclaw`
@@ -27,13 +27,13 @@ Repositories that merely share an owner or name are not automatically ecosystem 
 ## Domain architecture
 The long-term namespace is split by role rather than duplicated websites:
 
-- `velclaw.com` — brand / corporate canonical identity.
-- `velclaw.ai` — AI, agents, models and intelligence surfaces.
-- `velclaw.dev` — developer platform, docs, SDK and CLI.
-- `velclaw.app` — main user-facing application.
-- `velclaw.io` — platform, API, gateway and runtime infrastructure.
+- `velclaw.cfd` — brand / corporate canonical identity.
+- `velclaw.cfd` — AI, agents, models and intelligence surfaces.
+- `velclaw.cfd` — developer platform, docs, SDK and CLI.
+- `velclaw.cfd` — main user-facing application.
+- `velclaw.cfd` — platform, API, gateway and runtime infrastructure.
 
-`velclaw.com` is a legacy/transition domain. It must not be introduced as a new dependency and must not be the hard-coded OAuth issuer, metadata base, sitemap host, robots host or CORS authority.
+`velclaw.cfd` is a legacy/transition domain. It must not be introduced as a new dependency and must not be the hard-coded OAuth issuer, metadata base, sitemap host, robots host or CORS authority.
 
 The application reads domain identity from environment variables such as `VELCLAW_PUBLIC_ORIGIN`, `VELCLAW_OAUTH_ISSUER`, `VELCLAW_APP_ORIGIN`, `VELCLAW_API_ORIGIN`, `VELCLAW_DOCS_ORIGIN` and `VELCLAW_ALLOWED_ORIGINS`.
 

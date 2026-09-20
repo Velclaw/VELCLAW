@@ -10,7 +10,7 @@ The primary target is **KubeOps Cloud**, using the existing K3s production clust
 GitHub -> Velclaw Control Plane/Webhook -> PostgreSQL queue -> Kubernetes publisher
                                                        -> Job -> Kaniko -> GHCR
                                                        -> Deployment -> Service -> Ingress -> TLS
-Cloudflare Edge -> velclaw.com / *.velclaw.dev
+Cloudflare Edge -> velclaw.cfd / *.velclaw.cfd
 ```
 
 ## Kubernetes deployment
@@ -76,7 +76,7 @@ KubeOps must provide:
 - reachable Kubernetes API for GitHub Actions
 - GHCR access
 - PostgreSQL and Redis connectivity required by Velclaw
-- DNS/Cloudflare routing for `velclaw.com` and `*.velclaw.dev`
+- DNS/Cloudflare routing for `velclaw.cfd` and `*.velclaw.cfd`
 - the three runtime Secrets listed above
 
 These prerequisites are infrastructure state; repository manifests alone do not prove that the cluster is live.

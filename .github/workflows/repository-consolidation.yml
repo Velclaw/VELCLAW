@@ -62,7 +62,7 @@ jobs:
             check_repo "zskbot/velclaw-browser" private
             check_repo "Velclaw/Oauth" internal
             check_repo "Velclaw/deploy-velclaw" private
-            check_repo "Velclaw/docs.velclaw.ai" private
+            check_repo "Velclaw/velclaw.cfd/docs" private
             check_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" private
           fi
 
@@ -109,7 +109,7 @@ jobs:
             import_repo "zskbot/velclaw-browser" "apps/browser" private
             import_repo "Velclaw/Oauth" "apps/oauth" internal
             import_repo "Velclaw/deploy-velclaw" "deploy/legacy/velclaw" private
-            import_repo "Velclaw/docs.velclaw.ai" "docs/site" private
+            import_repo "Velclaw/velclaw.cfd/docs" "docs/site" private
             import_repo "Velclaw/Velclaw-velclaw-docs-ui-reference" "docs/ui-reference" private
           fi
 

@@ -20,14 +20,14 @@ interface Deployment {
 }
 
 const exampleProjects = [
-  { name: 'Velclaw', repo: 'https://github.com/Velclaw/Velclaw.git', branch: 'main', host: 'velclaw.com' },
-  { name: 'Velclaw Docs', repo: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', host: 'docs.velclaw.dev' },
+  { name: 'Velclaw', repo: 'https://github.com/Velclaw/Velclaw.git', branch: 'main', host: 'velclaw.cfd' },
+  { name: 'Velclaw Docs', repo: 'https://github.com/Velclaw/velclaw.cfd/docs.git', branch: 'main', host: 'docs.velclaw.cfd' },
 ]
 
 const platformStats = [
   ['Platform', 'Velclaw Hosting', Cloud],
   ['Runtime', 'Docker', Container],
-  ['Routing', '*.velclaw.dev', Globe2],
+  ['Routing', '*.velclaw.cfd', Globe2],
   ['Source', 'GitHub', Github],
 ] as const
 
@@ -135,11 +135,11 @@ export function VelclawHostingPage() {
                 <div className="flex h-11 w-11 items-center justify-center border border-violet-400/60 bg-violet-500/10"><Cloud className="h-5 w-5 text-violet-300" /></div>
                 <div><p className="font-mono text-[10px] uppercase tracking-[0.24em] text-violet-300">VELCLAW / HOSTING</p><h1 className="text-2xl font-semibold md:text-3xl">Velclaw Hosting</h1></div>
               </div>
-              <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">First-party hosting control plane của Velclaw. GitHub là source of truth; Velclaw Deploy xếp hàng build, Docker runtime chạy release và public traffic đi qua namespace <code>*.velclaw.dev</code>.</p>
+              <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">First-party hosting control plane của Velclaw. GitHub là source of truth; Velclaw Deploy xếp hàng build, Docker runtime chạy release và public traffic đi qua namespace <code>*.velclaw.cfd</code>.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link href="/deploy/engine" className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs hover:border-violet-400/60"><Server className="h-3.5 w-3.5" /> Deploy Engine</Link>
-              <a href="https://velclaw.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-violet-400/60 px-3 py-2 text-xs"><ExternalLink className="h-3.5 w-3.5" /> Production</a>
+              <a href="https://velclaw.cfd" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-violet-400/60 px-3 py-2 text-xs"><ExternalLink className="h-3.5 w-3.5" /> Production</a>
             </div>
           </div>
         </header>

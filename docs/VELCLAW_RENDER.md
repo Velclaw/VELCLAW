@@ -15,7 +15,7 @@ Render Web Service
         +---- PostgreSQL via POSTGRES_URL
         |
         v
-https://velclaw.com
+https://velclaw.cfd
 ```
 
 ## Deploy
@@ -25,7 +25,7 @@ https://velclaw.com
 3. Use the `main` branch for production.
 4. Set the environment variables marked `sync: false` in `render.yaml` in Render's Environment settings.
 5. Deploy and wait for the Render build to finish.
-6. Add `velclaw.com` as a custom domain in the Render service and complete the DNS records Render provides.
+6. Add `velclaw.cfd` as a custom domain in the Render service and complete the DNS records Render provides.
 
 ## Required secrets
 
@@ -44,7 +44,7 @@ At minimum, production needs:
 
 Set the GitHub OAuth callback URL to:
 
-`https://velclaw.com/api/auth/github/callback`
+`https://velclaw.cfd/api/auth/github/callback`
 
 The client ID is public and belongs in `NEXT_PUBLIC_GITHUB_CLIENT_ID`. The client secret must remain a private Render environment variable.
 
@@ -54,4 +54,4 @@ Velclaw expects PostgreSQL through `POSTGRES_URL`. Run the repository's Drizzle 
 
 ## Production evidence
 
-A successful Render build alone is not proof that `velclaw.com` is serving production. Verify the Render service is healthy, the custom domain is attached, DNS resolves to Render, and the public site responds before declaring production deployed.
+A successful Render build alone is not proof that `velclaw.cfd` is serving production. Verify the Render service is healthy, the custom domain is attached, DNS resolves to Render, and the public site responds before declaring production deployed.

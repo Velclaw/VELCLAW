@@ -8,11 +8,11 @@ function normalizeOrigin(value: string | undefined, fallback: string): string {
 }
 
 export const VELCLAW_DOMAIN_ROLES = {
-  brand: 'https://velclaw.com',
-  ai: 'https://velclaw.ai',
-  dev: 'https://velclaw.dev',
-  app: 'https://velclaw.app',
-  io: 'https://velclaw.io',
+  brand: 'https://velclaw.cfd',
+  ai: 'https://velclaw.cfd',
+  dev: 'https://velclaw.cfd',
+  app: 'https://velclaw.cfd',
+  io: 'https://velclaw.cfd',
 } as const
 
 export const VELCLAW_PUBLIC_ORIGIN = normalizeOrigin(process.env.VELCLAW_PUBLIC_ORIGIN, VELCLAW_DOMAIN_ROLES.brand)

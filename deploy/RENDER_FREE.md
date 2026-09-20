@@ -20,13 +20,13 @@ Keep secrets in Render's environment settings; never commit them to Git.
 
 The Render adapter triggers a deploy of a configured Render service. It does not create arbitrary Docker containers from the Velclaw control plane, because Render's free service is not a general-purpose Docker host.
 
-For true per-project isolated containers and wildcard `*.velclaw.dev` routing, use the existing self-hosted provider when a Docker-capable server is available.
+For true per-project isolated containers and wildcard `*.velclaw.cfd` routing, use the existing self-hosted provider when a Docker-capable server is available.
 
 ## Suggested free rollout
 
 1. Deploy the control plane from this repository using `deploy/render.yaml`.
 2. Configure an external PostgreSQL provider appropriate for the required data retention.
 3. Add the Render API key and service ID as secrets.
-4. Connect `velclaw.com` through DNS/custom-domain configuration.
+4. Connect `velclaw.cfd` through DNS/custom-domain configuration.
 5. Keep `VELCLAW_HOSTING_PROVIDER=render` for the free phase.
 6. Later switch to `self-hosted` after provisioning a Docker host.

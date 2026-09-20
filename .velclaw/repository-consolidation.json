@@ -17,7 +17,7 @@
     {"source":"Velclaw/Oauth","destination":"apps/oauth","visibility":"internal"},
     {"source":"Velclaw/velclaw-eve","destination":"agents/eve","visibility":"public"},
     {"source":"Velclaw/deploy-velclaw","destination":"deploy/legacy/velclaw","visibility":"private"},
-    {"source":"Velclaw/docs.velclaw.ai","destination":"docs/site","visibility":"private"},
+    {"source":"Velclaw/velclaw.cfd/docs","destination":"docs/site","visibility":"private"},
     {"source":"Velclaw/Velclaw-velclaw-docs-ui-reference","destination":"docs/ui-reference","visibility":"private"}
   ]
 }

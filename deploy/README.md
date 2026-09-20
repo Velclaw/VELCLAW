@@ -51,4 +51,4 @@ Phase 1 stops after a verified build artifact. It does **not** claim that an app
 
 ## Public namespace
 
-The canonical Velclaw production host remains `https://velclaw.com`. Public deployment URLs must be verified before being exposed to users.
+The canonical Velclaw production host remains `https://velclaw.cfd`. Public deployment URLs must be verified before being exposed to users.

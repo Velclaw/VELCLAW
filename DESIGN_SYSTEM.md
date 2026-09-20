@@ -38,13 +38,13 @@ Velclaw has five official first-party domains with fixed roles:
 
 | Domain | Role |
 | --- | --- |
-| `velclaw.com` | Canonical brand and primary product |
-| `velclaw.ai` | AI, agents and intelligence |
-| `velclaw.dev` | Developer platform, documentation, SDK and CLI |
-| `velclaw.io` | API, gateway and runtime infrastructure |
-| `velclaw.app` | User-facing application and identity |
+| `velclaw.cfd` | Canonical brand and primary product |
+| `velclaw.cfd` | AI, agents and intelligence |
+| `velclaw.cfd` | Developer platform, documentation, SDK and CLI |
+| `velclaw.cfd` | API, gateway and runtime infrastructure |
+| `velclaw.cfd` | User-facing application and identity |
 
-Preview deployments use `*.velclaw.dev`. Legacy domain namespaces are excluded from the product contract and must not be introduced in source, UI, tests, documentation or deployment configuration.
+Preview deployments use `*.velclaw.cfd`. Legacy domain namespaces are excluded from the product contract and must not be introduced in source, UI, tests, documentation or deployment configuration.
 
 DNS/proxy state is managed by the hosting infrastructure. The application must treat the five-domain registry as the only first-party domain boundary.
 
@@ -58,4 +58,4 @@ Thay đổi giao diện phải được xem xét về khả năng tương thích
 
 ## Mục tiêu
 
-Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất và domain canonical `velclaw.com`.
+Người dùng phải nhận ra ngay một sản phẩm thuộc hệ sinh thái Velclaw thông qua ngôn ngữ thiết kế thống nhất và domain canonical `velclaw.cfd`.
