@@ -1,5 +1,6 @@
 import { getHostingProvider, type HostingDeploymentInput, type HostingDeploymentResult, type HostingProviderAdapter } from './providers'
 import { RenderHostingProvider } from './render'
+import { VelclawHostProvider } from './velclawhost'
 
 class SelfHostedProvider implements HostingProviderAdapter {
   readonly name = 'self-hosted' as const
@@ -20,7 +21,10 @@ class SelfHostedProvider implements HostingProviderAdapter {
 }
 
 export function getHostingProviderAdapter(): HostingProviderAdapter {
-  return getHostingProvider() === 'render' ? new RenderHostingProvider() : new SelfHostedProvider()
+  const provider = getHostingProvider()
+  if (provider === 'render') return new RenderHostingProvider()
+  if (provider === 'velclawhost') return new VelclawHostProvider()
+  return new SelfHostedProvider()
 }
 
 export async function createHostingDeployment(input: HostingDeploymentInput) {
