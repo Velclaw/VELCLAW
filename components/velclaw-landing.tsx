@@ -12,6 +12,7 @@ const products = [
   ['05', 'MCP', 'Kết nối tools và context cho agent.', '/mcp'],
   ['06', 'Plugins', 'Mở rộng workspace bằng hệ sinh thái plugin.', '/plugins'],
   ['07', 'Skills', 'Chuẩn hoá năng lực agent theo workflow.', '/skills'],
+  ['08', 'Ecosystem', 'Một registry duy nhất cho Core, Hub, Deploy, MCP và các surface liên quan.', '/projects'],
 ] as const
 
 const flow = [
@@ -38,6 +39,7 @@ export function VelclawLanding() {
             <Link href="/deploy">Deploy</Link>
             <Link href="/skills">Skills</Link>
             <Link href="/plugins">Plugins</Link>
+            <Link href="/projects">Ecosystem</Link>
           </div>
         </details>
 
