@@ -1,0 +1,81 @@
+name: Velclaw CI Startup Recovery
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: velclaw-ci-startup-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Node 22 / Quality
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Toolchain diagnostics
+        run: |
+          set -eux
+          node --version
+          pnpm --version
+          uname -m
+          git --version
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
+  docker:
+    name: Docker / Control Plane
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker version
+        run: docker version
+
+      - name: Build image
+        run: docker build --pull --tag velclaw:ci .
+
+      - name: Verify image metadata
+        run: |
+          test "$(docker image inspect velclaw:ci --format '{{.Config.ExposedPorts}}')" = "map[3000/tcp:{}]"
+          test "$(docker image inspect velclaw:ci --format '{{.Config.User}}')" = "velclaw"
