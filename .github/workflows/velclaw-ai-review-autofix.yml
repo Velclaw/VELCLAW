@@ -1,0 +1,136 @@
+name: Velclaw AI Review + Auto-Fix
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+concurrency:
+  group: velclaw-ai-review-autofix-\${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Layer 1 / AI Code Review
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+      models: read
+    steps:
+      - name: ChatGPT CodeReview
+        uses: zskbot/ChatGPT-CodeReview@8bd66227f057f21e847a8c27c9b356c25271d292
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          USE_GITHUB_MODELS: true
+          MODEL: openai/gpt-4o-mini
+          LANGUAGE: English
+          LOG_LEVEL: info
+          IGNORE_PATTERNS: /node_modules/**/*,*.md
+          INCLUDE_PATTERNS: app/**/*,components/**/*,lib/**/*,server/**/*,scripts/**/*,tests/**/*
+          PROMPT: Review for correctness, security, regressions, data loss, authorization mistakes, and maintainability. Report only actionable findings.
+
+      - name: Capture review findings
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p review-artifact
+          gh api --paginate "repos/\${GITHUB_REPOSITORY}/pulls/\${{ github.event.pull_request.number }}/reviews" \
+            --jq '.[] | select(.body | contains("<!-- chatgpt-code-review -->")) | [.commit_id, .state, .body] | @tsv' \
+            > review-artifact/reviews.tsv || true
+
+      - name: Publish review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: velclaw-review-findings
+          path: review-artifact/reviews.tsv
+          retention-days: 3
+
+  autofix:
+    name: Layer 2 / AI Auto-Fix
+    needs: review
+    if: \${{ needs.review.result == 'success' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+      models: read
+      checks: read
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Download review findings
+        uses: actions/download-artifact@v4
+        with:
+          name: velclaw-review-findings
+          path: review-artifact
+
+      - name: Run safe auto-fix loop
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GITHUB_HEAD_REF: \${{ github.event.pull_request.head.ref }}
+          GITHUB_HEAD_REPO: \${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_BASE_REF: \${{ github.event.pull_request.base.ref }}
+          VELCLAW_REVIEW_FILE: review-artifact/reviews.tsv
+          VELCLAW_RESULT_FILE: /tmp/velclaw-autofix-result.json
+        run: node scripts/ci/velclaw-auto-fix.mjs
+
+      - name: Publish auto-fix result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: velclaw-autofix-result
+          path: /tmp/velclaw-autofix-result.json
+          if-no-files-found: ignore
+          retention-days: 3
+
+  approval:
+    name: Layer 2 / Approval Gate
+    needs: [review, autofix]
+    if: \${{ needs.review.result == 'success' && needs.autofix.result == 'success' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download auto-fix result
+        uses: actions/download-artifact@v4
+        with:
+          name: velclaw-autofix-result
+          path: autofix-result
+
+      - name: Verify auto-fix review gate
+        run: |
+          set -euo pipefail
+          test -f autofix-result/velclaw-autofix-result.json
+          python - <<'PY'
+          import json
+          result=json.load(open('autofix-result/velclaw-autofix-result.json'))
+          if result.get('reviewClean') is not True:
+              raise SystemExit(f"Approval blocked: {result.get('status')}")
+          print(f"Velclaw automation gate: {result.get('status')}")
+          PY
+
+      - name: Approve PR
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: gh pr review "\${{ github.event.pull_request.number }}" --approve --body "Velclaw AI Review + Auto-Fix: review gate and validation passed."
