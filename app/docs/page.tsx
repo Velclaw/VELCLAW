@@ -10,6 +10,8 @@ const DOCS = [
   ['Render', '/docs/VELCLAW_RENDER'],
   ['Storage Inventory', '/docs/STORAGE_INVENTORY'],
   ['Operations', '/docs/velclaw-operations'],
+  ['Integration Contracts', '/docs/VELCLAW-INTEGRATION-CONTRACTS'],
+  ['Project Registry', '/projects'],
 ] as const
 
 export default function DocsPage() {
