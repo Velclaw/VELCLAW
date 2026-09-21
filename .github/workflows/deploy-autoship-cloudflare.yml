@@ -1,0 +1,105 @@
+name: Deploy Autoship Control Plane to Cloudflare
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Autoship/cloudflare/**'
+      - '.github/workflows/deploy-autoship-cloudflare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AUTOSHIP_PUBLIC_URL: https://autoship.velclaw.cfd
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: Autoship/cloudflare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Autoship/cloudflare/package.json
+      - run: npm install
+      - name: Validate required secrets and Cloudflare access
+        env:
+          AUTOSHIP_API_TOKEN: ${{ secrets.AUTOSHIP_API_TOKEN }}
+          AUTOSHIP_GITHUB_TOKEN: ${{ secrets.AUTOSHIP_GITHUB_TOKEN }}
+          CLOUDFLARE_WORKERS_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          CLOUDFLARE_LEGACY_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_D1_API_TOKEN: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${AUTOSHIP_API_TOKEN:-}" ]] || missing+=(AUTOSHIP_API_TOKEN)
+          [[ -n "${AUTOSHIP_GITHUB_TOKEN:-}" ]] || missing+=(AUTOSHIP_GITHUB_TOKEN)
+          [[ -n "${CLOUDFLARE_D1_API_TOKEN:-}" ]] || missing+=(CLOUDFLARE_D1_API_TOKEN)
+          [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]] || missing+=(CLOUDFLARE_ACCOUNT_ID)
+          [[ -n "${CLOUDFLARE_WORKERS_API_TOKEN:-${CLOUDFLARE_LEGACY_API_TOKEN:-}}" ]] || missing+=(CLOUDFLARE_WORKERS_API_TOKEN)
+          if (( ${#missing[@]} )); then printf 'Missing required GitHub Actions secrets: %s\n' "${missing[*]}" >&2; exit 1; fi
+          [[ "$CLOUDFLARE_ACCOUNT_ID" =~ ^[0-9a-fA-F]{32}$ ]] || { echo 'CLOUDFLARE_ACCOUNT_ID must be the 32-character Cloudflare Account ID.' >&2; exit 1; }
+          curl --fail-with-body --silent --show-error "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?per_page=100" -H "Authorization: Bearer ${CLOUDFLARE_D1_API_TOKEN}" -H 'Accept: application/json' | jq -e '.success == true and (.result | type == "array")' >/dev/null
+      - name: Provision D1 and apply schema
+        env:
+          CLOUDFLARE_D1_API_TOKEN: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer ${CLOUDFLARE_D1_API_TOKEN}" -H 'Accept: application/json')
+          list_json="$(curl --fail-with-body --silent --show-error "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?per_page=100" "${auth[@]}")"
+          db_id="$(jq -r '.result[] | select(.name=="autoship") | .uuid' <<<"${list_json}" | head -n1)"
+          if [[ -z "$db_id" || "$db_id" == "null" ]]; then
+            create_json="$(curl --fail-with-body --silent --show-error -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database" "${auth[@]}" -H 'Content-Type: application/json' --data '{"name":"autoship","location":"apac"}')"
+            db_id="$(jq -r '.result.uuid // empty' <<<"${create_json}")"
+          fi
+          [[ "$db_id" =~ ^[0-9a-fA-F-]{36}$ ]] || { echo 'Unable to determine D1 database id' >&2; exit 1; }
+          sed -i "s/REPLACE_WITH_D1_DATABASE_ID/$db_id/" wrangler.toml
+          schema_json="$(jq -Rs '{sql: .}' schema.sql)"
+          curl --fail-with-body --silent --show-error -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${db_id}/query" "${auth[@]}" -H 'Content-Type: application/json' --data "${schema_json}" | jq -e '.success == true' >/dev/null
+      - name: Set Worker secrets
+        env:
+          CLOUDFLARE_WORKERS_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          CLOUDFLARE_LEGACY_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          AUTOSHIP_API_TOKEN: ${{ secrets.AUTOSHIP_API_TOKEN }}
+          AUTOSHIP_GITHUB_TOKEN: ${{ secrets.AUTOSHIP_GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          worker_token="${CLOUDFLARE_WORKERS_API_TOKEN:-${CLOUDFLARE_LEGACY_API_TOKEN:-}}"
+          endpoint="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/autoship-control-plane/secrets"
+          put_secret() {
+            local name="$1" text="$2"
+            jq -nc --arg name "$name" --arg text "$text" '{name:$name,text:$text,type:"secret_text"}' |
+              curl --fail-with-body --silent --show-error -X PUT "$endpoint" -H "Authorization: Bearer ${worker_token}" -H 'Content-Type: application/json' --data @- |
+              jq -e '.success == true' >/dev/null
+          }
+          put_secret AUTOSHIP_API_TOKEN "$AUTOSHIP_API_TOKEN"
+          put_secret AUTOSHIP_GITHUB_TOKEN "$AUTOSHIP_GITHUB_TOKEN"
+      - name: Deploy control plane
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler@4 deploy
+      - name: Deploy public gateway
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler@4 deploy --config gateway/wrangler.toml
+      - name: Verify public health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl --retry 8 --retry-delay 5 --retry-connrefused --fail-with-body --silent --show-error "${AUTOSHIP_PUBLIC_URL}/api/health")"
+          printf '%s' "$health" | jq -e '.ok == true' >/dev/null

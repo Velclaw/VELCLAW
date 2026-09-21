@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: velclaw-publisher
+  namespace: velclaw-production
+  labels:
+    app.kubernetes.io/part-of: velclaw
+    app.kubernetes.io/name: publisher
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: publisher
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: publisher
+        app.kubernetes.io/part-of: velclaw
+    spec:
+      serviceAccountName: velclaw-publisher
+      imagePullSecrets:
+        - name: velclaw-registry
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: publisher
+          image: ghcr.io/velclaw/velclaw-publisher:main
+          imagePullPolicy: Always
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: NODE_EXTRA_CA_CERTS
+              value: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - name: VELCLAW_DEPLOY_API
+              value: http://velclaw.velclaw-production.svc.cluster.local
+            - name: VELCLAW_RUNTIME_NAMESPACE
+              value: velclaw-production
+            - name: VELCLAW_PUBLIC_DOMAIN
+              value: velclaw.com
+            - name: VELCLAW_IMAGE_REGISTRY
+              value: ghcr.io/velclaw
+            - name: VELCLAW_DEPLOY_POLL_MS
+              value: "3000"
+            - name: VELCLAW_DEPLOY_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: velclaw-runtime
+                  key: VELCLAW_DEPLOY_API_TOKEN
+                  optional: false
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

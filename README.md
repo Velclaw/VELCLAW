@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://github.com/Velclaw/Velclaw"><img src="assets/velclaw-intro.gif" alt="Velclaw" width="620"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
 
 # Velclaw
 
@@ -9,7 +9,7 @@
 Build, inspect, test, deploy, and operate software from one developer-focused workspace.
 
 <p>
-<a href="https://github.com/Velclaw/Velclaw"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVelclaw-111827?style=flat-square&logo=github&logoColor=white"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVELCLAW-111827?style=flat-square&logo=github&logoColor=white"></a>
 <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-Framework-111827?style=flat-square&logo=nextdotjs&logoColor=white"></a>
 <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Code-3178C6?style=flat-square&logo=typescript&logoColor=white"></a>
 <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=nodedotjs&logoColor=white"></a>
@@ -66,6 +66,31 @@ The goal is to give coding agents and developers one coherent environment instea
 | **Deployment** | Move validated software toward production |
 | **Developer UI** | A single workspace for the software lifecycle |
 
+## Authentication
+
+Authentication is separated into the dedicated Velclaw OAuth repository.
+
+| Surface | Repository | Purpose |
+| --- | --- | --- |
+| Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
+| Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
+
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+
+## Product Domains
+
+Velclaw uses five official first-party domains, each with a fixed responsibility. The domain registry is part of the core platform contract.
+
+| Domain | Role | Examples |
+| --- | --- | --- |
+| `velclaw.com` | Brand / canonical product | `https://velclaw.com` |
+| `velclaw.ai` | AI / agents / intelligence | `https://agents.velclaw.ai` |
+| `velclaw.dev` | Developer platform / docs / SDK / CLI | `https://docs.velclaw.dev` |
+| `velclaw.io` | API / gateway / runtime infrastructure | `https://api.velclaw.io` |
+| `velclaw.app` | User-facing application / identity | `https://velclaw.app` |
+
+Product code must not introduce `velclaw.cfd`. Preview deployments use the `*.velclaw.dev` namespace; platform-generated hostnames are not product URLs.
+
 ## Technology stack
 
 <p align="center">
@@ -80,8 +105,8 @@ The goal is to give coding agents and developers one coherent environment instea
 ## Quick start
 
 ```bash
-git clone https://github.com/Velclaw/Velclaw.git
-cd Velclaw
+git clone https://github.com/Velclaw/VELCLAW.git
+cd VELCLAW
 npm install
 npm run dev
 ```
@@ -98,7 +123,7 @@ npm run build
 ## Project structure
 
 ```text
-Velclaw/
+VELCLAW/
 ├── app/                 # Next.js application routes
 ├── components/          # UI and workspace components
 ├── lib/                 # application services and integrations
@@ -159,10 +184,10 @@ Velclaw references open-source software and community tooling. Each external pro
 
 ## Documentation
 
-- [Velclaw repository](https://github.com/Velclaw/Velclaw)
-- [Issues](https://github.com/Velclaw/Velclaw/issues)
-- [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
-- Documentation URL: add the official Velclaw docs site when it is published.
+- [Velclaw repository](https://github.com/Velclaw/VELCLAW)
+- [Issues](https://github.com/Velclaw/VELCLAW/issues)
+- [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
+- Official documentation: `https://velclaw.com/docs`
 
 ## Contributing
 
@@ -186,14 +211,12 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 - [x] Build/runtime workflow foundation
 - [ ] Expand agent workflows
 - [ ] Expand deployment automation
-- [ ] Dedicated documentation site
 - [ ] Production-grade observability
 - [ ] Broader ecosystem integrations
 
 ## License
 
-The current project configuration identifies Velclaw as private software. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
-
+The repository is publicly visible, but the current project configuration does not declare an open-source license. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
 
 ## Visual identity
 
@@ -209,7 +232,6 @@ The current project configuration identifies Velclaw as private software. Do not
 
 The repository includes the official Velclaw mark and a lightweight product-introduction GIF so the project identity remains visible throughout the README rather than only in the hero.
 
-
 ---
 
 <div align="center">
@@ -218,9 +240,3 @@ The repository includes the official Velclaw mark and a lightweight product-intr
 
 **Velclaw**  
 *Code. Innovate. Elevate.*
-
-<a href="https://github.com/Velclaw/Velclaw">GitHub</a> ·
-<a href="https://github.com/Velclaw/Velclaw/issues">Issues</a> ·
-<a href="https://github.com/Velclaw/Velclaw/pulls">Pull Requests</a>
-
-</div>

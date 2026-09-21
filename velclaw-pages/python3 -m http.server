@@ -1,0 +1,68 @@
+bash
+
+cd /home/claude/velclaw-html && cat data.json
+Sortie
+
+{
+  "fileTree": [
+    {
+      "name": "agent",
+      "path": "agent",
+      "type": "dir",
+      "children": [
+        { "name": "instructions.md", "path": "agent/instructions.md", "type": "file" },
+        { "name": "agent.ts", "path": "agent/agent.ts", "type": "file" },
+        { "name": "tools.ts", "path": "agent/tools.ts", "type": "file" }
+      ]
+    },
+    {
+      "name": "app",
+      "path": "app",
+      "type": "dir",
+      "children": [
+        { "name": "page.tsx", "path": "app/page.tsx", "type": "file" }
+      ]
+    },
+    {
+      "name": "components",
+      "path": "components",
+      "type": "dir",
+      "children": []
+    },
+    { "name": "vercel.json", "path": "vercel.json", "type": "file" }
+  ],
+  "fileContents": {
+    "agent/instructions.md": "# Velclaw agent\n\nYou are Velclaw, an assistant that helps the user manage\ntheir tasks and answer questions about their codebase.\n\n## Tone\nDirect, technical, no filler.",
+    "agent/agent.ts": "import { defineAgent } from \"eve\";\n\nexport default defineAgent({\n  model: \"claude-sonnet-4-6\",\n  instructionsFile: \"./instructions.md\",\n  tools: [\"search\", \"fileRead\"],\n});"
+  },
+  "chat": {
+    "initialMessages": [
+      { "role": "agent", "text": "Xin chào, tôi là Velclaw. Gõ một câu lệnh để bắt đầu kiểm tra agent." }
+    ]
+  },
+  "dashboard": {
+    "deployStatus": {
+      "label": "production · velclaw-kappa.vercel.app"
+    },
+    "tools": [
+      { "name": "search", "status": "active" },
+      { "name": "fileRead", "status": "active" },
+      { "name": "webFetch", "status": "inactive" }
+    ],
+    "connections": [
+      { "name": "GitHub", "status": "active" },
+      { "name": "Vercel", "status": "active" },
+      { "name": "Slack", "status": "inactive" }
+    ],
+    "models": [
+      "claude-sonnet-4-6",
+      "claude-opus-5",
+      "claude-haiku-4-5-20251001"
+    ],
+    "logs": [
+      { "time": "10:42", "text": "Agent deployed to production", "level": "info" },
+      { "time": "10:31", "text": "Tool webFetch disabled", "level": "info" },
+      { "time": "09:58", "text": "Chat session failed: timeout", "level": "error" }
+    ]
+  }
+}

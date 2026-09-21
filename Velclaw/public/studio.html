@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Velclaw Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080a0d;color:#edf1f4;font-family:"DM Sans",sans-serif}
+button{font:inherit}
+.top{height:58px;border-bottom:1px solid #202631;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.logo{font-weight:700}
+.logo b{color:#78BFE8}
+.back{color:#858d9a;font-size:12px}
+.layout{height:calc(100vh - 58px);display:grid;grid-template-columns:210px 1fr 330px}
+.panel{border-right:1px solid #202631;min-width:0}
+.panel:last-child{border-right:0;border-left:1px solid #202631}
+.title{padding:14px;border-bottom:1px solid #202631;font:10px "JetBrains Mono";color:#69727f;letter-spacing:.1em}
+.file{padding:9px 14px;color:#aeb5bf;font-size:12px;cursor:pointer}
+.file:hover{background:#11151b;color:white}
+.editor{height:100%;display:flex;flex-direction:column}
+.tabs{height:42px;border-bottom:1px solid #202631;display:flex;align-items:center;padding:0 14px;color:#dce1e5;font:12px "JetBrains Mono"}
+.code{flex:1;padding:22px;font:13px/1.7 "JetBrains Mono";color:#aeb7c3;white-space:pre;overflow:auto}
+.chat{display:flex;flex-direction:column;height:100%}
+.messages{flex:1;overflow:auto;padding:15px}
+.msg{padding:12px;margin-bottom:10px;background:#10141a;font-size:12px;line-height:1.55}
+.msg.user{border-left:2px solid #78BFE8}
+.msg.assistant{border-left:2px solid #39424e}
+.composer{padding:12px;border-top:1px solid #202631}
+textarea{width:100%;resize:none;background:#0d1116;color:white;border:1px solid #252c35;padding:11px;font:12px "DM Sans";outline:none}
+.send{margin-top:8px;width:100%;padding:10px;background:#78BFE8;border:0;font-weight:700;color:#07100c}
+@media(max-width:850px){
+.layout{grid-template-columns:1fr}
+.panel.files{display:none}
+.panel.chatpanel{position:fixed;right:0;top:58px;bottom:0;width:min(330px,90vw);background:#080a0d;transform:translateX(100%);transition:.2s}
+.panel.chatpanel.open{transform:translateX(0)}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo"><b>V</b> Velclaw <span style="color:#59616d">/ Studio</span></div>
+  <a class="back" href="/">Workspace</a>
+</header>
+
+<div class="layout">
+  <aside class="panel files">
+    <div class="title">PROJECT FILES</div>
+    <div class="file">src/</div>
+    <div class="file">src/index.js</div>
+    <div class="file">package.json</div>
+    <div class="file">README.md</div>
+  </aside>
+
+  <main class="editor">
+    <div class="tabs">src/index.js</div>
+    <pre class="code">import { createApp } from "./runtime";
+
+const app = createApp({
+  name: "Velclaw project"
+});
+
+app.start();
+
+console.log("Workspace ready");</pre>
+  </main>
+
+  <aside class="panel chatpanel" id="chatPanel">
+    <div class="chat">
+      <div class="title">VELCLAW AGENT</div>
+      <div class="messages" id="messages"></div>
+      <div class="composer">
+        <textarea id="input" rows="3" placeholder="Tell the agent what to build..."></textarea>
+        <button class="send" id="send">Send to agent</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const messages=document.getElementById('messages');
+const input=document.getElementById('input');
+
+function add(role,text){
+  const el=document.createElement('div');
+  el.className='msg '+role;
+  el.textContent=text;
+  messages.appendChild(el);
+  messages.scrollTop=messages.scrollHeight;
+}
+
+async function load(){
+  const r=await fetch('/api/agent/history');
+  const data=await r.json();
+  if(!data.length) add('assistant','Velclaw Agent ready. What are you building?');
+  data.forEach(x=>add(x.role,x.content));
+}
+
+async function send(){
+  const text=input.value.trim();
+  if(!text)return;
+
+  input.value='';
+  add('user',text);
+
+  const r=await fetch('/api/agent/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  });
+
+  const data=await r.json();
+  add('assistant',data.assistant.content);
+}
+
+document.getElementById('send').onclick=send;
+
+input.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    send();
+  }
+});
+
+load();
+</script>
+</body>
+</html>

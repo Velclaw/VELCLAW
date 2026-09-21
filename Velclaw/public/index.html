@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Velclaw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<div class="app">
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">V</div>
+    <span>Velclaw</span>
+  </div>
+
+  <div class="top-status">
+    <span class="status-dot"></span>
+    <span id="connection">Connecting</span>
+  </div>
+
+  <button id="menu" class="menu">☰</button>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+  <div class="nav-label">Workspace</div>
+
+  <button class="nav active" data-view="overview">Overview</button>
+  <button class="nav" data-view="projects">Projects</button>
+  <button class="nav" data-view="files">Files</button>
+  <button class="nav" data-view="agents">Agents</button>
+  <button class="nav" data-view="builds" onclick="location.href='/builds.html'">Builds</button>
+  <button class="nav" data-view="servers" onclick="location.href='/cloud.html'">Servers</button>
+
+  <div class="sidebar-bottom">
+    <div class="nav-label">System</div>
+    <button class="nav" data-view="settings" onclick="location.href='/support.html'">Support</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+  <div class="eyebrow">SOFTWARE WORKSPACE</div>
+  <h1>Build software<br><span>with agents.</span></h1>
+  <p>
+    Velclaw brings agents, code, builds, runtime and storage
+    into one workspace.
+  </p>
+
+  <div class="hero-actions">
+    <button class="primary" id="newProject">New project</button>
+    <button class="secondary" onclick="location.href='/studio.html'">Open Studio</button>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <span>Projects</span>
+    <strong id="projectsCount">0</strong>
+  </div>
+  <div class="stat">
+    <span>Files</span>
+    <strong id="filesCount">0</strong>
+  </div>
+  <div class="stat">
+    <span>Builds</span>
+    <strong id="jobsCount">0</strong>
+  </div>
+  <div class="stat">
+    <span>Support</span>
+    <strong id="ticketsCount">0</strong>
+  </div>
+</section>
+
+<section class="workspace-card">
+  <div class="card-head">
+    <div>
+      <span class="eyebrow">WORKSPACE</span>
+      <h2>Start building</h2>
+    </div>
+    <span class="live">LIVE</span>
+  </div>
+
+  <div class="empty">
+    <div class="empty-icon">&gt;_</div>
+    <h3>Your workspace is ready.</h3>
+    <p>Create a project and let Velclaw become the environment for it.</p>
+    <button class="primary" id="newProject2">Create project</button>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+
+<!-- VELCLAW PROJECT CREATION -->
+<div
+  id="projectModal"
+  class="project-modal"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="projectDialogTitle"
+>
+  <div class="project-dialog">
+
+    <div class="project-dialog-head">
+
+      <div>
+        <div class="project-dialog-kicker">New workspace project</div>
+
+        <h2 id="projectDialogTitle" class="project-dialog-title">
+          Create a project
+        </h2>
+
+        <p class="project-dialog-description">
+          Tạo một workspace mới để agent, code, build, runtime
+          và storage cùng hoạt động trên một project.
+        </p>
+      </div>
+
+      <button
+        id="projectClose"
+        class="project-close"
+        type="button"
+        aria-label="Đóng"
+      >×</button>
+
+    </div>
+
+    <form id="projectForm" class="project-form">
+
+      <div class="project-field">
+
+        <label class="project-label" for="projectName">
+          Project name
+        </label>
+
+        <input
+          id="projectName"
+          class="project-input"
+          required
+          maxlength="80"
+          autocomplete="off"
+          placeholder="Ví dụ: My AI App"
+        />
+
+        <div class="project-hint">
+          Tên hiển thị của project.
+        </div>
+
+      </div>
+
+      <div class="project-field">
+
+        <label class="project-label" for="projectSlug">
+          Project slug <span>tự động</span>
+        </label>
+
+        <div class="project-slug">
+
+          <span class="project-slug-prefix">velclaw/</span>
+
+          <input
+            id="projectSlug"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="my-ai-app"
+          />
+
+        </div>
+
+        <div class="project-hint">
+          Dùng cho workspace và đường dẫn project.
+        </div>
+
+      </div>
+
+      <div class="project-field">
+
+        <label class="project-label" for="projectDescription">
+          Description <span>optional</span>
+        </label>
+
+        <textarea
+          id="projectDescription"
+          class="project-textarea"
+          maxlength="500"
+          placeholder="Project này dùng để làm gì?"
+        ></textarea>
+
+      </div>
+
+      <div class="project-field">
+
+        <label class="project-label">
+          Project type
+        </label>
+
+        <div class="project-types">
+
+          <div class="project-type">
+            <input
+              id="typeApp"
+              type="radio"
+              name="projectType"
+              value="app"
+              checked
+            >
+            <label for="typeApp">
+              <span class="project-type-name">Application</span>
+              <span class="project-type-info">
+                Web / app / product
+              </span>
+            </label>
+          </div>
+
+          <div class="project-type">
+            <input
+              id="typeAgent"
+              type="radio"
+              name="projectType"
+              value="agent"
+            >
+            <label for="typeAgent">
+              <span class="project-type-name">Agent</span>
+              <span class="project-type-info">
+                AI agent / automation
+              </span>
+            </label>
+          </div>
+
+          <div class="project-type">
+            <input
+              id="typeService"
+              type="radio"
+              name="projectType"
+              value="service"
+            >
+            <label for="typeService">
+              <span class="project-type-name">Service</span>
+              <span class="project-type-info">
+                API / server / backend
+              </span>
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="project-grid">
+
+        <div class="project-field">
+
+          <label class="project-label" for="projectRuntime">
+            Runtime
+          </label>
+
+          <select id="projectRuntime" class="project-select">
+            <option value="node">Node.js</option>
+            <option value="python">Python</option>
+            <option value="static">Static Web</option>
+          </select>
+
+        </div>
+
+        <div class="project-field">
+
+          <label class="project-label" for="projectVisibility">
+            Visibility
+          </label>
+
+          <select id="projectVisibility" class="project-select">
+            <option value="private">Private</option>
+            <option value="internal">Internal</option>
+            <option value="public">Public</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="project-form-foot">
+
+        <div
+          id="projectFormStatus"
+          class="project-form-status"
+          aria-live="polite"
+        ></div>
+
+        <div class="project-actions">
+
+          <button
+            id="projectCancel"
+            class="project-cancel"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="projectCreate"
+            class="project-create"
+            type="submit"
+          >
+            Create project
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

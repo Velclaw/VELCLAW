@@ -1,0 +1,1 @@
+Next implementation target: wire `runGitoReview` and `evaluatePostAgentReview` into the task completion path, then expose the gate to PR creation/merge policy.

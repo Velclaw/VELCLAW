@@ -1,0 +1,51 @@
+---
+title: "Quickstart"
+description: "Begin with a guide on the fastest path to a successful outcome"
+---
+
+# Getting started
+
+Velclaw is a private Next.js application. The repository uses a pnpm v9 lockfile and provides the project scripts needed for local development and validation.
+
+## Create a workspace
+
+Clone the canonical repository and install its dependencies:
+
+```bash
+git clone https://github.com/Velclaw/VELCLAW.git
+cd VELCLAW
+corepack enable
+pnpm install
+pnpm dev
+```
+
+Open the local development server at `http://localhost:3000`.
+
+## Validate the project
+
+Run the standard project checks before considering a change complete:
+
+```bash
+pnpm build
+pnpm lint
+pnpm type-check
+```
+
+The repository CI currently tests Node.js 18.x, 20.x, and 22.x.
+
+## Documentation structure
+
+Use the sidebar to navigate the Velclaw documentation. Each area covers a distinct part of the platform and its engineering workflow.
+
+## Share a documentation link
+
+The documentation application supports hash-based routes and a static `doc` query parameter:
+
+```text
+#/workspace
+?doc=workspace&lang=en
+```
+
+<Note>
+  Documentation describes verified project behavior. Features marked preview are not guaranteed to be generally available.
+</Note>

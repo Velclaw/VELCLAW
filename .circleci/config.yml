@@ -1,0 +1,55 @@
+version: 2.1
+
+jobs:
+  quality:
+    docker:
+      - image: cimg/node:22.19
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Enable pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@10.15.1 --activate
+      - restore_cache:
+          keys:
+            - pnpm-v1-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-v1-
+      - run:
+          name: Install dependencies
+          command: pnpm install --no-frozen-lockfile
+      - save_cache:
+          key: pnpm-v1-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - ~/.local/share/pnpm/store
+      - run: pnpm type-check
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test
+      - run: pnpm build
+
+  docker:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Docker version
+          command: docker version
+      - run:
+          name: Build control-plane image
+          command: docker build --pull --tag velclaw:ci .
+      - run:
+          name: Verify image metadata
+          command: |
+            set -eux
+            test "$(docker image inspect velclaw:ci --format '{{.Config.ExposedPorts}}')" = "map[3000/tcp:{}]"
+            test "$(docker image inspect velclaw:ci --format '{{.Config.User}}')" = "velclaw"
+
+workflows:
+  recovery:
+    jobs:
+      - quality
+      - docker

@@ -1,0 +1,38 @@
+---
+title: "Agents"
+description: "Use the agent and sandbox infrastructure present in Velclaw."
+---
+
+# Agents
+
+Velclaw includes agent-facing infrastructure, sandbox implementations, workspace tooling, and UI/configuration surfaces for agent-driven development.
+
+## Agent infrastructure
+
+The source tree contains sandbox agent implementations under `lib/sandbox/agents` and related workspace tooling.
+
+## Define a clear role
+
+Before an agent begins work, specify:
+
+- The goal
+- Available tools
+- Relevant project context
+- Expected output
+
+## Supply useful context
+
+Connect agent work to the relevant project files and constraints instead of relying on an isolated prompt.
+
+## Review outputs
+
+Treat agent output as normal engineering work:
+
+1. Inspect the change.
+2. Run validation.
+3. Review the diff.
+4. Approve only when the result meets the project gate.
+
+<Note>
+  The source documentation currently classifies Agents as preview. Do not represent preview behavior as a guaranteed production capability.
+</Note>

@@ -1,0 +1,38 @@
+---
+title: "Agent"
+description: "Sử dụng hạ tầng agent và sandbox có trong Velclaw."
+---
+
+# Agent
+
+Velclaw bao gồm hạ tầng dành cho agent, các triển khai sandbox, công cụ không gian làm việc và các bề mặt UI/cấu hình cho phát triển do agent điều khiển.
+
+## Hạ tầng agent
+
+Cây mã nguồn chứa các triển khai agent sandbox trong `lib/sandbox/agents` và công cụ không gian làm việc liên quan.
+
+## Xác định vai trò rõ ràng
+
+Trước khi một agent bắt đầu làm việc, hãy chỉ định:
+
+- Mục tiêu
+- Các công cụ khả dụng
+- Ngữ cảnh dự án liên quan
+- Kết quả đầu ra mong đợi
+
+## Cung cấp ngữ cảnh hữu ích
+
+Kết nối công việc của agent với các tệp dự án và ràng buộc liên quan thay vì dựa vào một prompt rời rạc.
+
+## Review kết quả
+
+Coi đầu ra của agent như công việc kỹ thuật thông thường:
+
+1. Kiểm tra thay đổi.
+2. Chạy kiểm tra hợp lệ.
+3. Review diff.
+4. Chỉ phê duyệt khi kết quả đạt tiêu chuẩn của dự án.
+
+<Note>
+  Tài liệu gốc hiện phân loại Agents là preview. Không mô tả hành vi preview như một khả năng production được bảo đảm.
+</Note>

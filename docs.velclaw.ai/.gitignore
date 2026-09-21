@@ -1,0 +1,21 @@
+# Các thư mục chứa gói cài đặt (Bắt buộc phải bỏ qua vì rất nặng)
+node_modules/
+.pnpm-store/
+
+# Các thư mục sinh ra khi build dự án sản phẩm sau này
+dist/
+.next/
+out/
+build/
+
+# Các tệp chứa mã bí mật, mật khẩu hệ thống (Tuyệt đối không đẩy lên mạng)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Các tệp rác của hệ điều hành máy tính tạo ra tự động
+.DS_Store
+Thumbs.db
+*.log

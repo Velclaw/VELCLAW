@@ -1,0 +1,25 @@
+---
+title: "Bảo mật"
+description: "Áp dụng ranh giới rõ ràng và thực hành review khi làm việc với mã, công cụ và thông tin xác thực của Velclaw."
+---
+
+# Bảo mật
+
+Velclaw áp dụng ranh giới truy cập rõ ràng và thực hành review cho mã nguồn, công cụ, thông tin xác thực và các đường phân phối.
+
+## Giới hạn truy cập
+
+Chỉ cấp cho người dùng và công cụ quyền truy cập họ cần cho tác vụ hiện tại.
+
+## Bảo vệ bí mật
+
+Giữ thông tin xác thực bên ngoài các tệp nguồn và ví dụ trong tài liệu. Dùng kho lưu trữ bí mật theo từng môi trường.
+
+```bash
+export VELCLAW_TOKEN="your-token"
+# Never commit this value
+```
+
+## Review các thay đổi nhạy cảm
+
+Yêu cầu review có chủ đích cho các thay đổi ảnh hưởng đến quyền hạn, xử lý dữ liệu, thông tin xác thực hoặc các đường phân phối.

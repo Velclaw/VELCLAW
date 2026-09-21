@@ -1,0 +1,35 @@
+---
+title: "Build & runtime"
+description: "Build, validate, and run the verified Velclaw application stack."
+---
+
+# Build & runtime
+
+Velclaw's primary application runtime is Next.js, with a legacy Node server entry point also defined in the project configuration.
+
+## Verified stack
+
+The verified project documentation identifies:
+
+- Next.js 16.3.3
+- React 19.2.1
+- TypeScript 5.9.x
+- pnpm v9 lockfile
+
+## Build consistently
+
+Run the standard validation commands:
+
+```bash
+pnpm build
+pnpm lint
+pnpm type-check
+```
+
+## Runtime
+
+The primary runtime is Next.js. The project also defines a `legacy:start` script for `server/index.js`. Runtime configuration may depend on environment variables and external services.
+
+## Continuous integration
+
+GitHub Actions contains Node.js CI, a Next.js workflow, and a Velclaw review workflow. The Node.js workflow currently tests Node 18.x, 20.x, and 22.x.

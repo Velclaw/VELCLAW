@@ -1,0 +1,35 @@
+---
+title: "Build & runtime"
+description: "Build, kiểm tra hợp lệ và chạy stack ứng dụng Velclaw đã xác minh."
+---
+
+# Build & runtime
+
+Runtime ứng dụng chính của Velclaw là Next.js, cùng với một điểm vào máy chủ Node cũ (legacy) cũng được định nghĩa trong cấu hình dự án.
+
+## Stack đã xác minh
+
+Tài liệu dự án đã xác minh xác định:
+
+- Next.js 16.3.3
+- React 19.2.1
+- TypeScript 5.9.x
+- Lockfile pnpm v9
+
+## Build nhất quán
+
+Chạy các lệnh kiểm tra hợp lệ tiêu chuẩn:
+
+```bash
+pnpm build
+pnpm lint
+pnpm type-check
+```
+
+## Runtime
+
+Runtime chính là Next.js. Dự án cũng định nghĩa script `legacy:start` cho `server/index.js`. Cấu hình runtime có thể phụ thuộc vào biến môi trường và các dịch vụ bên ngoài.
+
+## Tích hợp liên tục
+
+GitHub Actions chứa CI Node.js, một workflow Next.js và một workflow review Velclaw. Workflow Node.js hiện kiểm thử Node 18.x, 20.x và 22.x.

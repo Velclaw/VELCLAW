@@ -3,27 +3,32 @@ import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 import { VELCLAW_INTEGRATIONS } from '../lib/velclaw/integrations'
 import { VELCLAW_SKILLS } from '../lib/velclaw/skills'
-import { buildVelclawProductUrl, isVelclawProductUrl, VELCLAW_PRODUCT_DOMAIN, VELCLAW_PRODUCT_URL } from '../lib/velclaw/product-domain'
+import {
+  buildVelclawProductUrl,
+  isVelclawProductUrl,
+  VELCLAW_PRODUCT_DOMAIN,
+  VELCLAW_PRODUCT_URL,
+} from '../lib/velclaw/product-domain'
 import {
   VELCLAW_PUBLIC_DOMAIN,
   isVelclawPublicDomain,
   resolveVelclawVirtualDomain,
 } from '../lib/velclaw/virtual-domain'
 
-test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
-  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.cfd')
-  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd'), 'velclaw.cfd')
-  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd:3000'), 'velclaw.cfd')
-  assert.equal(isVelclawPublicDomain('velclaw.cfd'), true)
-  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.cfd'), true)
+test('Velclaw uses velclaw.com as the sole canonical hostname', () => {
+  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.com')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.com'), 'velclaw.com')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.com:3000'), 'velclaw.com')
+  assert.equal(isVelclawPublicDomain('velclaw.com'), true)
+  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.dev'), true)
   assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.vercel.app'), false)
 })
 
 test('Velclaw product URLs are first-party and branch-derived', () => {
-  assert.equal(VELCLAW_PRODUCT_DOMAIN, 'velclaw.cfd')
-  assert.equal(VELCLAW_PRODUCT_URL, 'https://velclaw.cfd')
+  assert.equal(VELCLAW_PRODUCT_DOMAIN, 'velclaw.com')
+  assert.equal(VELCLAW_PRODUCT_URL, 'https://velclaw.com')
   const url = buildVelclawProductUrl('feat/velclaw-deploy-page3')
-  assert.equal(url, 'https://velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd')
+  assert.equal(url, 'https://velclaw-git-feat-velclaw-deploy-page3-velclaw.com')
   assert.equal(isVelclawProductUrl(url), true)
   assert.equal(isVelclawProductUrl('https://velclaw-git-feat-velclaw-deploy-page3-velclaw.vercel.app'), false)
 })

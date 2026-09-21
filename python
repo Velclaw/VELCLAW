@@ -1,0 +1,23 @@
+import anthropic
+from anthropic import WorkloadIdentityCredentials
+
+def read_token() -> str:
+    with open("/path/to/token") as f:
+        return f.read().strip()
+
+client = anthropic.Anthropic(
+    credentials=WorkloadIdentityCredentials(
+        identity_token_provider=read_token,
+        federation_rule_id="fdrl_01MU366Qxt9aCbKq6RuvY8RK",
+        organization_id="68a83737-d261-4cd3-9597-516be4b8d5b3",
+        service_account_id="svac_01C3iefGFAY94RY9NkvTjKwV",
+        workspace_id="wrkspc_01TWLVhHg8PPgnoDFz47arUb",
+    ),
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello, Claude"}],
+)
+print(message.content[0].text)

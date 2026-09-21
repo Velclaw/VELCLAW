@@ -1,0 +1,19 @@
+# Reference configuration for the velclaw-runtime tunnel.
+# Do not commit the real credentials JSON.
+# On Termux, use scripts/setup-cloudflared-termux.sh so the credentials path uses $HOME correctly.
+# Cloudflare requires a catch-all ingress rule as the final rule.
+
+tunnel: 21a89f01-11be-404f-8793-8938eab56f5e
+credentials-file: /path/to/.cloudflared/21a89f01-11be-404f-8793-8938eab56f5e.json
+
+originRequest:
+  connectTimeout: 30s
+  keepAliveTimeout: 30s
+  keepAliveConnections: 100
+
+ingress:
+  - hostname: velclaw.cfd
+    service: http://127.0.0.1:3000
+  - hostname: "*.velclaw.cfd"
+    service: http://127.0.0.1:3000
+  - service: http_status:404

@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>velclaw — Support</title>
+
+<style>
+:root{
+  --bg:#07090c;
+  --panel:#0d1117;
+  --panel2:#11161d;
+  --line:#202833;
+  --text:#edf2f7;
+  --muted:#7f8a98;
+  --accent:#78BFE8;
+  --danger:#ff6b6b;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+}
+
+header{
+  height:64px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+}
+
+.brand{
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+
+.brand span{
+  color:var(--muted);
+  font-weight:400;
+}
+
+header a{
+  color:var(--muted);
+  text-decoration:none;
+}
+
+main{
+  width:min(920px,calc(100% - 32px));
+  margin:auto;
+  padding:55px 0 100px;
+}
+
+.eyebrow{
+  color:var(--accent);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+h1{
+  font-size:clamp(42px,8vw,76px);
+  line-height:.95;
+  letter-spacing:-.065em;
+  margin:12px 0 18px;
+}
+
+.intro{
+  color:var(--muted);
+  max-width:620px;
+  line-height:1.7;
+}
+
+.panel{
+  margin-top:42px;
+  border:1px solid var(--line);
+  background:var(--panel);
+}
+
+.panel-head{
+  padding:18px 20px;
+  border-bottom:1px solid var(--line);
+  font-weight:600;
+}
+
+form{
+  padding:20px;
+}
+
+label{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin:0 0 7px;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  background:#080b0f;
+  color:var(--text);
+  border:1px solid var(--line);
+  padding:13px;
+  margin-bottom:18px;
+  outline:none;
+  font:inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:var(--accent);
+}
+
+button{
+  border:0;
+  background:var(--accent);
+  color:#06100d;
+  padding:12px 17px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+#status{
+  margin-top:12px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.ticket{
+  border-top:1px solid var(--line);
+  padding:18px 20px;
+}
+
+.ticket:first-child{
+  border-top:0;
+}
+
+.ticket-top{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.ticket-title{
+  font-weight:600;
+}
+
+.ticket-meta{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:7px;
+}
+
+.ticket-message{
+  color:#aeb7c2;
+  line-height:1.6;
+  margin-top:12px;
+  white-space:pre-wrap;
+}
+
+.badge{
+  font-size:11px;
+  padding:4px 8px;
+  border:1px solid var(--line);
+  color:var(--accent);
+  white-space:nowrap;
+}
+
+.empty{
+  padding:25px 20px;
+  color:var(--muted);
+}
+
+@media(max-width:600px){
+  main{
+    padding-top:38px;
+  }
+
+  .ticket-top{
+    flex-direction:column;
+    gap:8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    velclaw <span>/ support</span>
+  </div>
+
+  <a href="/">Workspace</a>
+</header>
+
+<main>
+
+  <div class="eyebrow">User service</div>
+
+  <h1>How can we help?</h1>
+
+  <p class="intro">
+    Gửi yêu cầu hỗ trợ về workspace, agent, build, runtime,
+    server hoặc file của bạn.
+  </p>
+
+  <section class="panel">
+
+    <div class="panel-head">
+      Open a support request
+    </div>
+
+    <form id="supportForm">
+
+      <label for="subject">Subject</label>
+
+      <input
+        id="subject"
+        required
+        maxlength="160"
+        placeholder="Bạn đang gặp vấn đề gì?"
+      >
+
+      <label for="priority">Priority</label>
+
+      <select id="priority">
+        <option value="normal">Normal</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+
+      <label for="message">Message</label>
+
+      <textarea
+        id="message"
+        required
+        maxlength="5000"
+        rows="7"
+        placeholder="Mô tả vấn đề..."
+      ></textarea>
+
+      <button id="submitBtn" type="submit">
+        Send request
+      </button>
+
+      <div id="status"></div>
+
+    </form>
+
+  </section>
+
+  <section class="panel">
+
+    <div class="panel-head">
+      Your requests
+    </div>
+
+    <div id="tickets">
+      <div class="empty">Loading...</div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+const form = document.getElementById("supportForm");
+const tickets = document.getElementById("tickets");
+const statusBox = document.getElementById("status");
+const submitBtn = document.getElementById("submitBtn");
+
+function escapeHTML(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+async function loadTickets(){
+
+  try{
+
+    const response =
+      await fetch("/api/support/tickets");
+
+    if(!response.ok)
+      throw new Error("Unable to load tickets");
+
+    const data = await response.json();
+
+    if(!Array.isArray(data) || data.length === 0){
+
+      tickets.innerHTML =
+        '<div class="empty">No support requests yet.</div>';
+
+      return;
+    }
+
+    tickets.innerHTML = data
+      .slice()
+      .reverse()
+      .map(ticket => {
+
+        const date =
+          ticket.createdAt
+            ? new Date(ticket.createdAt).toLocaleString("vi-VN")
+            : "";
+
+        return `
+          <article class="ticket">
+
+            <div class="ticket-top">
+
+              <div>
+                <div class="ticket-title">
+                  ${escapeHTML(ticket.subject)}
+                </div>
+
+                <div class="ticket-meta">
+                  ${escapeHTML(date)}
+                  · ${escapeHTML(ticket.priority || "normal")}
+                </div>
+              </div>
+
+              <div class="badge">
+                ${escapeHTML(ticket.status || "open")}
+              </div>
+
+            </div>
+
+            <div class="ticket-message">
+              ${escapeHTML(ticket.message)}
+            </div>
+
+          </article>
+        `;
+
+      })
+      .join("");
+
+  }catch(error){
+
+    tickets.innerHTML =
+      '<div class="empty">Unable to load support requests.</div>';
+
+  }
+}
+
+form.addEventListener("submit", async event => {
+
+  event.preventDefault();
+
+  submitBtn.disabled = true;
+  statusBox.textContent = "Sending...";
+
+  try{
+
+    const response =
+      await fetch("/api/support/tickets",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          subject:document.getElementById("subject").value.trim(),
+          priority:document.getElementById("priority").value,
+          message:document.getElementById("message").value.trim()
+        })
+      });
+
+    if(!response.ok)
+      throw new Error("Request failed");
+
+    form.reset();
+
+    statusBox.textContent =
+      "Support request created.";
+
+    await loadTickets();
+
+  }catch(error){
+
+    statusBox.textContent =
+      "Unable to create support request.";
+
+  }finally{
+
+    submitBtn.disabled = false;
+
+  }
+
+});
+
+loadTickets();
+
+setInterval(loadTickets,5000);
+</script>
+
+</body>
+</html>

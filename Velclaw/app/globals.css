@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source "../node_modules/streamdown/dist/*.js";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-mono);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+:root {
+  --radius: 0px;
+  --background: #ffffff;
+  --foreground: #17151c;
+  --card: #ffffff;
+  --card-foreground: #17151c;
+  --popover: #ffffff;
+  --popover-foreground: #17151c;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f1f7;
+  --secondary-foreground: #17151c;
+  --muted: #f3f1f7;
+  --muted-foreground: #6d6875;
+  --accent: #f0eafa;
+  --accent-foreground: #17151c;
+  --destructive: #dc2626;
+  --border: #ded9e5;
+  --input: #ded9e5;
+  --ring: #8b5cf6;
+  --chart-1: #8b5cf6;
+  --chart-2: #a78bfa;
+  --chart-3: #6d28d9;
+  --chart-4: #c4b5fd;
+  --chart-5: #4c1d95;
+  --sidebar: #faf9fc;
+  --sidebar-foreground: #17151c;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0eafa;
+  --sidebar-accent-foreground: #17151c;
+  --sidebar-border: #ded9e5;
+  --sidebar-ring: #8b5cf6;
+}
+
+.dark {
+  --background: #08070d;
+  --foreground: #f5f3fa;
+  --card: #111019;
+  --card-foreground: #f5f3fa;
+  --popover: #111019;
+  --popover-foreground: #f5f3fa;
+  --primary: #a78bfa;
+  --primary-foreground: #08070d;
+  --secondary: #1a1722;
+  --secondary-foreground: #f5f3fa;
+  --muted: #18151f;
+  --muted-foreground: #9d97aa;
+  --accent: #211b2d;
+  --accent-foreground: #f5f3fa;
+  --destructive: #f87171;
+  --border: #2a2534;
+  --input: #302a3b;
+  --ring: #a78bfa;
+  --chart-1: #a78bfa;
+  --chart-2: #8b5cf6;
+  --chart-3: #c4b5fd;
+  --chart-4: #7c3aed;
+  --chart-5: #6d28d9;
+  --sidebar: #0d0b12;
+  --sidebar-foreground: #f5f3fa;
+  --sidebar-primary: #a78bfa;
+  --sidebar-primary-foreground: #08070d;
+  --sidebar-accent: #1b1724;
+  --sidebar-accent-foreground: #f5f3fa;
+  --sidebar-border: #26212f;
+  --sidebar-ring: #a78bfa;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background-image: linear-gradient(rgba(139, 92, 246, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 92, 246, 0.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  ::selection {
+    background: rgba(167, 139, 250, 0.28);
+    color: var(--foreground);
+  }
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Velclaw UI baseline: controls/cards stay square and compact across every route. */
+button,
+input,
+textarea,
+select,
+[role='button'],
+[data-slot='card'],
+[data-slot='dialog-content'],
+[data-slot='alert-dialog-content'],
+[data-slot='dropdown-menu-content'],
+[data-slot='popover-content'],
+[data-slot='tabs-list'],
+[data-slot='alert'] {
+  border-radius: 0 !important;
+}
+
+.velclaw-auth-page {
+  isolation: isolate;
+}
+
+.velclaw-auth-grid {
+  background-image: linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.velclaw-auth-provider {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+}
+
+/* Agent chat: make the existing response stream visibly belong to Velclaw. */
+.mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2 {
+  position: relative;
+  padding-left: 2.25rem;
+  min-height: 1.5rem;
+}
+
+.mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.65);
+  background: #08070d url('/brand/velclaw-mark.svg') center / 1.15rem 1.15rem no-repeat;
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.16);
+}
+
+@media (max-width: 768px) {
+  .mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2 {
+    padding-left: 2rem;
+  }
+
+  .mt-4 > .space-y-1 > .text-xs.text-muted-foreground.px-2::before {
+    width: 1.25rem;
+    height: 1.25rem;
+    background-size: 1rem 1rem;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Git Diff Viewer Mobile Optimizations */
+.git-diff-view-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .git-diff-view-container {
+    font-size: 11px;
+  }
+
+  .git-diff-view-container > div {
+    min-width: max-content;
+  }
+
+  .git-diff-view-container .diff-line-num {
+    padding: 2px 4px;
+    font-size: 10px;
+  }
+
+  .git-diff-view-container .diff-line-content {
+    padding: 2px 4px;
+  }
+}

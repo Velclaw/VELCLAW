@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Velclaw Builds</title>
+<style>
+body{margin:0;background:#080a0d;color:#eef1f3;font-family:Arial,sans-serif}
+header{height:60px;border-bottom:1px solid #202631;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+main{max-width:900px;margin:auto;padding:50px 20px}
+h1{font-size:44px;letter-spacing:-.05em}
+button{padding:11px 16px;background:#78BFE8;border:0;font-weight:bold}
+.job{border:1px solid #202631;background:#0e1116;padding:18px;margin:12px 0}
+.meta{color:#78818d;font-size:12px}
+.bar{height:4px;background:#1b222b;margin-top:14px}
+.fill{height:100%;background:#78BFE8}
+pre{color:#87919e;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<strong>Velclaw / Builds</strong>
+<a href="/" style="color:#87919e">Workspace</a>
+</header>
+<main>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<h1>Builds</h1>
+<p style="color:#78818d">Build jobs and artifacts.</p>
+</div>
+<button onclick="build()">Start build</button>
+</div>
+<div id="jobs"></div>
+</main>
+<script>
+async function build(){
+  await fetch('/api/builds',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({projectId:null})
+  });
+  load();
+}
+
+async function load(){
+  const r=await fetch('/api/builds');
+  const jobs=await r.json();
+  document.getElementById('jobs').innerHTML=jobs.reverse().map(j=>`
+    <div class="job">
+      <strong>${j.id}</strong>
+      <div class="meta">${j.status} · ${j.progress}%</div>
+      <div class="bar"><div class="fill" style="width:${j.progress}%"></div></div>
+      <pre>${j.logs.join('\\n')}</pre>
+      ${j.artifact?'<div>Artifact: '+j.artifact.name+'</div>':''}
+    </div>
+  `).join('');
+}
+
+load();
+setInterval(load,1000);
+</script>
+</body>
+</html>

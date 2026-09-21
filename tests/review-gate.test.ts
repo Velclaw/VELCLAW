@@ -7,6 +7,7 @@ test('review gate passes when no critical/high findings exist', () => {
     { severity: 'medium', message: 'Improve naming' },
     { severity: 'low', message: 'Optional cleanup' },
   ]
+
   const gate = evaluateReviewGate(findings)
   assert.equal(gate.passed, true)
   assert.deepEqual(gate.blockingFindings, [])
@@ -15,6 +16,7 @@ test('review gate passes when no critical/high findings exist', () => {
 test('review gate blocks critical findings', () => {
   const finding: ReviewFinding = { severity: 'critical', message: 'Remote code execution risk', file: 'app/api/run.ts' }
   const gate = evaluateReviewGate([finding])
+
   assert.equal(gate.passed, false)
   assert.deepEqual(gate.blockingFindings, [finding])
 })
@@ -26,6 +28,7 @@ test('review gate blocks high findings and preserves their order', () => {
     { severity: 'medium', message: 'Refactor later' },
     { severity: 'critical', message: 'Unsafe command execution', file: 'lib/sandbox.ts' },
   ]
+
   const gate = evaluateReviewGate(findings)
   assert.equal(gate.passed, false)
   assert.deepEqual(gate.blockingFindings, [findings[1], findings[3]])
@@ -34,6 +37,7 @@ test('review gate blocks high findings and preserves their order', () => {
 test('review gate does not mutate findings', () => {
   const findings: ReviewFinding[] = [{ severity: 'high', message: 'Problem' }]
   const before = structuredClone(findings)
+
   evaluateReviewGate(findings)
   assert.deepEqual(findings, before)
 })

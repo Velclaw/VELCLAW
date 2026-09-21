@@ -1,0 +1,74 @@
+name: Velclaw Release Validation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: velclaw-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/velclaw/velclaw
+  PUBLISHER_IMAGE: ghcr.io/velclaw/velclaw-publisher
+
+jobs:
+  validate:
+    name: CI / Build / Test / Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Runtime validation
+        run: pnpm validate:runtime
+
+      - name: Ecosystem contract audit
+        run: pnpm audit:ecosystem
+
+      - name: Live ecosystem repository audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pnpm audit:ecosystem:live
+
+      - name: Unit and integration tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
+      - name: Docker build
+        run: docker build --pull --tag "$IMAGE:${GITHUB_SHA}" .
+
+      - name: Publisher Docker build
+        run: docker build --pull --file deploy/kubernetes-publisher.Dockerfile --tag "$PUBLISHER_IMAGE:${GITHUB_SHA}" deploy
+
+      - name: Secret hygiene
+        run: |
+          if git grep -nEI --cached -- '-----BEGIN (OPENSSH|RSA|EC|DSA|PGP) PRIVATE KEY-----|(^|[^A-Za-z0-9_])(sk|ghp|github_pat)_[A-Za-z0-9_-]{20,}' -- . ':!pnpm-lock.yaml'; then
+            echo 'Potential credential material detected in tracked files.'
+            exit 1
+          fi

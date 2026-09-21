@@ -1,0 +1,7 @@
+node_modules/
+.zvelclaw/
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store

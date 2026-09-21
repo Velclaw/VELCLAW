@@ -1,0 +1,51 @@
+---
+title: "Bắt đầu nhanh"
+description: "Bắt đầu với hướng dẫn về con đường nhanh nhất dẫn đến kết quả thành công"
+---
+
+# Bắt đầu
+
+Velclaw là một ứng dụng Next.js riêng tư. Kho mã sử dụng lockfile pnpm v9 và cung cấp các script dự án cần thiết cho phát triển cục bộ và kiểm tra hợp lệ.
+
+## Tạo không gian làm việc
+
+Clone kho mã chính thức và cài đặt các phụ thuộc:
+
+```bash
+git clone https://github.com/Velclaw/Velclaw.git
+cd Velclaw
+corepack enable
+pnpm install
+pnpm dev
+```
+
+Mở máy chủ phát triển cục bộ tại `http://localhost:3000`.
+
+## Kiểm tra hợp lệ dự án
+
+Chạy các bước kiểm tra tiêu chuẩn của dự án trước khi coi một thay đổi là hoàn tất:
+
+```bash
+pnpm build
+pnpm lint
+pnpm type-check
+```
+
+CI của kho mã hiện kiểm thử Node.js 18.x, 20.x và 22.x.
+
+## Cấu trúc tài liệu
+
+Dùng thanh bên để điều hướng tài liệu Velclaw. Mỗi lĩnh vực bao quát một phần riêng biệt của nền tảng và quy trình kỹ thuật của nó.
+
+## Chia sẻ liên kết tài liệu
+
+Ứng dụng tài liệu hỗ trợ route dạng hash và tham số truy vấn tĩnh `doc`:
+
+```text
+#/workspace
+?doc=workspace&lang=en
+```
+
+<Note>
+  Tài liệu mô tả hành vi dự án đã được xác minh. Các tính năng được đánh dấu preview không được bảo đảm sẽ phát hành rộng rãi.
+</Note>

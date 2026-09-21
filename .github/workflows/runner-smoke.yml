@@ -1,0 +1,21 @@
+name: Runner Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Runner
+        run: |
+          set -euo pipefail
+          echo "runner=${RUNNER_OS}"
+          node --version
+          docker --version
+          git --version

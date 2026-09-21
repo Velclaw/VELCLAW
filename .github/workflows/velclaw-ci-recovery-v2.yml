@@ -1,0 +1,93 @@
+name: Velclaw CI Recovery v2
+
+on:
+  push:
+    branches:
+      - ci/recovery-v2
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: velclaw-ci-recovery-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  runner-smoke:
+    name: Runner smoke / Ubuntu 22.04
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Runner diagnostics
+        run: |
+          set -eux
+          echo "runner=${RUNNER_NAME}"
+          echo "os=${RUNNER_OS}"
+          echo "arch=$(uname -m)"
+          echo "kernel=$(uname -r)"
+          node --version
+          npm --version
+          git --version
+
+  quality:
+    name: Node 22 / Quality
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker version
+        run: docker version
+
+      - name: Build control-plane image
+        run: docker build --pull --tag velclaw:ci .
+
+      - name: Inspect image
+        run: docker image inspect velclaw:ci >/dev/null
+
+      - name: Verify image metadata
+        run: |
+          test "$(docker image inspect velclaw:ci --format '{{.Config.ExposedPorts}}')" = "map[3000/tcp:{}]"
+          test "$(docker image inspect velclaw:ci --format '{{.Config.User}}')" = "velclaw"

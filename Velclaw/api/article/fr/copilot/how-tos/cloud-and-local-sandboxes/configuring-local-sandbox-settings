@@ -1,0 +1,136 @@
+# Configuration des paramètres de bac à sable local
+
+Dans /sandbox, utilisez la commande Copilot CLI pour définir comment le bac à sable local restreint l’accès au système de fichiers, la connectivité réseau et les capacités du système.
+
+> \[!NOTE]
+> Les bacs à sable locaux pour GitHub Copilot souhaitent être modifiés préversion publique .
+
+> \[!IMPORTANT]
+> Le bac à sable local sur Windows nécessite une build Windows Insiders.
+
+## À propos de la configuration du bac à sable local
+
+Vous pouvez utiliser la commande slash `/sandbox` pour autoriser des chemins supplémentaires, configurer l’accès réseau ou activer ou désactiver le mode bac à sable.
+
+Pour une vue d’ensemble conceptuelle des environnements de test dans le cloud et locaux pour Copilot, consultez [À propos des environnements isolés dans le cloud et locaux pour GitHub Copilot](/fr/copilot/concepts/about-cloud-and-local-sandboxes).
+
+## Ouvrir la configuration du bac à sable
+
+1. Démarrez une Copilot CLI session.
+2. Entrez la `/sandbox` commande slash.
+
+   Cela ouvre une interface de configuration interactive avec quatre onglets : **Général**, **Authentification**, **Système de fichiers** et **Réseau**. Utilisez <kbd>Tab</kbd> pour basculer entre les onglets. Appuyez sur <kbd>Échap</kbd> pour enregistrer vos modifications et fermer la configuration.
+
+## Configuration des paramètres généraux
+
+L’onglet **Général** contrôle le comportement du bac à sable de niveau supérieur. Lorsque les paramètres gérés par l’entreprise appliquent une valeur, la boîte de dialogue étiquette le paramètre comme `(managed)` et vous empêche de la modifier.
+
+| Setting                                       | Description                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Activer le bac à sable**                    | Exécutez des commandes shell dans le sandbox. Vous pouvez également activer cette option avec `/sandbox enable` et `/sandbox disable`.                                                                                                                                                                                                                                                |
+| **Autoriser le contournement du bac à sable** | Laissez le modèle demander que des commandes individuelles s’exécutent en dehors du bac à sable, sous réserve d’approbation. Une invite de contournement peut également vous permettre de désactiver le bac à sable pour le reste de la session active. Activé par défaut. Pour plus d’informations, consultez [Autoriser le contournement du bac à sable](#allowing-sandbox-bypass). |
+| **Serveurs MCP en bac à sable**               | Exécutez des serveurs MCP à l’intérieur du bac à sable. Activé par défaut.                                                                                                                                                                                                                                                                                                            |
+| **Serveurs LSP en bac à sable**               | Exécutez des serveurs de langage (serveurs LSP) à l’intérieur du bac à sable. Activé par défaut.                                                                                                                                                                                                                                                                                      |
+
+### Autorisation du contournement du bac à sable
+
+Le paramètre **Autoriser le contournement du bac à sable** contrôle ce qui se passe quand Copilot il n’est pas possible d’exécuter une commande correctement à l’intérieur du bac à sable.
+
+* **Activé (par défaut)** : si une commande échoue à l’intérieur du bac à sable, vous êtes invité à autoriser Copilot l’exécution de la commande en dehors du bac à sable. Votre réponse à cette invite s’applique à cette tentative spécifique d’exécution de la commande. Si vous le souhaitez, vous pouvez choisir de désactiver le bac à sable pour le reste de la session (si votre entreprise l’autorise), ou saisir à la place une instruction sur laquelle Copilot pourra travailler.
+* **Désactivé** : si Copilot vous ne parvenez pas à exécuter une commande correctement dans le bac à sable, elle cesse de travailler sur la tâche et signale l’échec.
+
+Si les paramètres gérés par l’entreprise définissent `sandbox.allowBypass` sur `false`, vous ne pouvez pas autoriser l’exécution de commandes individuelles en dehors de la sandbox ni désactiver la sandbox pour le reste de la session. Si les paramètres managés nécessitent un bac à sable (sandboxing), mais que la stratégie effective autorise le contournement, vous pouvez désactiver le bac à sable uniquement à partir d’une invite d’autorisations de contournement active, et non par le biais de paramètres ordinaires ou `/sandbox disable`.
+
+## Configuration des paramètres d’authentification
+
+L’onglet **Authentification** contrôle si vos informations d’identification sont mises à la disposition des commandes exécutées à l’intérieur du bac à sable. Comme dans les autres onglets, une valeur gérée par l’entreprise s’affiche et `(managed)` ne peut pas être modifiée.
+
+| Setting                            | Description                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Authentifier git**               | Injectez un jeton GitHub pour que HTTPS `git` authentifié fonctionne dans l’environnement bac à sable sans assistant d’identification. Pour les hôtes autres que GitHub, vos propres identifiants enregistrés sont plutôt mis à la disposition des commandes `git` exécutées dans le bac à sable. Activé par défaut. |
+| **Authentifier gh**                | Exportez `GH_TOKEN` de sorte que GitHub CLI (remarque : l’interface `gh` CLI, pas `copilot`) fonctionne à l’intérieur du bac à sable sans atteindre ses informations d’identification stockées (répertoire de configuration ou trousseau du système d’exploitation), que le bac à sable bloque. Activé par défaut.   |
+| **Autoriser l’accès au trousseau** | Disponible uniquement sur macOS. Autoriser les commandes isolées à utiliser le Trousseau d’accès de macOS, par exemple pour accéder aux identifiants utilisés par les assistants d’identification `git` et `gh`. Désactivé par défaut.                                                                               |
+
+## Configuration des paramètres du système de fichiers
+
+L’onglet **Système** de fichiers contrôle les répertoires et fichiers auxquels le processus en bac à sable peut accéder.
+
+Par défaut, Copilot se voit accorder une autorisation de lecture/écriture sur tout ce qui se trouve dans le répertoire de travail actuel ainsi que dans ses sous-répertoires. Si vous êtes dans un dépôt Git, Copilot l’autorisation suivante est également accordée :
+
+* Autorisation en lecture/écriture sur tout le contenu du répertoire `.git` du dépôt et de ses sous-répertoires.
+* Autorisation de lecture pour tout le reste dans le dépôt situé au-dessus du répertoire de travail actuel. Le répertoire de travail lui-même reste en lecture/écriture, car l’octroi plus spécifique gagne lorsque les deux se chevauchent.
+
+| Setting                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Inclure le répertoire de travail**              | Activé par défaut. Le répertoire de travail actuel (ainsi que le répertoire `.git` du dépôt englobant, le cas échéant) est automatiquement ajouté à la liste des chemins accessibles en lecture/écriture. Désélectionnez cette option si vous ne souhaitez pas que le répertoire de travail dispose automatiquement d’un accès en lecture/écriture, puis autorisez manuellement l’accès à des chemins spécifiques.                                                                                                                                                |
+| **Autoriser l’accès aux outils de développement** | Activé par défaut. Accorde aux commandes en bac à sable l’accès en lecture à la configuration et aux caches de l’outil développeur, y compris les registres du gestionnaire de package et les jetons qu’ils stockent, et l’accès en lecture/écriture aux caches de build partagés, de sorte que les installations et les builds fonctionnent à l’intérieur du bac à sable. Cela s’affiche sous la forme de **accès aux outils de développement** dans le `/sandbox policy` rapport. Désactivez-le pour exiger que ces emplacements soient accordés explicitement. |
+
+> \[!IMPORTANT]
+> La désélection du **répertoire de travail Include** supprime l’accès à tout ce qui se trouve dans et en dessous du `.git` répertoire d’un référentiel Git. Par conséquent, les opérations Git telles que `status`, `add`, `commit`et `diff` échoueront, sauf si vous ajoutez manuellement l’accès pour ce répertoire.
+
+### Ajout de règles de chemin d’accès au système de fichiers
+
+Vous pouvez spécifier des chemins d’accès que vous souhaitez ajouter au bac à sable. Cela vous permet d’accorder un accès en lecture seule ou en lecture/écriture aux répertoires et fichiers en dehors du répertoire de travail. Vous pouvez également refuser l’accès, pour exclure les répertoires et les fichiers du bac à sable.
+
+1. Sous l’onglet **Système** de fichiers, appuyez sur <kbd>A</kbd> pour ajouter une nouvelle règle de chemin d’accès.
+
+2. Tapez un fichier ou un chemin d’accès au répertoire. Utilisez un chemin d’accès absolu, par exemple sur `/Users/octocat/projects/app` macOS ou Linux, ou `C:\Users\octocat\projects\app` sur Windows. Appuyez sur <kbd>Entrée</kbd>.
+
+   > \[!NOTE]
+   > L’ajout d’un répertoire inclut son sous-arborescence entière. Les caractères génériques ne sont pas pris en charge.
+
+3. Utilisez les touches de direction gauche et droite de votre clavier pour naviguer entre les options d’autorisations : **lecture/écriture**, **lecture seule**, **refus**. Appuyez ensuite <kbd>sur Entrée</kbd> pour sélectionner une option.
+
+Une fois que vous avez ajouté des chemins de système de fichiers, vous pouvez les modifier ou les supprimer.
+
+1. Utilisez les touches de direction haut et bas pour sélectionner un chemin d’accès.
+2. <kbd>Appuyez sur Entrée</kbd> pour modifier le chemin d’accès, ou <kbd>D</kbd> pour le supprimer.
+
+## Configuration des paramètres réseau
+
+L’onglet **Réseau** contrôle si les processus en bac à sable peuvent établir des connexions réseau.
+
+| Setting                                | Description                                                                                                                                                                                                                                                                                           |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Autoriser les connexions sortantes** | Activé par défaut. Lorsqu’il est activé, le processus isolé peut accéder à des hôtes externes sur Internet. Désactivez cette option pour isoler complètement le bac à sable du réseau.                                                                                                                |
+| **Autoriser le réseau local**          | Activé par défaut. Lorsqu’il est activé, le processus en bac à sable peut atteindre des hôtes sur votre réseau local (par exemple, `localhost` ou d’autres appareils sur votre réseau local). Désactivez cette option pour empêcher le bac à sable d’atteindre les services de réseau local ou privé. |
+| **HTTP Proxy**                         | Acheminer le trafic sortant du bac à sable via un proxy HTTP. Consultez [Routage du trafic via un proxy HTTP](#routing-traffic-through-an-http-proxy).                                                                                                                                                |
+
+### Routage du trafic via un proxy HTTP
+
+Sélectionnez **Proxy HTTP** sous l’onglet **Réseau** pour envoyer le trafic sortant du bac à sable via un serveur proxy. Entrez **l’URL** du proxy, et éventuellement un **nom d’utilisateur** et un **mot de passe**. Pour supprimer le proxy, effacez l’URL.
+
+N'oubliez pas les éléments suivants :
+
+* Le proxy s’applique uniquement tant que **Autoriser les connexions sortantes** est activé. Si vous désactivez les connexions sortantes, le proxy est conservé dans vos paramètres, mais reste inactif.
+* Le mot de passe est stocké en toute sécurité dans le magasin d’informations d’identification de votre système d’exploitation. Vous pouvez également entrer une `${VAR}` référence de variable d’environnement au lieu d’un mot de passe littéral.
+* Sur Linux et macOS, le proxy est coopératif : il est appliqué via des variables d’environnement proxy standard et dépend de chaque outil qui les respecte. Sous Windows, le sandbox impose l’utilisation du proxy.
+* Votre organisation peut appliquer l’URL du proxy via les paramètres managés. Dans ce cas, l’URL s’affiche comme `(managed)`, mais vous pouvez toujours fournir vos propres informations d’identification, qui sont stockées dans vos paramètres utilisateur.
+
+## Activation et désactivation rapide du bac à sable
+
+Vous pouvez activer ou désactiver le bac à sable sans ouvrir l’interface de configuration complète :
+
+* **Activer** : entrez `/sandbox enable` dans la Copilot CLI session.
+* **Désactiver** : Entrez `/sandbox disable` dans la Copilot CLI session.
+
+Ces commandes modifient le paramètre **Activer le bac à sable** sous l’onglet **Général** .
+
+## Affichage de vos paramètres de bac à sable actuels
+
+Les paramètres sont enregistrés dans `settings.json` sous la clé `sandbox` dans votre répertoire de configuration Copilot CLI. Pour plus d’informations sur le répertoire de configuration, consultez [GitHub Copilot le répertoire de configuration du CLI](/fr/copilot/reference/copilot-cli-reference/cli-config-dir-reference).
+
+Vous pouvez afficher vos paramètres de bac à sable actuels à partir d’une Copilot CLI session.
+
+1. Appuyez sur `/settings`.
+2. Appuyez <kbd>/</kbd> pour rechercher les paramètres.
+3. Tapez `sandbox` pour filtrer la liste des paramètres.
+
+Les étapes ci-dessus montrent vos paramètres enregistrés. Pour voir la stratégie **effective** du système de fichiers — les chemins d’accès en lecture/écriture, en lecture seule et refusés qui résultent de la combinaison de vos paramètres, des autorisations automatiques et de toute stratégie gérée — entrez `/sandbox policy`. Pour plus d’informations, consultez « [Présentation des stratégies de système de fichiers pour le bac à sable local dans GitHub Copilot CLI](/fr/copilot/concepts/agents/copilot-cli/understanding-local-sandboxing) ».
+
+## Lectures complémentaires
+
+* [À propos des environnements isolés dans le cloud et locaux pour GitHub Copilot](/fr/copilot/concepts/about-cloud-and-local-sandboxes)
+* [Utiliser le sandbox local](/fr/copilot/how-tos/cloud-and-local-sandboxes/using-local-sandboxing)
+* [Activation ou désactivation des bacs à sable cloud pour votre organisation ou entreprise](/fr/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization)
+* [Configuration de l’interface CLI GitHub Copilot](/fr/copilot/how-tos/copilot-cli/set-up-copilot-cli/configure-copilot-cli)

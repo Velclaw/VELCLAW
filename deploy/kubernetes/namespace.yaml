@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: velclaw-production
+  labels:
+    app.kubernetes.io/part-of: velclaw
+    app.kubernetes.io/managed-by: velclaw

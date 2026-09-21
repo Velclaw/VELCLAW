@@ -4,46 +4,38 @@
 
 ## Identity
 - Project: **Velclaw** / `velclaw`
-- Canonical GitHub repository: **`Velclaw/Velclaw`**
-- Primary/canonical domain: **`velclaw.cfd`**
+- Current canonical GitHub repository: **`Velclaw/VELCLAW`**
 - Canonical default branch: `main`
+- Current public domain: **deployment-configured; `velclaw.com` is legacy/transition only**
 
-## Domain rules
-- `velclaw.cfd` is the primary and canonical domain for the Velclaw ecosystem.
-- All first-party Velclaw pages and public deployment links should use the `velclaw.cfd` host.
-- Preview deployments use first-party subdomains under `velclaw.cfd`, for example `velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd`.
-- Platform-generated deployment hostnames are infrastructure details and must not be exposed as Velclaw product URLs.
+## Ecosystem structure
+`Velclaw/VELCLAW` is the current canonical core repository. The Velclaw ecosystem is intentionally multi-repository. Independent repositories remain independently deployable and integrate through explicit APIs, webhooks, OAuth, GitHub, MCP/skills/plugins, artifacts and documented configuration contracts.
 
-## Canonical page naming
-Display names follow the **Velclaw + function** convention.
+### Core ecosystem members
+- **Auth:** `Velclaw/Oauth`
+- **Official Docs:** `Velclaw/docs.velclaw.ai`
+- **Docs Pages:** `zskbot/repo-docs-velclaw`
+- **Deploy:** `Velclaw/deploy-velclaw`
+- **Release automation:** `zskbot/Autoship`, `zskbot/autoship-velclaw`
+- **IDE:** `zskbot/AgentsIDE`, `zskbot/Zvelclaw`, `zskbot/Zvelclaw-CLI`, `zskbot/velclaw-pages`, `zskbot/velclaw-browser`
+- **Agents:** `Velclaw/zvelclaw-agent`, `Velclaw/velclaw-eve`
+- **AI/developer surfaces:** `zskbot/ZsKai`, `zskbot/agent-skills`
+- **Review:** `zskbot/ChatGPT-CodeReview`
 
-| Route | Canonical display name | Source role |
-|---|---|---|
-| `/` | **Velclaw Workspace** | Main workspace / task entry |
-| `/new` | **Velclaw Task** | Task creation |
-| `/tasks` | **Velclaw Tasks** | Task list |
-| `/velclaw` | **Velclaw Dashboard** | Pipeline dashboard |
-| `/repos/new` | **Velclaw Repo** | Repository creation |
-| `/mcp` | **Velclaw MCP** | MCP connectors |
-| `/plugins` | **Velclaw Plugins** | Integration registry |
-| `/skills` | **Velclaw Skills** | Reusable agent capabilities |
-| `/deploy` | **Velclaw Deploy** | Deployment control plane |
-| `/api-keys` | **Velclaw API Keys** | Provider credentials |
-| `/wiki` | **Velclaw Wiki** | System knowledge |
-| `/auth/signin` | **Velclaw Sign In** | Authentication |
-| `/velclawhub` | **VelclawHub** | Ecosystem gateway / route inventory |
-| `/velclaw/ui-audit` | **Velclaw UI Audit** | QA / UI audit |
-| `/docs` | **Velclaw Docs** | Documentation |
-| `/hub` | **VelclawHub Ecosystem** | Existing ecosystem hub route |
+Repositories that merely share an owner or name are not automatically ecosystem members; membership requires verified purpose or integration.
 
-The canonical ecosystem gateway is **VelclawHub** at `/velclawhub`. The existing `/hub` route is explicitly named **VelclawHub Ecosystem**. The legacy `/test` route has been removed.
+## Domain architecture
+The long-term namespace is split by role rather than duplicated websites:
 
-## Naming rules
-1. Use `Velclaw + function` for user-facing page names where a generic name would be ambiguous.
-2. Keep stable public routes unchanged unless a migration/redirect plan is explicitly required.
-3. Keep route directories aligned with URL semantics.
-4. Use canonical display names in navigation, QA inventories, headings, and source-level page components where practical.
-5. New first-party pages/components/registries use the Velclaw namespace and do not introduce unrelated product branding.
+- `velclaw.com` — brand / corporate canonical identity.
+- `velclaw.ai` — AI, agents, models and intelligence surfaces.
+- `velclaw.dev` — developer platform, docs, SDK and CLI.
+- `velclaw.app` — main user-facing application.
+- `velclaw.io` — platform, API, gateway and runtime infrastructure.
+
+`velclaw.com` is a legacy/transition domain. It must not be introduced as a new dependency and must not be the hard-coded OAuth issuer, metadata base, sitemap host, robots host or CORS authority.
+
+The application reads domain identity from environment variables such as `VELCLAW_PUBLIC_ORIGIN`, `VELCLAW_OAUTH_ISSUER`, `VELCLAW_APP_ORIGIN`, `VELCLAW_API_ORIGIN`, `VELCLAW_DOCS_ORIGIN` and `VELCLAW_ALLOWED_ORIGINS`.
 
 ## Core architecture
 Velclaw is an AI-native software workspace for agents, code, builds, runtime, storage, and user services.
@@ -52,39 +44,24 @@ Canonical delivery pipeline:
 
 **Task → Skill selection → Executor → Review → Gate → GitHub API → PR → Deployment evidence**
 
-- **Skills** = reusable agent capabilities, instructions and workflows.
-- **Plugins** = external integrations/connectors; not pipeline stages.
-- **MCP** = protocol/runtime interface; not a pipeline stage.
-- **Executor** = executes the selected task/skill in the approved workspace.
-- **Review** = produces review evidence/findings.
-- **Gate** = enforces quality/policy checks.
-- **GitHub API** = branch, commit, checks and PR delivery.
-- **Velclaw Deploy** = release/deployment control plane and evidence surface after delivery; it does not create a second execution pipeline.
+Independent ecosystem services plug into this pipeline; they do not silently create competing execution pipelines.
 
-## Velclaw Deploy
-
-The canonical deployment control-plane page is `/deploy` (**Velclaw Deploy**). It centralizes release preparation, target semantics, deployment evidence and links to the existing Task, Skills, Executor, Review, Gate, GitHub, Plugins, MCP, API Keys and VelclawHub surfaces.
-
-Task-scoped deployment discovery may consume provider/GitHub evidence, but the public Velclaw URL presented to users must be a first-party `*.velclaw.cfd` address. The Deploy page must not claim production success without provider-backed evidence.
-
-`velclaw.cfd` is the only canonical Velclaw host. Preview URLs are Velclaw-owned hostnames under that domain.
+## Ecosystem integration contracts
+1. **GitHub:** repositories, branches, commits, PRs, Actions and checks.
+2. **HTTP APIs:** versioned service contracts for workspace, agent, deployment and platform operations.
+3. **Webhooks:** CI, GitHub and deployment state transitions.
+4. **OAuth:** authorization-code, token and userinfo contracts. OAuth credentials are not API keys.
+5. **MCP / Skills / Plugins:** capability discovery and controlled execution.
+6. **Artifacts:** builds, images, logs and release evidence.
+7. **Configuration:** namespaced environment variables and documented schemas; no secrets committed to source.
 
 ## Working rules
 1. Inspect the canonical repository before changing anything.
 2. Extend existing functionality instead of creating competing systems.
-3. Validate each implementation step with actual repository/build/CI evidence.
+3. Validate implementation with actual repository/build/CI evidence.
 4. Never claim a check passes without evidence.
 5. Keep API keys and secrets in environment/secrets configuration; never hard-code them.
-6. Normal GitHub flow: branch → commit → CI/check → PR → review → merge.
-7. Do not merge, delete, or destroy project data without explicit basis.
-8. Do not claim production deployment unless it has been verified.
-
-## Important project facts
-- Primary domain: `velclaw.cfd`
-- Canonical repository: `Velclaw/Velclaw`
-- Project name: Velclaw / `velclaw`
-- Canonical ecosystem gateway: `/velclawhub`
-- Canonical Plugins route: `/plugins`
-- Canonical Skills route: `/skills`
-- Canonical Deploy route: `/deploy`
-- Canonical page naming: `Velclaw + function`
+6. Treat domain names as configuration and identity boundaries, not infrastructure dependencies.
+7. Normal GitHub flow: branch → commit → CI/check → PR → review → merge.
+8. Do not merge, delete, or destroy project data without explicit basis.
+9. Do not claim production deployment unless provider-backed evidence confirms it.

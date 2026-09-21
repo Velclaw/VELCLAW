@@ -1,0 +1,29 @@
+import OpenAI from "openai";
+
+const client = new OpenAI();
+
+const session = await client.beta.agents.sessions.create({
+  agent: {
+    model: "gpt-6-astra",
+    tools: [
+      {
+        type: "mcp",
+        server_label: "observability",
+        transport: {
+          type: "http",
+          server_url: "https://observability.example.com/mcp",
+        },
+      },
+    ],
+    multi_agent: { enabled: true, max_concurrent_subagents: 3 },
+  },
+  vault_ids: ["vault_YOUR_VAULT_ID"],
+  environment: {
+    type: "openai_hosted",
+    capability_directories: ["/workspace/capabilities/skills"],
+  },
+  input:
+    "Investigate service-api’s elevated 5xx rate over the last 30 minutes. " +
+    "Delegate deployment, error, and dependency analysis to subagents. " +
+    "Save findings, evidence, and recommended mitigation in /workspace/outputs.",
+});

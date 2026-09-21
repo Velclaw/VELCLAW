@@ -1,0 +1,20 @@
+"agent": {
+  "tools": [
+    {
+      "type": "mcp",
+      "server_label": "openai_docs",
+      "transport": {
+        "type": "http",
+        "server_url": "https://developers.openai.com/mcp"
+      }
+    },
+  ]
+}
+
+"agent": {
+  "model": "gpt-6-astra",
+  "multi_agent": {
+    "enabled": true,
+    "max_concurrent_subagents": 3,
+  }
+}

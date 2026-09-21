@@ -22,14 +22,14 @@ GitHub webhook
   → Docker image
   → isolated Docker container
   → Velclaw Traefik proxy
-  → *.velclaw.cfd
+  → *.velclaw.dev
 ```
 
-The root `Dockerfile` is the canonical application image definition for Velclaw. The runtime publisher builds that Dockerfile for a release branch, starts the resulting container with resource/security limits, and attaches Velclaw-owned routing labels. Traefik exposes the container through the first-party `velclaw.cfd` namespace.
+The root `Dockerfile` is the canonical application image definition for Velclaw. The runtime publisher builds that Dockerfile for a release branch, starts the resulting container with resource/security limits, and attaches Velclaw-owned routing labels. Traefik exposes the container through the first-party `velclaw.com` namespace.
 
 ## Responsibilities
 
-- show the canonical production target: `velclaw.cfd`
+- show the canonical production target: `velclaw.com`
 - show only Velclaw-owned production and preview URLs
 - distinguish production from preview deployment URLs
 - link Task, Skills, Executor, Review, Gate, GitHub, Plugins, MCP, API Keys and VelclawHub
@@ -44,13 +44,13 @@ Velclaw Deploy does not invent runtime state. A page render is not a deployment.
 
 ### Production
 
-`https://velclaw.cfd` is the sole canonical Velclaw host.
+`https://velclaw.com` is the sole canonical Velclaw host.
 
 ### Preview
 
-Preview deployments use a first-party subdomain under `velclaw.cfd`, for example:
+Preview deployments use a first-party subdomain under `velclaw.com`, for example:
 
-`https://velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd`
+`https://velclaw-git-feat-velclaw-deploy-page3-velclaw.com`
 
 Platform-generated hostnames are infrastructure details and must not be surfaced as Velclaw product URLs.
 
@@ -81,4 +81,4 @@ The Deploy route must be present in the canonical UI Audit inventory and Velclaw
 
 ## DNS / deployment boundary
 
-The `*.velclaw.cfd` namespace requires wildcard DNS, TLS and reverse-proxy routing to be configured for the Velclaw runtime host. Repository code can enforce and display the canonical namespace, but DNS/infrastructure state is external and is not fabricated by the application.
+The `*.velclaw.dev` namespace requires wildcard DNS, TLS and reverse-proxy routing to be configured for the Velclaw runtime host. Repository code can enforce and display the canonical namespace, but DNS/infrastructure state is external and is not fabricated by the application.

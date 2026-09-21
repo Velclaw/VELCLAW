@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/
+.idea/
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/

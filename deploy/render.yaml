@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: velclaw-hosting
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: VELCLAW_HOSTING_PROVIDER
+        value: render
+      - key: VELCLAW_PUBLIC_DOMAIN
+        value: velclaw.com
+      - key: VELCLAW_PUBLIC_SCHEME
+        value: https
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: RENDER_SERVICE_ID
+        sync: false
+      - key: RENDER_REPOSITORY_URL
+        sync: false
+      - key: RENDER_BRANCH
+        value: main
+      - key: RENDER_API_KEY
+        sync: false
+      - key: RENDER_PUBLIC_URL
+        sync: false
+      - key: POSTGRES_URL
+        sync: false
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false
