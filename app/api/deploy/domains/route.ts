@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const hostname = typeof input?.hostname === 'string' ? input.hostname.trim().toLowerCase() : ''
   const deploymentId = typeof input?.deploymentId === 'string' ? input.deploymentId : ''
   if (!isVelclawHostname(hostname))
-    return NextResponse.json({ error: 'Only Velclaw first-party .com/.ai/.dev/.io/.app hostnames are supported' }, { status: 400 })
+    return NextResponse.json({ error: 'Only Velclaw first-party .cfd hostnames are supported' }, { status: 400 })
   await ensureTable()
   const [deployment] = await sql`SELECT id, status, url FROM velclaw_deployments WHERE id = ${deploymentId} LIMIT 1`
   if (!deployment) return NextResponse.json({ error: 'Deployment not found' }, { status: 404 })
