@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   if (!/^[A-Za-z0-9._/-]{1,120}$/.test(branch)) return NextResponse.json({ error: 'Invalid branch name' }, { status: 400 })
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/.test(projectName)) return NextResponse.json({ error: 'Invalid project name' }, { status: 400 })
   if (commitSha && !/^[0-9a-f]{40}$/i.test(commitSha)) return NextResponse.json({ error: 'Invalid commit SHA' }, { status: 400 })
-  if (customDomain && !isVelclawHostname(customDomain)) return NextResponse.json({ error: 'Only Velclaw first-party .com/.ai/.dev/.io/.app hostnames are supported' }, { status: 400 })
+  if (customDomain && !isVelclawHostname(customDomain)) return NextResponse.json({ error: 'Only Velclaw first-party .cfd hostnames are supported' }, { status: 400 })
   if (env) {
     const entries = Object.entries(env)
     if (entries.length > 100 || entries.some(([key, value]) => !ENV_KEY_PATTERN.test(key) || typeof value !== 'string' || value.length > 8192 || /[\r\n]/.test(value))) return NextResponse.json({ error: 'Invalid environment variables' }, { status: 400 })
