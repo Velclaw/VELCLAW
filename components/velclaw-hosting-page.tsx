@@ -21,7 +21,7 @@ interface Deployment {
 
 const exampleProjects = [
   { name: 'Velclaw', repo: 'https://github.com/Velclaw/Velclaw.git', branch: 'main', host: 'velclaw.cfd' },
-  { name: 'Velclaw Docs', repo: 'https://github.com/Velclaw/docs.velclaw.ai.git', branch: 'main', host: 'docs.velclaw.cfd' },
+  { name: 'Velclaw Docs', repo: 'https://github.com/Velclaw/velclaw.cfd/docs.git', branch: 'main', host: 'docs.velclaw.cfd' },
 ]
 
 const platformStats = [

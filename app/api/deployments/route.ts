@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/session/get-server-session'
 import { createHostingDeployment } from '@/lib/hosting'
-import { listDeployments } from '@/lib/deploy/store'
+import { getDeployment, listDeployments } from '@/lib/deploy/store'
+import { isVelclawHostname } from '@/lib/velclaw/product-domain'
 
-const REPO_PATTERN = /^https:\/\/(?:github\.com)\/[^/]+\/[^/]+(?:\.git)?$/i
+const REPO_PATTERN = /^https:\/\/github\.com\/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}(?:\.git)?$/i
 const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/
-const DOMAIN_PATTERN = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+velclaw\.cfd$/i
 
 export async function GET() {
   const session = await getServerSession()
@@ -25,20 +25,24 @@ export async function POST(request: NextRequest) {
   const customDomain = typeof input?.customDomain === 'string' ? input.customDomain.trim().toLowerCase() : null
   const env = input?.env && typeof input.env === 'object' && !Array.isArray(input.env) ? input.env : null
 
-  if (!REPO_PATTERN.test(repoUrl)) return NextResponse.json({ error: 'Only HTTPS GitHub repository URLs are supported' }, { status: 400 })
+  if (!REPO_PATTERN.test(repoUrl)) return NextResponse.json({ error: 'Only canonical HTTPS GitHub repository URLs are supported' }, { status: 400 })
   if (!/^[A-Za-z0-9._/-]{1,120}$/.test(branch)) return NextResponse.json({ error: 'Invalid branch name' }, { status: 400 })
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/.test(projectName)) return NextResponse.json({ error: 'Invalid project name' }, { status: 400 })
   if (commitSha && !/^[0-9a-f]{40}$/i.test(commitSha)) return NextResponse.json({ error: 'Invalid commit SHA' }, { status: 400 })
-  if (customDomain && !DOMAIN_PATTERN.test(customDomain)) return NextResponse.json({ error: 'Only *.velclaw.cfd custom domains are supported' }, { status: 400 })
+  if (customDomain && !isVelclawHostname(customDomain)) return NextResponse.json({ error: 'Only Velclaw first-party .cfd hostnames are supported' }, { status: 400 })
   if (env) {
     const entries = Object.entries(env)
     if (entries.length > 100 || entries.some(([key, value]) => !ENV_KEY_PATTERN.test(key) || typeof value !== 'string' || value.length > 8192 || /[\r\n]/.test(value))) return NextResponse.json({ error: 'Invalid environment variables' }, { status: 400 })
   }
 
   try {
-    await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
-    const [deployment] = await listDeployments(session.user.id, 1)
-    return NextResponse.json({ deployment }, { status: 202 })
+    const created = await createHostingDeployment({ userId: session.user.id, projectName, repoUrl, branch, commitSha, env, customDomain })
+    if (created.provider === 'self-hosted' && created.externalId) {
+      const deployment = await getDeployment(created.externalId, session.user.id)
+      if (deployment) return NextResponse.json({ deployment }, { status: 202 })
+      throw new Error('Created deployment could not be loaded')
+    }
+    return NextResponse.json({ deployment: created }, { status: 202 })
   } catch (error) {
     console.error('[deployments] create failed', error)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Deployment provider unavailable' }, { status: 503 })

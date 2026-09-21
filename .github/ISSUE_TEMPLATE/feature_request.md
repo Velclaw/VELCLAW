@@ -1,15 +1,20 @@
 ---
-name: Đề xuất tính năng
-about: Đề xuất cải tiến cho Velclaw
-labels: enhancement
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
-## Vấn đề cần giải quyết
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Đề xuất
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-## Lợi ích
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-## Ảnh hưởng tới giao diện hiện tại
-
-Nêu rõ nếu đề xuất có thể thay đổi giao diện chuẩn Velclaw.
+**Additional context**
+Add any other context or screenshots about the feature request here.

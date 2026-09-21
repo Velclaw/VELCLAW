@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await runOpenAIAgent({
+      userId: session.user.id,
       message,
       model: typeof body?.model === 'string' ? body.model : undefined,
       instructions: typeof body?.instructions === 'string' ? body.instructions : undefined,

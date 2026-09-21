@@ -69,8 +69,8 @@ Mục tiêu: cung cấp cho coding agents và developers **một môi trường 
 ## Các bước
 
 ```bash
-git clone https://github.com/Velclaw/Velclaw.git
-cd Velclaw
+git clone https://github.com/Velclaw/VELCLAW.git
+cd VELCLAW
 npm install
 npm run dev
 ```
@@ -178,7 +178,7 @@ Deployment
 
 # 8. Liên kết
 
-- Repository: [https://github.com/Velclaw/Velclaw](https://github.com/Velclaw/Velclaw)
-- Issues: [https://github.com/Velclaw/Velclaw/issues](https://github.com/Velclaw/Velclaw/issues)
-- Pull requests: [https://github.com/Velclaw/Velclaw/pulls](https://github.com/Velclaw/Velclaw/pulls)
+- Repository: [https://github.com/Velclaw/VELCLAW](https://github.com/Velclaw/VELCLAW)
+- Issues: [https://github.com/Velclaw/VELCLAW/issues](https://github.com/Velclaw/VELCLAW/issues)
+- Pull requests: [https://github.com/Velclaw/VELCLAW/pulls](https://github.com/Velclaw/VELCLAW/pulls)
 - Documentation site: *(sẽ cập nhật khi ra mắt chính thức)*

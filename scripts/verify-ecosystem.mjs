@@ -16,9 +16,9 @@ const registryText = readFileSync(registry, 'utf8')
 const contextText = readFileSync(context, 'utf8')
 
 const requiredRepos = [
-  'Velclaw/repo-Velclaw',
+  'Velclaw/VELCLAW',
   'Velclaw/Oauth',
-  'Velclaw/docs.velclaw.ai',
+  'Velclaw/velclaw.cfd/docs',
   'zskbot/repo-docs-velclaw',
   'zskbot/Autoship',
   'zskbot/autoship-velclaw',
@@ -36,10 +36,10 @@ const requiredRepos = [
 ]
 
 const failures = []
-if (!contextText.includes('Canonical GitHub repository: **`Velclaw/repo-Velclaw`**')) {
-  failures.push('canonical repository is not Velclaw/repo-Velclaw')
+if (!contextText.includes('Current canonical GitHub repository: **`Velclaw/VELCLAW`**')) {
+  failures.push('canonical repository is not Velclaw/VELCLAW')
 }
-if (!registryText.includes('Velclaw/repo-Velclaw')) {
+if (!registryText.includes('Velclaw/VELCLAW')) {
   failures.push('ecosystem registry does not identify the core repository')
 }
 for (const repo of requiredRepos) {
@@ -51,7 +51,7 @@ if (!registryText.includes('Webhooks')) failures.push('webhook contract missing'
 if (!registryText.includes('OAuth')) failures.push('OAuth contract missing')
 if (!registryText.includes('MCP / skills / plugins')) failures.push('capability contract missing')
 
-const stale = ['Velclaw/Velclaw']
+const stale = ['Velclaw/Velclaw', 'Velclaw/repo-Velclaw']
 for (const token of stale) {
   if (contextText.includes(token)) failures.push(`stale canonical reference: ${token}`)
 }

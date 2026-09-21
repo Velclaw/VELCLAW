@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react'
 
 interface Deployment { id:string; projectName:string; repoUrl:string; branch:string; commitSha:string|null; status:string; url:string|null; logs:string[]; error:string|null; createdAt:string }
 type DeploymentTarget={projectName:string;repoUrl:string;branch:string;path:string;description:string}
-const DEPLOYMENT_TARGETS:DeploymentTarget[]=[{projectName:'velclaw-pages',repoUrl:'https://github.com/Velclaw/deploy-velclaw.git',branch:'main',path:'/',description:'Velclaw public product landing'},{projectName:'velclaw-docs',repoUrl:'https://github.com/Velclaw/docs.velclaw.ai.git',branch:'main',path:'/docs',description:'Velclaw documentation surface'}]
+const DEPLOYMENT_TARGETS:DeploymentTarget[]=[{projectName:'velclaw-pages',repoUrl:'https://github.com/Velclaw/deploy-velclaw.git',branch:'main',path:'/',description:'Velclaw public product landing'},{projectName:'velclaw-docs',repoUrl:'https://github.com/Velclaw/velclaw.cfd/docs.git',branch:'main',path:'/docs',description:'Velclaw documentation surface'}]
 const DEFAULT_TARGET=DEPLOYMENT_TARGETS[0]
 const PIPELINE=['source','ci','build','test','security','approval','deploy','smoke','live'] as const
 function stageForStatus(status:string){if(status==='waiting_approval')return 6;if(status==='queued')return 7;if(status==='building')return 7;if(status==='ready')return PIPELINE.length;if(status==='failed')return 5;if(status==='cancelled')return 0;return 1}

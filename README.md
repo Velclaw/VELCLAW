@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://github.com/Velclaw/Velclaw"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
 
 # Velclaw
 
@@ -9,7 +9,7 @@
 Build, inspect, test, deploy, and operate software from one developer-focused workspace.
 
 <p>
-<a href="https://github.com/Velclaw/Velclaw"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVelclaw-111827?style=flat-square&logo=github&logoColor=white"></a>
+<a href="https://github.com/Velclaw/VELCLAW"><img src="https://img.shields.io/badge/GitHub-Velclaw%2FVELCLAW-111827?style=flat-square&logo=github&logoColor=white"></a>
 <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-Framework-111827?style=flat-square&logo=nextdotjs&logoColor=white"></a>
 <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Code-3178C6?style=flat-square&logo=typescript&logoColor=white"></a>
 <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-Runtime-339933?style=flat-square&logo=nodedotjs&logoColor=white"></a>
@@ -66,26 +66,27 @@ The goal is to give coding agents and developers one coherent environment instea
 | **Deployment** | Move validated software toward production |
 | **Developer UI** | A single workspace for the software lifecycle |
 
-## Product URLs
+## Authentication
 
-The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+Authentication is separated into the dedicated Velclaw OAuth repository.
 
-| Product surface | Canonical URL |
-| --- | --- |
-| Velclaw | `https://velclaw.cfd/` |
-| Velclaw Docs | `https://velclaw.cfd/docs` |
-| VelclawHub | `https://velclaw.cfd/velclawhub` |
-| VelclawHub Ecosystem | `https://velclaw.cfd/hub` |
-| Velclaw Deploy | `https://velclaw.cfd/deploy` |
-| Velclaw Skills | `https://velclaw.cfd/skills` |
-| Velclaw Plugins | `https://velclaw.cfd/plugins` |
-| Velclaw MCP | `https://velclaw.cfd/mcp` |
-| Velclaw Tasks | `https://velclaw.cfd/tasks` |
-| Velclaw Dashboard | `https://velclaw.cfd/velclaw` |
-| Velclaw Repo | `https://velclaw.cfd/repos/new` |
-| Velclaw API Keys | `https://velclaw.cfd/api-keys` |
+| Surface | Repository | Purpose |
+| --- | --- | --- |
+| Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
+| Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-Infrastructure-generated hostnames are not product URLs.
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.cfd` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+
+## Product Domains
+
+Velclaw currently uses `velclaw.cfd` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
+
+| Domain | Role | Examples |
+| --- | --- | --- |
+| `velclaw.cfd` | Brand / canonical product | `https://velclaw.cfd` |
+| `velclaw.cfd` | All active Velclaw surfaces | `https://velclaw.cfd`, `https://velclaw.cfd/docs`, `https://velclaw.cfd/api/*` |
+
+Product code must use `velclaw.cfd` as the active canonical runtime domain. Preview deployments use the `*.velclaw.cfd` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
@@ -101,8 +102,8 @@ Infrastructure-generated hostnames are not product URLs.
 ## Quick start
 
 ```bash
-git clone https://github.com/Velclaw/Velclaw.git
-cd Velclaw
+git clone https://github.com/Velclaw/VELCLAW.git
+cd VELCLAW
 npm install
 npm run dev
 ```
@@ -119,7 +120,7 @@ npm run build
 ## Project structure
 
 ```text
-Velclaw/
+VELCLAW/
 ├── app/                 # Next.js application routes
 ├── components/          # UI and workspace components
 ├── lib/                 # application services and integrations
@@ -180,9 +181,9 @@ Velclaw references open-source software and community tooling. Each external pro
 
 ## Documentation
 
-- [Velclaw repository](https://github.com/Velclaw/Velclaw)
-- [Issues](https://github.com/Velclaw/Velclaw/issues)
-- [Pull requests](https://github.com/Velclaw/Velclaw/pulls)
+- [Velclaw repository](https://github.com/Velclaw/VELCLAW)
+- [Issues](https://github.com/Velclaw/VELCLAW/issues)
+- [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
 - Official documentation: `https://velclaw.cfd/docs`
 
 ## Contributing
@@ -212,7 +213,7 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 
 ## License
 
-The current project configuration identifies Velclaw as private software. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
+The repository is publicly visible, but the current project configuration does not declare an open-source license. Do not claim an open-source license until a `LICENSE` file and public licensing decision are present.
 
 ## Visual identity
 

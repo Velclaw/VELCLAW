@@ -6,6 +6,7 @@ import { getUserApiKey } from '@/lib/api-keys/user-keys'
 type AgentMode = 'single' | 'multi'
 
 type AgentRunInput = {
+  userId: string
   message: string
   model?: string
   instructions?: string
@@ -47,14 +48,6 @@ function getOpenAIVaultIds() {
     .slice(0, 20)
 }
 
-function getOpenAICapabilityDirectories() {
-  return (process.env.OPENAI_CAPABILITY_DIRECTORIES || '')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .slice(0, 20)
-}
-
 export async function runOpenAIAgent(input: AgentRunInput) {
   const apiKey = await getUserApiKey('openai')
   if (!apiKey) throw new Error('OpenAI API key is not configured for this user')
@@ -90,7 +83,7 @@ export async function runOpenAIAgent(input: AgentRunInput) {
         handoffs: [researchAgent, engineeringAgent],
       })
 
-      const result = await runner.run(rootAgent, message, { maxTurns: 12 })
+      const result = await runner.run(rootAgent, message, { maxTurns: Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8) * 4 })
       return { mode: 'multi' as const, model, output: result.finalOutput }
     }
 
@@ -103,6 +96,7 @@ export async function runOpenAIAgent(input: AgentRunInput) {
 }
 
 export async function createOpenAIAgentsSession(input: {
+  userId: string
   message: string
   model?: string
   instructions?: string
@@ -119,16 +113,14 @@ export async function createOpenAIAgentsSession(input: {
   const model = getOpenAIAgentModel(input.model)
   const instructions =
     cleanText(input.instructions, 6000) ||
-    'You are Velclaw Agent. Complete the requested task, verify your work, and report concrete results. When using a hosted workspace, save durable findings and evidence under /workspace/outputs.'
+    'You are Velclaw Agent. Complete the requested task, verify your work, and report concrete results.'
   const maxConcurrentSubagents = Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8)
   const tools = getOpenAIMcpTools()
   const vaultIds = getOpenAIVaultIds()
-  const capabilityDirectories = getOpenAICapabilityDirectories()
 
   const payload: Record<string, unknown> = {
     agent: {
       model,
-      name: 'Velclaw Hosted Agent',
       instructions,
       ...(tools ? { tools } : {}),
       ...(input.multiAgent
@@ -136,10 +128,7 @@ export async function createOpenAIAgentsSession(input: {
         : {}),
     },
     ...(vaultIds.length ? { vault_ids: vaultIds } : {}),
-    environment: {
-      type: input.environment || 'openai_hosted',
-      ...(capabilityDirectories.length ? { capability_directories: capabilityDirectories } : {}),
-    },
+    environment: { type: input.environment || 'openai_hosted' },
     input: message,
   }
 
@@ -156,9 +145,9 @@ export async function createOpenAIAgentsSession(input: {
 
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    const message =
+    const responseMessage =
       typeof data?.error?.message === 'string' ? data.error.message : `Agents API request failed (${response.status})`
-    throw new Error(message)
+    throw new Error(responseMessage)
   }
 
   return data

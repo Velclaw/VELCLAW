@@ -24,7 +24,7 @@ This file is the source-of-truth inventory for persistence and storage surfaces 
 
 - `Velclaw/Velclaw` — canonical application/control-plane repository.
 - `Velclaw/deploy-velclaw` — static Velclaw Pages source repository.
-- `Velclaw/docs.velclaw.ai` — documentation source repository; deployed independently as the docs site and also compatible with the Velclaw container publisher.
+- `Velclaw/velclaw.cfd/docs` — documentation source repository; deployed independently as the docs site and also compatible with the Velclaw container publisher.
 
 ## Rules
 

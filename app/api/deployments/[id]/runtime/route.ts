@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import { ensureDeployStore } from '@/lib/deploy/store'
 import postgres from 'postgres'
+import { isVelclawProductUrl } from '@/lib/velclaw/product-domain'
 
 export const dynamic = 'force-dynamic'
 const sql = postgres(process.env.POSTGRES_URL || '', { max: 3 })
 
 type Params = { params: Promise<{ id: string }> }
 const STATUS = new Set(['building', 'ready', 'failed'])
-const PRODUCT_URL = /^https:\/\/(?:velclaw\.cfd|[a-z0-9.-]+\.velclaw\.cfd)(?:\/.*)?$/i
 
 export async function POST(request: Request, { params }: Params) {
   const auth = request.headers.get('authorization')
@@ -22,7 +22,7 @@ export async function POST(request: Request, { params }: Params) {
   const logs = Array.isArray(body?.logs) ? body.logs.filter((v: unknown): v is string => typeof v === 'string').slice(-500) : null
   const error = typeof body?.error === 'string' ? body.error.slice(0, 4000) : null
   if (!STATUS.has(status)) return NextResponse.json({ error: 'Invalid deployment status' }, { status: 400 })
-  if (url && !PRODUCT_URL.test(url)) return NextResponse.json({ error: 'Runtime URL must remain inside the Velclaw product domain' }, { status: 400 })
+  if (url && !isVelclawProductUrl(url)) return NextResponse.json({ error: 'Runtime URL must remain inside the Velclaw .com/.ai/.dev/.io/.app product domains' }, { status: 400 })
   if (status === 'ready' && !url) return NextResponse.json({ error: 'A ready deployment requires a verified product URL' }, { status: 400 })
 
   try {

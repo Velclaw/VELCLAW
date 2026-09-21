@@ -37,7 +37,7 @@ systemctl enable --now docker
 
 install -d -o root -g root /opt/velclaw
 if [ ! -d /opt/velclaw/.git ]; then
-  git clone https://github.com/Velclaw/Velclaw.git /opt/velclaw
+  git clone https://github.com/Velclaw/VELCLAW.git /opt/velclaw
 else
   git -C /opt/velclaw fetch origin main
   git -C /opt/velclaw checkout main
