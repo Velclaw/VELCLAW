@@ -159,6 +159,20 @@ Large upstream mirrors, unrelated experiments, generic infrastructure forks, and
 
 No repository in this audit should be copied into `Velclaw/VELCLAW` as a nested Git repository or gitlink. Reuse is contract-first: API, webhook, OAuth, MCP/skills, artifact, CLI or provider adapter.
 
+### Integration readiness gate
+
+The next implementation pass must verify source imports, package dependencies, workflow references, webhooks, deployment configuration and environment-variable contracts for each repository marked **INTEGRATE** or **REVIEW**. The integration-contract document is now the normative boundary for that audit.
+
+Readiness states:
+
+- **DISCOVERED** — repository found and relevant by purpose.
+- **VERIFIED** — source/configuration inspected and capability confirmed.
+- **CONTRACTED** — canonical adapter boundary documented.
+- **IMPLEMENTED** — core adapter/UI integration exists.
+- **VALIDATED** — type-check/build/tests and runtime evidence pass.
+
+No repository may be labeled IMPLEMENTED or VALIDATED based only on its README.
+
 ### Current canonical integration set
 
 For implementation planning, the highest-confidence set is now:
