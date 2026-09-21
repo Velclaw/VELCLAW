@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/repos/new',
     '/auth/signin',
     '/velclaw/ui-audit',
+    '/projects',
   ]
 
   return paths.map((path) => ({
