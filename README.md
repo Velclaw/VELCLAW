@@ -75,18 +75,18 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 | Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
 | Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.cfd` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
 
 ## Product Domains
 
-Velclaw currently uses `velclaw.cfd` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
+Velclaw currently uses `velclaw.app` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
 
 | Domain | Role | Examples |
 | --- | --- | --- |
-| `velclaw.cfd` | Brand / canonical product | `https://velclaw.cfd` |
-| `velclaw.cfd` | All active Velclaw surfaces | `https://velclaw.cfd`, `https://velclaw.cfd/docs`, `https://velclaw.cfd/api/*` |
+| `velclaw.app` | Brand / canonical product | `https://velclaw.app` |
+| `velclaw.app` | All active Velclaw surfaces | `https://velclaw.app`, `https://velclaw.app/docs`, `https://velclaw.app/api/*` |
 
-Product code must use `velclaw.cfd` as the active canonical runtime domain. Preview deployments use the `*.velclaw.cfd` namespace; platform-generated hostnames are not product URLs.
+Product code must use `velclaw.app` as the active canonical runtime domain. Preview deployments use the `*.velclaw.app` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
@@ -184,7 +184,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/VELCLAW)
 - [Issues](https://github.com/Velclaw/VELCLAW/issues)
 - [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
-- Official documentation: `https://velclaw.cfd/docs`
+- Official documentation: `https://velclaw.app/docs`
 
 ## Contributing
 
