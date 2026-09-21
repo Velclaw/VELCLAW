@@ -22,7 +22,7 @@ const run = (command, args, options = {}) => {
   } catch (error) {
     return {
       ok: false,
-      output: `\${error.stdout ?? ''}\n\${error.stderr ?? ''}`.trim(),
+      output: `${error.stdout ?? ''}\n${error.stderr ?? ''}`.trim(),
       error,
     }
   }
@@ -30,7 +30,7 @@ const run = (command, args, options = {}) => {
 
 const check = (name, command, args) => {
   const result = run(command, args)
-  console.log(`::group::\${name}`)
+  console.log(`::group::${name}`)
   console.log(result.output.slice(-12000))
   console.log('::endgroup::')
   return result
@@ -64,8 +64,8 @@ if (env.GITHUB_HEAD_REPO && env.GITHUB_REPOSITORY && env.GITHUB_HEAD_REPO !== en
 
 if (!env.GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required for the auto-fix layer')
 
-const diff = run('git', ['diff', '--no-ext-diff', `\${env.GITHUB_BASE_REF}...HEAD`]).output.slice(-30000)
-const failureText = failures.map((failure) => `### \${failure.name}\n\${failure.output.slice(-9000)}`).join('\n\n')
+const diff = run('git', ['diff', '--no-ext-diff', `${env.GITHUB_BASE_REF}...HEAD`]).output.slice(-30000)
+const failureText = failures.map((failure) => `### ${failure.name}\n${failure.output.slice(-9000)}`).join('\n\n')
 const reviewText =
   env.VELCLAW_REVIEW_FILE && existsSync(env.VELCLAW_REVIEW_FILE)
     ? readFileSync(env.VELCLAW_REVIEW_FILE, 'utf8').slice(-16000)
@@ -83,18 +83,18 @@ Rules:
 - If no safe patch can be produced, return an empty diff.
 
 Review findings:
-\${reviewText}
+${reviewText}
 
 Failures:
-\${failureText}
+${failureText}
 
 Current PR diff:
-\${diff}`
+${diff}`
 
 const response = await fetch('https://models.github.ai/inference/chat/completions', {
   method: 'POST',
   headers: {
-    Authorization: `Bearer \${env.GITHUB_TOKEN}`,
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
     'Content-Type': 'application/json',
     Accept: 'application/vnd.github+json',
   },
@@ -106,7 +106,7 @@ const response = await fetch('https://models.github.ai/inference/chat/completion
 })
 
 if (!response.ok) {
-  throw new Error(`GitHub Models request failed: \${response.status} \${await response.text()}`)
+  throw new Error(`GitHub Models request failed: ${response.status} ${await response.text()}`)
 }
 
 const payload = await response.json()
@@ -134,14 +134,14 @@ const patchFile = '/tmp/velclaw-autofix.patch'
 writeFileSync(patchFile, patch)
 
 const dryRun = run('git', ['apply', '--check', '--whitespace=fix', patchFile])
-if (!dryRun.ok) throw new Error(`Generated patch failed validation:\n\${dryRun.output}`)
+if (!dryRun.ok) throw new Error(`Generated patch failed validation:\n${dryRun.output}`)
 
 const apply = run('git', ['apply', '--whitespace=fix', patchFile])
-if (!apply.ok) throw new Error(`Generated patch could not be applied:\n\${apply.output}`)
+if (!apply.ok) throw new Error(`Generated patch could not be applied:\n${apply.output}`)
 
 const postFailures = []
 for (const [name, command, args] of checks) {
-  const result = check(`post-fix \${name}`, command, args)
+  const result = check(`post-fix ${name}`, command, args)
   if (!result.ok) postFailures.push({ name, output: result.output })
 }
 
@@ -157,7 +157,7 @@ const finalDiff = run('git', ['diff', '--no-ext-diff']).output.slice(-30000)
 const reviewResponse = await fetch('https://models.github.ai/inference/chat/completions', {
   method: 'POST',
   headers: {
-    Authorization: `Bearer \${env.GITHUB_TOKEN}`,
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -169,17 +169,17 @@ const reviewResponse = await fetch('https://models.github.ai/inference/chat/comp
         content: `You are the Velclaw post-fix reviewer. Decide whether the proposed patch fully addresses the reported review findings without introducing a new correctness or security issue. Return ONLY JSON: {"clean":true|false,"reason":"..."}.
 
 Review findings:
-\${reviewText}
+${reviewText}
 
 Proposed patch:
-\${finalDiff}`,
+${finalDiff}`,
       },
     ],
   }),
 })
 
 if (!reviewResponse.ok) {
-  throw new Error(`Post-fix review failed: \${reviewResponse.status} \${await reviewResponse.text()}`)
+  throw new Error(`Post-fix review failed: ${reviewResponse.status} ${await reviewResponse.text()}`)
 }
 
 const reviewPayload = await reviewResponse.json()
@@ -193,7 +193,7 @@ if (postFixReview.clean !== true) {
   run('git', ['reset', '--hard', 'HEAD'])
   run('git', ['clean', '-fd'])
   writeResult('review-blocked', false)
-  console.log(`Post-fix review blocked approval: \${postFixReview.reason}`)
+  console.log(`Post-fix review blocked approval: ${postFixReview.reason}`)
   process.exit(1)
 }
 
@@ -202,10 +202,10 @@ run('git', ['config', 'user.email', 'velclaw-autofix[bot]@users.noreply.github.c
 run('git', ['add', 'app', 'components', 'lib', 'server', 'scripts', 'tests'])
 
 const commit = run('git', ['commit', '-m', 'fix: apply Velclaw auto-fix'])
-if (!commit.ok) throw new Error(`Auto-fix commit failed:\n\${commit.output}`)
+if (!commit.ok) throw new Error(`Auto-fix commit failed:\n${commit.output}`)
 
-const push = run('git', ['push', 'origin', `HEAD:\${env.GITHUB_HEAD_REF}`])
-if (!push.ok) throw new Error(`Auto-fix push failed:\n\${push.output}`)
+const push = run('git', ['push', 'origin', `HEAD:${env.GITHUB_HEAD_REF}`])
+if (!push.ok) throw new Error(`Auto-fix push failed:\n${push.output}`)
 
 writeResult('fixed', true)
 console.log('VELCLAW_AUTOFIX_STATUS=fixed')
