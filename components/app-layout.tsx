@@ -51,7 +51,7 @@ function SidebarLoader({ width }: { width: number }) {
 
 export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, initialIsMobile }: AppLayoutProps) {
   const pathname = usePathname()
-  const isLanding = pathname === '/'
+  const isStandalone = pathname === '/' || pathname === '/docs' || pathname.startsWith('/docs/')
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => initialIsMobile ? false : (initialSidebarOpen ?? true))
@@ -83,8 +83,8 @@ export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, i
     finally { setIsLoading(false) }
   }, [])
 
-  useEffect(() => { if (!isLanding) fetchTasks() }, [fetchTasks, isLanding])
-  useEffect(() => { if (isLanding) return; const interval = setInterval(fetchTasks, 5000); return () => clearInterval(interval) }, [fetchTasks, isLanding])
+  useEffect(() => { if (!isStandalone) fetchTasks() }, [fetchTasks, isStandalone])
+  useEffect(() => { if (isStandalone) return; const interval = setInterval(fetchTasks, 5000); return () => clearInterval(interval) }, [fetchTasks, isStandalone])
 
   const toggleSidebar = useCallback(() => updateSidebarOpen(!isSidebarOpen), [isSidebarOpen, updateSidebarOpen])
   useEffect(() => {
@@ -114,7 +114,7 @@ export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, i
   return (
     <TasksContext.Provider value={{ refreshTasks: fetchTasks, toggleSidebar, isSidebarOpen, isSidebarResizing: isResizing, addTaskOptimistically }}>
       <ConnectorsProvider>
-        {isLanding ? children : (
+        {isStandalone ? children : (
           <div className="h-dvh flex relative" style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
             {isSidebarOpen && <div className="lg:hidden fixed inset-0 bg-black/60 z-30" onClick={closeSidebar} aria-hidden="true" />}
             <aside className={`fixed inset-y-0 left-0 z-40 ${isResizing || !hasMounted ? '' : 'transition-transform duration-200 ease-out'} ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ width: `${sidebarWidth}px` }} aria-label="Velclaw workspace navigation">
