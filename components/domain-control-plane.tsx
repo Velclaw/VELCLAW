@@ -35,7 +35,7 @@ type Domain = {
   autoRenew: boolean
   nameservers: string[]
   dns: number
-  ssl: 'live' | 'pending'
+  ssl: 'pending' | 'pending'
   target: string
 }
 
@@ -43,23 +43,23 @@ const seedDomains: Domain[] = [
   {
     name: 'velclaw.com',
     tld: '.com',
-    registrar: 'Connected registrar',
-    status: 'active',
-    expires: '2027-08-14',
+    registrar: 'GoDaddy',
+    status: 'pending',
+    expires: 'Not verified',
     autoRenew: true,
-    nameservers: ['ns1.velclaw.cfd', 'ns2.velclaw.cfd'],
+    nameservers: ['Not verified', 'Not verified'],
     dns: 8,
-    ssl: 'live',
+    ssl: 'pending',
     target: 'Production',
   },
   {
     name: 'velclaw.app',
     tld: '.app',
-    registrar: 'Connected registrar',
-    status: 'active',
-    expires: '2027-10-03',
+    registrar: 'Vercel',
+    status: 'pending',
+    expires: 'Not verified',
     autoRenew: true,
-    nameservers: ['ns1.velclaw.cfd', 'ns2.velclaw.cfd'],
+    nameservers: ['Not verified', 'Not verified'],
     dns: 6,
     ssl: 'live',
     target: 'Application',
@@ -67,11 +67,11 @@ const seedDomains: Domain[] = [
   {
     name: 'velclaw.dev',
     tld: '.dev',
-    registrar: 'Connected registrar',
+    registrar: 'Vercel',
     status: 'attention',
-    expires: '2027-03-28',
+    expires: 'Not verified',
     autoRenew: false,
-    nameservers: ['Pending registrar sync', 'Pending registrar sync'],
+    nameservers: ['Not verified', 'Not verified'],
     dns: 2,
     ssl: 'pending',
     target: 'Developer',
@@ -81,7 +81,7 @@ const seedDomains: Domain[] = [
 const dnsRecords = [
   ['A', '@', '76.76.21.21', '300'],
   ['CNAME', 'www', 'cname.velclaw.host', '300'],
-  ['CNAME', 'docs', 'docs.velclaw.cfd', '300'],
+  ['CNAME', 'docs', 'velclaw.dev', '300'],
   ['TXT', '@', 'velclaw-verification=••••••••', '3600'],
   ['MX', '@', 'mx1.mail.provider', '3600'],
 ]
@@ -122,7 +122,18 @@ export function DomainControlPlane() {
 
   const addDomain = () => {
     const normalized = newDomain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
-    if (!normalized || !normalized.includes('.')) return
+    const validDomain = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalized)
+    if (!validDomain) {
+      setNotice('Enter a valid domain name')
+      window.setTimeout(() => setNotice(''), 3200)
+      return
+    }
+
+    if (domains.some((domain) => domain.name === normalized)) {
+      setNotice(normalized + ' is already managed')
+      window.setTimeout(() => setNotice(''), 3200)
+      return
+    }
 
     const tld = '.' + normalized.split('.').pop()
     const domain: Domain = {
@@ -143,13 +154,18 @@ export function DomainControlPlane() {
     setNewDomain('')
     setShowAdd(false)
     setTab('overview')
-    setNotice(`${normalized} added to the Velclaw control plane`)
+    setNotice(normalized + ' added to the Velclaw control plane')
     window.setTimeout(() => setNotice(''), 3200)
   }
 
   const copyNameserver = async (value: string) => {
-    await navigator.clipboard?.writeText(value)
-    setNotice(`${value} copied`)
+    try {
+      if (!navigator.clipboard) throw new Error('Clipboard API unavailable')
+      await navigator.clipboard.writeText(value)
+      setNotice(value + ' copied')
+    } catch {
+      setNotice('Copy failed. Copy ' + value + ' manually.')
+    }
     window.setTimeout(() => setNotice(''), 2200)
   }
 
@@ -187,8 +203,8 @@ export function DomainControlPlane() {
             <div className="mb-3 text-[10px] uppercase tracking-[0.16em] text-zinc-600">DNS boundary</div>
             <div className="border border-violet-400/20 bg-violet-500/[0.04] p-3">
               <div className="flex items-center gap-2 text-xs text-zinc-300"><Wifi size={13} className="text-violet-300" /> Velclaw DNS</div>
-              <div className="mt-1 font-mono text-[10px] text-zinc-600">ns1.velclaw.cfd</div>
-              <div className="font-mono text-[10px] text-zinc-600">ns2.velclaw.cfd</div>
+              <div className="mt-1 font-mono text-[10px] text-zinc-600">External registrar / Vercel</div>
+              <div className="font-mono text-[10px] text-zinc-600">Provider-managed DNS</div>
             </div>
           </div>
         </aside>
