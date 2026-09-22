@@ -25,10 +25,10 @@ importers:
         version: 22.0.1
       '@openai/agents':
         specifier: 0.18.0
-        version: 0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+        version: 0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       '@openai/agents-openai':
         specifier: 0.18.0
-        version: 0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+        version: 0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -169,7 +169,7 @@ importers:
         version: 3.17.5
       ws:
         specifier: 8.19.0
-        version: 8.21.3
+        version: 8.19.0
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -5188,6 +5188,18 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+  ws@8.19.0:
+    resolution: {integrity: sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   ws@8.21.3:
     resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
     engines: {node: '>=10.0.0'}
@@ -6038,6 +6050,22 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 27.0.0
 
+  '@openai/agents-core@0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      debug: 4.4.3
+      openai: 7.15.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
+    optionalDependencies:
+      '@modelcontextprotocol/client': 2.0.0
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - '@aws-sdk/credential-provider-node'
+      - '@smithy/hash-node'
+      - '@smithy/signature-v4'
+      - supports-color
+      - undici
+      - ws
+
   '@openai/agents-core@0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)':
     dependencies:
       '@standard-schema/spec': 1.1.0
@@ -6054,11 +6082,11 @@ snapshots:
       - undici
       - ws
 
-  '@openai/agents-openai@0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)':
+  '@openai/agents-openai@0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+      '@openai/agents-core': 0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       debug: 4.4.3
-      openai: 7.15.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+      openai: 7.15.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -6084,13 +6112,13 @@ snapshots:
       - undici
       - utf-8-validate
 
-  '@openai/agents@0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)':
+  '@openai/agents@0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
-      '@openai/agents-openai': 0.18.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+      '@openai/agents-core': 0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
+      '@openai/agents-openai': 0.18.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       '@openai/agents-realtime': 0.18.0(undici@7.29.0)(zod@4.3.6)
       debug: 4.4.3
-      openai: 7.15.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6)
+      openai: 7.15.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -9630,6 +9658,12 @@ snapshots:
       regex: 6.1.0
       regex-recursion: 6.0.2
 
+  openai@7.15.0(undici@7.29.0)(ws@8.19.0)(zod@4.3.6):
+    optionalDependencies:
+      undici: 7.29.0
+      ws: 8.19.0
+      zod: 4.3.6
+
   openai@7.15.0(undici@7.29.0)(ws@8.21.3)(zod@4.3.6):
     optionalDependencies:
       undici: 7.29.0
@@ -10650,6 +10684,8 @@ snapshots:
   word-wrap@1.2.5: {}
 
   wrappy@1.0.2: {}
+
+  ws@8.19.0: {}
 
   ws@8.21.3: {}
 
