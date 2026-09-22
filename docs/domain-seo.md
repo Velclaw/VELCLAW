@@ -2,7 +2,7 @@
 
 Velclaw publishes three distinct public web properties:
 
-- velclaw.com — platform and company surface
+- velclaw.ai — primary platform and company surface
 - velclaw.dev — developer, IDE, documentation and API surface
 - velclaw.app — application and user-service surface
 
@@ -26,20 +26,20 @@ The domains are intentionally not configured as duplicate aliases.
 
 Use these values in the production deployment:
 
-VELCLAW_PUBLIC_ORIGIN=https://velclaw.com
+VELCLAW_PUBLIC_ORIGIN=https://velclaw.ai
 VELCLAW_APP_ORIGIN=https://velclaw.app
 VELCLAW_API_ORIGIN=https://velclaw.dev
 VELCLAW_DOCS_ORIGIN=https://velclaw.dev
-VELCLAW_OAUTH_ISSUER=https://velclaw.com
-VELCLAW_ALLOWED_ORIGINS=https://velclaw.com,https://velclaw.dev,https://velclaw.app
+VELCLAW_OAUTH_ISSUER=https://velclaw.ai
+VELCLAW_ALLOWED_ORIGINS=https://velclaw.ai,https://velclaw.dev,https://velclaw.app
 
-Do not use velclaw.cfd as the canonical origin for these three public properties.
+Do not use velclaw.cfd or velclaw.com as the canonical origin for these three public properties.
 
 ## DNS and deployment
 
 All three domains must resolve to the production deployment serving this application, with valid HTTPS:
 
-- https://velclaw.com
+- https://velclaw.ai
 - https://velclaw.dev
 - https://velclaw.app
 
@@ -49,7 +49,7 @@ The deployment platform must accept all three hostnames.
 
 Create or verify three Search Console properties and submit:
 
-- https://velclaw.com/sitemap.xml
+- https://velclaw.ai/sitemap.xml
 - https://velclaw.dev/sitemap.xml
 - https://velclaw.app/sitemap.xml
 
