@@ -22,7 +22,7 @@ export default async function VelclawWorkspacePage() {
           Official Velclaw service: <a href={origin}>{origin}</a>
         </p>
       </section>
-      <VelclawLanding />
+      <VelclawLanding role={role} />
     </>
   )
 }
