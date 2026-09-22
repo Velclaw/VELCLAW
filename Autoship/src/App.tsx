@@ -1,104 +1,106 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Terminal, 
-  Layers, 
-  FileCode2, 
-  Radio, 
-  Bot, 
-  Play, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Sparkles, 
-  Server, 
-  GitBranch, 
-  Zap, 
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+  Terminal,
+  Layers,
+  FileCode2,
+  Radio,
+  Bot,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Sparkles,
+  Server,
+  GitBranch,
+  Zap,
   RefreshCw,
   Plus,
-  ArrowUpRight
-} from 'lucide-react';
-import { BuildRun, DeploymentProject } from './types';
-import { Header } from './components/Header';
-import { PipelineVisualizer } from './components/PipelineVisualizer';
-import { LiveTerminal } from './components/LiveTerminal';
-import { ConfigGenerator } from './components/ConfigGenerator';
-import { WebhookManager } from './components/WebhookManager';
-import { AiDevopsDoctor } from './components/AiDevopsDoctor';
-import { ProjectList } from './components/ProjectList';
-import { ProjectModal } from './components/ProjectModal';
+  ArrowUpRight,
+} from 'lucide-react'
+import { BuildRun, DeploymentProject } from './types'
+import { Header } from './components/Header'
+import { PipelineVisualizer } from './components/PipelineVisualizer'
+import { LiveTerminal } from './components/LiveTerminal'
+import { ConfigGenerator } from './components/ConfigGenerator'
+import { WebhookManager } from './components/WebhookManager'
+import { AiDevopsDoctor } from './components/AiDevopsDoctor'
+import { ProjectList } from './components/ProjectList'
+import { ProjectModal } from './components/ProjectModal'
 
 export default function App() {
-  const [projects, setProjects] = useState<DeploymentProject[]>([]);
-  const [selectedProject, setSelectedProject] = useState<DeploymentProject | null>(null);
-  const [buildRuns, setBuildRuns] = useState<BuildRun[]>([]);
-  const [currentRun, setCurrentRun] = useState<BuildRun | null>(null);
-  const [selectedStageId, setSelectedStageId] = useState<string | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects'>('pipelines');
-  const [isTriggering, setIsTriggering] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [editingProject, setEditingProject] = useState<DeploymentProject | null>(null);
-  const [doctorLogInput, setDoctorLogInput] = useState<string>('');
+  const [projects, setProjects] = useState<DeploymentProject[]>([])
+  const [selectedProject, setSelectedProject] = useState<DeploymentProject | null>(null)
+  const [buildRuns, setBuildRuns] = useState<BuildRun[]>([])
+  const [currentRun, setCurrentRun] = useState<BuildRun | null>(null)
+  const [selectedStageId, setSelectedStageId] = useState<string | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects'>(
+    'pipelines',
+  )
+  const [isTriggering, setIsTriggering] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [editingProject, setEditingProject] = useState<DeploymentProject | null>(null)
+  const [doctorLogInput, setDoctorLogInput] = useState<string>('')
 
   // Fetch projects and pipeline runs
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await fetch('/api/projects');
-      const data = await res.json();
+      const res = await fetch('/api/projects')
+      const data = await res.json()
       if (data.projects) {
-        setProjects(data.projects);
+        setProjects(data.projects)
         if (!selectedProject && data.projects.length > 0) {
-          setSelectedProject(data.projects[0]);
+          setSelectedProject(data.projects[0])
         }
       }
     } catch (err) {
-      console.error('Error fetching projects:', err);
+      console.error('Error fetching projects:', err)
     }
-  }, [selectedProject]);
+  }, [selectedProject])
 
   const fetchPipelines = useCallback(async (projId?: string) => {
     try {
-      const url = projId ? `/api/pipelines?projectId=${projId}` : '/api/pipelines';
-      const res = await fetch(url);
-      const data = await res.json();
+      const url = projId ? `/api/pipelines?projectId=${projId}` : '/api/pipelines'
+      const res = await fetch(url)
+      const data = await res.json()
       if (data.runs) {
-        setBuildRuns(data.runs);
+        setBuildRuns(data.runs)
         // If no current run selected or current run is running, keep updating
         if (data.runs.length > 0) {
           setCurrentRun((prev) => {
-            if (!prev) return data.runs[0];
-            const updated = data.runs.find((r: BuildRun) => r.id === prev.id);
-            return updated || data.runs[0];
-          });
+            if (!prev) return data.runs[0]
+            const updated = data.runs.find((r: BuildRun) => r.id === prev.id)
+            return updated || data.runs[0]
+          })
         }
       }
     } catch (err) {
-      console.error('Error fetching pipelines:', err);
+      console.error('Error fetching pipelines:', err)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    fetchProjects();
-    fetchPipelines();
-  }, [fetchProjects, fetchPipelines]);
+    fetchProjects()
+    fetchPipelines()
+  }, [fetchProjects, fetchPipelines])
 
   // Polling when build is active
   useEffect(() => {
-    const isRunning = currentRun?.status === 'running' || buildRuns.some((r) => r.status === 'running');
-    if (!isRunning) return;
+    const isRunning = currentRun?.status === 'running' || buildRuns.some((r) => r.status === 'running')
+    if (!isRunning) return
 
     const interval = setInterval(() => {
-      fetchPipelines(selectedProject?.id);
-    }, 1200);
+      fetchPipelines(selectedProject?.id)
+    }, 1200)
 
-    return () => clearInterval(interval);
-  }, [currentRun?.status, buildRuns, selectedProject?.id, fetchPipelines]);
+    return () => clearInterval(interval)
+  }, [currentRun?.status, buildRuns, selectedProject?.id, fetchPipelines])
 
   // Trigger manual deployment pipeline
   const handleTriggerDeploy = async (projectId?: string, shouldFail: boolean = false) => {
-    const targetProjId = projectId || selectedProject?.id;
-    if (!targetProjId) return;
+    const targetProjId = projectId || selectedProject?.id
+    if (!targetProjId) return
 
-    setIsTriggering(true);
+    setIsTriggering(true)
     try {
       const res = await fetch('/api/pipelines/trigger', {
         method: 'POST',
@@ -108,20 +110,20 @@ export default function App() {
           commitMessage: `chore(deploy): trigger manual pipeline build #${Date.now().toString().slice(-4)}`,
           shouldFail,
         }),
-      });
-      const data = await res.json();
+      })
+      const data = await res.json()
       if (data.run) {
-        setCurrentRun(data.run);
-        setSelectedStageId(data.run.stages[0]?.id);
-        setActiveTab('pipelines');
-        fetchPipelines(targetProjId);
+        setCurrentRun(data.run)
+        setSelectedStageId(data.run.stages[0]?.id)
+        setActiveTab('pipelines')
+        fetchPipelines(targetProjId)
       }
     } catch (err) {
-      console.error('Error triggering deploy:', err);
+      console.error('Error triggering deploy:', err)
     } finally {
-      setIsTriggering(false);
+      setIsTriggering(false)
     }
-  };
+  }
 
   // Save or edit project
   const handleSaveProject = async (projectData: Partial<DeploymentProject>) => {
@@ -131,44 +133,43 @@ export default function App() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
-      });
+      })
     } else {
       // POST
       const res = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
-      });
-      const data = await res.json();
+      })
+      const data = await res.json()
       if (data.project) {
-        setSelectedProject(data.project);
+        setSelectedProject(data.project)
       }
     }
-    fetchProjects();
-  };
+    fetchProjects()
+  }
 
   const handleDeleteProject = async (projId: string) => {
-    await fetch(`/api/projects/${projId}`, { method: 'DELETE' });
+    await fetch(`/api/projects/${projId}`, { method: 'DELETE' })
     if (selectedProject?.id === projId) {
-      setSelectedProject(null);
+      setSelectedProject(null)
     }
-    fetchProjects();
-    fetchPipelines();
-  };
+    fetchProjects()
+    fetchPipelines()
+  }
 
   // Switch to AI Doctor with log pre-filled
   const handleDiagnoseWithAi = (logSnippet: string) => {
-    setDoctorLogInput(logSnippet);
-    setActiveTab('ai-doctor');
-  };
+    setDoctorLogInput(logSnippet)
+    setActiveTab('ai-doctor')
+  }
 
   // Calculate Metrics
-  const totalRuns = buildRuns.length;
-  const successRuns = buildRuns.filter((r) => r.status === 'success').length;
-  const successRate = totalRuns > 0 ? Math.round((successRuns / totalRuns) * 100) : 100;
-  const avgDuration = totalRuns > 0 
-    ? Math.round(buildRuns.reduce((acc, curr) => acc + (curr.durationSeconds || 35), 0) / totalRuns)
-    : 42;
+  const totalRuns = buildRuns.length
+  const successRuns = buildRuns.filter((r) => r.status === 'success').length
+  const successRate = totalRuns > 0 ? Math.round((successRuns / totalRuns) * 100) : 100
+  const avgDuration =
+    totalRuns > 0 ? Math.round(buildRuns.reduce((acc, curr) => acc + (curr.durationSeconds || 35), 0) / totalRuns) : 42
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased">
@@ -177,14 +178,14 @@ export default function App() {
         projects={projects}
         selectedProject={selectedProject}
         onSelectProject={(p) => {
-          setSelectedProject(p);
-          fetchPipelines(p.id);
+          setSelectedProject(p)
+          fetchPipelines(p.id)
         }}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenNewProjectModal={() => {
-          setEditingProject(null);
-          setIsModalOpen(true);
+          setEditingProject(null)
+          setIsModalOpen(true)
         }}
         onTriggerDeploy={() => handleTriggerDeploy()}
         isTriggering={isTriggering}
@@ -288,20 +289,18 @@ export default function App() {
                     <Clock className="w-4 h-4 text-slate-400" />
                     <span>Lịch Sử Deploy Gần Đây</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    {buildRuns.length} builds
-                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">{buildRuns.length} builds</span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-800/80 p-1">
                   {buildRuns.map((run) => {
-                    const isSelected = currentRun?.id === run.id;
+                    const isSelected = currentRun?.id === run.id
                     return (
                       <div
                         key={run.id}
                         onClick={() => {
-                          setCurrentRun(run);
-                          setSelectedStageId(run.stages[0]?.id);
+                          setCurrentRun(run)
+                          setSelectedStageId(run.stages[0]?.id)
                         }}
                         className={`p-3 rounded-lg transition cursor-pointer text-xs space-y-1.5 ${
                           isSelected
@@ -316,8 +315,8 @@ export default function App() {
                                 run.status === 'running'
                                   ? 'bg-amber-400 animate-pulse'
                                   : run.status === 'success'
-                                  ? 'bg-emerald-400'
-                                  : 'bg-rose-400'
+                                    ? 'bg-emerald-400'
+                                    : 'bg-rose-400'
                               }`}
                             />
                             <strong className="text-white">#{run.id.replace('run-', '')}</strong>
@@ -329,16 +328,14 @@ export default function App() {
                           </span>
                         </div>
 
-                        <p className="text-[11px] text-slate-400 line-clamp-1">
-                          {run.commitMessage}
-                        </p>
+                        <p className="text-[11px] text-slate-400 line-clamp-1">{run.commitMessage}</p>
 
                         <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1">
                           <span>@{run.author}</span>
                           <span>{run.durationSeconds ? `${run.durationSeconds}s` : 'running...'}</span>
                         </div>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               </div>
@@ -347,28 +344,21 @@ export default function App() {
         )}
 
         {/* Tab 2: Config Generator & GitHub Actions Setup */}
-        {activeTab === 'configs' && (
-          <ConfigGenerator project={selectedProject} />
-        )}
+        {activeTab === 'configs' && <ConfigGenerator project={selectedProject} />}
 
         {/* Tab 3: GitHub Webhooks & Simulator */}
         {activeTab === 'webhooks' && (
           <WebhookManager
             project={selectedProject}
             onPipelineTriggered={() => {
-              fetchPipelines(selectedProject?.id);
-              setActiveTab('pipelines');
+              fetchPipelines(selectedProject?.id)
+              setActiveTab('pipelines')
             }}
           />
         )}
 
         {/* Tab 4: AI DevOps Doctor & Architect */}
-        {activeTab === 'ai-doctor' && (
-          <AiDevopsDoctor
-            project={selectedProject}
-            initialLogText={doctorLogInput}
-          />
-        )}
+        {activeTab === 'ai-doctor' && <AiDevopsDoctor project={selectedProject} initialLogText={doctorLogInput} />}
 
         {/* Tab 5: Project Management */}
         {activeTab === 'projects' && (
@@ -377,14 +367,14 @@ export default function App() {
             selectedProject={selectedProject}
             onSelectProject={setSelectedProject}
             onEditProject={(p) => {
-              setEditingProject(p);
-              setIsModalOpen(true);
+              setEditingProject(p)
+              setIsModalOpen(true)
             }}
             onDeleteProject={handleDeleteProject}
             onTriggerDeploy={(pId) => handleTriggerDeploy(pId)}
             onOpenNewProjectModal={() => {
-              setEditingProject(null);
-              setIsModalOpen(true);
+              setEditingProject(null)
+              setIsModalOpen(true)
             }}
           />
         )}
@@ -394,12 +384,12 @@ export default function App() {
       <ProjectModal
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          setEditingProject(null);
+          setIsModalOpen(false)
+          setEditingProject(null)
         }}
         onSaveProject={handleSaveProject}
         initialProject={editingProject}
       />
     </div>
-  );
+  )
 }

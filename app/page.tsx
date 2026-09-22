@@ -1,10 +1,6 @@
 import { headers } from 'next/headers'
 import { VelclawLanding } from '@/components/velclaw-landing'
-import {
-  getVelclawDomainRole,
-  getVelclawDomainRoleContent,
-  getVelclawOriginForRole,
-} from '@/lib/velclaw/domain-config'
+import { getVelclawDomainRole, getVelclawDomainRoleContent, getVelclawOriginForRole } from '@/lib/velclaw/domain-config'
 
 /** Renders the landing experience with screen-reader context tailored to the request's domain role. */
 export default async function VelclawWorkspacePage() {

@@ -55,15 +55,18 @@ export async function listRuntimeEvidence(): Promise<RuntimeEvidence[]> {
     ORDER BY component
   `
   const byComponent = new Map(rows.map((row) => [row.component, row]))
-  return EVIDENCE_COMPONENTS.map((component) => byComponent.get(component) || {
-    component,
-    status: 'unverified',
-    evidenceHash: null,
-    evidence: null,
-    capturedAt: null,
-    attestedBy: null,
-    source: null,
-  })
+  return EVIDENCE_COMPONENTS.map(
+    (component) =>
+      byComponent.get(component) || {
+        component,
+        status: 'unverified',
+        evidenceHash: null,
+        evidence: null,
+        capturedAt: null,
+        attestedBy: null,
+        source: null,
+      },
+  )
 }
 
 export async function attestRuntimeEvidence(input: {

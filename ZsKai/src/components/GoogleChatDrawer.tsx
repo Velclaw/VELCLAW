@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   MessageSquare,
   Send,
@@ -12,233 +12,224 @@ import {
   MessageCircle,
   Plus,
   Radio,
-  Terminal
-} from 'lucide-react';
-import {
-  initGoogleAuth,
-  signInWithGoogle,
-  googleSignOut,
-  getGoogleAccessToken
-} from '../utils/googleAuth';
-import { User } from 'firebase/auth';
+  Terminal,
+} from 'lucide-react'
+import { initGoogleAuth, signInWithGoogle, googleSignOut, getGoogleAccessToken } from '../utils/googleAuth'
+import { User } from 'firebase/auth'
 
 export interface ChatSpace {
-  name: string; // e.g. "spaces/AAAA..."
-  displayName?: string;
-  type?: string;
-  singleUserBotDm?: boolean;
+  name: string // e.g. "spaces/AAAA..."
+  displayName?: string
+  type?: string
+  singleUserBotDm?: boolean
 }
 
 export interface ChatMessage {
-  name: string;
+  name: string
   sender?: {
-    name?: string;
-    displayName?: string;
-    type?: string;
-  };
-  text?: string;
-  createTime?: string;
+    name?: string
+    displayName?: string
+    type?: string
+  }
+  text?: string
+  createTime?: string
 }
 
 interface GoogleChatDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  terminalHistoryText?: string;
+  isOpen: boolean
+  onClose: () => void
+  terminalHistoryText?: string
 }
 
-export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
-  isOpen,
-  onClose,
-  terminalHistoryText = ''
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({ isOpen, onClose, terminalHistoryText = '' }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [isAuthChecking, setIsAuthChecking] = useState(true)
+  const [isSigningIn, setIsSigningIn] = useState(false)
 
-  const [spaces, setSpaces] = useState<ChatSpace[]>([]);
-  const [selectedSpaceName, setSelectedSpaceName] = useState<string | null>(null);
-  const [isLoadingSpaces, setIsLoadingSpaces] = useState(false);
+  const [spaces, setSpaces] = useState<ChatSpace[]>([])
+  const [selectedSpaceName, setSelectedSpaceName] = useState<string | null>(null)
+  const [isLoadingSpaces, setIsLoadingSpaces] = useState(false)
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-  const [newMessageText, setNewMessageText] = useState('');
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [newMessageText, setNewMessageText] = useState('')
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
 
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
 
   // Auth setup
   useEffect(() => {
     const unsubscribe = initGoogleAuth(
       (authedUser, accessToken) => {
-        setUser(authedUser);
-        setToken(accessToken);
-        setIsAuthChecking(false);
+        setUser(authedUser)
+        setToken(accessToken)
+        setIsAuthChecking(false)
       },
       () => {
-        setUser(null);
-        setToken(null);
-        setIsAuthChecking(false);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
+        setUser(null)
+        setToken(null)
+        setIsAuthChecking(false)
+      },
+    )
+    return () => unsubscribe()
+  }, [])
 
   // Load spaces when drawer opens or token available
   useEffect(() => {
     if (isOpen && token) {
-      handleFetchSpaces();
+      handleFetchSpaces()
     }
-  }, [isOpen, token]);
+  }, [isOpen, token])
 
   // Load messages when space is selected
   useEffect(() => {
     if (selectedSpaceName && token) {
-      handleFetchMessages(selectedSpaceName);
+      handleFetchMessages(selectedSpaceName)
     } else {
-      setMessages([]);
+      setMessages([])
     }
-  }, [selectedSpaceName, token]);
+  }, [selectedSpaceName, token])
 
   const handleSignIn = async () => {
-    setIsSigningIn(true);
-    setStatusMessage(null);
+    setIsSigningIn(true)
+    setStatusMessage(null)
     try {
-      const res = await signInWithPopupGoogle();
+      const res = await signInWithPopupGoogle()
       if (res) {
-        setUser(res.user);
-        setToken(res.accessToken);
-        setStatusMessage({ type: 'success', text: 'Đã kết nối Google Chat thành công!' });
+        setUser(res.user)
+        setToken(res.accessToken)
+        setStatusMessage({ type: 'success', text: 'Đã kết nối Google Chat thành công!' })
       }
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể đăng nhập Google' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể đăng nhập Google' })
     } finally {
-      setIsSigningIn(false);
+      setIsSigningIn(false)
     }
-  };
+  }
 
   const signInWithPopupGoogle = async () => {
-    return await signInWithGoogle();
-  };
+    return await signInWithGoogle()
+  }
 
   const handleSignOut = async () => {
-    await googleSignOut();
-    setUser(null);
-    setToken(null);
-    setSpaces([]);
-    setSelectedSpaceName(null);
-    setMessages([]);
-    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google Chat.' });
-  };
+    await googleSignOut()
+    setUser(null)
+    setToken(null)
+    setSpaces([])
+    setSelectedSpaceName(null)
+    setMessages([])
+    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google Chat.' })
+  }
 
   const handleFetchSpaces = async () => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingSpaces(true);
-    setStatusMessage(null);
+    setIsLoadingSpaces(true)
+    setStatusMessage(null)
     try {
       const response = await fetch('https://chat.googleapis.com/v1/spaces?pageSize=30', {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
+        headers: { Authorization: `Bearer ${activeToken}` },
+      })
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to fetch spaces (${response.status})`);
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to fetch spaces (${response.status})`)
       }
 
-      const data = await response.json();
-      const loadedSpaces: ChatSpace[] = data.spaces || [];
-      setSpaces(loadedSpaces);
+      const data = await response.json()
+      const loadedSpaces: ChatSpace[] = data.spaces || []
+      setSpaces(loadedSpaces)
 
       if (loadedSpaces.length > 0 && !selectedSpaceName) {
-        setSelectedSpaceName(loadedSpaces[0].name);
+        setSelectedSpaceName(loadedSpaces[0].name)
       }
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải Google Chat Spaces' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải Google Chat Spaces' })
     } finally {
-      setIsLoadingSpaces(false);
+      setIsLoadingSpaces(false)
     }
-  };
+  }
 
   const handleFetchMessages = async (spaceName: string) => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingMessages(true);
+    setIsLoadingMessages(true)
     try {
-      const response = await fetch(`https://chat.googleapis.com/v1/${spaceName}/messages?pageSize=25&orderBy=createTime%20desc`, {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
+      const response = await fetch(
+        `https://chat.googleapis.com/v1/${spaceName}/messages?pageSize=25&orderBy=createTime%20desc`,
+        {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        },
+      )
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to fetch messages (${response.status})`);
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to fetch messages (${response.status})`)
       }
 
-      const data = await response.json();
-      const loadedMessages: ChatMessage[] = (data.messages || []).reverse();
-      setMessages(loadedMessages);
+      const data = await response.json()
+      const loadedMessages: ChatMessage[] = (data.messages || []).reverse()
+      setMessages(loadedMessages)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tải tin nhắn' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tải tin nhắn' })
     } finally {
-      setIsLoadingMessages(false);
+      setIsLoadingMessages(false)
     }
-  };
+  }
 
   const handleSendMessage = async (textToSend?: string) => {
-    const content = textToSend || newMessageText;
-    if (!content.trim() || !selectedSpaceName) return;
+    const content = textToSend || newMessageText
+    if (!content.trim() || !selectedSpaceName) return
 
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsSendingMessage(true);
-    setStatusMessage(null);
+    setIsSendingMessage(true)
+    setStatusMessage(null)
     try {
       const response = await fetch(`https://chat.googleapis.com/v1/${selectedSpaceName}/messages`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${activeToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text: content.trim()
-        })
-      });
+          text: content.trim(),
+        }),
+      })
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to post message (${response.status})`);
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to post message (${response.status})`)
       }
 
-      setNewMessageText('');
-      setStatusMessage({ type: 'success', text: 'Đã gửi tin nhắn thành công!' });
-      await handleFetchMessages(selectedSpaceName);
+      setNewMessageText('')
+      setStatusMessage({ type: 'success', text: 'Đã gửi tin nhắn thành công!' })
+      await handleFetchMessages(selectedSpaceName)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể gửi tin nhắn' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể gửi tin nhắn' })
     } finally {
-      setIsSendingMessage(false);
+      setIsSendingMessage(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm select-none font-mono">
       <div className="w-full max-w-xl bg-black border-l-2 border-neutral-800 h-full flex flex-col shadow-2xl text-white">
-        
         {/* Top Bar */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b-2 border-neutral-800 bg-black">
           <div className="flex items-center space-x-2">
             <MessageCircle className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
-              Google Chat Live
-            </h2>
+            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Google Chat Live</h2>
             <span className="px-2 py-0.5 text-[10px] bg-cyan-400 text-black font-extrabold uppercase border border-cyan-300">
               Workspace Chat API
             </span>
@@ -269,8 +260,8 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
               statusMessage.type === 'success'
                 ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700'
                 : statusMessage.type === 'error'
-                ? 'bg-red-950/80 text-red-300 border-red-700'
-                : 'bg-neutral-900 text-neutral-300 border-neutral-700'
+                  ? 'bg-red-950/80 text-red-300 border-red-700'
+                  : 'bg-neutral-900 text-neutral-300 border-neutral-700'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -294,11 +285,10 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
             <div className="p-4 bg-black border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] max-w-md space-y-3">
               <MessageSquare className="w-10 h-10 text-cyan-400 mx-auto" />
-              <h3 className="text-sm font-extrabold uppercase text-white tracking-wider">
-                Kết Nối Google Chat Spaces
-              </h3>
+              <h3 className="text-sm font-extrabold uppercase text-white tracking-wider">Kết Nối Google Chat Spaces</h3>
               <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-                Đăng nhập tài khoản Google Workspace để gửi thông báo terminal, cảnh báo sự cố từ ứng dụng trực tiếp tới Google Chat Spaces / Direct Messages.
+                Đăng nhập tài khoản Google Workspace để gửi thông báo terminal, cảnh báo sự cố từ ứng dụng trực tiếp tới
+                Google Chat Spaces / Direct Messages.
               </p>
             </div>
 
@@ -308,17 +298,28 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
               className="px-6 py-3 bg-white hover:bg-neutral-100 text-neutral-800 font-bold border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all cursor-pointer active:scale-95 flex items-center space-x-3 uppercase text-xs"
             >
               <svg className="w-5 h-5" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                ></path>
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                ></path>
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                ></path>
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                ></path>
               </svg>
               <span>{isSigningIn ? 'Đang xác thực...' : 'Sign in with Google'}</span>
             </button>
           </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-            
             {/* Spaces Selector & Refresh */}
             <div className="p-3 bg-neutral-950 border-b-2 border-neutral-800 flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
@@ -327,13 +328,13 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
                 </label>
                 <select
                   value={selectedSpaceName || ''}
-                  onChange={e => setSelectedSpaceName(e.target.value)}
+                  onChange={(e) => setSelectedSpaceName(e.target.value)}
                   className="w-full bg-black text-cyan-300 text-xs font-extrabold uppercase border-2 border-neutral-700 p-1.5 focus:border-cyan-400 focus:outline-none"
                 >
                   {spaces.length === 0 ? (
                     <option value="">-- Không có Space nào --</option>
                   ) : (
-                    spaces.map(sp => (
+                    spaces.map((sp) => (
                       <option key={sp.name} value={sp.name}>
                         {sp.displayName || sp.name} {sp.type ? `(${sp.type})` : ''}
                       </option>
@@ -402,9 +403,9 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
             {/* Message Input Composer */}
             <div className="p-3 bg-neutral-950 border-t-2 border-neutral-800">
               <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  handleSendMessage();
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSendMessage()
                 }}
                 className="flex items-center space-x-2"
               >
@@ -412,7 +413,7 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
                   type="text"
                   placeholder="Nhập tin nhắn gửi sang Google Chat Space..."
                   value={newMessageText}
-                  onChange={e => setNewMessageText(e.target.value)}
+                  onChange={(e) => setNewMessageText(e.target.value)}
                   disabled={!selectedSpaceName || isSendingMessage}
                   className="flex-1 bg-black text-white text-xs font-bold p-2 border-2 border-neutral-700 focus:border-cyan-400 focus:outline-none"
                 />
@@ -426,11 +427,9 @@ export const GoogleChatDrawer: React.FC<GoogleChatDrawerProps> = ({
                 </button>
               </form>
             </div>
-
           </div>
         )}
-
       </div>
     </div>
-  );
-};
+  )
+}

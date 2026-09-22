@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   FileSpreadsheet,
   Plus,
@@ -12,262 +12,254 @@ import {
   Users,
   Eye,
   Send,
-  Sparkles
-} from 'lucide-react';
-import {
-  initGoogleAuth,
-  signInWithGoogle,
-  googleSignOut,
-  getGoogleAccessToken
-} from '../utils/googleAuth';
-import { User } from 'firebase/auth';
+  Sparkles,
+} from 'lucide-react'
+import { initGoogleAuth, signInWithGoogle, googleSignOut, getGoogleAccessToken } from '../utils/googleAuth'
+import { User } from 'firebase/auth'
 
 export interface GoogleFormFile {
-  id: string;
-  name: string;
-  modifiedTime?: string;
-  webViewLink?: string;
+  id: string
+  name: string
+  modifiedTime?: string
+  webViewLink?: string
 }
 
 export interface GoogleFormDetail {
-  formId: string;
+  formId: string
   info?: {
-    title?: string;
-    description?: string;
-    documentTitle?: string;
-  };
+    title?: string
+    description?: string
+    documentTitle?: string
+  }
   items?: {
-    itemId?: string;
-    title?: string;
-    description?: string;
+    itemId?: string
+    title?: string
+    description?: string
     questionItem?: {
       question?: {
-        questionId?: string;
-        required?: boolean;
-      };
-    };
-  }[];
-  responderUri?: string;
+        questionId?: string
+        required?: boolean
+      }
+    }
+  }[]
+  responderUri?: string
 }
 
 export interface GoogleFormResponse {
-  responseId: string;
-  createTime?: string;
-  answers?: Record<string, any>;
+  responseId: string
+  createTime?: string
+  answers?: Record<string, any>
 }
 
 interface GoogleFormsDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, onClose }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [isAuthChecking, setIsAuthChecking] = useState(true)
+  const [isSigningIn, setIsSigningIn] = useState(false)
 
-  const [formsList, setFormsList] = useState<GoogleFormFile[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoadingForms, setIsLoadingForms] = useState(false);
+  const [formsList, setFormsList] = useState<GoogleFormFile[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isLoadingForms, setIsLoadingForms] = useState(false)
 
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
-  const [activeFormDetail, setActiveFormDetail] = useState<GoogleFormDetail | null>(null);
-  const [activeFormResponses, setActiveFormResponses] = useState<GoogleFormResponse[]>([]);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
+  const [activeFormDetail, setActiveFormDetail] = useState<GoogleFormDetail | null>(null)
+  const [activeFormResponses, setActiveFormResponses] = useState<GoogleFormResponse[]>([])
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
 
   // New Form Creation state
-  const [isCreatingForm, setIsCreatingForm] = useState(false);
-  const [newFormTitle, setNewFormTitle] = useState('');
-  const [isSubmittingNewForm, setIsSubmittingNewForm] = useState(false);
+  const [isCreatingForm, setIsCreatingForm] = useState(false)
+  const [newFormTitle, setNewFormTitle] = useState('')
+  const [isSubmittingNewForm, setIsSubmittingNewForm] = useState(false)
 
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
 
   useEffect(() => {
     const unsubscribe = initGoogleAuth(
       (authedUser, accessToken) => {
-        setUser(authedUser);
-        setToken(accessToken);
-        setIsAuthChecking(false);
+        setUser(authedUser)
+        setToken(accessToken)
+        setIsAuthChecking(false)
       },
       () => {
-        setUser(null);
-        setToken(null);
-        setIsAuthChecking(false);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
+        setUser(null)
+        setToken(null)
+        setIsAuthChecking(false)
+      },
+    )
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     if (isOpen && token) {
-      handleFetchForms();
+      handleFetchForms()
     }
-  }, [isOpen, token]);
+  }, [isOpen, token])
 
   useEffect(() => {
     if (selectedFormId && token) {
-      handleLoadFormDetails(selectedFormId);
+      handleLoadFormDetails(selectedFormId)
     } else {
-      setActiveFormDetail(null);
-      setActiveFormResponses([]);
+      setActiveFormDetail(null)
+      setActiveFormResponses([])
     }
-  }, [selectedFormId, token]);
+  }, [selectedFormId, token])
 
   const handleSignIn = async () => {
-    setIsSigningIn(true);
-    setStatusMessage(null);
+    setIsSigningIn(true)
+    setStatusMessage(null)
     try {
-      const res = await signInWithGoogle();
+      const res = await signInWithGoogle()
       if (res) {
-        setUser(res.user);
-        setToken(res.accessToken);
-        setStatusMessage({ type: 'success', text: 'Đã kết nối Google Forms thành công!' });
+        setUser(res.user)
+        setToken(res.accessToken)
+        setStatusMessage({ type: 'success', text: 'Đã kết nối Google Forms thành công!' })
       }
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể xác thực Google Forms' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể xác thực Google Forms' })
     } finally {
-      setIsSigningIn(false);
+      setIsSigningIn(false)
     }
-  };
+  }
 
   const handleSignOut = async () => {
-    await googleSignOut();
-    setUser(null);
-    setToken(null);
-    setFormsList([]);
-    setSelectedFormId(null);
-    setActiveFormDetail(null);
-    setActiveFormResponses([]);
-    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google Forms.' });
-  };
+    await googleSignOut()
+    setUser(null)
+    setToken(null)
+    setFormsList([])
+    setSelectedFormId(null)
+    setActiveFormDetail(null)
+    setActiveFormResponses([])
+    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google Forms.' })
+  }
 
   const handleFetchForms = async () => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingForms(true);
-    setStatusMessage(null);
+    setIsLoadingForms(true)
+    setStatusMessage(null)
     try {
-      let q = "mimeType='application/vnd.google-apps.form' and trashed=false";
+      let q = "mimeType='application/vnd.google-apps.form' and trashed=false"
       if (searchQuery.trim()) {
-        q += ` and name contains '${searchQuery.trim().replace(/'/g, "\\'")}'`;
+        q += ` and name contains '${searchQuery.trim().replace(/'/g, "\\'")}'`
       }
 
-      const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime%20desc&pageSize=20&fields=files(id,name,modifiedTime,webViewLink)`;
-      
+      const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&orderBy=modifiedTime%20desc&pageSize=20&fields=files(id,name,modifiedTime,webViewLink)`
+
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
+        headers: { Authorization: `Bearer ${activeToken}` },
+      })
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to fetch forms (${response.status})`);
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to fetch forms (${response.status})`)
       }
 
-      const data = await response.json();
-      setFormsList(data.files || []);
+      const data = await response.json()
+      setFormsList(data.files || [])
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải danh sách Google Forms' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải danh sách Google Forms' })
     } finally {
-      setIsLoadingForms(false);
+      setIsLoadingForms(false)
     }
-  };
+  }
 
   const handleLoadFormDetails = async (formId: string) => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingDetail(true);
+    setIsLoadingDetail(true)
     try {
       // Fetch Form Metadata
       const formRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}`, {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
+        headers: { Authorization: `Bearer ${activeToken}` },
+      })
 
       if (!formRes.ok) {
-        const errData = await formRes.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to get form detail (${formRes.status})`);
+        const errData = await formRes.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to get form detail (${formRes.status})`)
       }
 
-      const formDetail: GoogleFormDetail = await formRes.json();
-      setActiveFormDetail(formDetail);
+      const formDetail: GoogleFormDetail = await formRes.json()
+      setActiveFormDetail(formDetail)
 
       // Fetch Form Responses
       const respRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}/responses`, {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
+        headers: { Authorization: `Bearer ${activeToken}` },
+      })
 
       if (respRes.ok) {
-        const respData = await respRes.json();
-        setActiveFormResponses(respData.responses || []);
+        const respData = await respRes.json()
+        setActiveFormResponses(respData.responses || [])
       }
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi đọc thông tin biểu mẫu' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi đọc thông tin biểu mẫu' })
     } finally {
-      setIsLoadingDetail(false);
+      setIsLoadingDetail(false)
     }
-  };
+  }
 
   const handleCreateNewForm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFormTitle.trim()) return;
+    e.preventDefault()
+    if (!newFormTitle.trim()) return
 
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsSubmittingNewForm(true);
-    setStatusMessage(null);
+    setIsSubmittingNewForm(true)
+    setStatusMessage(null)
     try {
       const response = await fetch('https://forms.googleapis.com/v1/forms', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${activeToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           info: {
             title: newFormTitle.trim(),
-            documentTitle: newFormTitle.trim()
-          }
-        })
-      });
+            documentTitle: newFormTitle.trim(),
+          },
+        }),
+      })
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Failed to create Google Form (${response.status})`);
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.error?.message || `Failed to create Google Form (${response.status})`)
       }
 
-      const createdForm: GoogleFormDetail = await response.json();
-      setNewFormTitle('');
-      setIsCreatingForm(false);
-      setStatusMessage({ type: 'success', text: `Tạo Google Form "${createdForm.info?.title}" thành công!` });
-      await handleFetchForms();
-      setSelectedFormId(createdForm.formId);
+      const createdForm: GoogleFormDetail = await response.json()
+      setNewFormTitle('')
+      setIsCreatingForm(false)
+      setStatusMessage({ type: 'success', text: `Tạo Google Form "${createdForm.info?.title}" thành công!` })
+      await handleFetchForms()
+      setSelectedFormId(createdForm.formId)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tạo Google Form' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tạo Google Form' })
     } finally {
-      setIsSubmittingNewForm(false);
+      setIsSubmittingNewForm(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm select-none font-mono">
       <div className="w-full max-w-2xl bg-black border-l-2 border-neutral-800 h-full flex flex-col shadow-2xl text-white">
-        
         {/* Top Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b-2 border-neutral-800 bg-black">
           <div className="flex items-center space-x-2">
             <FileSpreadsheet className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
-              Google Forms Manager
-            </h2>
+            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Google Forms Manager</h2>
             <span className="px-2 py-0.5 text-[10px] bg-cyan-400 text-black font-extrabold uppercase border border-cyan-300">
               Workspace Forms API
             </span>
@@ -298,8 +290,8 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
               statusMessage.type === 'success'
                 ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700'
                 : statusMessage.type === 'error'
-                ? 'bg-red-950/80 text-red-300 border-red-700'
-                : 'bg-neutral-900 text-neutral-300 border-neutral-700'
+                  ? 'bg-red-950/80 text-red-300 border-red-700'
+                  : 'bg-neutral-900 text-neutral-300 border-neutral-700'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -323,11 +315,10 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
             <div className="p-4 bg-black border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] max-w-md space-y-3">
               <FileSpreadsheet className="w-10 h-10 text-cyan-400 mx-auto" />
-              <h3 className="text-sm font-extrabold uppercase text-white tracking-wider">
-                Kết Nối Google Forms API
-              </h3>
+              <h3 className="text-sm font-extrabold uppercase text-white tracking-wider">Kết Nối Google Forms API</h3>
               <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-                Đăng nhập tài khoản Google để tạo biểu mẫu khảo sát mới, xem câu hỏi và kiểm tra câu trả lời (responses) trực tiếp từ Google Forms.
+                Đăng nhập tài khoản Google để tạo biểu mẫu khảo sát mới, xem câu hỏi và kiểm tra câu trả lời (responses)
+                trực tiếp từ Google Forms.
               </p>
             </div>
 
@@ -337,20 +328,30 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
               className="px-6 py-3 bg-white hover:bg-neutral-100 text-neutral-800 font-bold border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all cursor-pointer active:scale-95 flex items-center space-x-3 rounded-none uppercase text-xs"
             >
               <svg className="w-5 h-5" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                ></path>
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                ></path>
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                ></path>
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                ></path>
               </svg>
               <span>{isSigningIn ? 'Đang xác thực...' : 'Sign in with Google'}</span>
             </button>
           </div>
         ) : (
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            
             {/* Left Column: Forms List & Search */}
             <div className="w-full md:w-5/12 border-b-2 md:border-b-0 md:border-r-2 border-neutral-800 flex flex-col bg-black">
-              
               <div className="p-3 border-b-2 border-neutral-800 space-y-2 bg-neutral-950">
                 <div className="flex items-center space-x-1.5">
                   <div className="relative flex-1">
@@ -358,8 +359,8 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                       type="text"
                       placeholder="Tìm Google Form..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleFetchForms()}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleFetchForms()}
                       className="w-full pl-8 pr-2 py-1.5 bg-black border-2 border-neutral-700 focus:border-cyan-400 text-white text-xs rounded-none focus:outline-none"
                     />
                     <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
@@ -390,7 +391,7 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                       type="text"
                       placeholder="Ví dụ: Dev_Feedback_Survey_2026"
                       value={newFormTitle}
-                      onChange={e => setNewFormTitle(e.target.value)}
+                      onChange={(e) => setNewFormTitle(e.target.value)}
                       required
                       className="w-full p-1.5 bg-neutral-900 border-2 border-neutral-700 text-white text-xs rounded-none focus:border-cyan-400 focus:outline-none"
                     />
@@ -426,7 +427,7 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                     Không tìm thấy Google Form nào.
                   </div>
                 ) : (
-                  formsList.map(form => (
+                  formsList.map((form) => (
                     <div
                       key={form.id}
                       onClick={() => setSelectedFormId(form.id)}
@@ -436,7 +437,9 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                           : 'bg-black border-neutral-800 hover:border-neutral-600 text-neutral-300'
                       }`}
                     >
-                      <FileSpreadsheet className={`w-4 h-4 shrink-0 mt-0.5 ${selectedFormId === form.id ? 'text-cyan-400' : 'text-neutral-400'}`} />
+                      <FileSpreadsheet
+                        className={`w-4 h-4 shrink-0 mt-0.5 ${selectedFormId === form.id ? 'text-cyan-400' : 'text-neutral-400'}`}
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-xs truncate leading-tight">{form.name}</div>
                         <div className="text-[10px] text-neutral-400 mt-1 flex items-center justify-between">
@@ -446,7 +449,7 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                               href={form.webViewLink}
                               target="_blank"
                               rel="noreferrer"
-                              onClick={e => e.stopPropagation()}
+                              onClick={(e) => e.stopPropagation()}
                               className="text-cyan-400 hover:underline flex items-center gap-0.5"
                             >
                               <span>Chỉnh sửa</span>
@@ -501,10 +504,17 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                           {activeFormDetail?.items && activeFormDetail.items.length > 0 ? (
                             <div className="space-y-1.5">
                               {activeFormDetail.items.map((item, idx) => (
-                                <div key={item.itemId || idx} className="p-2.5 bg-neutral-950 border border-neutral-800 text-xs">
-                                  <span className="font-bold text-white block">{idx + 1}. {item.title || '[Chưa đặt tên câu hỏi]'}</span>
+                                <div
+                                  key={item.itemId || idx}
+                                  className="p-2.5 bg-neutral-950 border border-neutral-800 text-xs"
+                                >
+                                  <span className="font-bold text-white block">
+                                    {idx + 1}. {item.title || '[Chưa đặt tên câu hỏi]'}
+                                  </span>
                                   {item.description && (
-                                    <span className="text-[11px] text-neutral-400 block mt-0.5">{item.description}</span>
+                                    <span className="text-[11px] text-neutral-400 block mt-0.5">
+                                      {item.description}
+                                    </span>
                                   )}
                                 </div>
                               ))}
@@ -527,7 +537,10 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                           {activeFormResponses.length > 0 ? (
                             <div className="space-y-2">
                               {activeFormResponses.map((resp, idx) => (
-                                <div key={resp.responseId || idx} className="p-3 bg-neutral-950 border border-neutral-800 space-y-1">
+                                <div
+                                  key={resp.responseId || idx}
+                                  className="p-3 bg-neutral-950 border border-neutral-800 space-y-1"
+                                >
                                   <div className="flex items-center justify-between text-[10px] text-neutral-400">
                                     <span className="font-bold text-cyan-300"># Response {idx + 1}</span>
                                     <span>{resp.createTime ? new Date(resp.createTime).toLocaleString() : ''}</span>
@@ -552,11 +565,9 @@ export const GoogleFormsDrawer: React.FC<GoogleFormsDrawerProps> = ({ isOpen, on
                 </div>
               )}
             </div>
-
           </div>
         )}
-
       </div>
     </div>
-  );
-};
+  )
+}

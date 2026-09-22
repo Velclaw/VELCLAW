@@ -28,15 +28,19 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     const packages = Array.isArray(data.objects)
-      ? data.objects.map((entry: any) => ({
-          name: entry.package?.name,
-          version: entry.package?.version,
-          description: entry.package?.description || '',
-          keywords: entry.package?.keywords || [],
-          license: entry.package?.license || null,
-          repository: entry.package?.links?.repository || null,
-          npm: entry.package?.links?.npm || `https://www.npmjs.com/package/${encodeURIComponent(entry.package?.name || '')}`,
-        })).filter((entry: { name?: string }) => Boolean(entry.name))
+      ? data.objects
+          .map((entry: any) => ({
+            name: entry.package?.name,
+            version: entry.package?.version,
+            description: entry.package?.description || '',
+            keywords: entry.package?.keywords || [],
+            license: entry.package?.license || null,
+            repository: entry.package?.links?.repository || null,
+            npm:
+              entry.package?.links?.npm ||
+              `https://www.npmjs.com/package/${encodeURIComponent(entry.package?.name || '')}`,
+          }))
+          .filter((entry: { name?: string }) => Boolean(entry.name))
       : []
 
     return NextResponse.json({ packages })

@@ -1,86 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Radio, 
-  Copy, 
-  Check, 
-  Play, 
-  Send, 
-  Shield, 
-  Clock, 
-  RefreshCw, 
-  CheckCircle2, 
-  XCircle, 
+import React, { useState, useEffect } from 'react'
+import {
+  Radio,
+  Copy,
+  Check,
+  Play,
+  Send,
+  Shield,
+  Clock,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
   AlertCircle,
   GitBranch,
-  Terminal
-} from 'lucide-react';
-import { DeploymentProject, WebhookLog } from '../types';
+  Terminal,
+} from 'lucide-react'
+import { DeploymentProject, WebhookLog } from '../types'
 
 interface WebhookManagerProps {
-  project: DeploymentProject | null;
-  onPipelineTriggered?: () => void;
+  project: DeploymentProject | null
+  onPipelineTriggered?: () => void
 }
 
-export const WebhookManager: React.FC<WebhookManagerProps> = ({
-  project,
-  onPipelineTriggered,
-}) => {
-  const [copiedUrl, setCopiedUrl] = useState(false);
-  const [copiedSecret, setCopiedSecret] = useState(false);
-  const [logs, setLogs] = useState<WebhookLog[]>([]);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+export const WebhookManager: React.FC<WebhookManagerProps> = ({ project, onPipelineTriggered }) => {
+  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [copiedSecret, setCopiedSecret] = useState(false)
+  const [logs, setLogs] = useState<WebhookLog[]>([])
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false)
 
   // Simulation form state
-  const [simBranch, setSimBranch] = useState(project?.branch || 'main');
-  const [simCommitMsg, setSimCommitMsg] = useState('feat: update landing page and fix responsive navbar');
-  const [simAuthor, setSimAuthor] = useState('github-developer');
-  const [simShouldFail, setSimShouldFail] = useState(false);
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simulationResult, setSimulationResult] = useState<string | null>(null);
+  const [simBranch, setSimBranch] = useState(project?.branch || 'main')
+  const [simCommitMsg, setSimCommitMsg] = useState('feat: update landing page and fix responsive navbar')
+  const [simAuthor, setSimAuthor] = useState('github-developer')
+  const [simShouldFail, setSimShouldFail] = useState(false)
+  const [isSimulating, setIsSimulating] = useState(false)
+  const [simulationResult, setSimulationResult] = useState<string | null>(null)
 
-  const appUrl = window.location.origin;
-  const webhookUrl = project ? `${appUrl}/api/webhooks/github/${project.id}` : '';
+  const appUrl = window.location.origin
+  const webhookUrl = project ? `${appUrl}/api/webhooks/github/${project.id}` : ''
 
   useEffect(() => {
     if (project) {
-      setSimBranch(project.branch || 'main');
-      fetchLogs();
+      setSimBranch(project.branch || 'main')
+      fetchLogs()
     }
-  }, [project]);
+  }, [project])
 
   const fetchLogs = async () => {
-    if (!project) return;
-    setIsLoadingLogs(true);
+    if (!project) return
+    setIsLoadingLogs(true)
     try {
-      const res = await fetch(`/api/webhooks/logs?projectId=${project.id}`);
-      const data = await res.json();
+      const res = await fetch(`/api/webhooks/logs?projectId=${project.id}`)
+      const data = await res.json()
       if (data.logs) {
-        setLogs(data.logs);
+        setLogs(data.logs)
       }
     } catch (err) {
-      console.error('Error fetching webhook logs:', err);
+      console.error('Error fetching webhook logs:', err)
     } finally {
-      setIsLoadingLogs(false);
+      setIsLoadingLogs(false)
     }
-  };
+  }
 
   const handleCopy = (text: string, type: 'url' | 'secret') => {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text)
     if (type === 'url') {
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 2000);
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 2000)
     } else {
-      setCopiedSecret(true);
-      setTimeout(() => setCopiedSecret(false), 2000);
+      setCopiedSecret(true)
+      setTimeout(() => setCopiedSecret(false), 2000)
     }
-  };
+  }
 
   const handleSimulatePush = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!project) return;
+    e.preventDefault()
+    if (!project) return
 
-    setIsSimulating(true);
-    setSimulationResult(null);
+    setIsSimulating(true)
+    setSimulationResult(null)
 
     try {
       // Send real push payload to webhook endpoint
@@ -104,27 +101,27 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({
             clone_url: project.repoUrl,
           },
         }),
-      });
+      })
 
-      const data = await res.json();
-      setSimulationResult(data.message || 'Webhook đã gửi thành công!');
-      fetchLogs();
+      const data = await res.json()
+      setSimulationResult(data.message || 'Webhook đã gửi thành công!')
+      fetchLogs()
       if (onPipelineTriggered) {
-        onPipelineTriggered();
+        onPipelineTriggered()
       }
     } catch (err: any) {
-      setSimulationResult('Lỗi khi gửi webhook: ' + err.message);
+      setSimulationResult('Lỗi khi gửi webhook: ' + err.message)
     } finally {
-      setIsSimulating(false);
+      setIsSimulating(false)
     }
-  };
+  }
 
   if (!project) {
     return (
       <div className="p-8 text-center text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
         Vui lòng chọn một dự án để quản lý Webhook.
       </div>
-    );
+    )
   }
 
   return (
@@ -139,7 +136,8 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({
             <div>
               <h2 className="text-base font-bold text-white">GitHub Webhook Listener</h2>
               <p className="text-xs text-slate-400">
-                Endpoint tự động nhận thông báo từ GitHub mỗi khi có sự kiện <code className="text-cyan-300 font-mono">push</code>
+                Endpoint tự động nhận thông báo từ GitHub mỗi khi có sự kiện{' '}
+                <code className="text-cyan-300 font-mono">push</code>
               </p>
             </div>
           </div>
@@ -196,7 +194,10 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({
         <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 text-xs text-slate-400 flex items-start gap-2.5">
           <Shield className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
           <div>
-            <strong>Cách cài đặt trên GitHub:</strong> Vào repository &gt; <strong>Settings</strong> &gt; <strong>Webhooks</strong> &gt; <strong>Add webhook</strong> &gt; Dán <strong>Payload URL</strong> ở trên, chọn Content type là <code className="text-slate-300 font-mono">application/json</code>, dán <strong>Secret</strong> và chọn <code className="text-slate-300 font-mono">Just the push event</code>.
+            <strong>Cách cài đặt trên GitHub:</strong> Vào repository &gt; <strong>Settings</strong> &gt;{' '}
+            <strong>Webhooks</strong> &gt; <strong>Add webhook</strong> &gt; Dán <strong>Payload URL</strong> ở trên,
+            chọn Content type là <code className="text-slate-300 font-mono">application/json</code>, dán{' '}
+            <strong>Secret</strong> và chọn <code className="text-slate-300 font-mono">Just the push event</code>.
           </div>
         </div>
       </div>
@@ -307,8 +308,8 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({
                         log.status === 'accepted'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : log.status === 'ignored'
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                       }`}
                     >
                       {log.status}
@@ -333,5 +334,5 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

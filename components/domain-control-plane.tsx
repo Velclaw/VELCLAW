@@ -94,10 +94,14 @@ function StatusBadge({ status }: { status: DomainStatus }) {
     attention: { label: 'Needs attention', cls: 'border-red-400/30 bg-red-400/10 text-red-300' },
   }
   const item = map[status]
-  return <span className={`inline-flex items-center gap-1.5 border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] ${item.cls}`}>
-    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-    {item.label}
-  </span>
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] ${item.cls}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {item.label}
+    </span>
+  )
 }
 
 /** Renders an interactive client-side view of seeded, in-memory domain state. */
@@ -121,7 +125,11 @@ export function DomainControlPlane() {
   }
 
   const addDomain = () => {
-    const normalized = newDomain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const normalized = newDomain
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/\/$/, '')
     const validDomain = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalized)
     if (!validDomain) {
       setNotice('Enter a valid domain name')
@@ -174,7 +182,9 @@ export function DomainControlPlane() {
       <div className="mx-auto flex min-h-screen max-w-[1480px]">
         <aside className="hidden w-[252px] shrink-0 border-r border-white/10 bg-[#0b0a10] lg:flex lg:flex-col">
           <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-            <div className="grid h-8 w-8 place-items-center border border-violet-400/50 bg-violet-500/10 text-sm font-black text-violet-200">V</div>
+            <div className="grid h-8 w-8 place-items-center border border-violet-400/50 bg-violet-500/10 text-sm font-black text-violet-200">
+              V
+            </div>
             <div>
               <div className="text-sm font-bold tracking-wide">VELCLAW</div>
               <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Control Plane</div>
@@ -202,7 +212,9 @@ export function DomainControlPlane() {
           <div className="mt-auto border-t border-white/10 p-4">
             <div className="mb-3 text-[10px] uppercase tracking-[0.16em] text-zinc-600">DNS boundary</div>
             <div className="border border-violet-400/20 bg-violet-500/[0.04] p-3">
-              <div className="flex items-center gap-2 text-xs text-zinc-300"><Wifi size={13} className="text-violet-300" /> Velclaw DNS</div>
+              <div className="flex items-center gap-2 text-xs text-zinc-300">
+                <Wifi size={13} className="text-violet-300" /> Velclaw DNS
+              </div>
               <div className="mt-1 font-mono text-[10px] text-zinc-600">External registrar / Vercel</div>
               <div className="font-mono text-[10px] text-zinc-600">Provider-managed DNS</div>
             </div>
@@ -212,7 +224,9 @@ export function DomainControlPlane() {
         <section className="min-w-0 flex-1">
           <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0a0910]/95 px-4 py-3 backdrop-blur lg:px-7">
             <div className="flex items-center gap-3">
-              <div className="lg:hidden grid h-8 w-8 place-items-center border border-violet-400/50 bg-violet-500/10 font-black text-violet-200">V</div>
+              <div className="lg:hidden grid h-8 w-8 place-items-center border border-violet-400/50 bg-violet-500/10 font-black text-violet-200">
+                V
+              </div>
               <div>
                 <div className="text-xs text-zinc-500">Velclaw / Workspace</div>
                 <h1 className="text-base font-semibold tracking-tight">Domain Manager</h1>
@@ -222,7 +236,10 @@ export function DomainControlPlane() {
               <button className="hidden items-center gap-2 border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:border-violet-400/40 hover:text-zinc-100 sm:flex">
                 <RefreshCw size={13} /> Sync all
               </button>
-              <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-violet-500 px-3 py-2 text-xs font-bold text-white hover:bg-violet-400">
+              <button
+                onClick={() => setShowAdd(true)}
+                className="flex items-center gap-2 bg-violet-500 px-3 py-2 text-xs font-bold text-white hover:bg-violet-400"
+              >
                 <Plus size={14} /> Add domain
               </button>
             </div>
@@ -232,9 +249,19 @@ export function DomainControlPlane() {
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {[
                 ['Domains', String(domains.length), 'All managed domains', Globe2],
-                ['Healthy', String(domains.filter((d) => d.status === 'active').length), 'DNS + SSL operational', ShieldCheck],
+                [
+                  'Healthy',
+                  String(domains.filter((d) => d.status === 'active').length),
+                  'DNS + SSL operational',
+                  ShieldCheck,
+                ],
                 ['DNS records', String(domains.reduce((sum, d) => sum + d.dns, 0)), 'Across all domains', Activity],
-                ['Attention', String(domains.filter((d) => d.status === 'attention').length), 'Requires action', CircleAlert],
+                [
+                  'Attention',
+                  String(domains.filter((d) => d.status === 'attention').length),
+                  'Requires action',
+                  CircleAlert,
+                ],
               ].map(([label, value, sub, Icon]) => (
                 <div key={String(label)} className="border border-white/10 bg-white/[0.018] p-4">
                   <div className="flex items-center justify-between text-zinc-500">
@@ -253,17 +280,28 @@ export function DomainControlPlane() {
               <div className="border-b border-white/10 p-4">
                 <div className="relative">
                   <Search size={15} className="absolute left-3 top-3 text-zinc-600" />
-                  <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search domains..." className="w-full border border-white/10 bg-white/[0.025] py-2.5 pl-9 pr-3 text-xs outline-none placeholder:text-zinc-700 focus:border-violet-400/50" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search domains..."
+                    className="w-full border border-white/10 bg-white/[0.025] py-2.5 pl-9 pr-3 text-xs outline-none placeholder:text-zinc-700 focus:border-violet-400/50"
+                  />
                 </div>
               </div>
 
               <div className="divide-y divide-white/[0.06]">
                 {filtered.map((domain) => (
-                  <button key={domain.name} onClick={() => selectDomain(domain)} className={`block w-full p-4 text-left hover:bg-white/[0.025] ${selected.name === domain.name ? 'bg-violet-500/[0.06] shadow-[inset_2px_0_0_#a78bfa]' : ''}`}>
+                  <button
+                    key={domain.name}
+                    onClick={() => selectDomain(domain)}
+                    className={`block w-full p-4 text-left hover:bg-white/[0.025] ${selected.name === domain.name ? 'bg-violet-500/[0.06] shadow-[inset_2px_0_0_#a78bfa]' : ''}`}
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="font-mono text-sm font-semibold">{domain.name}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-zinc-600">{domain.registrar}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-zinc-600">
+                          {domain.registrar}
+                        </div>
                       </div>
                       <StatusBadge status={domain.status} />
                     </div>
@@ -284,7 +322,9 @@ export function DomainControlPlane() {
                       <h2 className="font-mono text-xl font-semibold">{selected.name}</h2>
                       <StatusBadge status={selected.status} />
                     </div>
-                    <p className="mt-2 text-xs text-zinc-500">Centralized registration, DNS, nameserver and hosting routing.</p>
+                    <p className="mt-2 text-xs text-zinc-500">
+                      Centralized registration, DNS, nameserver and hosting routing.
+                    </p>
                   </div>
                   <button className="flex items-center gap-2 border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:border-violet-400/40 hover:text-white">
                     <MoreHorizontal size={14} /> Actions <ChevronDown size={13} />
@@ -293,7 +333,11 @@ export function DomainControlPlane() {
 
                 <nav className="mt-6 flex gap-1 overflow-x-auto">
                   {(['overview', 'dns', 'nameservers', 'settings'] as const).map((item) => (
-                    <button key={item} onClick={() => setTab(item)} className={`border-b-2 px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] ${tab === item ? 'border-violet-400 text-violet-200' : 'border-transparent text-zinc-600 hover:text-zinc-300'}`}>
+                    <button
+                      key={item}
+                      onClick={() => setTab(item)}
+                      className={`border-b-2 px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] ${tab === item ? 'border-violet-400 text-violet-200' : 'border-transparent text-zinc-600 hover:text-zinc-300'}`}
+                    >
                       {item === 'nameservers' ? 'Nameservers' : item}
                     </button>
                   ))}
@@ -306,7 +350,11 @@ export function DomainControlPlane() {
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       {[
                         ['Registrar', selected.registrar, 'Registration provider'],
-                        ['Expiration', selected.expires, selected.autoRenew ? 'Auto-renew enabled' : 'Auto-renew disabled'],
+                        [
+                          'Expiration',
+                          selected.expires,
+                          selected.autoRenew ? 'Auto-renew enabled' : 'Auto-renew disabled',
+                        ],
                         ['Routing target', selected.target, 'Velclaw service'],
                       ].map(([label, value, sub]) => (
                         <div key={String(label)} className="border border-white/10 bg-white/[0.018] p-4">
@@ -322,8 +370,16 @@ export function DomainControlPlane() {
                         <CircleAlert size={17} className="mt-0.5 shrink-0 text-red-300" />
                         <div>
                           <div className="text-sm font-semibold text-red-200">Registrar sync required</div>
-                          <div className="mt-1 text-xs leading-5 text-zinc-500">Connect the registrar account for this domain so Velclaw can reconcile expiration, nameserver and DNS state.</div>
-                          <button onClick={() => setNotice('Registrar connection flow queued')} className="mt-3 border border-red-300/20 px-3 py-2 text-xs text-red-200 hover:bg-red-400/10">Connect registrar</button>
+                          <div className="mt-1 text-xs leading-5 text-zinc-500">
+                            Connect the registrar account for this domain so Velclaw can reconcile expiration,
+                            nameserver and DNS state.
+                          </div>
+                          <button
+                            onClick={() => setNotice('Registrar connection flow queued')}
+                            className="mt-3 border border-red-300/20 px-3 py-2 text-xs text-red-200 hover:bg-red-400/10"
+                          >
+                            Connect registrar
+                          </button>
                         </div>
                       </div>
                     )}
@@ -334,12 +390,25 @@ export function DomainControlPlane() {
                           <div className="text-sm font-semibold">DNS health</div>
                           <div className="mt-1 text-[11px] text-zinc-600">Authoritative routing and edge status</div>
                         </div>
-                        <span className={`flex items-center gap-2 text-xs ${selected.status === 'active' ? 'text-emerald-300' : 'text-amber-300'}`}><span className="h-1.5 w-1.5 rounded-full bg-current" /> {selected.status === 'active' ? 'Operational' : 'Awaiting verification'}</span>
+                        <span
+                          className={`flex items-center gap-2 text-xs ${selected.status === 'active' ? 'text-emerald-300' : 'text-amber-300'}`}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />{' '}
+                          {selected.status === 'active' ? 'Operational' : 'Awaiting verification'}
+                        </span>
                       </div>
                       <div className="grid divide-y divide-white/[0.06] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                         {[
                           ['Authoritative DNS', selected.status === 'active' ? 'Velclaw DNS' : 'Pending verification'],
-                          ['Nameservers', selected.nameservers.every((value) => !value.toLowerCase().includes('verified') && !value.toLowerCase().includes('configure')) ? '2 active' : 'Not configured'],
+                          [
+                            'Nameservers',
+                            selected.nameservers.every(
+                              (value) =>
+                                !value.toLowerCase().includes('verified') && !value.toLowerCase().includes('configure'),
+                            )
+                              ? '2 active'
+                              : 'Not configured',
+                          ],
                           ['SSL', selected.ssl === 'live' ? 'Live' : 'Pending'],
                         ].map(([label, value]) => (
                           <div key={String(label)} className="p-4">
@@ -355,18 +424,42 @@ export function DomainControlPlane() {
                 {tab === 'dns' && (
                   <div className="border border-white/10">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
-                      <div><div className="text-sm font-semibold">DNS records</div><div className="mt-1 text-[11px] text-zinc-600">Manage A, AAAA, CNAME, MX, TXT and other records.</div></div>
-                      <button onClick={() => setNotice('DNS record editor opened')} className="flex items-center gap-2 bg-violet-500 px-3 py-2 text-xs font-bold"><Plus size={13} /> Add record</button>
+                      <div>
+                        <div className="text-sm font-semibold">DNS records</div>
+                        <div className="mt-1 text-[11px] text-zinc-600">
+                          Manage A, AAAA, CNAME, MX, TXT and other records.
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setNotice('DNS record editor opened')}
+                        className="flex items-center gap-2 bg-violet-500 px-3 py-2 text-xs font-bold"
+                      >
+                        <Plus size={13} /> Add record
+                      </button>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[680px] text-left text-xs">
                         <thead className="border-b border-white/10 bg-white/[0.018] text-[10px] uppercase tracking-[0.14em] text-zinc-600">
-                          <tr><th className="px-4 py-3">Type</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Value</th><th className="px-4 py-3">TTL</th><th className="px-4 py-3" /></tr>
+                          <tr>
+                            <th className="px-4 py-3">Type</th>
+                            <th className="px-4 py-3">Name</th>
+                            <th className="px-4 py-3">Value</th>
+                            <th className="px-4 py-3">TTL</th>
+                            <th className="px-4 py-3" />
+                          </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.06]">
                           {dnsRecords.map(([type, name, value, ttl]) => (
                             <tr key={`${type}-${name}`} className="hover:bg-white/[0.02]">
-                              <td className="px-4 py-3 font-mono text-violet-300">{type}</td><td className="px-4 py-3 font-mono text-zinc-400">{name}</td><td className="px-4 py-3 font-mono text-zinc-300">{value}</td><td className="px-4 py-3 text-zinc-600">{ttl}</td><td className="px-4 py-3 text-right"><button onClick={() => setNotice(`Editing ${type} ${name}`)}><Settings2 size={14} className="text-zinc-600 hover:text-zinc-200" /></button></td>
+                              <td className="px-4 py-3 font-mono text-violet-300">{type}</td>
+                              <td className="px-4 py-3 font-mono text-zinc-400">{name}</td>
+                              <td className="px-4 py-3 font-mono text-zinc-300">{value}</td>
+                              <td className="px-4 py-3 text-zinc-600">{ttl}</td>
+                              <td className="px-4 py-3 text-right">
+                                <button onClick={() => setNotice(`Editing ${type} ${name}`)}>
+                                  <Settings2 size={14} className="text-zinc-600 hover:text-zinc-200" />
+                                </button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -380,18 +473,39 @@ export function DomainControlPlane() {
                     <div className="border border-violet-400/20 bg-violet-500/[0.04] p-5">
                       <div className="flex gap-3">
                         <Server size={18} className="mt-0.5 text-violet-300" />
-                        <div><div className="text-sm font-semibold">Authoritative nameservers</div><div className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">Point the registrar for <span className="font-mono text-zinc-300">{selected.name}</span> at these nameservers. Velclaw then becomes the single control point for DNS records.</div></div>
+                        <div>
+                          <div className="text-sm font-semibold">Authoritative nameservers</div>
+                          <div className="mt-1 max-w-2xl text-xs leading-5 text-zinc-500">
+                            Point the registrar for <span className="font-mono text-zinc-300">{selected.name}</span> at
+                            these nameservers. Velclaw then becomes the single control point for DNS records.
+                          </div>
+                        </div>
                       </div>
                     </div>
                     {selected.nameservers.map((ns, index) => (
-                      <div key={`${ns}-${index}`} className="flex items-center justify-between gap-3 border border-white/10 bg-white/[0.018] p-4">
-                        <div><div className="text-[10px] uppercase tracking-[0.14em] text-zinc-600">NS {index + 1}</div><div className="mt-1 font-mono text-sm">{ns}</div></div>
-                        <button onClick={() => copyNameserver(ns)} className="border border-white/10 p-2 text-zinc-500 hover:text-white" title="Copy"><Copy size={14} /></button>
+                      <div
+                        key={`${ns}-${index}`}
+                        className="flex items-center justify-between gap-3 border border-white/10 bg-white/[0.018] p-4"
+                      >
+                        <div>
+                          <div className="text-[10px] uppercase tracking-[0.14em] text-zinc-600">NS {index + 1}</div>
+                          <div className="mt-1 font-mono text-sm">{ns}</div>
+                        </div>
+                        <button
+                          onClick={() => copyNameserver(ns)}
+                          className="border border-white/10 p-2 text-zinc-500 hover:text-white"
+                          title="Copy"
+                        >
+                          <Copy size={14} />
+                        </button>
                       </div>
                     ))}
                     <div className="border border-white/10 p-4">
                       <div className="text-[10px] uppercase tracking-[0.14em] text-zinc-600">Delegation check</div>
-                      <div className="mt-3 flex items-center gap-2 text-sm"><Check size={15} className="text-emerald-300" /> DNS delegation will be verified after registrar sync.</div>
+                      <div className="mt-3 flex items-center gap-2 text-sm">
+                        <Check size={15} className="text-emerald-300" /> DNS delegation will be verified after registrar
+                        sync.
+                      </div>
                     </div>
                   </div>
                 )}
@@ -399,19 +513,39 @@ export function DomainControlPlane() {
                 {tab === 'settings' && (
                   <div className="space-y-4">
                     {[
-                      ['Auto-renew', selected.autoRenew ? 'Enabled' : 'Disabled', 'Keep registration renewal state synchronized with the registrar.'],
-                      ['SSL automation', selected.ssl === 'live' ? 'Enabled' : 'Waiting', 'Issue and renew certificates after DNS is verified.'],
+                      [
+                        'Auto-renew',
+                        selected.autoRenew ? 'Enabled' : 'Disabled',
+                        'Keep registration renewal state synchronized with the registrar.',
+                      ],
+                      [
+                        'SSL automation',
+                        selected.ssl === 'live' ? 'Enabled' : 'Waiting',
+                        'Issue and renew certificates after DNS is verified.',
+                      ],
                       ['Hosting target', selected.target, 'Where the root domain and subdomains route by default.'],
                     ].map(([label, value, sub]) => (
-                      <div key={String(label)} className="flex flex-wrap items-center justify-between gap-4 border border-white/10 p-4">
-                        <div><div className="text-sm font-semibold">{String(label)}</div><div className="mt-1 text-[11px] text-zinc-600">{String(sub)}</div></div>
-                        <button className="flex items-center gap-2 border border-white/10 px-3 py-2 text-xs text-zinc-300">{String(value)} <ChevronDown size={13} /></button>
+                      <div
+                        key={String(label)}
+                        className="flex flex-wrap items-center justify-between gap-4 border border-white/10 p-4"
+                      >
+                        <div>
+                          <div className="text-sm font-semibold">{String(label)}</div>
+                          <div className="mt-1 text-[11px] text-zinc-600">{String(sub)}</div>
+                        </div>
+                        <button className="flex items-center gap-2 border border-white/10 px-3 py-2 text-xs text-zinc-300">
+                          {String(value)} <ChevronDown size={13} />
+                        </button>
                       </div>
                     ))}
                     <div className="border border-red-400/15 bg-red-400/[0.03] p-4">
                       <div className="text-sm font-semibold text-red-200">Danger zone</div>
-                      <div className="mt-1 text-xs text-zinc-600">Remove this domain from the Velclaw control plane without changing registrar ownership.</div>
-                      <button className="mt-3 flex items-center gap-2 border border-red-400/20 px-3 py-2 text-xs text-red-300 hover:bg-red-400/10"><Trash2 size={13} /> Remove domain</button>
+                      <div className="mt-1 text-xs text-zinc-600">
+                        Remove this domain from the Velclaw control plane without changing registrar ownership.
+                      </div>
+                      <button className="mt-3 flex items-center gap-2 border border-red-400/20 px-3 py-2 text-xs text-red-300 hover:bg-red-400/10">
+                        <Trash2 size={13} /> Remove domain
+                      </button>
                     </div>
                   </div>
                 )}
@@ -425,14 +559,30 @@ export function DomainControlPlane() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg border border-white/10 bg-[#0d0b12] shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 p-5">
-              <div><div className="text-sm font-semibold">Add domain</div><div className="mt-1 text-xs text-zinc-600">Register a domain you already own with the Velclaw control plane.</div></div>
-              <button onClick={() => setShowAdd(false)} className="text-zinc-600 hover:text-white"><X size={18} /></button>
+              <div>
+                <div className="text-sm font-semibold">Add domain</div>
+                <div className="mt-1 text-xs text-zinc-600">
+                  Register a domain you already own with the Velclaw control plane.
+                </div>
+              </div>
+              <button onClick={() => setShowAdd(false)} className="text-zinc-600 hover:text-white">
+                <X size={18} />
+              </button>
             </div>
             <div className="p-5">
               <label className="text-[10px] uppercase tracking-[0.14em] text-zinc-600">Domain</label>
               <div className="mt-2 flex">
-                <div className="grid w-10 place-items-center border border-r-0 border-white/10 bg-white/[0.03] text-zinc-600"><Globe2 size={14} /></div>
-                <input autoFocus value={newDomain} onChange={(e) => setNewDomain(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addDomain()} placeholder="example.com" className="min-w-0 flex-1 border border-white/10 bg-white/[0.02] px-3 py-3 font-mono text-sm outline-none focus:border-violet-400/50" />
+                <div className="grid w-10 place-items-center border border-r-0 border-white/10 bg-white/[0.03] text-zinc-600">
+                  <Globe2 size={14} />
+                </div>
+                <input
+                  autoFocus
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addDomain()}
+                  placeholder="example.com"
+                  className="min-w-0 flex-1 border border-white/10 bg-white/[0.02] px-3 py-3 font-mono text-sm outline-none focus:border-violet-400/50"
+                />
               </div>
               <div className="mt-4 grid gap-2 text-[11px] text-zinc-600 sm:grid-cols-2">
                 <div className="border border-white/10 p-3">1. Add the domain here</div>
@@ -442,8 +592,19 @@ export function DomainControlPlane() {
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t border-white/10 p-4">
-              <button onClick={() => setShowAdd(false)} className="border border-white/10 px-4 py-2 text-xs text-zinc-400">Cancel</button>
-              <button onClick={addDomain} disabled={!newDomain.includes('.')} className="bg-violet-500 px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40">Add domain</button>
+              <button
+                onClick={() => setShowAdd(false)}
+                className="border border-white/10 px-4 py-2 text-xs text-zinc-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addDomain}
+                disabled={!newDomain.includes('.')}
+                className="bg-violet-500 px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Add domain
+              </button>
             </div>
           </div>
         </div>

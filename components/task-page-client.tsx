@@ -66,7 +66,9 @@ export function TaskPageClient({
   if (isLoading) {
     return (
       <div className="flex-1 bg-background">
-        <div className="p-3"><SharedHeader initialStars={initialStars} /></div>
+        <div className="p-3">
+          <SharedHeader initialStars={initialStars} />
+        </div>
         <div className="mx-auto max-w-7xl p-4 space-y-3 animate-pulse">
           <div className="h-10 border bg-muted/30" />
           <div className="h-24 border bg-muted/20" />
@@ -79,7 +81,9 @@ export function TaskPageClient({
   if (error || !task) {
     return (
       <div className="flex-1 bg-background">
-        <div className="p-3"><SharedHeader initialStars={initialStars} /></div>
+        <div className="p-3">
+          <SharedHeader initialStars={initialStars} />
+        </div>
         <div className="mx-auto max-w-2xl p-6">
           <div className="border p-6 text-center">
             <XCircle className="mx-auto size-8 text-destructive" />
@@ -107,7 +111,13 @@ export function TaskPageClient({
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-3 py-1.5 text-[11px] font-mono overflow-x-auto">
-        <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={() => router.push('/tasks')} aria-label="Back to tasks">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 shrink-0"
+          onClick={() => router.push('/tasks')}
+          aria-label="Back to tasks"
+        >
           <ArrowLeft className="size-3.5" />
         </Button>
         <div className="flex items-center gap-1.5 shrink-0 text-muted-foreground">
@@ -122,7 +132,9 @@ export function TaskPageClient({
             {statusLabel}
           </Badge>
           {task.selectedAgent && <span className="hidden sm:inline text-muted-foreground">{task.selectedAgent}</span>}
-          {task.selectedModel && <span className="hidden md:inline max-w-[180px] truncate text-muted-foreground">{task.selectedModel}</span>}
+          {task.selectedModel && (
+            <span className="hidden md:inline max-w-[180px] truncate text-muted-foreground">{task.selectedModel}</span>
+          )}
         </div>
       </div>
 
