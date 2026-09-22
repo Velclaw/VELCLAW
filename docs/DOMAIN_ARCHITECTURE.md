@@ -1,45 +1,39 @@
 # Velclaw Domain Architecture
 
-## Current status
+## Public domain roles
 
-`velclaw.cfd` is the **temporary canonical production domain** for the current Velclaw deployment. All active application, deployment, API, documentation and preview URLs use the `velclaw.cfd` namespace.
+Velclaw uses three first-party public domains with distinct responsibilities:
 
-When a primary domain is purchased later, migration targets may include:
+- `velclaw.ai` — primary platform, company and AI product surface
+- `velclaw.dev` — developer surface: IDE, documentation, SDKs, APIs and engineering tools
+- `velclaw.app` — application and user-service surface
 
-- `velclaw.com`
-- `velclaw.ai`
-- `velclaw.dev`
-- `velclaw.io`
-- `velclaw.app`
-
-These are future migration targets, not active runtime endpoints.
+The three domains can be served by the same application while the request host selects the appropriate role, metadata, canonical URL, sitemap and product identity.
 
 ## Current URL map
 
-- `https://velclaw.cfd`
-- `https://velclaw.cfd/docs`
-- `https://velclaw.cfd/api/*`
-- `https://*.velclaw.cfd`
-- Branch previews: `https://velclaw-git-<branch-slug>-velclaw.cfd`
+- `https://velclaw.ai`
+- `https://velclaw.dev`
+- `https://velclaw.app`
+
+`velclaw.com` is not part of the active public domain map until ownership is independently verified.
 
 ## Environment contract
 
 Production defaults:
 
 ```env
-VELCLAW_PUBLIC_ORIGIN=https://velclaw.cfd
-VELCLAW_OAUTH_ISSUER=https://velclaw.cfd
-VELCLAW_APP_ORIGIN=https://velclaw.cfd
-VELCLAW_API_ORIGIN=https://velclaw.cfd
-VELCLAW_DOCS_ORIGIN=https://velclaw.cfd
-VELCLAW_ALLOWED_ORIGINS=https://velclaw.cfd
+VELCLAW_PUBLIC_ORIGIN=https://velclaw.ai
+VELCLAW_OAUTH_ISSUER=https://velclaw.ai
+VELCLAW_APP_ORIGIN=https://velclaw.app
+VELCLAW_API_ORIGIN=https://velclaw.dev
+VELCLAW_DOCS_ORIGIN=https://velclaw.dev
+VELCLAW_ALLOWED_ORIGINS=https://velclaw.ai,https://velclaw.dev,https://velclaw.app
 ```
-
-The variables remain overrideable for controlled local/test environments.
 
 ## Migration rule
 
-When a primary domain is purchased, change deployment configuration first, validate OAuth/CORS/metadata, then add redirects from `velclaw.cfd`. The current deployment must continue using `velclaw.cfd` until that migration is explicitly performed.
+Do not make `velclaw.com` canonical until its ownership and DNS control are verified. If a future domain migration is required, update deployment configuration, OAuth/CORS, metadata, canonical URLs, redirects and Search Console properties as one controlled migration.
 
 ## Repository
 
