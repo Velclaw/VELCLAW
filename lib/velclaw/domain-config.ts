@@ -1,14 +1,14 @@
 export type VelclawDomainRole = 'platform' | 'developer' | 'application'
 
 export const VELCLAW_DOMAIN_ROLES = {
-  platform: 'https://velclaw.ai',
+  platform: 'https://velclaw.site',
   developer: 'https://velclaw.dev',
   application: 'https://velclaw.app',
 } as const
 
 const DOMAIN_ROLE_BY_HOST: Record<string, VelclawDomainRole> = {
-  'velclaw.ai': 'platform',
-  'www.velclaw.ai': 'platform',
+  'velclaw.site': 'platform',
+  'www.velclaw.site': 'platform',
   'velclaw.dev': 'developer',
   'www.velclaw.dev': 'developer',
   'velclaw.app': 'application',
