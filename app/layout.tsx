@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
@@ -8,7 +9,12 @@ import { SessionProvider } from '@/components/auth/session-provider'
 import { JotaiProvider } from '@/components/providers/jotai-provider'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
+import {
+  getVelclawDomainRole,
+  getVelclawDomainConfig,
+  getVelclawDomainRoleContent,
+  getVelclawOriginForRole,
+} from '@/lib/velclaw/domain-config'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,38 +26,45 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(VELCLAW_PUBLIC_ORIGIN),
-  title: {
-    default: 'Velclaw — AI-native Software Workspace',
-    template: '%s | Velclaw',
-  },
-  description: 'Velclaw is an AI-native software workspace for agents, code, builds, runtime, review and delivery.',
-  applicationName: 'Velclaw',
-  alternates: {
-    languages: {
-      vi: VELCLAW_PUBLIC_ORIGIN,
-      en: VELCLAW_PUBLIC_ORIGIN,
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers()
+  const role = getVelclawDomainRole(requestHeaders.get('host'))
+  const content = getVelclawDomainRoleContent[role]
+  const origin = getVelclawOriginForRole(role)
+
+  return {
+    metadataBase: new URL(origin),
+    title: {
+      default: content.title,
+      template: '%s | Velclaw',
     },
-  },
-  openGraph: {
-    type: 'website',
-    siteName: 'Velclaw',
-    url: VELCLAW_PUBLIC_ORIGIN,
-    title: 'Velclaw — AI-native Software Workspace',
-    description: 'AI-native workspace for agents, code, builds, runtime, review and delivery.',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+    description: content.description,
+    applicationName: 'Velclaw',
+    alternates: { canonical: origin },
+    openGraph: {
+      type: 'website',
+      siteName: 'Velclaw',
+      url: origin,
+      title: content.title,
+      description: content.description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: content.title,
+      description: content.description,
+    },
+    robots: { index: true, follow: true },
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
+  const requestHeaders = await headers()
+  const role = getVelclawDomainRole(requestHeaders.get('host'))
+  const content = getVelclawDomainRoleContent[role]
+  const config = getVelclawDomainConfig()
+
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -64,6 +77,23 @@ export default function RootLayout({
         </JotaiProvider>
         <Analytics />
         <SpeedInsights />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': role === 'application' ? 'SoftwareApplication' : 'Organization',
+              name: content.name,
+              url: getVelclawOriginForRole(role),
+              description: content.description,
+              logo: `${config.publicOrigin}/velclaw-mark.svg`,
+              sameAs: Object.values(config.roles),
+              ...(role === 'application'
+                ? { applicationCategory: 'DeveloperApplication', operatingSystem: 'Web' }
+                : {}),
+            }),
+          }}
+        />
       </body>
     </html>
   )
