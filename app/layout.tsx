@@ -26,6 +26,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+/** Builds metadata for the Velclaw domain role associated with the request host. */
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers()
   const role = getVelclawDomainRole(requestHeaders.get('host'))
@@ -57,6 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+/** Wraps every route in shared providers and emits structured data for the request's domain role. */
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

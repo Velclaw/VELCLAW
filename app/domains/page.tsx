@@ -7,6 +7,7 @@ export const metadata = {
   description: 'Central domain, DNS, nameserver and hosting control plane for Velclaw.',
 }
 
+/** Renders the domain control plane for authenticated users and redirects other visitors to sign-in. */
 export default async function DomainsPage() {
   const session = await getServerSession()
   if (!session?.user) redirect('/auth/signin')

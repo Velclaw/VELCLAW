@@ -86,6 +86,7 @@ const dnsRecords = [
   ['MX', '@', 'mx1.mail.provider', '3600'],
 ]
 
+/** Renders the label and color treatment for a domain status. */
 function StatusBadge({ status }: { status: DomainStatus }) {
   const map = {
     active: { label: 'Active', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
@@ -99,6 +100,7 @@ function StatusBadge({ status }: { status: DomainStatus }) {
   </span>
 }
 
+/** Renders an interactive domain-management prototype backed by in-memory seed data. */
 export function DomainControlPlane() {
   const [domains, setDomains] = useState(seedDomains)
   const [selected, setSelected] = useState(seedDomains[0])
@@ -113,11 +115,13 @@ export function DomainControlPlane() {
     [domains, query],
   )
 
+  /** Selects a domain and returns its detail view to the overview tab. */
   const selectDomain = (domain: Domain) => {
     setSelected(domain)
     setTab('overview')
   }
 
+  /** Adds valid-looking input as a pending in-memory domain and selects it. */
   const addDomain = () => {
     const normalized = newDomain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
     if (!normalized || !normalized.includes('.')) return
@@ -145,6 +149,7 @@ export function DomainControlPlane() {
     window.setTimeout(() => setNotice(''), 3200)
   }
 
+  /** Writes a nameserver to the Clipboard API when available, then shows a transient notice. */
   const copyNameserver = async (value: string) => {
     await navigator.clipboard?.writeText(value)
     setNotice(`${value} copied`)

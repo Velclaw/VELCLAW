@@ -63,10 +63,12 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   },
 } as const
 
+/** Maps a hostname to its Velclaw role, defaulting unknown or missing hosts to the platform. */
 export function getVelclawDomainRole(hostname: string | null | undefined): VelclawDomainRole {
   return DOMAIN_ROLE_BY_HOST[(hostname || '').toLowerCase().split(':')[0]] || 'platform'
 }
 
+/** Returns the canonical public origin assigned to a Velclaw domain role. */
 export function getVelclawOriginForRole(role: VelclawDomainRole): string {
   return VELCLAW_DOMAIN_ROLES[role]
 }

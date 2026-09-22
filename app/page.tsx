@@ -6,6 +6,7 @@ import {
   getVelclawOriginForRole,
 } from '@/lib/velclaw/domain-config'
 
+/** Renders the landing page with host-specific semantic content for the active Velclaw domain. */
 export default async function VelclawWorkspacePage() {
   const requestHeaders = await headers()
   const role = getVelclawDomainRole(requestHeaders.get('host'))
