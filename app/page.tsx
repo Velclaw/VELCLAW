@@ -6,6 +6,7 @@ import {
   getVelclawOriginForRole,
 } from '@/lib/velclaw/domain-config'
 
+/** Renders the landing experience with screen-reader context tailored to the request's domain role. */
 export default async function VelclawWorkspacePage() {
   const requestHeaders = await headers()
   const role = getVelclawDomainRole(requestHeaders.get('host'))

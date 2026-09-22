@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
 import { getVelclawDomainRole, getVelclawOriginForRole } from '@/lib/velclaw/domain-config'
 
+/** Returns the URL set and crawl hints for the request's Velclaw domain role. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const requestHeaders = await headers()
   const role = getVelclawDomainRole(requestHeaders.get('host'))

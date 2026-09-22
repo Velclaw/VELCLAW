@@ -86,6 +86,7 @@ const dnsRecords = [
   ['MX', '@', 'mx1.mail.provider', '3600'],
 ]
 
+/** Renders the user-facing label and visual treatment for a domain status. */
 function StatusBadge({ status }: { status: DomainStatus }) {
   const map = {
     active: { label: 'Active', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
@@ -99,6 +100,7 @@ function StatusBadge({ status }: { status: DomainStatus }) {
   </span>
 }
 
+/** Renders an interactive client-side view of seeded, in-memory domain state. */
 export function DomainControlPlane() {
   const [domains, setDomains] = useState(seedDomains)
   const [selected, setSelected] = useState(seedDomains[0])
