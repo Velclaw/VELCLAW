@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   }
 
   const destination = new URL(request.nextUrl.pathname + request.nextUrl.search, PRIMARY_ORIGIN)
-  return NextResponse.redirect(destination, 308)
+  return NextResponse.redirect(destination, 301)
 }
 
 export const config = {
