@@ -20,7 +20,7 @@ test('domain control plane renders the primary AI domain and the two service dom
     assert.ok(markup.includes(domain), `missing seeded domain: ${domain}`)
   }
 
-  assert.match(markup, /Pending verification/)
+  assert.match(markup, /Vercel/)
 })
 
 test('domain control plane initially selects the primary AI platform domain', () => {
