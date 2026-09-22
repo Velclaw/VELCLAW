@@ -35,7 +35,7 @@ type Domain = {
   autoRenew: boolean
   nameservers: string[]
   dns: number
-  ssl: 'pending' | 'pending'
+  ssl: 'live' | 'pending'
   target: string
 }
 
@@ -48,7 +48,7 @@ const seedDomains: Domain[] = [
     expires: 'Not verified',
     autoRenew: true,
     nameservers: ['Not verified', 'Not verified'],
-    dns: 8,
+    dns: 0,
     ssl: 'pending',
     target: 'Production',
   },
@@ -60,19 +60,19 @@ const seedDomains: Domain[] = [
     expires: 'Not verified',
     autoRenew: true,
     nameservers: ['Not verified', 'Not verified'],
-    dns: 6,
-    ssl: 'live',
+    dns: 0,
+    ssl: 'pending',
     target: 'Application',
   },
   {
     name: 'velclaw.dev',
     tld: '.dev',
     registrar: 'Vercel',
-    status: 'attention',
+    status: 'pending',
     expires: 'Not verified',
     autoRenew: false,
     nameservers: ['Not verified', 'Not verified'],
-    dns: 2,
+    dns: 0,
     ssl: 'pending',
     target: 'Developer',
   },
