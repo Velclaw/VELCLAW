@@ -162,12 +162,12 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - velclaw.ai
+        - velclaw.site
         - velclaw.dev
         - velclaw.app
       secretName: velclaw-tls
   rules:
-    - host: velclaw.ai
+    - host: velclaw.site
       http:
         paths:
           - path: /
