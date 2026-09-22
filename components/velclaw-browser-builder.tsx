@@ -10,15 +10,22 @@ type AgentRole = 'coder' | 'reviewer' | 'tester' | 'deployer'
 type AgentChange = { path: string; content: string }
 
 const starterFiles: ProjectFiles = {
-  'package.json': JSON.stringify({
-    name: 'velclaw-app',
-    private: true,
-    scripts: { dev: 'vite --host 0.0.0.0', build: 'vite build' },
-    dependencies: { vite: 'latest', react: 'latest', 'react-dom': 'latest' },
-  }, null, 2),
-  'index.html': '<!doctype html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Velclaw App</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>',
-  'src/main.jsx': "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport './style.css'\n\nfunction App(){return <main><h1>Built with Velclaw</h1><p>Your browser is the development environment.</p></main>}\ncreateRoot(document.getElementById('root')).render(<App />)",
-  'src/style.css': ':root{font-family:Inter,system-ui,sans-serif;color:#f7f7f8;background:#09090b}body{margin:0;min-height:100vh;display:grid;place-items:center}main{text-align:center}h1{font-size:clamp(2rem,6vw,4rem);margin:0 0 .75rem}p{color:#a1a1aa}',
+  'package.json': JSON.stringify(
+    {
+      name: 'velclaw-app',
+      private: true,
+      scripts: { dev: 'vite --host 0.0.0.0', build: 'vite build' },
+      dependencies: { vite: 'latest', react: 'latest', 'react-dom': 'latest' },
+    },
+    null,
+    2,
+  ),
+  'index.html':
+    '<!doctype html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Velclaw App</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>',
+  'src/main.jsx':
+    "import React from 'react'\nimport { createRoot } from 'react-dom/client'\nimport './style.css'\n\nfunction App(){return <main><h1>Built with Velclaw</h1><p>Your browser is the development environment.</p></main>}\ncreateRoot(document.getElementById('root')).render(<App />)",
+  'src/style.css':
+    ':root{font-family:Inter,system-ui,sans-serif;color:#f7f7f8;background:#09090b}body{margin:0;min-height:100vh;display:grid;place-items:center}main{text-align:center}h1{font-size:clamp(2rem,6vw,4rem);margin:0 0 .75rem}p{color:#a1a1aa}',
 }
 
 function toFileSystemTree(files: ProjectFiles): FileSystemTree {
@@ -46,7 +53,9 @@ function previewMessageText(message: PreviewMessage) {
 function safeCommand(command: string) {
   const value = command.trim()
   if (!value || value.length > 500) return false
-  return !/(^|[;&|])\s*(rm\s+-rf\s+\/|mkfs|dd\s+if=|shutdown|reboot)\b|curl\b.*\|\s*(sh|bash)|wget\b.*\|\s*(sh|bash)/i.test(value)
+  return !/(^|[;&|])\s*(rm\s+-rf\s+\/|mkfs|dd\s+if=|shutdown|reboot)\b|curl\b.*\|\s*(sh|bash)|wget\b.*\|\s*(sh|bash)/i.test(
+    value,
+  )
 }
 
 export function VelclawBrowserBuilder() {
@@ -85,11 +94,14 @@ export function VelclawBrowserBuilder() {
     if (!files[activeFile]) setActiveFile(Object.keys(files)[0] || 'package.json')
   }, [files, activeFile])
 
-  useEffect(() => () => {
-    processRef.current?.kill()
-    containerRef.current?.teardown()
-    containerRef.current = null
-  }, [])
+  useEffect(
+    () => () => {
+      processRef.current?.kill()
+      containerRef.current?.teardown()
+      containerRef.current = null
+    },
+    [],
+  )
 
   function appendLog(text: string) {
     setLogs((current) => [...current.slice(-199), text])
@@ -104,7 +116,9 @@ export function VelclawBrowserBuilder() {
       setPreviewUrl(url)
       setStatus('Preview ready')
     })
-    container.on('preview-message', (message) => appendLog(`[preview:${message.type}] ${previewMessageText(message)}\n`))
+    container.on('preview-message', (message) =>
+      appendLog(`[preview:${message.type}] ${previewMessageText(message)}\n`),
+    )
     await container.mount(toFileSystemTree(files))
     return container
   }
@@ -167,12 +181,16 @@ export function VelclawBrowserBuilder() {
       const response = await fetch('/api/builder/agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, prompt, files: Object.entries(files).map(([path, content]) => ({ path, content })) }),
+        body: JSON.stringify({
+          role,
+          prompt,
+          files: Object.entries(files).map(([path, content]) => ({ path, content })),
+        }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Agent failed')
       setAgentOutput(data.output || '')
-      const changes = Array.isArray(data.changes) ? data.changes as AgentChange[] : []
+      const changes = Array.isArray(data.changes) ? (data.changes as AgentChange[]) : []
       if (changes.length) {
         const next = { ...files }
         for (const change of changes) next[change.path] = change.content
@@ -218,27 +236,177 @@ export function VelclawBrowserBuilder() {
   return (
     <main className="min-h-screen bg-[#07080b] text-zinc-100">
       <header className="flex min-h-14 items-center justify-between border-b border-white/10 bg-[#0c0e13] px-4">
-        <div className="flex items-center gap-3"><Sparkles className="h-5 w-5 text-violet-300" /><div><strong>Velclaw Builder</strong><div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Browser-native workspace</div></div></div>
-        <div className="flex items-center gap-3"><span className="hidden max-w-[40vw] truncate text-xs text-zinc-500 md:block">{status}</span><button disabled={busy} onClick={startPreview} className="flex items-center gap-2 bg-violet-500 px-3 py-1.5 text-xs font-semibold hover:bg-violet-400 disabled:opacity-50"><Play className="h-3.5 w-3.5" /> Preview</button></div>
+        <div className="flex items-center gap-3">
+          <Sparkles className="h-5 w-5 text-violet-300" />
+          <div>
+            <strong>Velclaw Builder</strong>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Browser-native workspace</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="hidden max-w-[40vw] truncate text-xs text-zinc-500 md:block">{status}</span>
+          <button
+            disabled={busy}
+            onClick={startPreview}
+            className="flex items-center gap-2 bg-violet-500 px-3 py-1.5 text-xs font-semibold hover:bg-violet-400 disabled:opacity-50"
+          >
+            <Play className="h-3.5 w-3.5" /> Preview
+          </button>
+        </div>
       </header>
 
       <div className="grid min-h-[calc(100vh-3.5rem)] lg:grid-cols-[220px_minmax(0,1fr)_minmax(320px,42vw)]">
         <aside className="hidden border-r border-white/10 bg-[#0a0c10] p-3 lg:block">
           <div className="mb-3 text-[10px] uppercase tracking-[0.2em] text-zinc-500">Workspace</div>
-          {fileNames.map((path) => <button key={path} onClick={() => { setActiveFile(path); setTab('files') }} className={`mb-1 flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs ${activeFile === path ? 'bg-white/10 text-white' : 'text-zinc-400 hover:bg-white/5'}`}><FileCode2 className="h-3.5 w-3.5" />{path}</button>)}
+          {fileNames.map((path) => (
+            <button
+              key={path}
+              onClick={() => {
+                setActiveFile(path)
+                setTab('files')
+              }}
+              className={`mb-1 flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs ${activeFile === path ? 'bg-white/10 text-white' : 'text-zinc-400 hover:bg-white/5'}`}
+            >
+              <FileCode2 className="h-3.5 w-3.5" />
+              {path}
+            </button>
+          ))}
         </aside>
 
         <section className="min-w-0 border-r border-white/10 bg-[#080a0e]">
-          <div className="flex gap-1 border-b border-white/10 p-2">{(['files', 'agent', 'terminal', 'deploy'] as const).map((item) => <button key={item} onClick={() => setTab(item)} className={`px-3 py-1.5 text-xs ${tab === item ? 'bg-white/10 text-white' : 'text-zinc-500'}`}>{item}</button>)}</div>
-          {tab === 'files' && <div className="h-[calc(100vh-6.5rem)] p-4"><div className="mb-2 text-xs text-zinc-500">{activeFile}</div><textarea value={files[activeFile] || ''} onChange={(event) => setFiles((current) => ({ ...current, [activeFile]: event.target.value }))} onBlur={() => void syncFile(activeFile, files[activeFile] || '')} spellCheck={false} className="h-full w-full resize-none border border-white/10 bg-[#050609] p-4 font-mono text-xs leading-5 text-zinc-200 outline-none focus:border-violet-500" /></div>}
-          {tab === 'agent' && <div className="space-y-4 p-4"><div className="flex items-center gap-2"><Bot className="h-4 w-4 text-violet-300" /><strong className="text-sm">Velclaw Agent</strong></div><select value={role} onChange={(event) => setRole(event.target.value as AgentRole)} className="w-full border border-white/10 bg-[#050609] p-2 text-xs"><option value="coder">Coder</option><option value="reviewer">Reviewer</option><option value="tester">Tester</option><option value="deployer">Deployer</option></select><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Describe the change…" className="h-32 w-full border border-white/10 bg-[#050609] p-3 text-xs outline-none"/><button disabled={busy || !prompt.trim()} onClick={runAgent} className="bg-violet-500 px-4 py-2 text-xs font-semibold disabled:opacity-50">Run agent</button>{agentOutput && <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/30 p-3 text-xs text-zinc-300">{agentOutput}</pre>}</div>}
-          {tab === 'terminal' && <div className="space-y-3 p-4"><div className="flex gap-2"><Terminal className="mt-2 h-4 w-4 text-zinc-500"/><input value={command} onChange={(event) => setCommand(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void runCommand() }} className="flex-1 border border-white/10 bg-[#050609] p-2 font-mono text-xs"/><button onClick={() => void runCommand()} disabled={busy} className="bg-violet-500 px-3 text-xs">Run</button></div><pre className="h-[65vh] overflow-auto whitespace-pre-wrap bg-black p-3 font-mono text-xs text-zinc-300">{logs.join('')}</pre></div>}
-          {tab === 'deploy' && <div className="space-y-4 p-4"><div className="flex items-center gap-2"><Rocket className="h-4 w-4 text-violet-300"/><strong className="text-sm">Velclaw Hosting</strong></div><input value={repoUrl} onChange={(event) => setRepoUrl(event.target.value)} placeholder="https://github.com/org/repo" className="w-full border border-white/10 bg-[#050609] p-2 text-xs"/><input value={branch} onChange={(event) => setBranch(event.target.value)} placeholder="main" className="w-full border border-white/10 bg-[#050609] p-2 text-xs"/><button disabled={busy} onClick={() => void deploy()} className="flex items-center gap-2 bg-violet-500 px-4 py-2 text-xs font-semibold"><Rocket className="h-3.5 w-3.5"/> Deploy</button><pre className="max-h-[45vh] overflow-auto whitespace-pre-wrap border border-white/10 p-3 text-xs text-zinc-300">{deployResult}</pre></div>}
+          <div className="flex gap-1 border-b border-white/10 p-2">
+            {(['files', 'agent', 'terminal', 'deploy'] as const).map((item) => (
+              <button
+                key={item}
+                onClick={() => setTab(item)}
+                className={`px-3 py-1.5 text-xs ${tab === item ? 'bg-white/10 text-white' : 'text-zinc-500'}`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          {tab === 'files' && (
+            <div className="h-[calc(100vh-6.5rem)] p-4">
+              <div className="mb-2 text-xs text-zinc-500">{activeFile}</div>
+              <textarea
+                value={files[activeFile] || ''}
+                onChange={(event) => setFiles((current) => ({ ...current, [activeFile]: event.target.value }))}
+                onBlur={() => void syncFile(activeFile, files[activeFile] || '')}
+                spellCheck={false}
+                className="h-full w-full resize-none border border-white/10 bg-[#050609] p-4 font-mono text-xs leading-5 text-zinc-200 outline-none focus:border-violet-500"
+              />
+            </div>
+          )}
+          {tab === 'agent' && (
+            <div className="space-y-4 p-4">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-violet-300" />
+                <strong className="text-sm">Velclaw Agent</strong>
+              </div>
+              <select
+                value={role}
+                onChange={(event) => setRole(event.target.value as AgentRole)}
+                className="w-full border border-white/10 bg-[#050609] p-2 text-xs"
+              >
+                <option value="coder">Coder</option>
+                <option value="reviewer">Reviewer</option>
+                <option value="tester">Tester</option>
+                <option value="deployer">Deployer</option>
+              </select>
+              <textarea
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="Describe the change…"
+                className="h-32 w-full border border-white/10 bg-[#050609] p-3 text-xs outline-none"
+              />
+              <button
+                disabled={busy || !prompt.trim()}
+                onClick={runAgent}
+                className="bg-violet-500 px-4 py-2 text-xs font-semibold disabled:opacity-50"
+              >
+                Run agent
+              </button>
+              {agentOutput && (
+                <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/30 p-3 text-xs text-zinc-300">
+                  {agentOutput}
+                </pre>
+              )}
+            </div>
+          )}
+          {tab === 'terminal' && (
+            <div className="space-y-3 p-4">
+              <div className="flex gap-2">
+                <Terminal className="mt-2 h-4 w-4 text-zinc-500" />
+                <input
+                  value={command}
+                  onChange={(event) => setCommand(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') void runCommand()
+                  }}
+                  className="flex-1 border border-white/10 bg-[#050609] p-2 font-mono text-xs"
+                />
+                <button onClick={() => void runCommand()} disabled={busy} className="bg-violet-500 px-3 text-xs">
+                  Run
+                </button>
+              </div>
+              <pre className="h-[65vh] overflow-auto whitespace-pre-wrap bg-black p-3 font-mono text-xs text-zinc-300">
+                {logs.join('')}
+              </pre>
+            </div>
+          )}
+          {tab === 'deploy' && (
+            <div className="space-y-4 p-4">
+              <div className="flex items-center gap-2">
+                <Rocket className="h-4 w-4 text-violet-300" />
+                <strong className="text-sm">Velclaw Hosting</strong>
+              </div>
+              <input
+                value={repoUrl}
+                onChange={(event) => setRepoUrl(event.target.value)}
+                placeholder="https://github.com/org/repo"
+                className="w-full border border-white/10 bg-[#050609] p-2 text-xs"
+              />
+              <input
+                value={branch}
+                onChange={(event) => setBranch(event.target.value)}
+                placeholder="main"
+                className="w-full border border-white/10 bg-[#050609] p-2 text-xs"
+              />
+              <button
+                disabled={busy}
+                onClick={() => void deploy()}
+                className="flex items-center gap-2 bg-violet-500 px-4 py-2 text-xs font-semibold"
+              >
+                <Rocket className="h-3.5 w-3.5" /> Deploy
+              </button>
+              <pre className="max-h-[45vh] overflow-auto whitespace-pre-wrap border border-white/10 p-3 text-xs text-zinc-300">
+                {deployResult}
+              </pre>
+            </div>
+          )}
         </section>
 
         <aside className="min-h-[360px] bg-black/20 p-3">
-          <div className="mb-2 flex items-center justify-between text-xs text-zinc-500"><span>Live Preview</span>{previewUrl && <a href={previewUrl} target="_blank" rel="noreferrer" className="text-violet-300">Open</a>}</div>
-          <div className="h-[calc(100vh-6.5rem)] min-h-[340px] overflow-hidden border border-white/10 bg-white">{previewUrl ? <iframe title="Velclaw preview" src={previewUrl} className="h-full w-full border-0" /> : <div className="grid h-full place-items-center bg-[#101116] text-center text-xs text-zinc-500"><div><Github className="mx-auto mb-2 h-6 w-6"/><p>Run Preview to start the browser runtime.</p></div></div>}</div>
+          <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
+            <span>Live Preview</span>
+            {previewUrl && (
+              <a href={previewUrl} target="_blank" rel="noreferrer" className="text-violet-300">
+                Open
+              </a>
+            )}
+          </div>
+          <div className="h-[calc(100vh-6.5rem)] min-h-[340px] overflow-hidden border border-white/10 bg-white">
+            {previewUrl ? (
+              <iframe title="Velclaw preview" src={previewUrl} className="h-full w-full border-0" />
+            ) : (
+              <div className="grid h-full place-items-center bg-[#101116] text-center text-xs text-zinc-500">
+                <div>
+                  <Github className="mx-auto mb-2 h-6 w-6" />
+                  <p>Run Preview to start the browser runtime.</p>
+                </div>
+              </div>
+            )}
+          </div>
         </aside>
       </div>
     </main>

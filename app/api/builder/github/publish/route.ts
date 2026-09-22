@@ -17,7 +17,15 @@ export async function POST(request: NextRequest) {
   if (!/^https:\/\/github\.com\/[^/]+\/[^/]+(?:\.git)?$/i.test(repoUrl) || !title || !branchName) {
     return NextResponse.json({ error: 'Repository, branch and title are required' }, { status: 400 })
   }
-  if (!files.every((file: unknown) => file && typeof file === 'object' && typeof (file as { path?: unknown }).path === 'string' && typeof (file as { content?: unknown }).content === 'string')) {
+  if (
+    !files.every(
+      (file: unknown) =>
+        file &&
+        typeof file === 'object' &&
+        typeof (file as { path?: unknown }).path === 'string' &&
+        typeof (file as { content?: unknown }).content === 'string',
+    )
+  ) {
     return NextResponse.json({ error: 'Invalid workspace files' }, { status: 400 })
   }
 
@@ -26,6 +34,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('[builder/github/publish]', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'GitHub publish failed' }, { status: 400 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'GitHub publish failed' },
+      { status: 400 },
+    )
   }
 }

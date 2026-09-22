@@ -1,23 +1,35 @@
-import React from 'react';
-import { Menu, Archive, Share2, Github, ChevronDown, Columns, BookOpen, ListTodo, FileText, MessageCircle, FileSpreadsheet } from 'lucide-react';
-import { UserProfile, PushNotification } from '../types/shell';
+import React from 'react'
+import {
+  Menu,
+  Archive,
+  Share2,
+  Github,
+  ChevronDown,
+  Columns,
+  BookOpen,
+  ListTodo,
+  FileText,
+  MessageCircle,
+  FileSpreadsheet,
+} from 'lucide-react'
+import { UserProfile, PushNotification } from '../types/shell'
 
 interface HeaderProps {
-  user: UserProfile;
-  notifications: PushNotification[];
-  onOpenAuth: () => void;
-  onOpenNotifications: () => void;
-  onOpenGoogleTasks?: () => void;
-  onOpenGoogleDocs?: () => void;
-  onOpenGoogleChat?: () => void;
-  onOpenGoogleForms?: () => void;
-  onToggleMainMenu: () => void;
-  isSyncing: boolean;
-  onManualSync: () => void;
-  cleanHomeMode?: boolean;
-  activeNavTab: 'chat' | 'diff' | 'logs' | 'rfc';
-  onChangeNavTab: (tab: 'chat' | 'diff' | 'logs' | 'rfc') => void;
-  onToggleCleanHomeMode: () => void;
+  user: UserProfile
+  notifications: PushNotification[]
+  onOpenAuth: () => void
+  onOpenNotifications: () => void
+  onOpenGoogleTasks?: () => void
+  onOpenGoogleDocs?: () => void
+  onOpenGoogleChat?: () => void
+  onOpenGoogleForms?: () => void
+  onToggleMainMenu: () => void
+  isSyncing: boolean
+  onManualSync: () => void
+  cleanHomeMode?: boolean
+  activeNavTab: 'chat' | 'diff' | 'logs' | 'rfc'
+  onChangeNavTab: (tab: 'chat' | 'diff' | 'logs' | 'rfc') => void
+  onToggleCleanHomeMode: () => void
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -35,9 +47,9 @@ export const Header: React.FC<HeaderProps> = ({
   cleanHomeMode = true,
   activeNavTab,
   onChangeNavTab,
-  onToggleCleanHomeMode
+  onToggleCleanHomeMode,
 }) => {
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
     <div className="bg-black border-b-2 border-neutral-800 sticky top-0 z-30 select-none font-mono">
@@ -200,14 +212,15 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onToggleCleanHomeMode}
           className={`p-1.5 rounded-none border-2 transition-all cursor-pointer shrink-0 ml-2 ${
-            cleanHomeMode ? 'bg-black border-neutral-800 text-neutral-400 hover:text-white' : 'bg-cyan-950 border-cyan-700 text-cyan-300'
+            cleanHomeMode
+              ? 'bg-black border-neutral-800 text-neutral-400 hover:text-white'
+              : 'bg-cyan-950 border-cyan-700 text-cyan-300'
           }`}
-          title={cleanHomeMode ? "Mở Bảng Phân Tích Song Song" : "Đóng Bảng Phân Tích"}
+          title={cleanHomeMode ? 'Mở Bảng Phân Tích Song Song' : 'Đóng Bảng Phân Tích'}
         >
           <Columns className="w-4 h-4" />
         </button>
       </div>
     </div>
-  );
-};
-
+  )
+}

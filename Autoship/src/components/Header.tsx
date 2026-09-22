@@ -1,27 +1,16 @@
-import React from 'react';
-import { 
-  GitBranch, 
-  Play, 
-  Bot, 
-  FileCode2, 
-  Radio, 
-  Plus, 
-  Layers, 
-  CheckCircle2, 
-  Terminal,
-  Activity
-} from 'lucide-react';
-import { DeploymentProject } from '../types';
+import React from 'react'
+import { GitBranch, Play, Bot, FileCode2, Radio, Plus, Layers, CheckCircle2, Terminal, Activity } from 'lucide-react'
+import { DeploymentProject } from '../types'
 
 interface HeaderProps {
-  projects: DeploymentProject[];
-  selectedProject: DeploymentProject | null;
-  onSelectProject: (project: DeploymentProject) => void;
-  activeTab: 'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects';
-  onTabChange: (tab: 'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects') => void;
-  onOpenNewProjectModal: () => void;
-  onTriggerDeploy: () => void;
-  isTriggering: boolean;
+  projects: DeploymentProject[]
+  selectedProject: DeploymentProject | null
+  onSelectProject: (project: DeploymentProject) => void
+  activeTab: 'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects'
+  onTabChange: (tab: 'pipelines' | 'configs' | 'webhooks' | 'ai-doctor' | 'projects') => void
+  onOpenNewProjectModal: () => void
+  onTriggerDeploy: () => void
+  isTriggering: boolean
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -68,8 +57,8 @@ export const Header: React.FC<HeaderProps> = ({
                   <select
                     value={selectedProject.id}
                     onChange={(e) => {
-                      const p = projects.find((proj) => proj.id === e.target.value);
-                      if (p) onSelectProject(p);
+                      const p = projects.find((proj) => proj.id === e.target.value)
+                      if (p) onSelectProject(p)
                     }}
                     className="bg-transparent text-xs text-white font-medium focus:outline-none cursor-pointer pr-4"
                   >
@@ -172,5 +161,5 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
     </header>
-  );
-};
+  )
+}

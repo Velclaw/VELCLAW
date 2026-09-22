@@ -5,7 +5,11 @@ const FIRST_PARTY_HOST = /^(?:[a-z0-9-]+\.)*velclaw\.(?:site|dev|app)$/i
 const BRANCH_HOST = /^velclaw-git-[a-z0-9-]+-velclaw\.dev$/i
 
 function slugify(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 export function buildVelclawProductUrl(branchName: string): string {

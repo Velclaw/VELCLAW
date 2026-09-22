@@ -1,83 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  FileCode2, 
-  Copy, 
-  Check, 
-  Download, 
-  Key, 
-  Server, 
-  ShieldCheck, 
-  Terminal, 
+import React, { useState, useEffect } from 'react'
+import {
+  FileCode2,
+  Copy,
+  Check,
+  Download,
+  Key,
+  Server,
+  ShieldCheck,
+  Terminal,
   HelpCircle,
   ExternalLink,
   ChevronRight,
-  FolderGit2
-} from 'lucide-react';
-import { DeploymentProject, GeneratedConfigTemplate } from '../types';
+  FolderGit2,
+} from 'lucide-react'
+import { DeploymentProject, GeneratedConfigTemplate } from '../types'
 
 interface ConfigGeneratorProps {
-  project: DeploymentProject | null;
+  project: DeploymentProject | null
 }
 
 export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => {
-  const [templates, setTemplates] = useState<GeneratedConfigTemplate[]>([]);
-  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<number>(0);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [webhookUrl, setWebhookUrl] = useState<string>('');
-  const [activeStep, setActiveStep] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [templates, setTemplates] = useState<GeneratedConfigTemplate[]>([])
+  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<number>(0)
+  const [copied, setCopied] = useState<boolean>(false)
+  const [webhookUrl, setWebhookUrl] = useState<string>('')
+  const [activeStep, setActiveStep] = useState<number>(1)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    if (!project) return;
-    fetchTemplates();
-  }, [project]);
+    if (!project) return
+    fetchTemplates()
+  }, [project])
 
   const fetchTemplates = async () => {
-    if (!project) return;
-    setIsLoading(true);
+    if (!project) return
+    setIsLoading(true)
     try {
       const res = await fetch('/api/generator/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ project }),
-      });
-      const data = await res.json();
+      })
+      const data = await res.json()
       if (data.templates) {
-        setTemplates(data.templates);
-        setWebhookUrl(data.webhookEndpoint || '');
+        setTemplates(data.templates)
+        setWebhookUrl(data.webhookEndpoint || '')
       }
     } catch (err) {
-      console.error('Error loading config templates:', err);
+      console.error('Error loading config templates:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const handleDownload = (tmpl: GeneratedConfigTemplate) => {
-    const blob = new Blob([tmpl.content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = tmpl.filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+    const blob = new Blob([tmpl.content], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = tmpl.filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   if (!project) {
     return (
       <div className="p-8 text-center text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
         Vui lòng chọn hoặc tạo một dự án để xem các file cấu hình CI/CD.
       </div>
-    );
+    )
   }
 
-  const currentTemplate = templates[selectedTemplateIndex] || templates[0];
+  const currentTemplate = templates[selectedTemplateIndex] || templates[0]
 
   return (
     <div className="space-y-6">
@@ -88,11 +88,11 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             <FolderGit2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">
-              Hướng Dẫn Tích Hợp CI/CD Cho Dự Án "{project.name}"
-            </h2>
+            <h2 className="text-base font-bold text-white">Hướng Dẫn Tích Hợp CI/CD Cho Dự Án "{project.name}"</h2>
             <p className="text-xs text-slate-400">
-              Chỉ cần làm 3 bước này 1 lần duy nhất, từ nay mỗi khi bạn gõ <code className="text-indigo-300 font-mono bg-slate-800 px-1 py-0.5 rounded">git push</code>, web sẽ tự cập nhật ngay lập tức!
+              Chỉ cần làm 3 bước này 1 lần duy nhất, từ nay mỗi khi bạn gõ{' '}
+              <code className="text-indigo-300 font-mono bg-slate-800 px-1 py-0.5 rounded">git push</code>, web sẽ tự
+              cập nhật ngay lập tức!
             </p>
           </div>
         </div>
@@ -108,7 +108,9 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             }`}
           >
             <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
-              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">1</span>
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
+                1
+              </span>
               Tạo File GitHub Actions
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
@@ -125,7 +127,9 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             }`}
           >
             <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
-              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">2</span>
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
+                2
+              </span>
               Cấu Hình Secrets Trên GitHub
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
@@ -142,7 +146,9 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             }`}
           >
             <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
-              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">3</span>
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
+                3
+              </span>
               Thiết Lập Server & Webhook
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
@@ -157,24 +163,50 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             <div className="space-y-2">
               <p className="font-semibold text-white">Bước 1: Tạo workflow tự động hóa trên GitHub</p>
               <ol className="list-decimal list-inside space-y-1 text-slate-300">
-                <li>Trong mã nguồn dự án của bạn, tạo thư mục <code className="text-indigo-400 font-mono">.github/workflows/</code></li>
-                <li>Tạo file tên là <code className="text-indigo-400 font-mono">deploy.yml</code> bên trong thư mục đó.</li>
-                <li>Sao chép toàn bộ nội dung file <strong>deploy.yml</strong> ở bên dưới và dán vào.</li>
-                <li>Commit và push lên GitHub: <code className="text-cyan-300 font-mono bg-slate-900 px-1.5 py-0.5 rounded">git add . && git commit -m "ci: add automated deploy" && git push</code></li>
+                <li>
+                  Trong mã nguồn dự án của bạn, tạo thư mục{' '}
+                  <code className="text-indigo-400 font-mono">.github/workflows/</code>
+                </li>
+                <li>
+                  Tạo file tên là <code className="text-indigo-400 font-mono">deploy.yml</code> bên trong thư mục đó.
+                </li>
+                <li>
+                  Sao chép toàn bộ nội dung file <strong>deploy.yml</strong> ở bên dưới và dán vào.
+                </li>
+                <li>
+                  Commit và push lên GitHub:{' '}
+                  <code className="text-cyan-300 font-mono bg-slate-900 px-1.5 py-0.5 rounded">
+                    git add . && git commit -m "ci: add automated deploy" && git push
+                  </code>
+                </li>
               </ol>
             </div>
           )}
 
           {activeStep === 2 && (
             <div className="space-y-2">
-              <p className="font-semibold text-white">Bước 2: Thêm SSH Key bí mật để GitHub kết nối an toàn với máy chủ</p>
+              <p className="font-semibold text-white">
+                Bước 2: Thêm SSH Key bí mật để GitHub kết nối an toàn với máy chủ
+              </p>
               <ol className="list-decimal list-inside space-y-1 text-slate-300">
-                <li>Mở repository của bạn trên GitHub: <a href={project.repoUrl} target="_blank" rel="noreferrer" className="text-indigo-400 underline">{project.repoUrl}</a></li>
-                <li>Vào tab <strong>Settings</strong> &gt; ở menu bên trái chọn <strong>Secrets and variables</strong> &gt; chọn <strong>Actions</strong>.</li>
-                <li>Nhấn nút <strong>New repository secret</strong>:</li>
+                <li>
+                  Mở repository của bạn trên GitHub:{' '}
+                  <a href={project.repoUrl} target="_blank" rel="noreferrer" className="text-indigo-400 underline">
+                    {project.repoUrl}
+                  </a>
+                </li>
+                <li>
+                  Vào tab <strong>Settings</strong> &gt; ở menu bên trái chọn <strong>Secrets and variables</strong>{' '}
+                  &gt; chọn <strong>Actions</strong>.
+                </li>
+                <li>
+                  Nhấn nút <strong>New repository secret</strong>:
+                </li>
                 <li className="pl-4">
-                  - Name: <code className="text-amber-300 font-mono">SERVER_SSH_KEY</code><br />
-                  - Value: Dán Private SSH Key của máy chủ VPS của bạn (file <code className="font-mono text-slate-400">id_ed25519</code> hoặc <code className="font-mono text-slate-400">id_rsa</code>).
+                  - Name: <code className="text-amber-300 font-mono">SERVER_SSH_KEY</code>
+                  <br />- Value: Dán Private SSH Key của máy chủ VPS của bạn (file{' '}
+                  <code className="font-mono text-slate-400">id_ed25519</code> hoặc{' '}
+                  <code className="font-mono text-slate-400">id_rsa</code>).
                 </li>
               </ol>
             </div>
@@ -200,7 +232,8 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Dán URL này vào <strong>GitHub &gt; Repo Settings &gt; Webhooks &gt; Add Webhook</strong> để hệ thống tự động nhận tín hiệu mỗi khi push code!
+                  Dán URL này vào <strong>GitHub &gt; Repo Settings &gt; Webhooks &gt; Add Webhook</strong> để hệ thống
+                  tự động nhận tín hiệu mỗi khi push code!
                 </p>
               </div>
             </div>
@@ -276,5 +309,5 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -82,7 +82,9 @@ export function CommandPalette() {
             aria-label="Search Velclaw commands"
             className="border-0 shadow-none focus-visible:ring-0"
           />
-          <kbd className="hidden sm:inline-flex shrink-0 border px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">ESC</kbd>
+          <kbd className="hidden sm:inline-flex shrink-0 border px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+            ESC
+          </kbd>
         </div>
         <div className="max-h-[55vh] overflow-y-auto p-2" role="listbox" aria-label="Velclaw commands">
           {filtered.length === 0 ? (

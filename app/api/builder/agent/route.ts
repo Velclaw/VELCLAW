@@ -17,7 +17,16 @@ export async function POST(request: NextRequest) {
 
   if (!roles.has(role)) return NextResponse.json({ error: 'Invalid agent role' }, { status: 400 })
   if (!prompt.trim()) return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
-  if (files.length > 150 || !files.every((file: unknown) => file && typeof file === 'object' && typeof (file as { path?: unknown }).path === 'string' && typeof (file as { content?: unknown }).content === 'string')) {
+  if (
+    files.length > 150 ||
+    !files.every(
+      (file: unknown) =>
+        file &&
+        typeof file === 'object' &&
+        typeof (file as { path?: unknown }).path === 'string' &&
+        typeof (file as { content?: unknown }).content === 'string',
+    )
+  ) {
     return NextResponse.json({ error: 'Invalid workspace files' }, { status: 400 })
   }
 
@@ -26,10 +35,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(await runBuilderWorkflow({ prompt, model, files: files as BuilderWorkspaceFile[] }))
     }
 
-    const result = await runBuilderAgent({ role: role as 'coder' | 'reviewer' | 'tester' | 'deployer', prompt, model, files: files as BuilderWorkspaceFile[] })
+    const result = await runBuilderAgent({
+      role: role as 'coder' | 'reviewer' | 'tester' | 'deployer',
+      prompt,
+      model,
+      files: files as BuilderWorkspaceFile[],
+    })
     return NextResponse.json(result)
   } catch (error) {
     console.error('[builder/agent]', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Velclaw Agent failed' }, { status: 503 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Velclaw Agent failed' },
+      { status: 503 },
+    )
   }
 }

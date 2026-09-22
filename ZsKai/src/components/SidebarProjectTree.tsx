@@ -1,18 +1,18 @@
-import React from 'react';
-import { Folder, FileText, Download, FileCode, Clock, Plus, Database, Sparkles, FileSpreadsheet } from 'lucide-react';
-import { ProjectFile, SavedSession } from '../types/shell';
+import React from 'react'
+import { Folder, FileText, Download, FileCode, Clock, Plus, Database, Sparkles, FileSpreadsheet } from 'lucide-react'
+import { ProjectFile, SavedSession } from '../types/shell'
 
 interface SidebarProjectTreeProps {
-  files: ProjectFile[];
-  sessions: SavedSession[];
-  selectedFileId: string | null;
-  onSelectFile: (file: ProjectFile) => void;
-  onSelectSession: (session: SavedSession) => void;
-  onExportPDF: () => void;
-  onExportMarkdown: () => void;
-  onExportCSV: () => void;
-  onNewSession: () => void;
-  activeTab?: 'files' | 'sessions';
+  files: ProjectFile[]
+  sessions: SavedSession[]
+  selectedFileId: string | null
+  onSelectFile: (file: ProjectFile) => void
+  onSelectSession: (session: SavedSession) => void
+  onExportPDF: () => void
+  onExportMarkdown: () => void
+  onExportCSV: () => void
+  onNewSession: () => void
+  activeTab?: 'files' | 'sessions'
 }
 
 export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
@@ -24,7 +24,7 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
   onExportPDF,
   onExportMarkdown,
   onExportCSV,
-  onNewSession
+  onNewSession,
 }) => {
   return (
     <aside className="w-full lg:w-64 bg-black border-r-2 border-neutral-800 flex flex-col h-full select-none overflow-y-auto font-mono text-white">
@@ -37,7 +37,7 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
           </div>
 
           <nav className="space-y-1">
-            {files.map(folder => (
+            {files.map((folder) => (
               <div key={folder.id} className="space-y-1">
                 <div className="flex items-center text-cyan-300 bg-black px-2.5 py-1.5 rounded-none border-2 border-neutral-700 font-mono text-xs font-bold">
                   <Folder className="w-4 h-4 mr-2 text-cyan-400 shrink-0" />
@@ -46,8 +46,8 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
 
                 {folder.children && (
                   <div className="pl-3 space-y-0.5 border-l-2 border-neutral-800 ml-3 mt-1">
-                    {folder.children.map(file => {
-                      const isSelected = file.id === selectedFileId;
+                    {folder.children.map((file) => {
+                      const isSelected = file.id === selectedFileId
                       return (
                         <button
                           key={file.id}
@@ -61,7 +61,7 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
                           <FileText className="w-3.5 h-3.5 mr-2 text-cyan-400 shrink-0" />
                           <span className="truncate font-mono text-[11px]">{file.name}</span>
                         </button>
-                      );
+                      )
                     })}
                   </div>
                 )}
@@ -84,16 +84,14 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
           </div>
 
           <div className="space-y-2">
-            {sessions.map(s => (
+            {sessions.map((s) => (
               <button
                 key={s.id}
                 onClick={() => onSelectSession(s)}
                 className="w-full flex items-center justify-between p-2 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-800 hover:border-cyan-400 transition-all text-left group active:scale-98"
               >
                 <div className="truncate pr-2">
-                  <div className="text-xs text-neutral-200 group-hover:text-cyan-300 font-bold truncate">
-                    {s.name}
-                  </div>
+                  <div className="text-xs text-neutral-200 group-hover:text-cyan-300 font-bold truncate">{s.name}</div>
                   <div className="text-[9px] text-neutral-400 font-mono">
                     {s.commandCount} queries &bull; {s.encryptedHash.slice(0, 8)}...
                   </div>
@@ -137,5 +135,5 @@ export const SidebarProjectTree: React.FC<SidebarProjectTreeProps> = ({
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}

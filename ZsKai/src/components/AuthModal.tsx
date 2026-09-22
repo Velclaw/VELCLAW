@@ -1,42 +1,37 @@
-import React, { useState } from 'react';
-import { X, ShieldCheck, Github, Lock, Key, CheckCircle, Smartphone, RefreshCw, AlertCircle } from 'lucide-react';
-import { UserProfile } from '../types/shell';
+import React, { useState } from 'react'
+import { X, ShieldCheck, Github, Lock, Key, CheckCircle, Smartphone, RefreshCw, AlertCircle } from 'lucide-react'
+import { UserProfile } from '../types/shell'
 
 interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  user: UserProfile;
-  onUpdateUser: (updated: Partial<UserProfile>) => void;
+  isOpen: boolean
+  onClose: () => void
+  user: UserProfile
+  onUpdateUser: (updated: Partial<UserProfile>) => void
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({
-  isOpen,
-  onClose,
-  user,
-  onUpdateUser
-}) => {
-  const [repoName, setRepoName] = useState(user.repoConnected || 'watson-cloudant-etl');
-  const [tokenInput, setTokenInput] = useState('');
-  const [twoFactorCode, setTwoFactorCode] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, onUpdateUser }) => {
+  const [repoName, setRepoName] = useState(user.repoConnected || 'watson-cloudant-etl')
+  const [tokenInput, setTokenInput] = useState('')
+  const [twoFactorCode, setTwoFactorCode] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleToggle2FA = () => {
-    const nextState = !user.is2FAEnabled;
-    onUpdateUser({ is2FAEnabled: nextState });
-    setSuccessMessage(nextState ? '2FA Authentication enabled successfully!' : '2FA disabled.');
-    setTimeout(() => setSuccessMessage(''), 3000);
-  };
+    const nextState = !user.is2FAEnabled
+    onUpdateUser({ is2FAEnabled: nextState })
+    setSuccessMessage(nextState ? '2FA Authentication enabled successfully!' : '2FA disabled.')
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
 
   const handleSaveRepo = (provider: 'github' | 'gitlab') => {
     onUpdateUser({
       authProvider: provider,
-      repoConnected: repoName
-    });
-    setSuccessMessage(`Connected repository via ${provider.toUpperCase()}: ${repoName}`);
-    setTimeout(() => setSuccessMessage(''), 3000);
-  };
+      repoConnected: repoName,
+    })
+    setSuccessMessage(`Connected repository via ${provider.toUpperCase()}: ${repoName}`)
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
@@ -44,7 +39,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="flex items-center justify-between p-4 border-b-2 border-neutral-800 bg-black">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-xs font-extrabold text-white uppercase tracking-tight">Security & Repository Authentication</h2>
+            <h2 className="text-xs font-extrabold text-white uppercase tracking-tight">
+              Security & Repository Authentication
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -68,7 +65,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <div className="text-sm font-bold text-white">{user.username}</div>
-              <div className="text-xs text-neutral-400 font-mono">{user.role} &bull; {user.authProvider.toUpperCase()}</div>
+              <div className="text-xs text-neutral-400 font-mono">
+                {user.role} &bull; {user.authProvider.toUpperCase()}
+              </div>
             </div>
           </div>
 
@@ -108,17 +107,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type="text"
                   value={repoName}
-                  onChange={e => setRepoName(e.target.value)}
+                  onChange={(e) => setRepoName(e.target.value)}
                   className="w-full p-2 bg-black border-2 border-neutral-700 rounded-none text-white font-bold focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] text-neutral-400 uppercase font-bold block mb-1">Personal Access Token</label>
+                <label className="text-[10px] text-neutral-400 uppercase font-bold block mb-1">
+                  Personal Access Token
+                </label>
                 <input
                   type="password"
                   value={tokenInput}
-                  onChange={e => setTokenInput(e.target.value)}
+                  onChange={(e) => setTokenInput(e.target.value)}
                   className="w-full p-2 bg-black border-2 border-neutral-700 rounded-none text-white font-bold focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all"
                 />
               </div>
@@ -161,5 +162,5 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

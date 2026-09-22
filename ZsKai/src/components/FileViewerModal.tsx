@@ -1,38 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, FileCode, Check } from 'lucide-react';
-import { ProjectFile } from '../types/shell';
-import { renderCodeSnippet } from '../utils/syntaxHighlighting';
+import React, { useState, useEffect } from 'react'
+import { X, Save, FileCode, Check } from 'lucide-react'
+import { ProjectFile } from '../types/shell'
+import { renderCodeSnippet } from '../utils/syntaxHighlighting'
 
 interface FileViewerModalProps {
-  file: ProjectFile | null;
-  onClose: () => void;
-  onSaveFile: (fileId: string, newContent: string) => void;
+  file: ProjectFile | null
+  onClose: () => void
+  onSaveFile: (fileId: string, newContent: string) => void
 }
 
-export const FileViewerModal: React.FC<FileViewerModalProps> = ({
-  file,
-  onClose,
-  onSaveFile
-}) => {
-  const [content, setContent] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+export const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, onClose, onSaveFile }) => {
+  const [content, setContent] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [savedSuccess, setSavedSuccess] = useState(false)
 
   useEffect(() => {
     if (file && file.content) {
-      setContent(file.content);
-      setIsEditing(false);
-      setSavedSuccess(false);
+      setContent(file.content)
+      setIsEditing(false)
+      setSavedSuccess(false)
     }
-  }, [file]);
+  }, [file])
 
-  if (!file) return null;
+  if (!file) return null
 
   const handleSave = () => {
-    onSaveFile(file.id, content);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
-  };
+    onSaveFile(file.id, content)
+    setSavedSuccess(true)
+    setTimeout(() => setSavedSuccess(false), 2500)
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -63,10 +59,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({
             >
               <Save className="w-3.5 h-3.5" /> Save
             </button>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white"
-            >
+            <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -77,7 +70,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({
           {isEditing ? (
             <textarea
               value={content}
-              onChange={e => setContent(e.target.value)}
+              onChange={(e) => setContent(e.target.value)}
               className="w-full h-80 bg-[#111622] text-slate-200 p-3 rounded border border-slate-800 focus:outline-none focus:border-blue-500 font-mono leading-relaxed"
               spellCheck={false}
             />
@@ -97,5 +90,5 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

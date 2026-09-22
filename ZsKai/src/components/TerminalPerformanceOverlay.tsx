@@ -1,54 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { Cpu, HardDrive, Wifi, Activity, Gauge, Zap, Sparkles } from 'lucide-react';
-import { getConfidenceTheme } from '../utils/syntaxHighlighting';
+import React, { useState, useEffect } from 'react'
+import { Cpu, HardDrive, Wifi, Activity, Gauge, Zap, Sparkles } from 'lucide-react'
+import { getConfidenceTheme } from '../utils/syntaxHighlighting'
 
 interface TerminalPerformanceOverlayProps {
-  latencyMs?: number;
-  aiConfidence?: number;
-  onSetConfidence?: (score: number) => void;
+  latencyMs?: number
+  aiConfidence?: number
+  onSetConfidence?: (score: number) => void
 }
 
 export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProps> = ({
   latencyMs = 18,
   aiConfidence = 0.992,
-  onSetConfidence
+  onSetConfidence,
 }) => {
-  const [memoryMB, setMemoryMB] = useState(42.8);
-  const [currentLatency, setCurrentLatency] = useState(latencyMs);
-  const [cpuUsage, setCpuUsage] = useState(3.4);
-  const [showDetails, setShowDetails] = useState(false);
+  const [memoryMB, setMemoryMB] = useState(42.8)
+  const [currentLatency, setCurrentLatency] = useState(latencyMs)
+  const [cpuUsage, setCpuUsage] = useState(3.4)
+  const [showDetails, setShowDetails] = useState(false)
 
-  const theme = getConfidenceTheme(aiConfidence);
+  const theme = getConfidenceTheme(aiConfidence)
 
   // Simulate subtle real-time performance fluctuations
   useEffect(() => {
     const interval = setInterval(() => {
-      setMemoryMB(prev => {
-        const delta = (Math.random() - 0.48) * 0.8;
-        return Math.min(96, Math.max(28, parseFloat((prev + delta).toFixed(1))));
-      });
+      setMemoryMB((prev) => {
+        const delta = (Math.random() - 0.48) * 0.8
+        return Math.min(96, Math.max(28, parseFloat((prev + delta).toFixed(1))))
+      })
 
-      setCurrentLatency(prev => {
-        const base = latencyMs || 18;
-        const delta = Math.floor((Math.random() - 0.5) * 6);
-        return Math.max(6, base + delta);
-      });
+      setCurrentLatency((prev) => {
+        const base = latencyMs || 18
+        const delta = Math.floor((Math.random() - 0.5) * 6)
+        return Math.max(6, base + delta)
+      })
 
-      setCpuUsage(prev => {
-        const delta = (Math.random() - 0.5) * 1.2;
-        return Math.min(25, Math.max(1.2, parseFloat((prev + delta).toFixed(1))));
-      });
-    }, 2500);
+      setCpuUsage((prev) => {
+        const delta = (Math.random() - 0.5) * 1.2
+        return Math.min(25, Math.max(1.2, parseFloat((prev + delta).toFixed(1))))
+      })
+    }, 2500)
 
-    return () => clearInterval(interval);
-  }, [latencyMs]);
+    return () => clearInterval(interval)
+  }, [latencyMs])
 
-  const maxMemory = 128;
-  const memoryPct = Math.min(100, Math.round((memoryMB / maxMemory) * 100));
+  const maxMemory = 128
+  const memoryPct = Math.min(100, Math.round((memoryMB / maxMemory) * 100))
 
   // Latency status color
-  const latencyColor = currentLatency < 30 ? 'text-emerald-400' : currentLatency < 80 ? 'text-amber-400' : 'text-rose-400';
-  const latencyDotColor = currentLatency < 30 ? 'bg-emerald-500' : currentLatency < 80 ? 'bg-amber-500' : 'bg-rose-500';
+  const latencyColor =
+    currentLatency < 30 ? 'text-emerald-400' : currentLatency < 80 ? 'text-amber-400' : 'text-rose-400'
+  const latencyDotColor = currentLatency < 30 ? 'bg-emerald-500' : currentLatency < 80 ? 'bg-amber-500' : 'bg-rose-500'
 
   return (
     <div className="relative font-mono text-[10px] select-none">
@@ -61,7 +62,9 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
         {/* Latency metric */}
         <div className="flex items-center space-x-1.5">
           <span className="relative flex h-2 w-2">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${latencyDotColor} opacity-75`}></span>
+            <span
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full ${latencyDotColor} opacity-75`}
+            ></span>
             <span className={`relative inline-flex rounded-full h-2 w-2 ${latencyDotColor}`}></span>
           </span>
           <Wifi className="w-3 h-3 text-slate-400" />
@@ -99,7 +102,10 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
         <span className="text-slate-700 hidden md:inline">|</span>
 
         {/* AI Confidence & Syntax Shift Badge */}
-        <div className="hidden md:flex items-center space-x-1 text-slate-300" title={`AI Confidence: ${(aiConfidence * 100).toFixed(1)}% (${theme.label})`}>
+        <div
+          className="hidden md:flex items-center space-x-1 text-slate-300"
+          title={`AI Confidence: ${(aiConfidence * 100).toFixed(1)}% (${theme.label})`}
+        >
           <Sparkles className={`w-3 h-3 ${theme.badgeText}`} />
           <span className={`font-bold ${theme.badgeText}`}>{(aiConfidence * 100).toFixed(0)}%</span>
         </div>
@@ -123,7 +129,9 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
             <div>
               <div className="flex justify-between text-slate-400 mb-1">
                 <span>V8 Heap Allocated</span>
-                <span className="font-bold text-white">{memoryMB} MB / {maxMemory} MB</span>
+                <span className="font-bold text-white">
+                  {memoryMB} MB / {maxMemory} MB
+                </span>
               </div>
               <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
                 <div
@@ -163,12 +171,12 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
                   <Sparkles className={`w-3 h-3 ${theme.badgeText}`} />
                   Watson AI Confidence
                 </span>
-                <span className={`font-bold text-[11px] ${theme.badgeText}`}>
-                  {(aiConfidence * 100).toFixed(1)}%
-                </span>
+                <span className={`font-bold text-[11px] ${theme.badgeText}`}>{(aiConfidence * 100).toFixed(1)}%</span>
               </div>
 
-              <div className={`p-1.5 rounded border text-[9.5px] ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText} flex justify-between items-center`}>
+              <div
+                className={`p-1.5 rounded border text-[9.5px] ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText} flex justify-between items-center`}
+              >
                 <span>Syntax Color Shift:</span>
                 <span className="font-bold uppercase tracking-wider">{theme.label}</span>
               </div>
@@ -179,8 +187,8 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
                   <div className="grid grid-cols-3 gap-1">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onSetConfidence(0.992);
+                        e.stopPropagation()
+                        onSetConfidence(0.992)
                       }}
                       className="px-1.5 py-1 bg-emerald-950 hover:bg-emerald-900 border border-emerald-800 text-emerald-300 rounded text-[9px] font-bold cursor-pointer transition-colors"
                     >
@@ -188,8 +196,8 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
                     </button>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onSetConfidence(0.82);
+                        e.stopPropagation()
+                        onSetConfidence(0.82)
                       }}
                       className="px-1.5 py-1 bg-amber-950 hover:bg-amber-900 border border-amber-800 text-amber-300 rounded text-[9px] font-bold cursor-pointer transition-colors"
                     >
@@ -197,8 +205,8 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
                     </button>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onSetConfidence(0.55);
+                        e.stopPropagation()
+                        onSetConfidence(0.55)
                       }}
                       className="px-1.5 py-1 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded text-[9px] font-bold cursor-pointer transition-colors"
                     >
@@ -216,8 +224,8 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
             </span>
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                setShowDetails(false);
+                e.stopPropagation()
+                setShowDetails(false)
               }}
               className="text-slate-400 hover:text-white underline cursor-pointer"
             >
@@ -227,5 +235,5 @@ export const TerminalPerformanceOverlay: React.FC<TerminalPerformanceOverlayProp
         </div>
       )}
     </div>
-  );
-};
+  )
+}

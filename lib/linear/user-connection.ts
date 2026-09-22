@@ -38,7 +38,10 @@ export async function getUserLinearConnection(userId: string) {
     scope: token.scope || data.scope,
   }
 
-  await db.update(connectors).set({ env: encrypt(JSON.stringify(refreshed)), updatedAt: new Date() }).where(eq(connectors.id, connection.id))
+  await db
+    .update(connectors)
+    .set({ env: encrypt(JSON.stringify(refreshed)), updatedAt: new Date() })
+    .where(eq(connectors.id, connection.id))
   return refreshed
 }
 
