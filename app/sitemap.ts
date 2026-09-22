@@ -1,29 +1,21 @@
 import type { MetadataRoute } from 'next'
-import { VELCLAW_PUBLIC_ORIGIN } from '@/lib/velclaw/domain-config'
+import { headers } from 'next/headers'
+import { getVelclawDomainRole, getVelclawOriginForRole } from '@/lib/velclaw/domain-config'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = [
-    '/',
-    '/docs/',
-    '/velclawhub',
-    '/hub',
-    '/deploy',
-    '/deploy/engine',
-    '/new',
-    '/tasks',
-    '/velclaw',
-    '/skills',
-    '/plugins',
-    '/mcp',
-    '/api-keys',
-    '/repos/new',
-    '/auth/signin',
-    '/velclaw/ui-audit',
-    '/projects',
-  ]
+/** Returns the URL set and crawl hints for the request's Velclaw domain role. */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const requestHeaders = await headers()
+  const role = getVelclawDomainRole(requestHeaders.get('host'))
+  const origin = getVelclawOriginForRole(role)
 
-  return paths.map((path) => ({
-    url: `${VELCLAW_PUBLIC_ORIGIN}${path}`,
+  const pathsByRole = {
+    platform: ['/', '/projects', '/deploy', '/velclaw', '/tasks', '/plugins', '/skills'],
+    developer: ['/', '/docs', '/builder', '/mcp', '/api-keys', '/repos/new', '/velclaw'],
+    application: ['/', '/console', '/projects', '/deploy', '/velclaw', '/tasks'],
+  } as const
+
+  return pathsByRole[role].map((path) => ({
+    url: `${origin}${path}`,
     changeFrequency: path === '/' ? 'daily' : 'weekly',
     priority: path === '/' ? 1 : 0.7,
   }))
