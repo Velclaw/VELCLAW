@@ -1,14 +1,14 @@
 export type VelclawDomainRole = 'platform' | 'developer' | 'application'
 
 export const VELCLAW_DOMAIN_ROLES = {
-  platform: 'https://velclaw.com',
+  platform: 'https://velclaw.ai',
   developer: 'https://velclaw.dev',
   application: 'https://velclaw.app',
 } as const
 
 const DOMAIN_ROLE_BY_HOST: Record<string, VelclawDomainRole> = {
-  'velclaw.com': 'platform',
-  'www.velclaw.com': 'platform',
+  'velclaw.ai': 'platform',
+  'www.velclaw.ai': 'platform',
   'velclaw.dev': 'developer',
   'www.velclaw.dev': 'developer',
   'velclaw.app': 'application',
@@ -41,11 +41,11 @@ export const VELCLAW_ALLOWED_ORIGINS = (
 
 export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   platform: {
-    name: 'Velclaw Platform',
-    title: 'Velclaw — AI-native Software Platform',
-    description: 'Velclaw is an AI-native software platform for agents, code, builds, runtime, review and delivery.',
-    heading: 'AI-native software platform',
-    intro: 'The main Velclaw platform for the company, product ecosystem, workspace and production delivery.',
+    name: 'Velclaw AI',
+    title: 'Velclaw AI — AI-native Software Platform',
+    description: 'Velclaw.ai is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
+    heading: 'Main AI-native software platform',
+    intro: 'The main Velclaw.ai platform for the company, product ecosystem, workspace and production delivery.',
   },
   developer: {
     name: 'Velclaw Developer',
