@@ -42,8 +42,8 @@ type Domain = {
 const seedDomains: Domain[] = [
   {
     name: 'velclaw.site',
-    tld: '.ai',
-    registrar: 'Pending verification',
+    tld: '.site',
+    registrar: 'Vercel',
     status: 'pending',
     expires: 'Not verified',
     autoRenew: true,
