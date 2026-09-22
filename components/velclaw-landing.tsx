@@ -25,7 +25,7 @@ const flow = [
 ] as const
 
 const domainIdentity: Record<VelclawDomainRole, { label: string; descriptor: string; cta: string; ctaHref: string }> = {
-  platform: { label: 'velclaw.com', descriptor: 'Platform & company', cta: 'Mở Platform', ctaHref: '/projects' },
+  platform: { label: 'velclaw.ai', descriptor: 'Platform & company', cta: 'Mở Platform', ctaHref: '/projects' },
   developer: { label: 'velclaw.dev', descriptor: 'Developer · IDE · Docs · API', cta: 'Mở Developer', ctaHref: '/builder' },
   application: { label: 'velclaw.app', descriptor: 'Application & services', cta: 'Mở Application', ctaHref: '/console' },
 }
