@@ -16,7 +16,7 @@ test('domain control plane renders the primary AI domain and the two service dom
   assert.match(markup, />0<\/div><div class="mt-1 text-\[11px\] text-zinc-600">Across all domains/)
   assert.match(markup, />0<\/div><div class="mt-1 text-\[11px\] text-zinc-600">Requires action/)
 
-  for (const domain of ['velclaw.ai', 'velclaw.app', 'velclaw.dev']) {
+  for (const domain of ['velclaw.site', 'velclaw.app', 'velclaw.dev']) {
     assert.ok(markup.includes(domain), `missing seeded domain: ${domain}`)
   }
 
