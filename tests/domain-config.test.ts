@@ -93,7 +93,7 @@ test('known bare, www, case-insensitive, and port-qualified hosts resolve to the
   const cases = [
     ['velclaw.site', 'platform'],
     ['www.velclaw.site', 'platform'],
-    ['VELCLAW.AI', 'platform'],
+    ['VELCLAW.SITE', 'platform'],
     ['velclaw.site:3000', 'platform'],
     ['velclaw.dev', 'developer'],
     ['www.velclaw.dev', 'developer'],
