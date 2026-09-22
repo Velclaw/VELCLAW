@@ -8,7 +8,6 @@ interface TaskPageProps {
   params: Promise<{
     taskId: string
   }>
-
 }
 
 export default async function TaskPage({ params }: TaskPageProps) {
@@ -46,7 +45,8 @@ export async function generateMetadata({ params }: TaskPageProps): Promise<Metad
         .limit(1)
 
       if (task[0]?.title) pageTitle = task[0].title
-      else if (task[0]?.prompt) pageTitle = task[0].prompt.length > 60 ? `${task[0].prompt.slice(0, 60)}...` : task[0].prompt
+      else if (task[0]?.prompt)
+        pageTitle = task[0].prompt.length > 60 ? `${task[0].prompt.slice(0, 60)}...` : task[0].prompt
     } catch (error) {
       console.error('Failed to fetch task for metadata:', error)
     }

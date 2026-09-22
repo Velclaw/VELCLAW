@@ -1,90 +1,76 @@
-import React, { useState } from 'react';
-import { 
-  X, 
-  Plus, 
-  Trash2, 
-  Server, 
-  GitBranch, 
-  Folder, 
-  Sliders, 
-  Shield, 
-  Play,
-  Layers
-} from 'lucide-react';
-import { DeploymentProject, DeploymentTarget } from '../types';
+import React, { useState } from 'react'
+import { X, Plus, Trash2, Server, GitBranch, Folder, Sliders, Shield, Play, Layers } from 'lucide-react'
+import { DeploymentProject, DeploymentTarget } from '../types'
 
 interface ProjectModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSaveProject: (projectData: Partial<DeploymentProject>) => Promise<void>;
-  initialProject?: DeploymentProject | null;
+  isOpen: boolean
+  onClose: () => void
+  onSaveProject: (projectData: Partial<DeploymentProject>) => Promise<void>
+  initialProject?: DeploymentProject | null
 }
 
-export const ProjectModal: React.FC<ProjectModalProps> = ({
-  isOpen,
-  onClose,
-  onSaveProject,
-  initialProject,
-}) => {
-  const [name, setName] = useState(initialProject?.name || '');
-  const [repoUrl, setRepoUrl] = useState(initialProject?.repoUrl || '');
-  const [branch, setBranch] = useState(initialProject?.branch || 'main');
-  const [target, setTarget] = useState<DeploymentTarget>(initialProject?.target || 'vps-ssh');
-  const [serverIp, setServerIp] = useState(initialProject?.serverIp || '');
-  const [serverPort, setServerPort] = useState(initialProject?.serverPort || 22);
-  const [serverUser, setServerUser] = useState(initialProject?.serverUser || 'root');
-  const [deployPath, setDeployPath] = useState(initialProject?.deployPath || '/var/www/my-app');
-  const [framework, setFramework] = useState(initialProject?.framework || 'react-vite');
-  const [buildCommand, setBuildCommand] = useState(initialProject?.buildCommand || 'npm ci && npm run build');
-  const [startCommand, setStartCommand] = useState(initialProject?.startCommand || 'pm2 reload all || systemctl reload nginx');
-  const [autoDeployOnPush, setAutoDeployOnPush] = useState(initialProject?.autoDeployOnPush !== false);
-  const [envVariables, setEnvVariables] = useState(initialProject?.envVariables || [
-    { key: 'NODE_ENV', value: 'production', isSecret: false }
-  ]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export const ProjectModal: React.FC<ProjectModalProps> = ({ isOpen, onClose, onSaveProject, initialProject }) => {
+  const [name, setName] = useState(initialProject?.name || '')
+  const [repoUrl, setRepoUrl] = useState(initialProject?.repoUrl || '')
+  const [branch, setBranch] = useState(initialProject?.branch || 'main')
+  const [target, setTarget] = useState<DeploymentTarget>(initialProject?.target || 'vps-ssh')
+  const [serverIp, setServerIp] = useState(initialProject?.serverIp || '')
+  const [serverPort, setServerPort] = useState(initialProject?.serverPort || 22)
+  const [serverUser, setServerUser] = useState(initialProject?.serverUser || 'root')
+  const [deployPath, setDeployPath] = useState(initialProject?.deployPath || '/var/www/my-app')
+  const [framework, setFramework] = useState(initialProject?.framework || 'react-vite')
+  const [buildCommand, setBuildCommand] = useState(initialProject?.buildCommand || 'npm ci && npm run build')
+  const [startCommand, setStartCommand] = useState(
+    initialProject?.startCommand || 'pm2 reload all || systemctl reload nginx',
+  )
+  const [autoDeployOnPush, setAutoDeployOnPush] = useState(initialProject?.autoDeployOnPush !== false)
+  const [envVariables, setEnvVariables] = useState(
+    initialProject?.envVariables || [{ key: 'NODE_ENV', value: 'production', isSecret: false }],
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleFrameworkChange = (selected: string) => {
-    setFramework(selected as any);
+    setFramework(selected as any)
     if (selected === 'react-vite') {
-      setBuildCommand('npm ci && npm run build');
-      setStartCommand('systemctl reload nginx');
+      setBuildCommand('npm ci && npm run build')
+      setStartCommand('systemctl reload nginx')
     } else if (selected === 'nextjs') {
-      setBuildCommand('npm ci && npm run build');
-      setStartCommand('pm2 reload next-app || pm2 start npm --name next-app -- start');
+      setBuildCommand('npm ci && npm run build')
+      setStartCommand('pm2 reload next-app || pm2 start npm --name next-app -- start')
     } else if (selected === 'nodejs-express') {
-      setBuildCommand('npm ci');
-      setStartCommand('pm2 reload api-server || pm2 start index.js --name api-server');
+      setBuildCommand('npm ci')
+      setStartCommand('pm2 reload api-server || pm2 start index.js --name api-server')
     } else if (selected === 'docker-compose') {
-      setBuildCommand('docker compose build');
-      setStartCommand('docker compose up -d --remove-orphans');
-      setTarget('docker');
+      setBuildCommand('docker compose build')
+      setStartCommand('docker compose up -d --remove-orphans')
+      setTarget('docker')
     } else if (selected === 'python-fastapi') {
-      setBuildCommand('pip install -r requirements.txt');
-      setStartCommand('systemctl restart fastapi');
+      setBuildCommand('pip install -r requirements.txt')
+      setStartCommand('systemctl restart fastapi')
     }
-  };
+  }
 
   const handleAddEnv = () => {
-    setEnvVariables([...envVariables, { key: '', value: '', isSecret: false }]);
-  };
+    setEnvVariables([...envVariables, { key: '', value: '', isSecret: false }])
+  }
 
   const handleRemoveEnv = (index: number) => {
-    setEnvVariables(envVariables.filter((_, i) => i !== index));
-  };
+    setEnvVariables(envVariables.filter((_, i) => i !== index))
+  }
 
   const handleEnvChange = (index: number, field: 'key' | 'value' | 'isSecret', val: any) => {
-    const next = [...envVariables];
-    next[index] = { ...next[index], [field]: val };
-    setEnvVariables(next);
-  };
+    const next = [...envVariables]
+    next[index] = { ...next[index], [field]: val }
+    setEnvVariables(next)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !repoUrl) return;
+    e.preventDefault()
+    if (!name || !repoUrl) return
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       await onSaveProject({
         name,
@@ -100,14 +86,14 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         startCommand,
         autoDeployOnPush,
         envVariables: envVariables.filter((ev) => ev.key.trim() !== ''),
-      });
-      onClose();
+      })
+      onClose()
     } catch (err) {
-      console.error('Error saving project:', err);
+      console.error('Error saving project:', err)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -330,7 +316,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
             <div>
               <div className="text-xs font-semibold text-white">Tự động hóa kích hoạt khi Push Code</div>
-              <div className="text-[11px] text-slate-400">Mỗi khi có commit mới vào branch theo dõi, tự động chạy build & deploy</div>
+              <div className="text-[11px] text-slate-400">
+                Mỗi khi có commit mới vào branch theo dõi, tự động chạy build & deploy
+              </div>
             </div>
             <input
               type="checkbox"
@@ -360,5 +348,5 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}

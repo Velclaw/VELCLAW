@@ -26,8 +26,18 @@ const flow = [
 
 const domainIdentity: Record<VelclawDomainRole, { label: string; descriptor: string; cta: string; ctaHref: string }> = {
   platform: { label: 'velclaw.site', descriptor: 'Platform & company', cta: 'Mở Platform', ctaHref: '/projects' },
-  developer: { label: 'velclaw.dev', descriptor: 'Developer · IDE · Docs · API', cta: 'Mở Developer', ctaHref: '/builder' },
-  application: { label: 'velclaw.app', descriptor: 'Application & services', cta: 'Mở Application', ctaHref: '/console' },
+  developer: {
+    label: 'velclaw.dev',
+    descriptor: 'Developer · IDE · Docs · API',
+    cta: 'Mở Developer',
+    ctaHref: '/builder',
+  },
+  application: {
+    label: 'velclaw.app',
+    descriptor: 'Application & services',
+    cta: 'Mở Application',
+    ctaHref: '/console',
+  },
 }
 
 export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole }) {
@@ -57,40 +67,180 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
         </Link>
 
         <nav className={styles.navlinks} aria-label="Velclaw navigation">
-          <Link className={styles.active} href="#platform">Nền tảng</Link>
+          <Link className={styles.active} href="#platform">
+            Nền tảng
+          </Link>
           <Link href="/console">Console</Link>
           <Link href="/builder">Nhà xây dựng</Link>
           <Link href="/velclaw">Không gian làm việc</Link>
         </nav>
 
         <div className={styles.authActions}>
-          <Link className={styles.signIn} href="/auth/signin">Đăng nhập</Link>
+          <Link className={styles.signIn} href="/auth/signin">
+            Đăng nhập
+          </Link>
         </div>
       </header>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <div className={styles.eyebrow}><span />{identity.descriptor.toUpperCase()} · AI-NATIVE SOFTWARE WORKSPACE</div>
-          <h1>Build. Review. Deploy.<br /><em>With Velclaw.</em></h1>
-          <p className={styles.lead}>Một workspace duy nhất để agent và developer đi từ task đến production — code, project, build, runtime, review và deployment nằm trong cùng một vòng đời.</p>
-          <div className={styles.ctas}><Link className={`${styles.btn} ${styles.primary}`} href={identity.ctaHref}>{identity.cta}</Link><Link className={`${styles.btn} ${styles.ghost}`} href="/builder">Mở Nhà xây dựng</Link></div>
-          <div className={styles.domainLine}><span className={styles.statusDot} /><span>{identity.label}</span><span className={styles.separator}>·</span><span>{identity.descriptor}</span></div>
+          <div className={styles.eyebrow}>
+            <span />
+            {identity.descriptor.toUpperCase()} · AI-NATIVE SOFTWARE WORKSPACE
+          </div>
+          <h1>
+            Build. Review. Deploy.
+            <br />
+            <em>With Velclaw.</em>
+          </h1>
+          <p className={styles.lead}>
+            Một workspace duy nhất để agent và developer đi từ task đến production — code, project, build, runtime,
+            review và deployment nằm trong cùng một vòng đời.
+          </p>
+          <div className={styles.ctas}>
+            <Link className={`${styles.btn} ${styles.primary}`} href={identity.ctaHref}>
+              {identity.cta}
+            </Link>
+            <Link className={`${styles.btn} ${styles.ghost}`} href="/builder">
+              Mở Nhà xây dựng
+            </Link>
+          </div>
+          <div className={styles.domainLine}>
+            <span className={styles.statusDot} />
+            <span>{identity.label}</span>
+            <span className={styles.separator}>·</span>
+            <span>{identity.descriptor}</span>
+          </div>
         </div>
         <div className={styles.commandPanel} aria-label="Velclaw browser builder preview">
-          <div className={styles.panelHeader}><span>VELCLAW / BUILDER</span><span className={styles.live}>READY</span></div>
-          <div className={styles.commandBody}><div><span className={styles.prompt}>$</span> velclaw builder</div><div className={styles.dim}>runtime <b>WebContainer</b></div><div className={styles.dim}>environment <b>browser</b></div><div className={styles.dim}>source <b>GitHub</b></div><div className={styles.divider} /><div><span className={styles.ok}>✓</span> filesystem ready</div><div><span className={styles.ok}>✓</span> node runtime ready</div><div><span className={styles.arrow}>→</span> edit <span className={styles.arrow}>→</span> preview <span className={styles.arrow}>→</span> deploy</div></div>
+          <div className={styles.panelHeader}>
+            <span>VELCLAW / BUILDER</span>
+            <span className={styles.live}>READY</span>
+          </div>
+          <div className={styles.commandBody}>
+            <div>
+              <span className={styles.prompt}>$</span> velclaw builder
+            </div>
+            <div className={styles.dim}>
+              runtime <b>WebContainer</b>
+            </div>
+            <div className={styles.dim}>
+              environment <b>browser</b>
+            </div>
+            <div className={styles.dim}>
+              source <b>GitHub</b>
+            </div>
+            <div className={styles.divider} />
+            <div>
+              <span className={styles.ok}>✓</span> filesystem ready
+            </div>
+            <div>
+              <span className={styles.ok}>✓</span> node runtime ready
+            </div>
+            <div>
+              <span className={styles.arrow}>→</span> edit <span className={styles.arrow}>→</span> preview{' '}
+              <span className={styles.arrow}>→</span> deploy
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className={styles.marquee} aria-hidden="true"><div>AGENTS · BUILDER · TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT · AGENTS · BUILDER · TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT · </div></div>
+      <div className={styles.marquee} aria-hidden="true">
+        <div>
+          AGENTS · BUILDER · TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT · AGENTS · BUILDER ·
+          TASKS · WORKSPACE · BUILD · RUNTIME · REVIEW · GITHUB · DEPLOYMENT ·{' '}
+        </div>
+      </div>
 
-      <section id="platform" className={styles.section}><div className={styles.sectionHead}><span className={styles.k}>01 / PLATFORM</span><h2>Mọi thứ agent cần để ship software, không cần nhảy giữa nhiều công cụ.</h2></div><div className={styles.productGrid}>{products.map(([num, title, text, href]) => <Link className={styles.productCard} href={href} key={num}><div className={styles.cardTop}><span>{num}</span><span className={styles.cardArrow}>↗</span></div><h3>{title}</h3><p>{text}</p></Link>)}</div></section>
+      <section id="platform" className={styles.section}>
+        <div className={styles.sectionHead}>
+          <span className={styles.k}>01 / PLATFORM</span>
+          <h2>Mọi thứ agent cần để ship software, không cần nhảy giữa nhiều công cụ.</h2>
+        </div>
+        <div className={styles.productGrid}>
+          {products.map(([num, title, text, href]) => (
+            <Link className={styles.productCard} href={href} key={num}>
+              <div className={styles.cardTop}>
+                <span>{num}</span>
+                <span className={styles.cardArrow}>↗</span>
+              </div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      <section className={styles.section}><div className={styles.sectionHead}><span className={styles.k}>02 / PIPELINE</span><h2>Một đường đi rõ ràng từ ý tưởng tới production.</h2></div><div className={styles.flow}>{flow.map(([num, title], index) => <div className={styles.flowGroup} key={num}><div className={styles.flowStep}><span>{num}</span><strong>{title}</strong></div>{index < flow.length - 1 && <span className={styles.flowArrow} aria-hidden="true">→</span>}</div>)}</div></section>
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <span className={styles.k}>02 / PIPELINE</span>
+          <h2>Một đường đi rõ ràng từ ý tưởng tới production.</h2>
+        </div>
+        <div className={styles.flow}>
+          {flow.map(([num, title], index) => (
+            <div className={styles.flowGroup} key={num}>
+              <div className={styles.flowStep}>
+                <span>{num}</span>
+                <strong>{title}</strong>
+              </div>
+              {index < flow.length - 1 && (
+                <span className={styles.flowArrow} aria-hidden="true">
+                  →
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <section className={styles.ctaBand}><div><span className={styles.k}>03 / BUILD</span><h3>Build ngay trên điện thoại bằng trình duyệt.</h3><p>Velclaw Builder chạy Node.js và preview trong browser; không cần biến điện thoại thành server.</p></div><Link className={`${styles.btn} ${styles.primary}`} href="/console">Mở Console</Link></section>
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <span className={styles.k}>03 / UNIFIED WORKSPACE</span>
+          <h2>Một cửa vào cho toàn bộ hiện trạng VELCLAW.</h2>
+        </div>
+        <div className={styles.integrationGrid}>
+          <Link className={styles.integrationCard} href="/velclaw">
+            <span>01</span>
+            <strong>Workspace & Agents</strong>
+            <p>Task, agent runtime, sandbox, review và GitHub PR trong cùng một luồng.</p>
+            <b>Mở workspace ↗</b>
+          </Link>
+          <Link className={styles.integrationCard} href="/deploy">
+            <span>02</span>
+            <strong>Build & Autoship</strong>
+            <p>Build, runtime evidence, deployment và rollback được nối vào lớp delivery.</p>
+            <b>Mở delivery ↗</b>
+          </Link>
+          <Link className={styles.integrationCard} href="/mcp">
+            <span>03</span>
+            <strong>Tools & Context</strong>
+            <p>MCP, plugins, skills và API keys cung cấp năng lực cho agent mà không tách rời sản phẩm.</p>
+            <b>Mở tools ↗</b>
+          </Link>
+          <Link className={styles.integrationCard} href="/console">
+            <span>04</span>
+            <strong>Builder & Preview</strong>
+            <p>Code, filesystem, preview và kiểm tra ứng dụng ngay trong browser.</p>
+            <b>Mở console ↗</b>
+          </Link>
+        </div>
+      </section>
 
-      <footer><span className={styles.mono}>{identity.label}</span><span>AI-native software lifecycle workspace</span></footer>
+      <section className={styles.ctaBand}>
+        <div>
+          <span className={styles.k}>03 / BUILD</span>
+          <h3>Build ngay trên điện thoại bằng trình duyệt.</h3>
+          <p>Velclaw Builder chạy Node.js và preview trong browser; không cần biến điện thoại thành server.</p>
+        </div>
+        <Link className={`${styles.btn} ${styles.primary}`} href="/console">
+          Mở Console
+        </Link>
+      </section>
+
+      <footer>
+        <span className={styles.mono}>{identity.label}</span>
+        <span>AI-native software lifecycle workspace</span>
+      </footer>
     </main>
   )
 }

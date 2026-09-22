@@ -1,30 +1,41 @@
-import React, { useState } from 'react';
-import { CommandHistoryItem } from '../types/shell';
-import { renderCodeSnippet, highlightCommand, getConfidenceTheme } from '../utils/syntaxHighlighting';
-import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, FileText, Code2, Layers, BookOpen } from 'lucide-react';
-import { RfcViewer } from './RfcViewer';
+import React, { useState } from 'react'
+import { CommandHistoryItem } from '../types/shell'
+import { renderCodeSnippet, highlightCommand, getConfidenceTheme } from '../utils/syntaxHighlighting'
+import {
+  CheckCircle2,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  ThumbsUp,
+  ThumbsDown,
+  FileText,
+  Code2,
+  Layers,
+  BookOpen,
+} from 'lucide-react'
+import { RfcViewer } from './RfcViewer'
 
 interface TerminalOutputProps {
-  history: CommandHistoryItem[];
-  outputEndRef: React.RefObject<HTMLDivElement | null>;
-  aiConfidence?: number;
-  activeNavTab?: 'chat' | 'diff' | 'logs' | 'rfc';
+  history: CommandHistoryItem[]
+  outputEndRef: React.RefObject<HTMLDivElement | null>
+  aiConfidence?: number
+  activeNavTab?: 'chat' | 'diff' | 'logs' | 'rfc'
 }
 
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
   history,
   outputEndRef,
   aiConfidence = 0.992,
-  activeNavTab = 'chat'
+  activeNavTab = 'chat',
 }) => {
-  const [isFilesExpanded, setIsFilesExpanded] = useState(true);
-  const [feedbackGiven, setFeedbackGiven] = useState<'up' | 'down' | null>(null);
+  const [isFilesExpanded, setIsFilesExpanded] = useState(true)
+  const [feedbackGiven, setFeedbackGiven] = useState<'up' | 'down' | null>(null)
 
-  const theme = getConfidenceTheme(aiConfidence);
+  const theme = getConfidenceTheme(aiConfidence)
 
   // Render RFC Viewer Specification Tab
   if (activeNavTab === 'rfc') {
-    return <RfcViewer />;
+    return <RfcViewer />
   }
 
   // Render Diff View (Sharp Rectangular Tech Theme)
@@ -49,9 +60,15 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           </div>
           <div className="p-3 font-mono text-[11px] leading-relaxed space-y-1">
             <div className="text-neutral-500">@@ -14,8 +14,12 @@</div>
-            <div className="bg-red-950/40 text-red-300 px-2 py-0.5 border-l-2 border-red-500">- &lt;div className="legacy-sidebar"&gt;Old Nav&lt;/div&gt;</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ &lt;div className="watson-clean-header"&gt;IETF Technical Header&lt;/div&gt;</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ &lt;nav className="nav-tabs"&gt;Cuộc trò chuyện | Diff | Nhật ký | RFC Specs&lt;/nav&gt;</div>
+            <div className="bg-red-950/40 text-red-300 px-2 py-0.5 border-l-2 border-red-500">
+              - &lt;div className="legacy-sidebar"&gt;Old Nav&lt;/div&gt;
+            </div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + &lt;div className="watson-clean-header"&gt;IETF Technical Header&lt;/div&gt;
+            </div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + &lt;nav className="nav-tabs"&gt;Cuộc trò chuyện | Diff | Nhật ký | RFC Specs&lt;/nav&gt;
+            </div>
           </div>
         </div>
 
@@ -59,13 +76,21 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
         <div className="bg-neutral-950 border border-neutral-800 rounded-none overflow-hidden">
           <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-800 flex justify-between items-center text-xs">
             <span className="font-bold text-white font-mono">public/pages/index.html</span>
-            <span className="text-xs font-mono font-bold bg-neutral-800 text-cyan-300 px-2 py-0.5 border border-neutral-700">Mới</span>
+            <span className="text-xs font-mono font-bold bg-neutral-800 text-cyan-300 px-2 py-0.5 border border-neutral-700">
+              Mới
+            </span>
           </div>
           <div className="p-3 font-mono text-[11px] leading-relaxed space-y-1">
             <div className="text-neutral-500">@@ -0,0 +1,15 @@</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ &lt;!DOCTYPE html&gt;</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ &lt;html lang="vi"&gt;</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ &lt;head&gt;&lt;title&gt;Watson Shell v4.0 - IETF/RFC Standards&lt;/title&gt;&lt;/head&gt;</div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + &lt;!DOCTYPE html&gt;
+            </div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + &lt;html lang="vi"&gt;
+            </div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + &lt;head&gt;&lt;title&gt;Watson Shell v4.0 - IETF/RFC Standards&lt;/title&gt;&lt;/head&gt;
+            </div>
           </div>
         </div>
 
@@ -77,12 +102,16 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           </div>
           <div className="p-3 font-mono text-[11px] leading-relaxed space-y-1">
             <div className="text-neutral-500">@@ -0,0 +1,24 @@</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ .sharp-rectangular-button &#123; border-radius: 0; background: #000; border: 1px solid #262626; &#125;</div>
-            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">+ .ietf-rfc-editor-container &#123; font-family: monospace; font-size: 12px; &#125;</div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + .sharp-rectangular-button &#123; border-radius: 0; background: #000; border: 1px solid #262626; &#125;
+            </div>
+            <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
+              + .ietf-rfc-editor-container &#123; font-family: monospace; font-size: 12px; &#125;
+            </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -90,7 +119,8 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
       {/* Sample / Default Main Chat Conversation Item matching user screenshot */}
       <div className="space-y-4 text-slate-200 font-sans">
         <div className="text-sm text-neutral-300 leading-relaxed font-mono">
-          number, card grid, timeline workflow và responsive mobile layout. <span className="text-neutral-500">{`{}`}</span>
+          number, card grid, timeline workflow và responsive mobile layout.{' '}
+          <span className="text-neutral-500">{`{}`}</span>
         </div>
 
         {/* Testing Checklist */}
@@ -114,7 +144,9 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               <code className="px-2 py-0.5 bg-black text-white rounded-none text-xs border-2 border-neutral-700 font-bold mr-2 break-all">
                 which chromium || which chromium-browser || which google-chrome || which firefox || true
               </code>
-              <span className="text-neutral-400 font-medium">— môi trường không có browser CLI để chụp screenshot runtime.</span>
+              <span className="text-neutral-400 font-medium">
+                — môi trường không có browser CLI để chụp screenshot runtime.
+              </span>
             </div>
           </div>
         </div>
@@ -122,7 +154,9 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
         {/* Committed changes line */}
         <div className="text-xs font-mono text-neutral-300 pt-1">
           Committed changes on the current branch:{' '}
-          <code className="px-1.5 py-0.5 bg-black text-cyan-300 rounded-none border-2 border-neutral-700 font-bold">2b1ba70</code>
+          <code className="px-1.5 py-0.5 bg-black text-cyan-300 rounded-none border-2 border-neutral-700 font-bold">
+            2b1ba70
+          </code>
           <div className="px-3 py-1.5 bg-black rounded-none border-2 border-neutral-700 text-white font-bold mt-1">
             Complete docs hierarchy and landing fallback
           </div>
@@ -143,7 +177,11 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             className="w-full px-4 py-3 bg-black hover:bg-neutral-900 border-b-2 border-neutral-800 flex items-center justify-between text-white font-mono text-xs font-extrabold uppercase transition-colors cursor-pointer"
           >
             <span>Tệp (3)</span>
-            {isFilesExpanded ? <ChevronUp className="w-4 h-4 text-cyan-400" /> : <ChevronDown className="w-4 h-4 text-cyan-400" />}
+            {isFilesExpanded ? (
+              <ChevronUp className="w-4 h-4 text-cyan-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-cyan-400" />
+            )}
           </button>
 
           {isFilesExpanded && (
@@ -240,9 +278,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             )}
 
             {item.output.type === 'code' && (
-              <div>
-                {renderCodeSnippet(item.output.content, item.output.language || 'javascript')}
-              </div>
+              <div>{renderCodeSnippet(item.output.content, item.output.language || 'javascript')}</div>
             )}
 
             {item.output.type === 'text' && item.output.content !== 'CLEAR_TERMINAL' && (
@@ -256,48 +292,58 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
       <div ref={outputEndRef} />
     </div>
-  );
-};
-
+  )
+}
 
 /**
  * Custom JSON syntax highlighter renderer for output
  */
 function renderFormattedJSON(json: Record<string, unknown>): React.ReactNode {
-  const jsonString = JSON.stringify(json, null, 2);
-  const lines = jsonString.split('\n');
+  const jsonString = JSON.stringify(json, null, 2)
+  const lines = jsonString.split('\n')
 
   return lines.map((line, idx) => {
     if (line.includes(':')) {
-      const parts = line.split(':');
-      const key = parts[0];
-      const val = parts.slice(1).join(':');
+      const parts = line.split(':')
+      const key = parts[0]
+      const val = parts.slice(1).join(':')
 
       return (
         <div key={idx}>
-          <span className="text-blue-300 font-medium">{key}</span>:
-          <span className="text-emerald-300">{val}</span>
+          <span className="text-blue-300 font-medium">{key}</span>:<span className="text-emerald-300">{val}</span>
         </div>
-      );
+      )
     }
-    return <div key={idx} className="text-orange-400">{line}</div>;
-  });
+    return (
+      <div key={idx} className="text-orange-400">
+        {line}
+      </div>
+    )
+  })
 }
 
 /**
  * Basic Markdown formatting parser for terminal output
  */
 function renderMarkdownContent(content: string): React.ReactNode {
-  const lines = content.split('\n');
+  const lines = content.split('\n')
 
   return (
     <div className="space-y-1">
       {lines.map((line, idx) => {
         if (line.startsWith('### ')) {
-          return <h4 key={idx} className="text-sm font-bold text-white mt-2 mb-1 border-b border-slate-800 pb-1">{line.replace('### ', '')}</h4>;
+          return (
+            <h4 key={idx} className="text-sm font-bold text-white mt-2 mb-1 border-b border-slate-800 pb-1">
+              {line.replace('### ', '')}
+            </h4>
+          )
         }
         if (line.startsWith('## ')) {
-          return <h3 key={idx} className="text-base font-bold text-blue-400 mt-2 mb-1">{line.replace('## ', '')}</h3>;
+          return (
+            <h3 key={idx} className="text-base font-bold text-blue-400 mt-2 mb-1">
+              {line.replace('## ', '')}
+            </h3>
+          )
         }
         if (line.startsWith('- ')) {
           return (
@@ -305,24 +351,36 @@ function renderMarkdownContent(content: string): React.ReactNode {
               <span className="text-emerald-400 font-bold">&bull;</span>
               <span className="text-slate-300">{parseInlineFormat(line.substring(2))}</span>
             </div>
-          );
+          )
         }
-        return <div key={idx} className="text-slate-300">{parseInlineFormat(line)}</div>;
+        return (
+          <div key={idx} className="text-slate-300">
+            {parseInlineFormat(line)}
+          </div>
+        )
       })}
     </div>
-  );
+  )
 }
 
 function parseInlineFormat(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
 
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="text-white font-bold">{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="text-white font-bold">
+          {part.slice(2, -2)}
+        </strong>
+      )
     }
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={i} className="px-1 py-0.5 bg-slate-800 text-blue-300 rounded font-mono text-[11px]">{part.slice(1, -1)}</code>;
+      return (
+        <code key={i} className="px-1 py-0.5 bg-slate-800 text-blue-300 rounded font-mono text-[11px]">
+          {part.slice(1, -1)}
+        </code>
+      )
     }
-    return part;
-  });
+    return part
+  })
 }

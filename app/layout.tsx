@@ -59,9 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /** Wraps every page in shared providers and emits structured data for the request's domain role. */
-export default async function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestHeaders = await headers()
   const role = getVelclawDomainRole(requestHeaders.get('host'))
   const content = getVelclawDomainRoleContent[role]

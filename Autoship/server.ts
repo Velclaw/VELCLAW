@@ -1,21 +1,21 @@
-import express, { Request, Response } from 'express';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
-import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-import { BuildRun, DeploymentProject, PipelineStage, WebhookLog } from './src/types';
+import express, { Request, Response } from 'express'
+import path from 'path'
+import crypto from 'crypto'
+import { fileURLToPath } from 'url'
+import { createServer as createViteServer } from 'vite'
+import { GoogleGenAI } from '@google/genai'
+import dotenv from 'dotenv'
+import { BuildRun, DeploymentProject, PipelineStage, WebhookLog } from './src/types'
 
-dotenv.config();
+dotenv.config()
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const app = express();
-const PORT = 3000;
+const app = express()
+const PORT = 3000
 
-app.use(express.json());
+app.use(express.json())
 
 // Initialize Gemini Client
 const ai = new GoogleGenAI({
@@ -25,7 +25,7 @@ const ai = new GoogleGenAI({
       'User-Agent': 'aistudio-build',
     },
   },
-});
+})
 
 // In-memory Database with persistent defaults
 let projects: DeploymentProject[] = [
@@ -81,7 +81,7 @@ let projects: DeploymentProject[] = [
     lastDeployStatus: 'success',
     totalBuilds: 28,
   },
-];
+]
 
 let buildRuns: BuildRun[] = [
   {
@@ -179,13 +179,13 @@ let buildRuns: BuildRun[] = [
         logs: [
           '> curl -Is https://mywebapp.com | head -n 1',
           'HTTP/2 200 OK',
-          '✔ SSL valid (Let\'s Encrypt, expires in 74 days)',
+          "✔ SSL valid (Let's Encrypt, expires in 74 days)",
           '✔ Web service is responding normally (Latency: 28ms).',
         ],
       },
     ],
   },
-];
+]
 
 let webhookLogs: WebhookLog[] = [
   {
@@ -199,11 +199,11 @@ let webhookLogs: WebhookLog[] = [
     status: 'accepted',
     reason: 'Push event matched tracked branch [main]. Pipeline #run-101 started automatically.',
   },
-];
+]
 
 // Helper to generate simulated pipeline stages
 function generateStagesForProject(project: DeploymentProject, commitMsg: string): PipelineStage[] {
-  const isDocker = project.target === 'docker' || project.framework === 'docker-compose';
+  const isDocker = project.target === 'docker' || project.framework === 'docker-compose'
 
   return [
     {
@@ -243,9 +243,10 @@ function generateStagesForProject(project: DeploymentProject, commitMsg: string)
       name: `5. Zero-Downtime Deployment (${project.target.toUpperCase()})`,
       type: 'deploy',
       status: 'pending',
-      command: project.target === 'vps-ssh'
-        ? `rsync -avz ./dist/ ${project.serverUser || 'root'}@${project.serverIp || 'remote'}:${project.deployPath}`
-        : 'docker compose up -d --build --no-deps',
+      command:
+        project.target === 'vps-ssh'
+          ? `rsync -avz ./dist/ ${project.serverUser || 'root'}@${project.serverIp || 'remote'}:${project.deployPath}`
+          : 'docker compose up -d --build --no-deps',
       logs: [],
     },
     {
@@ -256,7 +257,7 @@ function generateStagesForProject(project: DeploymentProject, commitMsg: string)
       command: `curl -f -I http://${project.serverIp || 'localhost'}:${project.serverPort || 80}/`,
       logs: [],
     },
-  ];
+  ]
 }
 
 // -------------------------------------------------------------
@@ -265,13 +266,13 @@ function generateStagesForProject(project: DeploymentProject, commitMsg: string)
 
 // 1. Projects API
 app.get('/api/projects', (req: Request, res: Response) => {
-  res.json({ projects, count: projects.length });
-});
+  res.json({ projects, count: projects.length })
+})
 
 app.post('/api/projects', (req: Request, res: Response) => {
-  const body = req.body;
+  const body = req.body
   if (!body.name || !body.repoUrl) {
-    return res.status(400).json({ error: 'Tên dự án và URL GitHub repository là bắt buộc.' });
+    return res.status(400).json({ error: 'Tên dự án và URL GitHub repository là bắt buộc.' })
   }
 
   const newProject: DeploymentProject = {
@@ -294,71 +295,71 @@ app.post('/api/projects', (req: Request, res: Response) => {
     envVariables: body.envVariables || [],
     createdAt: new Date().toISOString(),
     totalBuilds: 0,
-  };
+  }
 
-  projects.unshift(newProject);
-  res.status(201).json({ project: newProject, message: 'Dự án đã được khởi tạo thành công!' });
-});
+  projects.unshift(newProject)
+  res.status(201).json({ project: newProject, message: 'Dự án đã được khởi tạo thành công!' })
+})
 
 app.put('/api/projects/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
-  const index = projects.findIndex((p) => p.id === id);
+  const { id } = req.params
+  const index = projects.findIndex((p) => p.id === id)
   if (index === -1) {
-    return res.status(404).json({ error: 'Không tìm thấy dự án.' });
+    return res.status(404).json({ error: 'Không tìm thấy dự án.' })
   }
 
   projects[index] = {
     ...projects[index],
     ...req.body,
     id, // preserve ID
-  };
+  }
 
-  res.json({ project: projects[index], message: 'Cập nhật cấu hình dự án thành công!' });
-});
+  res.json({ project: projects[index], message: 'Cập nhật cấu hình dự án thành công!' })
+})
 
 app.delete('/api/projects/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
-  projects = projects.filter((p) => p.id !== id);
-  buildRuns = buildRuns.filter((b) => b.projectId !== id);
-  webhookLogs = webhookLogs.filter((w) => w.projectId !== id);
-  res.json({ success: true, message: 'Đã xóa dự án.' });
-});
+  const { id } = req.params
+  projects = projects.filter((p) => p.id !== id)
+  buildRuns = buildRuns.filter((b) => b.projectId !== id)
+  webhookLogs = webhookLogs.filter((w) => w.projectId !== id)
+  res.json({ success: true, message: 'Đã xóa dự án.' })
+})
 
 // 2. Pipelines & Build Runs API
 app.get('/api/pipelines', (req: Request, res: Response) => {
-  const { projectId } = req.query;
-  let runs = buildRuns;
+  const { projectId } = req.query
+  let runs = buildRuns
   if (projectId) {
-    runs = runs.filter((r) => r.projectId === projectId);
+    runs = runs.filter((r) => r.projectId === projectId)
   }
-  res.json({ runs, total: runs.length });
-});
+  res.json({ runs, total: runs.length })
+})
 
 app.get('/api/pipelines/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
-  const run = buildRuns.find((r) => r.id === id);
+  const { id } = req.params
+  const run = buildRuns.find((r) => r.id === id)
   if (!run) {
-    return res.status(404).json({ error: 'Không tìm thấy lịch sử build.' });
+    return res.status(404).json({ error: 'Không tìm thấy lịch sử build.' })
   }
-  res.json({ run });
-});
+  res.json({ run })
+})
 
 // Trigger pipeline execution (Real or Simulation)
 app.post('/api/pipelines/trigger', (req: Request, res: Response) => {
-  const { projectId, commitMessage, branch, author, triggeredBy = 'manual', shouldFail = false } = req.body;
-  const project = projects.find((p) => p.id === projectId);
+  const { projectId, commitMessage, branch, author, triggeredBy = 'manual', shouldFail = false } = req.body
+  const project = projects.find((p) => p.id === projectId)
 
   if (!project) {
-    return res.status(404).json({ error: 'Dự án không tồn tại.' });
+    return res.status(404).json({ error: 'Dự án không tồn tại.' })
   }
 
-  const runId = 'run-' + Date.now().toString(36);
-  const commitHash = crypto.randomBytes(3).toString('hex');
-  const targetBranch = branch || project.branch || 'main';
-  const finalCommitMsg = commitMessage || `chore(release): auto-deploy commit ${commitHash}`;
-  const finalAuthor = author || 'github-actor';
+  const runId = 'run-' + Date.now().toString(36)
+  const commitHash = crypto.randomBytes(3).toString('hex')
+  const targetBranch = branch || project.branch || 'main'
+  const finalCommitMsg = commitMessage || `chore(release): auto-deploy commit ${commitHash}`
+  const finalAuthor = author || 'github-actor'
 
-  const stages = generateStagesForProject(project, finalCommitMsg);
+  const stages = generateStagesForProject(project, finalCommitMsg)
 
   const newRun: BuildRun = {
     id: runId,
@@ -372,57 +373,59 @@ app.post('/api/pipelines/trigger', (req: Request, res: Response) => {
     startedAt: new Date().toISOString(),
     stages,
     triggeredBy,
-    deployedUrl: project.serverIp ? `http://${project.serverIp}` : `https://${project.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.app.live`,
-  };
+    deployedUrl: project.serverIp
+      ? `http://${project.serverIp}`
+      : `https://${project.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.app.live`,
+  }
 
-  buildRuns.unshift(newRun);
-  project.totalBuilds = (project.totalBuilds || 0) + 1;
+  buildRuns.unshift(newRun)
+  project.totalBuilds = (project.totalBuilds || 0) + 1
 
   // Execute stages asynchronously
-  executePipelineAsync(newRun.id, project, shouldFail);
+  executePipelineAsync(newRun.id, project, shouldFail)
 
   res.status(202).json({
     run: newRun,
     message: 'Pipeline CI/CD đã bắt đầu thực thi!',
-  });
-});
+  })
+})
 
 async function executePipelineAsync(runId: string, project: DeploymentProject, shouldFail: boolean = false) {
-  const run = buildRuns.find((r) => r.id === runId);
-  if (!run) return;
+  const run = buildRuns.find((r) => r.id === runId)
+  if (!run) return
 
-  const stageDurations = [1200, 2000, 1800, 2500, 2200, 1500];
+  const stageDurations = [1200, 2000, 1800, 2500, 2200, 1500]
 
   for (let i = 0; i < run.stages.length; i++) {
-    const stage = run.stages[i];
-    stage.status = 'running';
+    const stage = run.stages[i]
+    stage.status = 'running'
 
     // Simulate stage progress
-    await new Promise((resolve) => setTimeout(resolve, stageDurations[i] || 1500));
+    await new Promise((resolve) => setTimeout(resolve, stageDurations[i] || 1500))
 
     if (shouldFail && i === 3) {
       // Simulate build failure on stage 4
-      stage.status = 'failed';
-      stage.durationMs = 2100;
+      stage.status = 'failed'
+      stage.durationMs = 2100
       stage.logs = [
         `> ${stage.command}`,
         'Error: Command failed with exit code 1',
-        'src/components/Dashboard.tsx:42:15 - error TS2322: Type \'string\' is not assignable to type \'number\'.',
+        "src/components/Dashboard.tsx:42:15 - error TS2322: Type 'string' is not assignable to type 'number'.",
         '42   const timeout: number = process.env.VITE_TIMEOUT;',
         '                             ~~~~~~~~~~~~~~~~~~~~~~~~',
         'Found 1 fatal compilation error in TypeScript project.',
         'npm ERR! Build failed during bundle phase.',
-      ];
-      run.status = 'failed';
-      run.errorMessage = 'TypeScript Compilation Error in bundle stage.';
-      run.completedAt = new Date().toISOString();
-      project.lastDeployStatus = 'failed';
-      project.lastDeployedAt = new Date().toISOString();
-      return;
+      ]
+      run.status = 'failed'
+      run.errorMessage = 'TypeScript Compilation Error in bundle stage.'
+      run.completedAt = new Date().toISOString()
+      project.lastDeployStatus = 'failed'
+      project.lastDeployedAt = new Date().toISOString()
+      return
     }
 
-    stage.status = 'success';
-    stage.durationMs = stageDurations[i] + Math.floor(Math.random() * 400);
+    stage.status = 'success'
+    stage.durationMs = stageDurations[i] + Math.floor(Math.random() * 400)
 
     // Realistic logs
     if (stage.type === 'clone') {
@@ -431,7 +434,7 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         `Cloning commit ${run.commitHash} by @${run.author}...`,
         'Resolving deltas: 100% (210/210), done.',
         `Checked out branch '${run.branch}' at commit ${run.commitHash}`,
-      ];
+      ]
     } else if (stage.type === 'deps') {
       stage.logs = [
         `> ${stage.command}`,
@@ -439,7 +442,7 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         'Cached modules loaded from ~/.cache/ci-deps (100% match)',
         'Node environment verified (Node v20.x / npm v10.x)',
         'Dependencies validated successfully in 1.8s',
-      ];
+      ]
     } else if (stage.type === 'test') {
       stage.logs = [
         '> npm run lint && npm test -- --run',
@@ -449,7 +452,7 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         'PASS test/api.spec.ts (8 tests)',
         'PASS test/render.spec.tsx (14 tests)',
         'Coverage: 91.4% Statements, 88.2% Branches.',
-      ];
+      ]
     } else if (stage.type === 'build' || stage.type === 'docker') {
       stage.logs = [
         `> ${stage.command}`,
@@ -458,7 +461,7 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         'dist/assets/index.js (gzip: 42.1 kB)',
         'dist/assets/style.css (gzip: 8.4 kB)',
         '✔ Artifact generated in /dist directory ready for sync.',
-      ];
+      ]
     } else if (stage.type === 'deploy') {
       stage.logs = [
         `> Connecting to ${project.serverUser || 'root'}@${project.serverIp || 'target-server'}...`,
@@ -467,7 +470,7 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         'Atomic symlink swap: /current -> /releases/' + run.commitHash,
         `Running start/reload command: ${project.startCommand}`,
         'Process reloaded with zero downtime (PID: 49210 active).',
-      ];
+      ]
     } else if (stage.type === 'healthcheck') {
       stage.logs = [
         `> HTTP GET ${run.deployedUrl} (Health Endpoint)`,
@@ -475,43 +478,41 @@ async function executePipelineAsync(runId: string, project: DeploymentProject, s
         'Response Time: 19ms',
         'SSL Handshake: TLS 1.3 Valid',
         '✔ Auto-Deployment Completed! Users can now access the latest release.',
-      ];
+      ]
     }
   }
 
-  run.status = 'success';
-  run.completedAt = new Date().toISOString();
-  run.durationSeconds = Math.round(
-    (new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime()) / 1000
-  );
+  run.status = 'success'
+  run.completedAt = new Date().toISOString()
+  run.durationSeconds = Math.round((new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime()) / 1000)
 
-  project.lastDeployStatus = 'success';
-  project.lastDeployedAt = run.completedAt;
+  project.lastDeployStatus = 'success'
+  project.lastDeployedAt = run.completedAt
 }
 
 // 3. Real GitHub Webhook Listener Endpoint
 app.post('/api/webhooks/github/:projectId', (req: Request, res: Response) => {
-  const { projectId } = req.params;
-  const project = projects.find((p) => p.id === projectId);
+  const { projectId } = req.params
+  const project = projects.find((p) => p.id === projectId)
 
   if (!project) {
-    return res.status(404).json({ error: 'Dự án không tồn tại.' });
+    return res.status(404).json({ error: 'Dự án không tồn tại.' })
   }
 
-  const githubEvent = req.headers['x-github-event'] as string || 'push';
-  const githubSignature = req.headers['x-hub-signature-256'] as string;
-  const payload = req.body || {};
+  const githubEvent = (req.headers['x-github-event'] as string) || 'push'
+  const githubSignature = req.headers['x-hub-signature-256'] as string
+  const payload = req.body || {}
 
   // Check event type
   if (githubEvent === 'ping') {
-    return res.json({ message: 'GitHub Webhook Ping received successfully. Pong!' });
+    return res.json({ message: 'GitHub Webhook Ping received successfully. Pong!' })
   }
 
-  const ref = payload.ref || 'refs/heads/main';
-  const branch = ref.replace('refs/heads/', '');
-  const commit = payload.head_commit?.id?.slice(0, 7) || crypto.randomBytes(3).toString('hex');
-  const commitMsg = payload.head_commit?.message || `GitHub ${githubEvent} event on branch ${branch}`;
-  const author = payload.head_commit?.author?.username || payload.pusher?.name || 'github-user';
+  const ref = payload.ref || 'refs/heads/main'
+  const branch = ref.replace('refs/heads/', '')
+  const commit = payload.head_commit?.id?.slice(0, 7) || crypto.randomBytes(3).toString('hex')
+  const commitMsg = payload.head_commit?.message || `GitHub ${githubEvent} event on branch ${branch}`
+  const author = payload.head_commit?.author?.username || payload.pusher?.name || 'github-user'
 
   // Verify branch
   if (project.branch && branch !== project.branch) {
@@ -525,9 +526,9 @@ app.post('/api/webhooks/github/:projectId', (req: Request, res: Response) => {
       branch: ref,
       status: 'ignored',
       reason: `Ignored push to branch '${branch}', tracking '${project.branch}'.`,
-    };
-    webhookLogs.unshift(log);
-    return res.json({ message: `Branch ${branch} does not match tracked branch ${project.branch}. Skipped.` });
+    }
+    webhookLogs.unshift(log)
+    return res.json({ message: `Branch ${branch} does not match tracked branch ${project.branch}. Skipped.` })
   }
 
   if (!project.autoDeployOnPush) {
@@ -541,14 +542,14 @@ app.post('/api/webhooks/github/:projectId', (req: Request, res: Response) => {
       branch: ref,
       status: 'ignored',
       reason: 'Auto-deploy on push is currently disabled in project settings.',
-    };
-    webhookLogs.unshift(log);
-    return res.json({ message: 'Auto-deploy is disabled for this project.' });
+    }
+    webhookLogs.unshift(log)
+    return res.json({ message: 'Auto-deploy is disabled for this project.' })
   }
 
   // Trigger automated build pipeline
-  const runId = 'run-' + Date.now().toString(36);
-  const stages = generateStagesForProject(project, commitMsg);
+  const runId = 'run-' + Date.now().toString(36)
+  const stages = generateStagesForProject(project, commitMsg)
 
   const newRun: BuildRun = {
     id: runId,
@@ -562,11 +563,13 @@ app.post('/api/webhooks/github/:projectId', (req: Request, res: Response) => {
     startedAt: new Date().toISOString(),
     stages,
     triggeredBy: 'webhook',
-    deployedUrl: project.serverIp ? `http://${project.serverIp}` : `https://${project.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.app.live`,
-  };
+    deployedUrl: project.serverIp
+      ? `http://${project.serverIp}`
+      : `https://${project.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.app.live`,
+  }
 
-  buildRuns.unshift(newRun);
-  project.totalBuilds = (project.totalBuilds || 0) + 1;
+  buildRuns.unshift(newRun)
+  project.totalBuilds = (project.totalBuilds || 0) + 1
 
   const log: WebhookLog = {
     id: 'wh-' + Date.now().toString(36),
@@ -578,39 +581,39 @@ app.post('/api/webhooks/github/:projectId', (req: Request, res: Response) => {
     branch: ref,
     status: 'accepted',
     reason: `Push to branch '${branch}' validated. Automated Pipeline #${runId} initiated.`,
-  };
-  webhookLogs.unshift(log);
+  }
+  webhookLogs.unshift(log)
 
   // Run async pipeline
-  executePipelineAsync(runId, project, false);
+  executePipelineAsync(runId, project, false)
 
   res.status(202).json({
     status: 'accepted',
     message: `Webhook accepted! Build pipeline #${runId} started automatically.`,
     runId,
-  });
-});
+  })
+})
 
 // Webhook Logs
 app.get('/api/webhooks/logs', (req: Request, res: Response) => {
-  const { projectId } = req.query;
-  let logs = webhookLogs;
+  const { projectId } = req.query
+  let logs = webhookLogs
   if (projectId) {
-    logs = logs.filter((l) => l.projectId === projectId);
+    logs = logs.filter((l) => l.projectId === projectId)
   }
-  res.json({ logs });
-});
+  res.json({ logs })
+})
 
 // 4. Ready-To-Use Script & Config Generator
 app.post('/api/generator/templates', (req: Request, res: Response) => {
-  const { project, customTarget } = req.body;
+  const { project, customTarget } = req.body
   if (!project) {
-    return res.status(400).json({ error: 'Thiếu thông tin project.' });
+    return res.status(400).json({ error: 'Thiếu thông tin project.' })
   }
 
-  const p: DeploymentProject = project;
-  const appUrl = process.env.APP_URL || 'https://ais-dev-po4u3k2theglc3tqxoryuu-260459870834.asia-southeast1.run.app';
-  const webhookEndpoint = `${appUrl}/api/webhooks/github/${p.id}`;
+  const p: DeploymentProject = project
+  const appUrl = process.env.APP_URL || 'https://ais-dev-po4u3k2theglc3tqxoryuu-260459870834.asia-southeast1.run.app'
+  const webhookEndpoint = `${appUrl}/api/webhooks/github/${p.id}`
 
   const templates = [
     {
@@ -651,7 +654,7 @@ jobs:
         run: ${p.buildCommand || 'npm run build'}
         env:
           NODE_ENV: production
-${p.envVariables.map(ev => `          ${ev.key}: \${{ secrets.${ev.key} || '${ev.value}' }}`).join('\n')}
+${p.envVariables.map((ev) => `          ${ev.key}: \${{ secrets.${ev.key} || '${ev.value}' }}`).join('\n')}
 
       # Option A: Deploy trực tiếp lên VPS qua SSH + Rsync
       - name: Deploy to Remote Server via SSH
@@ -745,7 +748,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-${p.envVariables.map(ev => `      - ${ev.key}=${ev.value}`).join('\n')}
+${p.envVariables.map((ev) => `      - ${ev.key}=${ev.value}`).join('\n')}
     networks:
       - webnet
 
@@ -831,18 +834,18 @@ sudo ufw --force enable
 echo "✨ Cài đặt hoàn tất! Bạn có thể clone repo vào ${p.deployPath} và kết nối Webhook."
 `,
     },
-  ];
+  ]
 
-  res.json({ templates, webhookEndpoint });
-});
+  res.json({ templates, webhookEndpoint })
+})
 
 // 5. AI Assistant & Diagnostics with Gemini 3.7 Flash
 app.post('/api/ai/diagnose', async (req: Request, res: Response) => {
   try {
-    const { logText, projectContext, errorContext } = req.body;
+    const { logText, projectContext, errorContext } = req.body
 
     if (!logText) {
-      return res.status(400).json({ error: 'Vui lòng cung cấp log build hoặc lỗi cần chẩn đoán.' });
+      return res.status(400).json({ error: 'Vui lòng cung cấp log build hoặc lỗi cần chẩn đoán.' })
     }
 
     const prompt = `Bạn là Chuyên gia Cao cấp về DevOps, CI/CD, Docker, GitHub Actions, Nginx và Deployment Server.
@@ -863,25 +866,25 @@ Hãy phân tích chi tiết và trả lời bằng tiếng Việt thân thiện,
 1. **Nguyên Nhân Gốc Rễ (Root Cause)**: Giải thích ngắn gọn lỗi này do đâu (sai cú pháp, thiếu biến môi trường, xung đột port, thiếu quyền ssh, thiếu dependency...).
 2. **Cách Khắc Phục Ngay Lập Tức (Step-by-Step Fix)**: Liệt kê các câu lệnh hoặc thao tác cụ thể cần sửa.
 3. **Mã Sửa Mẫu (Code Snippet)**: Đoạn code / file config đã sửa chuẩn xác.
-4. **Mẹo Phòng Ngừa (Best Practices)**: Làm sao để lần push sau không bị lỗi nữa.`;
+4. **Mẹo Phòng Ngừa (Best Practices)**: Làm sao để lần push sau không bị lỗi nữa.`
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.7-flash',
       contents: prompt,
-    });
+    })
 
-    const analysis = response.text || 'Không thể tạo phân tích vào thời điểm này.';
-    res.json({ analysis });
+    const analysis = response.text || 'Không thể tạo phân tích vào thời điểm này.'
+    res.json({ analysis })
   } catch (error: any) {
-    console.error('Gemini AI diagnose error:', error);
-    res.status(500).json({ error: error.message || 'Lỗi khi gọi AI Gemini để chẩn đoán.' });
+    console.error('Gemini AI diagnose error:', error)
+    res.status(500).json({ error: error.message || 'Lỗi khi gọi AI Gemini để chẩn đoán.' })
   }
-});
+})
 
 // AI CI/CD Architecture Generator
 app.post('/api/ai/architect', async (req: Request, res: Response) => {
   try {
-    const { description, stack, targetServer } = req.body;
+    const { description, stack, targetServer } = req.body
 
     const prompt = `Bạn là Chuyên gia Kiến trúc sư DevOps & CI/CD.
 Người dùng mô tả yêu cầu triển khai tự động hóa sau:
@@ -893,20 +896,20 @@ Hãy thiết kế toàn diện kiến trúc CI/CD tự động hóa tốt nhất
 1. **Sơ đồ Quy Trình (Pipeline Flowchart)**: Từng bước từ lúc dev gõ \`git push\` -> GitHub Actions / Webhook -> Máy chủ build & zero-downtime reload.
 2. **File \`.github/workflows/deploy.yml\` hoàn chỉnh**: Đã tối ưu cache, build song song, bảo mật SSH Key.
 3. **File cấu hình máy chủ**: Nginx reverse proxy, PM2 hoặc Docker Compose phù hợp nhất.
-4. **Hướng dẫn 3 bước cài đặt**: Hướng dẫn dev thiết lập một lần duy nhất.`;
+4. **Hướng dẫn 3 bước cài đặt**: Hướng dẫn dev thiết lập một lần duy nhất.`
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.7-flash',
       contents: prompt,
-    });
+    })
 
-    const architecture = response.text || 'Không có kết quả từ AI.';
-    res.json({ architecture });
+    const architecture = response.text || 'Không có kết quả từ AI.'
+    res.json({ architecture })
   } catch (error: any) {
-    console.error('Gemini AI architect error:', error);
-    res.status(500).json({ error: error.message || 'Lỗi khi gọi AI Gemini.' });
+    console.error('Gemini AI architect error:', error)
+    res.status(500).json({ error: error.message || 'Lỗi khi gọi AI Gemini.' })
   }
-});
+})
 
 // -------------------------------------------------------------
 // Vite Middleware setup
@@ -916,19 +919,19 @@ async function startServer() {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
-    });
-    app.use(vite.middlewares);
+    })
+    app.use(vite.middlewares)
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    const distPath = path.join(process.cwd(), 'dist')
+    app.use(express.static(distPath))
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+      res.sendFile(path.join(distPath, 'index.html'))
+    })
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 GitDeploy CI/CD Server running on http://localhost:${PORT}`);
-  });
+    console.log(`🚀 GitDeploy CI/CD Server running on http://localhost:${PORT}`)
+  })
 }
 
-startServer();
+startServer()

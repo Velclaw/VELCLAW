@@ -55,10 +55,21 @@ export async function POST(req: NextRequest) {
   const codeChallenge = String(form.get('code_challenge') || '')
   const codeChallengeMethod = String(form.get('code_challenge_method') || '')
   if (codeChallenge && codeChallengeMethod !== 'S256') {
-    return NextResponse.json({ error: 'invalid_request', error_description: 'Only S256 PKCE is supported' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'invalid_request', error_description: 'Only S256 PKCE is supported' },
+      { status: 400 },
+    )
   }
 
-  const code = await createAuthorizationCode({ userId: session.user.id, clientId, redirectUri, scopes, nonce: String(form.get('nonce') || '') || undefined, codeChallenge: codeChallenge || undefined, codeChallengeMethod: codeChallengeMethod || undefined })
+  const code = await createAuthorizationCode({
+    userId: session.user.id,
+    clientId,
+    redirectUri,
+    scopes,
+    nonce: String(form.get('nonce') || '') || undefined,
+    codeChallenge: codeChallenge || undefined,
+    codeChallengeMethod: codeChallengeMethod || undefined,
+  })
   const callback = new URL(redirectUri)
   callback.searchParams.set('code', code)
   if (state) callback.searchParams.set('state', state)

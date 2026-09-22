@@ -1,4 +1,9 @@
-import { getRenderConfig, type HostingDeploymentInput, type HostingDeploymentResult, type HostingProviderAdapter } from './providers'
+import {
+  getRenderConfig,
+  type HostingDeploymentInput,
+  type HostingDeploymentResult,
+  type HostingProviderAdapter,
+} from './providers'
 
 export class RenderHostingProvider implements HostingProviderAdapter {
   readonly name = 'render' as const
@@ -18,7 +23,9 @@ export class RenderHostingProvider implements HostingProviderAdapter {
       throw new Error('RENDER_REPOSITORY_URL is required for the Render provider')
     }
     if (input.repoUrl !== configuredRepo || input.branch !== configuredBranch) {
-      throw new Error('Render provider is configured for a single repository and branch; use self-hosted for arbitrary projects')
+      throw new Error(
+        'Render provider is configured for a single repository and branch; use self-hosted for arbitrary projects',
+      )
     }
 
     const response = await fetch(`${apiUrl}/v1/services/${encodeURIComponent(serviceId)}/deploys`, {

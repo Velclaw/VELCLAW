@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   X,
   Sparkles,
@@ -23,32 +23,32 @@ import {
   Database,
   Trash2,
   CheckCircle2,
-  BarChart2
-} from 'lucide-react';
-import { ProjectFile, SavedSession, WatsonMetrics, UserProfile } from '../types/shell';
-import { getConfidenceTheme } from '../utils/syntaxHighlighting';
+  BarChart2,
+} from 'lucide-react'
+import { ProjectFile, SavedSession, WatsonMetrics, UserProfile } from '../types/shell'
+import { getConfidenceTheme } from '../utils/syntaxHighlighting'
 
 interface MainMenuDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  files: ProjectFile[];
-  sessions: SavedSession[];
-  metrics: WatsonMetrics;
-  user: UserProfile;
-  cleanHomeMode: boolean;
-  onToggleCleanHomeMode: () => void;
-  onSelectFile: (file: ProjectFile) => void;
-  onSelectSession: (session: SavedSession) => void;
-  onExecuteCommand: (cmd: string) => void;
-  onExportPDF: () => void;
-  onExportMarkdown: () => void;
-  onExportCSV: () => void;
-  onNewSession: () => void;
-  onClearTerminal: () => void;
-  onOpenAuth: () => void;
-  onManualSync: () => void;
-  isSyncing: boolean;
-  onSetConfidence?: (score: number) => void;
+  isOpen: boolean
+  onClose: () => void
+  files: ProjectFile[]
+  sessions: SavedSession[]
+  metrics: WatsonMetrics
+  user: UserProfile
+  cleanHomeMode: boolean
+  onToggleCleanHomeMode: () => void
+  onSelectFile: (file: ProjectFile) => void
+  onSelectSession: (session: SavedSession) => void
+  onExecuteCommand: (cmd: string) => void
+  onExportPDF: () => void
+  onExportMarkdown: () => void
+  onExportCSV: () => void
+  onNewSession: () => void
+  onClearTerminal: () => void
+  onOpenAuth: () => void
+  onManualSync: () => void
+  isSyncing: boolean
+  onSetConfidence?: (score: number) => void
 }
 
 export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
@@ -71,20 +71,17 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   onOpenAuth,
   onManualSync,
   isSyncing,
-  onSetConfidence
+  onSetConfidence,
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  const [activeTab, setActiveTab] = useState<'utilities' | 'files' | 'sessions' | 'system'>('utilities');
-  const theme = getConfidenceTheme(metrics.aiConfidence);
+  const [activeTab, setActiveTab] = useState<'utilities' | 'files' | 'sessions' | 'system'>('utilities')
+  const theme = getConfidenceTheme(metrics.aiConfidence)
 
   return (
     <div className="fixed inset-0 z-50 flex select-none animate-in fade-in duration-200">
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
       {/* Drawer Body */}
       <aside className="relative w-full max-w-sm sm:max-w-md bg-black border-r-2 border-neutral-800 h-full flex flex-col shadow-2xl z-10 overflow-hidden text-white font-mono">
@@ -134,7 +131,7 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
 
           <button
             onClick={() => {
-              onToggleCleanHomeMode();
+              onToggleCleanHomeMode()
             }}
             className={`px-3 py-1 rounded-none text-xs font-bold transition-all border-2 uppercase flex items-center gap-1 cursor-pointer active:scale-95 ${
               cleanHomeMode
@@ -206,8 +203,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 <div className="grid grid-cols-1 gap-2">
                   <button
                     onClick={() => {
-                      onExecuteCommand('watson run-analysis --db cloudant_prod --depth full');
-                      onClose();
+                      onExecuteCommand('watson run-analysis --db cloudant_prod --depth full')
+                      onClose()
                     }}
                     className="flex items-center justify-between p-2.5 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-700 hover:border-cyan-400 text-left transition-all cursor-pointer group active:scale-98"
                   >
@@ -225,8 +222,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
 
                   <button
                     onClick={() => {
-                      onExecuteCommand('watson optimize --dry-run');
-                      onClose();
+                      onExecuteCommand('watson optimize --dry-run')
+                      onClose()
                     }}
                     className="flex items-center justify-between p-2.5 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-700 hover:border-cyan-400 text-left transition-all cursor-pointer group active:scale-98"
                   >
@@ -244,8 +241,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
 
                   <button
                     onClick={() => {
-                      onExecuteCommand('watson sync-devices --target cloudant_prod');
-                      onClose();
+                      onExecuteCommand('watson sync-devices --target cloudant_prod')
+                      onClose()
                     }}
                     className="flex items-center justify-between p-2.5 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-700 hover:border-cyan-400 text-left transition-all cursor-pointer group active:scale-98"
                   >
@@ -263,8 +260,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
 
                   <button
                     onClick={() => {
-                      onExecuteCommand('watson prune --duplicates');
-                      onClose();
+                      onExecuteCommand('watson prune --duplicates')
+                      onClose()
                     }}
                     className="flex items-center justify-between p-2.5 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-700 hover:border-cyan-400 text-left transition-all cursor-pointer group active:scale-98"
                   >
@@ -290,8 +287,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => {
-                      onExportPDF();
-                      onClose();
+                      onExportPDF()
+                      onClose()
                     }}
                     className="p-2 bg-black hover:bg-neutral-900 border-2 border-neutral-700 rounded-none text-center transition-all cursor-pointer group active:scale-95"
                   >
@@ -300,8 +297,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                   </button>
                   <button
                     onClick={() => {
-                      onExportMarkdown();
-                      onClose();
+                      onExportMarkdown()
+                      onClose()
                     }}
                     className="p-2 bg-black hover:bg-neutral-900 border-2 border-neutral-700 rounded-none text-center transition-all cursor-pointer group active:scale-95"
                   >
@@ -310,8 +307,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                   </button>
                   <button
                     onClick={() => {
-                      onExportCSV();
-                      onClose();
+                      onExportCSV()
+                      onClose()
                     }}
                     className="p-2 bg-black hover:bg-neutral-900 border-2 border-neutral-700 rounded-none text-center transition-all cursor-pointer group active:scale-95"
                   >
@@ -329,8 +326,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
-                      onClearTerminal();
-                      onClose();
+                      onClearTerminal()
+                      onClose()
                     }}
                     className="flex-1 py-2 px-3 bg-black hover:bg-neutral-900 border-2 border-neutral-700 rounded-none font-bold text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                   >
@@ -339,8 +336,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                   </button>
                   <button
                     onClick={() => {
-                      onNewSession();
-                      onClose();
+                      onNewSession()
+                      onClose()
                     }}
                     className="flex-1 py-2 px-3 bg-cyan-400 hover:bg-cyan-300 border-2 border-cyan-300 text-black font-extrabold uppercase rounded-none transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                   >
@@ -359,7 +356,7 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 Tệp Cấu Hình & Logs Dự Án
               </div>
               <div className="space-y-1">
-                {files.map(folder => (
+                {files.map((folder) => (
                   <div key={folder.id} className="space-y-1">
                     <div className="flex items-center text-cyan-300 bg-neutral-950 px-2.5 py-1.5 rounded-none border-2 border-neutral-700 font-mono text-xs font-bold">
                       <Folder className="w-4 h-4 mr-2 shrink-0 text-cyan-400" />
@@ -368,12 +365,12 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
 
                     {folder.children && (
                       <div className="pl-3 space-y-1 border-l-2 border-neutral-800 ml-3">
-                        {folder.children.map(file => (
+                        {folder.children.map((file) => (
                           <button
                             key={file.id}
                             onClick={() => {
-                              onSelectFile(file);
-                              onClose();
+                              onSelectFile(file)
+                              onClose()
                             }}
                             className="w-full flex items-center justify-between px-2.5 py-2 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-800 hover:border-neutral-600 text-neutral-200 hover:text-white transition-all text-left cursor-pointer active:scale-98"
                           >
@@ -408,12 +405,12 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
               </div>
 
               <div className="space-y-2">
-                {sessions.map(s => (
+                {sessions.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => {
-                      onSelectSession(s);
-                      onClose();
+                      onSelectSession(s)
+                      onClose()
                     }}
                     className="w-full p-2.5 rounded-none bg-black hover:bg-neutral-900 border-2 border-neutral-800 hover:border-neutral-600 text-left transition-all cursor-pointer group active:scale-98"
                   >
@@ -454,11 +451,15 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 </div>
                 <div className="bg-black p-2.5 rounded-none border-2 border-neutral-700">
                   <div className="text-[10px] text-neutral-400 mb-0.5 font-bold">Bản Ghi Xử Lý</div>
-                  <div className="text-xs font-extrabold text-white font-mono">{metrics.recordsProcessed.toLocaleString()}</div>
+                  <div className="text-xs font-extrabold text-white font-mono">
+                    {metrics.recordsProcessed.toLocaleString()}
+                  </div>
                 </div>
                 <div className="bg-black p-2.5 rounded-none border-2 border-neutral-700">
                   <div className="text-[10px] text-neutral-400 mb-0.5 font-bold">Nút Hoạt Động</div>
-                  <div className="text-xs font-extrabold text-cyan-300 font-mono">{metrics.activeNodes} Cluster Nodes</div>
+                  <div className="text-xs font-extrabold text-cyan-300 font-mono">
+                    {metrics.activeNodes} Cluster Nodes
+                  </div>
                 </div>
               </div>
 
@@ -521,8 +522,8 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
                 </div>
                 <button
                   onClick={() => {
-                    onOpenAuth();
-                    onClose();
+                    onOpenAuth()
+                    onClose()
                   }}
                   className="w-full py-1.5 bg-neutral-900 hover:bg-neutral-800 border-2 border-neutral-700 rounded-none text-white font-bold transition-all cursor-pointer text-xs active:scale-95"
                 >
@@ -557,5 +558,5 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
         </div>
       </aside>
     </div>
-  );
-};
+  )
+}
