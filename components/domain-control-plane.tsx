@@ -334,12 +334,12 @@ export function DomainControlPlane() {
                           <div className="text-sm font-semibold">DNS health</div>
                           <div className="mt-1 text-[11px] text-zinc-600">Authoritative routing and edge status</div>
                         </div>
-                        <span className="flex items-center gap-2 text-xs text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-current" /> Operational</span>
+                        <span className={`flex items-center gap-2 text-xs ${selected.status === 'active' ? 'text-emerald-300' : 'text-amber-300'}`}><span className="h-1.5 w-1.5 rounded-full bg-current" /> {selected.status === 'active' ? 'Operational' : 'Awaiting verification'}</span>
                       </div>
                       <div className="grid divide-y divide-white/[0.06] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                         {[
-                          ['Authoritative DNS', 'Velclaw DNS'],
-                          ['Nameservers', selected.nameservers[0].includes('Pending') ? 'Not configured' : '2 active'],
+                          ['Authoritative DNS', selected.status === 'active' ? 'Velclaw DNS' : 'Pending verification'],
+                          ['Nameservers', selected.nameservers.every((value) => !value.toLowerCase().includes('verified') && !value.toLowerCase().includes('configure')) ? '2 active' : 'Not configured'],
                           ['SSL', selected.ssl === 'live' ? 'Live' : 'Pending'],
                         ].map(([label, value]) => (
                           <div key={String(label)} className="p-4">
