@@ -43,9 +43,9 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   platform: {
     name: 'Velclaw AI',
     title: 'Velclaw AI — AI-native Software Platform',
-    description: 'Velclaw.ai is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
+    description: 'Velclaw.site is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
     heading: 'Main AI-native software platform',
-    intro: 'The main Velclaw.ai platform for the company, product ecosystem, workspace and production delivery.',
+    intro: 'The main Velclaw.site platform for the company, product ecosystem, workspace and production delivery.',
   },
   developer: {
     name: 'Velclaw Developer',
