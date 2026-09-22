@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Menu } from 'lucide-react'
+import type { VelclawDomainRole } from '@/lib/velclaw/domain-config'
 import styles from './velclaw-landing.module.css'
 
 const products = [
@@ -23,7 +24,14 @@ const flow = [
   ['05', 'Deploy'],
 ] as const
 
-export function VelclawLanding() {
+const domainIdentity: Record<VelclawDomainRole, { label: string; descriptor: string; cta: string; ctaHref: string }> = {
+  platform: { label: 'velclaw.com', descriptor: 'Platform & company', cta: 'Mở Platform', ctaHref: '/projects' },
+  developer: { label: 'velclaw.dev', descriptor: 'Developer · IDE · Docs · API', cta: 'Mở Developer', ctaHref: '/builder' },
+  application: { label: 'velclaw.app', descriptor: 'Application & services', cta: 'Mở Application', ctaHref: '/console' },
+}
+
+export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole }) {
+  const identity = domainIdentity[role]
   return (
     <main className={styles.page}>
       <header className={styles.topnav}>
@@ -62,11 +70,11 @@ export function VelclawLanding() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <div className={styles.eyebrow}><span />AI-NATIVE SOFTWARE WORKSPACE</div>
+          <div className={styles.eyebrow}><span />{identity.descriptor.toUpperCase()} · AI-NATIVE SOFTWARE WORKSPACE</div>
           <h1>Build. Review. Deploy.<br /><em>With Velclaw.</em></h1>
           <p className={styles.lead}>Một workspace duy nhất để agent và developer đi từ task đến production — code, project, build, runtime, review và deployment nằm trong cùng một vòng đời.</p>
-          <div className={styles.ctas}><Link className={`${styles.btn} ${styles.primary}`} href="/builder">Mở Nhà xây dựng</Link><Link className={`${styles.btn} ${styles.ghost}`} href="/console">Mở Console</Link></div>
-          <div className={styles.domainLine}><span className={styles.statusDot} /><span>velclaw.cfd</span><span className={styles.separator}>·</span><span>Browser-first development</span></div>
+          <div className={styles.ctas}><Link className={`${styles.btn} ${styles.primary}`} href={identity.ctaHref}>{identity.cta}</Link><Link className={`${styles.btn} ${styles.ghost}`} href="/builder">Mở Nhà xây dựng</Link></div>
+          <div className={styles.domainLine}><span className={styles.statusDot} /><span>{identity.label}</span><span className={styles.separator}>·</span><span>{identity.descriptor}</span></div>
         </div>
         <div className={styles.commandPanel} aria-label="Velclaw browser builder preview">
           <div className={styles.panelHeader}><span>VELCLAW / BUILDER</span><span className={styles.live}>READY</span></div>
@@ -82,7 +90,7 @@ export function VelclawLanding() {
 
       <section className={styles.ctaBand}><div><span className={styles.k}>03 / BUILD</span><h3>Build ngay trên điện thoại bằng trình duyệt.</h3><p>Velclaw Builder chạy Node.js và preview trong browser; không cần biến điện thoại thành server.</p></div><Link className={`${styles.btn} ${styles.primary}`} href="/console">Mở Console</Link></section>
 
-      <footer><span className={styles.mono}>velclaw.cfd</span><span>AI-native software lifecycle workspace</span></footer>
+      <footer><span className={styles.mono}>{identity.label}</span><span>AI-native software lifecycle workspace</span></footer>
     </main>
   )
 }
