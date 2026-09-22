@@ -40,7 +40,7 @@ test('domain configuration defaults each surface to its designated first-party o
   const config = await importDomainConfig()
 
   assert.deepEqual(config.VELCLAW_DOMAIN_ROLES, {
-    platform: 'https://velclaw.com',
+    platform: 'https://velclaw.ai',
     developer: 'https://velclaw.dev',
     application: 'https://velclaw.app',
   })
@@ -49,7 +49,7 @@ test('domain configuration defaults each surface to its designated first-party o
   assert.equal(config.VELCLAW_APP_ORIGIN, config.VELCLAW_DOMAIN_ROLES.application)
   assert.equal(config.VELCLAW_API_ORIGIN, config.VELCLAW_DOMAIN_ROLES.developer)
   assert.equal(config.VELCLAW_DOCS_ORIGIN, config.VELCLAW_DOMAIN_ROLES.developer)
-  assert.equal(config.VELCLAW_PUBLIC_DOMAIN, 'velclaw.com')
+  assert.equal(config.VELCLAW_PUBLIC_DOMAIN, 'velclaw.ai')
   assert.deepEqual(config.VELCLAW_ALLOWED_ORIGINS, Object.values(config.VELCLAW_DOMAIN_ROLES))
 })
 
@@ -83,7 +83,7 @@ test('invalid configured origins fail fast', async () => {
     /Invalid Velclaw origin: not an origin/,
   )
   await assert.rejects(
-    importDomainConfig({ VELCLAW_ALLOWED_ORIGINS: 'https://velclaw.com,not an origin' }),
+    importDomainConfig({ VELCLAW_ALLOWED_ORIGINS: 'https://velclaw.ai,not an origin' }),
     /Invalid Velclaw origin: not an origin/,
   )
 })
@@ -91,10 +91,10 @@ test('invalid configured origins fail fast', async () => {
 test('known bare, www, case-insensitive, and port-qualified hosts resolve to their roles', async () => {
   const { getVelclawDomainRole } = await importDomainConfig()
   const cases = [
-    ['velclaw.com', 'platform'],
-    ['www.velclaw.com', 'platform'],
-    ['VELCLAW.COM', 'platform'],
-    ['velclaw.com:3000', 'platform'],
+    ['velclaw.ai', 'platform'],
+    ['www.velclaw.ai', 'platform'],
+    ['VELCLAW.AI', 'platform'],
+    ['velclaw.ai:3000', 'platform'],
     ['velclaw.dev', 'developer'],
     ['www.velclaw.dev', 'developer'],
     ['VELCLAW.DEV:443', 'developer'],
