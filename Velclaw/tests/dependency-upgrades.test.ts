@@ -24,6 +24,11 @@ test('Monaco resolves to the patched DOMPurify dependency in the npm lockfile', 
   assert.ok(major > 3 || (major === 3 && (minor > 4 || (minor === 4 && patch >= 15))))
 })
 
+/**
+ * Creates an Undici mock agent with real network access disabled and automatic test cleanup.
+ * @param t - Test context that closes the agent after the test.
+ * @returns The agent and mock pool for https://api.example.test.
+ */
 function mockOrigin(t: test.TestContext) {
   const agent = new MockAgent()
   agent.disableNetConnect()
@@ -119,6 +124,12 @@ for (const size of [31, 32, 33]) {
   })
 }
 
+/**
+ * Opens a WebSocket pair on an ephemeral loopback port and registers socket and server cleanup.
+ * @param t - Test context that tears down the connection after the test.
+ * @param maxPayload - Maximum message size accepted by the server, in bytes; defaults to 1024.
+ * @returns A promise resolving to the connected client and server-side peer.
+ */
 async function websocketPair(t: test.TestContext, maxPayload = 1024) {
   const server = new WebSocketServer({ host: '127.0.0.1', port: 0, maxPayload })
   let client: WebSocket | undefined

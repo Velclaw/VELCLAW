@@ -3,6 +3,12 @@ import { once } from 'node:events'
 import test, { type TestContext } from 'node:test'
 import WebSocket, { WebSocketServer } from 'ws'
 
+/**
+ * Opens a WebSocket pair on an ephemeral loopback port, with connection waits tied to the test signal.
+ * @param t - Test context that supplies cancellation and registers socket and server cleanup.
+ * @param maxPayload - Maximum message size accepted by the server, in bytes; defaults to 1024.
+ * @returns A promise resolving to the connected client and server-side peer.
+ */
 async function connect(t: TestContext, maxPayload = 1024) {
   const server = new WebSocketServer({ host: '127.0.0.1', port: 0, maxPayload })
   t.after(async () => {

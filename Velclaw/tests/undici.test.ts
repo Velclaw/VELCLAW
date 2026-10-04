@@ -8,6 +8,11 @@ const require = createRequire(import.meta.url)
 const { MockAgent, fetch, interceptors, cacheStores } = createRequire(require.resolve('@vercel/sandbox'))('undici')
 const origin = 'https://sandbox.example.test'
 
+/**
+ * Creates an Undici mock agent with real network access disabled.
+ * @param t - Test context that closes the agent after the test.
+ * @returns The isolated agent used to intercept sandbox SDK HTTP requests.
+ */
 function mockAgent(t: TestContext) {
   const agent = new MockAgent()
   agent.disableNetConnect()
