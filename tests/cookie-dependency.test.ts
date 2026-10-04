@@ -3,8 +3,12 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import Cookies from 'js-cookie'
 
-// Exercise the actual dependency at the document.cookie boundary without a DOM
-// emulator. The stub supplies browser reads and captures writes for inspection.
+/**
+ * Installs a document.cookie stub for browser reads and write inspection without a DOM emulator.
+ * @param t - Test context that restores the original document property after the test.
+ * @param initial - Initial cookie string exposed by the stub; defaults to an empty string.
+ * @returns The mutable document stub containing the latest cookie assignment.
+ */
 function cookieDocument(t: test.TestContext, initial = '') {
   const original = Object.getOwnPropertyDescriptor(globalThis, 'document')
   const document = { cookie: initial }
