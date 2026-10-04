@@ -1,0 +1,7 @@
+project_id = "REPLACE_WITH_YOUR_GCP_PROJECT_ID"
+region = "asia-southeast1"
+artifact_registry_repository = "velclaw"
+cloud_run_service = "velclaw"
+runtime_service_account = "velclaw-runtime"
+build_service_account = "velclaw-cloudbuild"
+max_instances = 10
