@@ -50,4 +50,46 @@ describe('PostCSS dependency compatibility', () => {
     expect(result.css).toBe('')
     expect(result.root.nodes).toEqual([])
   })
+
+  it('propagates asynchronous plugin failures without publishing partial CSS', async () => {
+    const failure = new Error('synthetic plugin failure')
+    let downstreamRan = false
+    const result = postcss([
+      {
+        postcssPlugin: 'test-rejecting-plugin',
+        async Once() {
+          await Promise.resolve()
+          throw failure
+        },
+      },
+      {
+        postcssPlugin: 'test-downstream-plugin',
+        Once() {
+          downstreamRan = true
+        },
+      },
+    ]).process('a { color: red }', { from: undefined })
+    await expect(result).rejects.toBe(failure)
+    expect(downstreamRan).toBe(false)
+  })
+
+  it('preserves plugin warnings and their declaration source positions', async () => {
+    const result = await postcss([
+      {
+        postcssPlugin: 'test-warning-plugin',
+        Declaration(declaration, { result }) {
+          if (declaration.prop === 'color') declaration.warn(result, 'synthetic warning')
+        },
+      },
+    ]).process('a {\n  color: red;\n}', { from: 'input.css' })
+    expect(result.css).toBe('a {\n  color: red;\n}')
+    expect(result.warnings()).toEqual([
+      expect.objectContaining({
+        plugin: 'test-warning-plugin',
+        text: 'synthetic warning',
+        line: 2,
+        column: 3,
+      }),
+    ])
+  })
 })

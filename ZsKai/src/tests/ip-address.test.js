@@ -99,4 +99,54 @@ describe('ip-address dependency regressions', () => {
   it.each([Address4, Address6])('rejects overlong untrusted input: %s', (Address) => {
     expect(() => new Address('1'.repeat(10000))).toThrow(AddressError)
   })
+
+  it.each([
+    ['A.IP6.ARPA', 'a000::/4'],
+    [`${'f.'.repeat(31)}Ip6.ArPa.`, 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:fff0/124'],
+    [`${'f.'.repeat(32)}ip6.arpa.`, 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/128'],
+  ])('retains the exact prefix at reverse DNS boundaries: %s', (input, network) => {
+    const address = Address6.fromArpa(input)
+    expect(address.networkForm()).toBe(network)
+    expect(Address6.fromArpa(address.reverseForm()).networkForm()).toBe(network)
+  })
+
+  it.each([
+    [Address4, '192.0.2.1/0'],
+    [Address4, '255.255.255.1/24'],
+    [Address6, '2001:db8::1/0'],
+    [Address6, 'ffff:ffff:ffff:ffff::1/64'],
+  ])('rejects nextNetwork when the entire current network reaches the address-space end: %s %s', (Address, input) => {
+    const address = new Address(input)
+    const original = address.networkForm()
+    expect(() => address.nextNetwork()).toThrow(AddressError)
+    expect(address.networkForm()).toBe(original)
+  })
+
+  it('supports exact bigint offsets beyond the safe integer range', () => {
+    const address = new Address6('::1/64')
+    const distance = 1n << 64n
+    const shifted = address.offset(distance)
+    expect(shifted.canonicalForm()).toBe('0000:0000:0000:0001:0000:0000:0000:0001')
+    expect(shifted.subnetMask).toBe(64)
+    expect(shifted.offset(-distance).correctForm()).toBe('::1')
+    expect(address.correctForm()).toBe('::1')
+  })
+
+  it.each([NaN, Infinity, -Infinity, '1', null, undefined])(
+    'rejects invalid offset %s for both address families',
+    (offset) => {
+      for (const address of [new Address4('192.0.2.1'), new Address6('2001:db8::1')]) {
+        expect(() => address.offset(offset)).toThrow(AddressError)
+      }
+    },
+  )
+
+  it.each([
+    ['::ffff:127.0.0.1/0', false],
+    ['::ffff:10.0.0.1/0', false],
+    ['::ffff:192.0.2.1', false],
+    ['::ffff:8.8.8.8/0', true],
+  ])('classifies mapped IPv4 hosts independently of their IPv6 prefix: %s', (input, global) => {
+    expect(new Address6(input).isGlobal()).toBe(global)
+  })
 })

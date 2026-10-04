@@ -5,7 +5,9 @@ import { gzipSync } from 'node:zlib'
 
 // Exercise the transitive dependency used by the sandbox SDK, including under pnpm.
 const require = createRequire(import.meta.url)
-const { MockAgent, fetch, interceptors, cacheStores } = createRequire(require.resolve('@vercel/sandbox'))('undici')
+const { MockAgent, BalancedPool, Pool, fetch, interceptors, cacheStores } = createRequire(
+  require.resolve('@vercel/sandbox'),
+)('undici')
 const origin = 'https://sandbox.example.test'
 
 /**
@@ -126,3 +128,95 @@ for (const size of [31, 32, 33]) {
     agent.assertNoPendingInterceptors()
   })
 }
+
+for (const option of ['connect', 'tls'] as const) {
+  test(`balanced pools retain ${option} certificate validation for initial and added upstreams`, async (t) => {
+    const checkServerIdentity = () => new Error('certificate rejected by test')
+    const settings = { rejectUnauthorized: true, checkServerIdentity }
+    const created: string[] = []
+    const pool = new BalancedPool([origin], {
+      [option]: settings,
+      factory(url: string, options: { connect?: typeof settings; tls?: typeof settings }) {
+        assert.equal(options[option]?.checkServerIdentity, checkServerIdentity)
+        assert.equal(options[option]?.rejectUnauthorized, true)
+        created.push(url)
+        return new Pool(url, options)
+      },
+    })
+    t.after(() => pool.destroy())
+    pool.addUpstream('https://second.example.test')
+    assert.deepEqual(created, [origin, 'https://second.example.test'])
+  })
+}
+
+for (const method of ['POST', 'DELETE']) {
+  test(`a successful ${method} invalidates a previously cached GET`, { timeout: 5000 }, async (t) => {
+    const agent = mockAgent(t)
+    const dispatcher = agent.compose(interceptors.cache({ store: new cacheStores.MemoryCacheStore() }))
+    const server = agent.get(origin)
+    server.intercept({ path: '/resource', method: 'GET' }).reply(200, 'before', {
+      headers: { 'cache-control': 'public, max-age=3600' },
+    })
+    server.intercept({ path: '/resource', method }).reply(200, 'updated')
+    server.intercept({ path: '/resource', method: 'GET' }).reply(200, 'after', {
+      headers: { 'cache-control': 'public, max-age=3600' },
+    })
+
+    for (const [verb, expected] of [
+      ['GET', 'before'],
+      ['GET', 'before'],
+      [method, 'updated'],
+      ['GET', 'after'],
+      ['GET', 'after'],
+    ]) {
+      const response = await dispatcher.request({ origin, path: '/resource', method: verb })
+      assert.equal(await response.body.text(), expected)
+    }
+    agent.assertNoPendingInterceptors()
+  })
+}
+
+for (const [payload, accepted] of [
+  ['🌍'.repeat(8), true],
+  ['🌍'.repeat(8) + 'a', false],
+] as const) {
+  test(`decompression measures ${Buffer.byteLength(payload)} UTF-8 bytes`, { timeout: 5000 }, async (t) => {
+    const agent = mockAgent(t)
+    const dispatcher = agent.compose(interceptors.decompress({ maxSize: 32 }))
+    agent
+      .get(origin)
+      .intercept({ path: '/unicode' })
+      .reply(200, gzipSync(payload), {
+        headers: { 'content-encoding': 'gzip' },
+      })
+    const consume = async () => {
+      const response = await dispatcher.request({ origin, path: '/unicode', method: 'GET' })
+      return response.body.text()
+    }
+    if (accepted) assert.equal(await consume(), payload)
+    else await assert.rejects(consume(), { code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE' })
+    agent.assertNoPendingInterceptors()
+  })
+}
+
+test('decompression limits intermediate output even when the final body fits', { timeout: 5000 }, async (t) => {
+  const agent = mockAgent(t)
+  const payload = 'ok'
+  const inner = gzipSync(payload)
+  assert.ok(inner.length > Buffer.byteLength(payload))
+  const dispatcher = agent.compose(interceptors.decompress({ maxSize: Buffer.byteLength(payload) }))
+  agent
+    .get(origin)
+    .intercept({ path: '/layered' })
+    .reply(200, gzipSync(inner), {
+      headers: { 'content-encoding': 'gzip, gzip' },
+    })
+  await assert.rejects(
+    async () => {
+      const response = await dispatcher.request({ origin, path: '/layered', method: 'GET' })
+      await response.body.text()
+    },
+    { code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE' },
+  )
+  agent.assertNoPendingInterceptors()
+})
