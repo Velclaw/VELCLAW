@@ -67,3 +67,54 @@ test('realtime transport preserves normal close status and reason', { timeout: 5
   assert.equal(code, 1000)
   assert.equal(reason.toString(), 'finished')
 })
+
+for (const payload of ['🌍'.repeat(8), '🌍'.repeat(8) + 'x']) {
+  test(`realtime payload limits count UTF-8 bytes: ${Buffer.byteLength(payload)}`, { timeout: 5000 }, async (t) => {
+    const { client, peer } = await connect(t, 32)
+    if (Buffer.byteLength(payload) === 32) {
+      const received = once(peer, 'message', { signal: t.signal })
+      client.send(payload)
+      const [data, isBinary] = await received
+      assert.equal(data.toString(), payload)
+      assert.equal(isBinary, false)
+    } else {
+      let delivered = false
+      peer.on('message', () => {
+        delivered = true
+      })
+      const rejected = once(peer, 'error', { signal: t.signal })
+      const closed = once(client, 'close', { signal: t.signal })
+      client.send(payload)
+      const [[error], [code]] = await Promise.all([rejected, closed])
+      assert.equal(error.code, 'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH')
+      assert.equal(code, 1009)
+      assert.equal(delivered, false)
+    }
+  })
+}
+
+test('realtime transport reassembles UTF-8 characters split across frames', { timeout: 5000 }, async (t) => {
+  const { client, peer } = await connect(t)
+  const bytes = Buffer.from('🌍')
+  const received = once(peer, 'message', { signal: t.signal })
+  client.send(bytes.subarray(0, 2), { binary: false, fin: false })
+  client.send(bytes.subarray(2), { binary: false, fin: true })
+  const [data, isBinary] = await received
+  assert.equal(data.toString(), '🌍')
+  assert.equal(isBinary, false)
+})
+
+test('realtime transport rejects invalid UTF-8 text without delivering it', { timeout: 5000 }, async (t) => {
+  const { client, peer } = await connect(t)
+  let delivered = false
+  peer.on('message', () => {
+    delivered = true
+  })
+  const rejected = once(peer, 'error', { signal: t.signal })
+  const closed = once(client, 'close', { signal: t.signal })
+  client.send(Buffer.from([0xc3, 0x28]), { binary: false })
+  const [[error], [code]] = await Promise.all([rejected, closed])
+  assert.equal(error.code, 'WS_ERR_INVALID_UTF8')
+  assert.equal(code, 1007)
+  assert.equal(delivered, false)
+})
