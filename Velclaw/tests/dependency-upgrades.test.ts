@@ -66,6 +66,39 @@ for (const method of ['POST', 'DELETE'] as const) {
   })
 }
 
+for (const cacheControl of ['private, max-age=3600', 'no-store']) {
+  test(`Undici shared cache respects ${cacheControl}`, { timeout: 5000 }, async (t) => {
+    const { agent, origin } = mockOrigin(t)
+    const client = agent.compose(interceptors.cache({ type: 'shared' }))
+    for (const body of ['first response', 'second response']) {
+      origin.intercept({ path: '/private', method: 'GET' }).reply(200, body, {
+        headers: { 'cache-control': cacheControl },
+      })
+    }
+    for (const body of ['first response', 'second response']) {
+      const response = await client.request({ origin: 'https://api.example.test', path: '/private', method: 'GET' })
+      assert.equal(await response.body.text(), body)
+    }
+    agent.assertNoPendingInterceptors()
+  })
+}
+
+test('Undici decompression rejects corrupt gzip data', { timeout: 5000 }, async (t) => {
+  const { agent, origin } = mockOrigin(t)
+  const client = agent.compose(interceptors.decompress({ maxSize: 32 }))
+  origin.intercept({ path: '/corrupt', method: 'GET' }).reply(200, Buffer.from('not a gzip stream'), {
+    headers: { 'content-encoding': 'gzip' },
+  })
+  await assert.rejects(
+    async () => {
+      const response = await client.request({ origin: 'https://api.example.test', path: '/corrupt', method: 'GET' })
+      await response.body.text()
+    },
+    { code: 'Z_DATA_ERROR' },
+  )
+  agent.assertNoPendingInterceptors()
+})
+
 for (const size of [31, 32, 33]) {
   test(`Undici enforces the decoded response limit at ${size} bytes`, { timeout: 5000 }, async (t) => {
     const { agent, origin } = mockOrigin(t)
@@ -135,6 +168,24 @@ test('ws accepts the payload limit and rejects one byte over it', { timeout: 500
   const error = once(peer, 'error')
   const closed = once(client, 'close')
   client.send('x'.repeat(33))
+  const [failure] = await error
+  assert.equal(failure.code, 'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH')
+  const [code] = await closed
+  assert.equal(code, 1009)
+})
+
+test('ws enforces the payload limit across fragmented messages', { timeout: 5000 }, async (t) => {
+  const { client, peer } = await websocketPair(t, 32)
+  const received = once(peer, 'message')
+  client.send('x'.repeat(16), { fin: false })
+  client.send('y'.repeat(16), { fin: true })
+  const [data] = await received
+  assert.equal(data.toString(), 'x'.repeat(16) + 'y'.repeat(16))
+
+  const error = once(peer, 'error')
+  const closed = once(client, 'close')
+  client.send('x'.repeat(16), { fin: false })
+  client.send('y'.repeat(17), { fin: true })
   const [failure] = await error
   assert.equal(failure.code, 'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH')
   const [code] = await closed

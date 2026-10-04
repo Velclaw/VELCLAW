@@ -62,3 +62,31 @@ test('cookie operations are safe during server rendering without document', (t) 
   assert.equal(Cookies.set('selected-owner', 'velclaw'), undefined)
   assert.doesNotThrow(() => Cookies.remove('selected-owner'))
 })
+
+test('cookie lookup distinguishes an empty preference from a missing one and matches the entire name', (t) => {
+  cookieDocument(t, 'selected-repo-backup=old; selected-repo=; owner-selected-repo=other')
+  assert.equal(Cookies.get('selected-repo'), '')
+  assert.equal(Cookies.get('missing'), undefined)
+  assert.equal(Cookies.get('selected-repo-backup'), 'old')
+})
+
+test('cookie lookup keeps embedded equals signs in values', (t) => {
+  cookieDocument(t, 'selected-repo=team/repo=main; selected-owner=velclaw')
+  assert.equal(Cookies.get('selected-repo'), 'team/repo=main')
+  assert.equal(Cookies.get('selected-owner'), 'velclaw')
+})
+
+test('cookie removal honors an explicit path and domain', (t) => {
+  const document = cookieDocument(t)
+  Cookies.remove('selected-repo', { path: '/repos', domain: 'example.test', secure: true, sameSite: 'strict' })
+  const [pair, ...attributes] = document.cookie.split('; ')
+  assert.equal(pair, 'selected-repo=')
+  assert.ok(attributes.includes('path=/repos'))
+  assert.ok(attributes.includes('domain=example.test'))
+  assert.ok(attributes.includes('secure'))
+  assert.ok(attributes.includes('sameSite=strict'))
+  assert.ok(!attributes.includes('path=/'))
+  const expiry = attributes.find((attribute) => attribute.startsWith('expires='))
+  assert.ok(expiry)
+  assert.ok(Date.parse(expiry.slice('expires='.length)) < Date.now())
+})

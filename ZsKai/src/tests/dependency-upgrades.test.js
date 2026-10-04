@@ -78,6 +78,40 @@ describe('ip-address upgrade used by rate limiting', () => {
     expect(() => new Address6('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/128').nextNetwork()).toThrow(AddressError)
     expect(() => new Address4('192.0.2.1').offset(0.5)).toThrow(AddressError)
   })
+
+  it.each(['42.2.0.192.in-addr.arpa.', '42.2.0.192.IN-ADDR.ARPA', '42.2.0.192.In-AdDr.ArPa.'])(
+    'accepts IPv4 reverse DNS suffix variations: %s',
+    (name) => {
+      expect(Address4.fromArpa(name).correctForm()).toBe('192.0.2.42')
+    },
+  )
+
+  it.each([
+    [Address4, '192.0.2.0', '192.0.2.0/24', true],
+    [Address4, '192.0.2.255', '192.0.2.0/24', true],
+    [Address4, '192.0.1.255', '192.0.2.0/24', false],
+    [Address4, '192.0.3.0', '192.0.2.0/24', false],
+    [Address6, '2001:db8::', '2001:db8::/64', true],
+    [Address6, '2001:db8::ffff:ffff:ffff:ffff', '2001:db8::/64', true],
+    [Address6, '2001:db7:ffff:ffff:ffff:ffff:ffff:ffff', '2001:db8::/64', false],
+    [Address6, '2001:db8:0:1::', '2001:db8::/64', false],
+  ])('checks subnet boundaries for %s: %s in %s is %s', (Address, value, subnet, contained) => {
+    expect(new Address(value).isInSubnet(new Address(subnet))).toBe(contained)
+  })
+
+  it.each([
+    [Address4, '192.0.2.42/24', '192.0.2.41', '192.0.2.0/24'],
+    [Address6, '2001:db8::42/64', '2001:db8::41', '2001:db8::/64'],
+  ])('offset preserves the prefix without mutating the original %s address', (Address, value, previous, network) => {
+    const original = new Address(value)
+    const shifted = original.offset(-1)
+    expect(shifted.correctForm()).toBe(previous)
+    expect(shifted.networkForm()).toBe(network)
+    expect(shifted).not.toBe(original)
+    expect(original.correctForm()).toBe(value.split('/')[0])
+    expect(original.networkForm()).toBe(network)
+    expect(original.offset(0).correctForm()).toBe(original.correctForm())
+  })
 })
 
 describe('PostCSS upgrade', () => {
@@ -116,6 +150,22 @@ describe('PostCSS upgrade', () => {
     const result = await postcss([]).process('', { from: undefined })
     expect(result.css).toBe('')
     expect(result.root.nodes).toHaveLength(0)
+  })
+
+  it('preserves quoted delimiters and important declarations when transforming adjacent properties', async () => {
+    const result = await postcss([
+      {
+        postcssPlugin: 'quoted-value-regression',
+        Declaration(declaration) {
+          if (declaration.prop === 'color') declaration.value = 'blue'
+        },
+      },
+    ]).process('.card { content: "}; /* literal */"; color: red !important }', { from: undefined })
+    const declarations = result.root.first.nodes
+    expect(declarations).toHaveLength(2)
+    expect(declarations[0].value).toBe('"}; /* literal */"')
+    expect(declarations[1].value).toBe('blue')
+    expect(declarations[1].important).toBe(true)
   })
 })
 
