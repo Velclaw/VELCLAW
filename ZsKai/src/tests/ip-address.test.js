@@ -99,4 +99,36 @@ describe('ip-address dependency regressions', () => {
   it.each([Address4, Address6])('rejects overlong untrusted input: %s', (Address) => {
     expect(() => new Address('1'.repeat(10000))).toThrow(AddressError)
   })
+
+  it.each([
+    [Address4, '0.0.0.0/0'],
+    [Address4, '255.255.255.254/31'],
+    [Address6, '::/0'],
+    [Address6, 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe/127'],
+  ])('rejects advancing beyond the final network: %s %s', (Address, value) => {
+    const address = new Address(value)
+    const original = address.networkForm()
+    expect(() => address.nextNetwork()).toThrow(AddressError)
+    expect(address.networkForm()).toBe(original)
+  })
+
+  it.each([1n << 64n, -(1n << 64n)])('applies large signed IPv6 offsets exactly: %s', (offset) => {
+    const address = new Address6('2001:db8:0:1::1234/64')
+    const shifted = address.offset(offset)
+    expect(shifted.correctForm()).toBe(offset > 0n ? '2001:db8:0:2::1234' : '2001:db8::1234')
+    expect(shifted.subnetMask).toBe(64)
+    expect(shifted.offset(-offset).correctForm()).toBe(address.correctForm())
+    expect(address.correctForm()).toBe('2001:db8:0:1::1234')
+  })
+
+  it.each(['256.2.0.192.in-addr.arpa.', '1.2.3.in-addr.arpa.', '1.2.3.4.5.in-addr.arpa.', 'x.2.0.192.in-addr.arpa.'])(
+    'rejects malformed IPv4 reverse DNS names: %s',
+    (name) => expect(() => Address4.fromArpa(name)).toThrow(AddressError),
+  )
+
+  it.each(['A.ip6.arpa.', 'a.IP6.ARPA'])('accepts a single-nibble reverse DNS delegation: %s', (name) => {
+    const address = Address6.fromArpa(name)
+    expect(address.networkForm()).toBe('a000::/4')
+    expect(address.subnetMask).toBe(4)
+  })
 })

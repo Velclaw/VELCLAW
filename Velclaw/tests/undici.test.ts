@@ -121,3 +121,58 @@ for (const size of [31, 32, 33]) {
     agent.assertNoPendingInterceptors()
   })
 }
+
+for (const method of ['POST', 'DELETE']) {
+  test(`a successful ${method} invalidates a cached GET`, { timeout: 5000 }, async (t) => {
+    const agent = mockAgent(t)
+    const dispatcher = agent.compose(interceptors.cache({ store: new cacheStores.MemoryCacheStore(), type: 'shared' }))
+    const pool = agent.get(origin)
+    pool.intercept({ path: '/resource', method: 'GET' }).reply(200, 'before', {
+      headers: { 'cache-control': 'public, max-age=3600' },
+    })
+    pool.intercept({ path: '/resource', method }).reply(204)
+    pool.intercept({ path: '/resource', method: 'GET' }).reply(200, 'after', {
+      headers: { 'cache-control': 'public, max-age=3600' },
+    })
+
+    // The second read must come from cache, and the mutation must evict it.
+    for (const expected of ['before', 'before']) {
+      const response = await dispatcher.request({ origin, path: '/resource', method: 'GET' })
+      assert.equal(await response.body.text(), expected)
+    }
+    const mutation = await dispatcher.request({ origin, path: '/resource', method })
+    assert.equal(mutation.statusCode, 204)
+    await mutation.body.dump()
+    const response = await dispatcher.request({ origin, path: '/resource', method: 'GET' })
+    assert.equal(await response.body.text(), 'after')
+    agent.assertNoPendingInterceptors()
+  })
+}
+
+for (const plaintext of ['hello', '0123456789abcdefghijklmnopqrstuv']) {
+  test(`nested gzip limits each decoding stage for ${plaintext.length} final bytes`, { timeout: 5000 }, async (t) => {
+    const agent = mockAgent(t)
+    const dispatcher = agent.compose(interceptors.decompress({ maxSize: 32 }))
+    const inner = gzipSync(plaintext)
+    agent
+      .get(origin)
+      .intercept({ path: '/nested' })
+      .reply(200, gzipSync(inner), {
+        headers: { 'content-encoding': 'gzip, gzip' },
+      })
+    const consume = async () => {
+      const response = await dispatcher.request({ origin, path: '/nested', method: 'GET' })
+      return response.body.text()
+    }
+    if (plaintext === 'hello') {
+      assert.ok(inner.length <= 32)
+      assert.equal(await consume(), plaintext)
+    } else {
+      // A small final body must not bypass the limit on an intermediate stage.
+      assert.equal(Buffer.byteLength(plaintext), 32)
+      assert.ok(inner.length > 32)
+      await assert.rejects(consume(), { code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE' })
+    }
+    agent.assertNoPendingInterceptors()
+  })
+}
