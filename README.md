@@ -206,10 +206,10 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 - [x] Core workspace
 - [x] GitHub integration foundation
 - [x] Build/runtime workflow foundation
-- [ ] Expand agent workflows
-- [ ] Expand deployment automation
-- [ ] Production-grade observability
-- [ ] Broader ecosystem integrations
+- [x] Expand agent workflows — auditable workflow state machine and operations control plane
+- [x] Expand deployment automation — queue/reconciliation contracts retained and surfaced through operations
+- [x] Production-grade observability — persistent event store, health checks and 24h summaries
+- [x] Broader ecosystem integrations — GitHub, MCP, Vercel, GitLab, Slack and Ollama adapter registry
 
 ## License
 
