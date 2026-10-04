@@ -73,3 +73,40 @@ test('realtime transport preserves normal close status and reason', { timeout: 5
   assert.equal(code, 1000)
   assert.equal(reason.toString(), 'finished')
 })
+
+test('realtime payload limits count UTF-8 bytes rather than string length', { timeout: 5000 }, async (t) => {
+  const { client, peer } = await connect(t, 4)
+  const received = once(peer, 'message', { signal: t.signal })
+  client.send('🌍')
+  const [data, isBinary] = await received
+  assert.equal(data.toString(), '🌍')
+  assert.equal(data.length, 4)
+  assert.equal(isBinary, false)
+
+  const rejected = once(peer, 'error', { signal: t.signal })
+  const closed = once(client, 'close', { signal: t.signal })
+  client.send('🌍a')
+  const [[error], [code]] = await Promise.all([rejected, closed])
+  assert.equal(error.code, 'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH')
+  assert.equal(code, 1009)
+})
+
+test('empty messages and control frames preserve a fragmented message at its limit', { timeout: 5000 }, async (t) => {
+  const { client, peer } = await connect(t, 4)
+  const empty = once(peer, 'message', { signal: t.signal })
+  client.send('')
+  const [emptyData, emptyBinary] = await empty
+  assert.equal(emptyData.length, 0)
+  assert.equal(emptyBinary, false)
+
+  const received = once(peer, 'message', { signal: t.signal })
+  const pong = once(client, 'pong', { signal: t.signal })
+  client.send('ab', { fin: false })
+  client.ping('probe')
+  const [pongData] = await pong
+  assert.equal(pongData.toString(), 'probe')
+  client.send('cd', { fin: true })
+  const [data, isBinary] = await received
+  assert.equal(data.toString(), 'abcd')
+  assert.equal(isBinary, false)
+})

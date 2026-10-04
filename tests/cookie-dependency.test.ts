@@ -94,3 +94,39 @@ test('cookie removal honors an explicit path and domain', (t) => {
   assert.ok(expiry)
   assert.ok(Date.parse(expiry.slice('expires='.length)) < Date.now())
 })
+
+for (const name of ['repo=name', 'repo; injected', '日本語']) {
+  test(`cookie names round-trip without introducing extra cookies: ${name}`, (t) => {
+    const document = cookieDocument(t)
+    Cookies.set(name, 'selected')
+    const [pair, ...attributes] = document.cookie.split('; ')
+    assert.equal(pair.split('=').length, 2)
+    assert.deepEqual(attributes, ['path=/'])
+    document.cookie = pair
+    assert.deepEqual(Object.entries(Cookies.get()), [[name, 'selected']])
+  })
+}
+
+test('malformed cookie names are skipped without losing valid cookies', (t) => {
+  cookieDocument(t, '%E0%A4%A=broken; selected-repo=valid; %ZZ=also-broken')
+  assert.deepEqual(Object.entries(Cookies.get()), [['selected-repo', 'valid']])
+})
+
+test('percent-encoded values are decoded once without creating a second cookie', (t) => {
+  cookieDocument(t, 'selected-repo=%253B%2520injected%253Dtrue')
+  assert.equal(Cookies.get('selected-repo'), '%3B%20injected%3Dtrue')
+  assert.equal(Cookies.get('injected'), undefined)
+})
+
+test('scoped cookie defaults and per-write overrides do not leak to the base instance', (t) => {
+  const document = cookieDocument(t)
+  const attributes: Cookies.CookieAttributes = { path: '/repos', secure: true, sameSite: 'strict' }
+  const scoped = Cookies.withAttributes(attributes)
+  scoped.set('selected-repo', 'first', { path: '/private' })
+  assert.equal(document.cookie, 'selected-repo=first; path=/private; secure; sameSite=strict')
+  scoped.set('selected-repo', 'second')
+  assert.equal(document.cookie, 'selected-repo=second; path=/repos; secure; sameSite=strict')
+  Cookies.set('selected-repo', 'third')
+  assert.equal(document.cookie, 'selected-repo=third; path=/')
+  assert.deepEqual(attributes, { path: '/repos', secure: true, sameSite: 'strict' })
+})
