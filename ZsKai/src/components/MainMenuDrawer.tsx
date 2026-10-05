@@ -73,9 +73,9 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   isSyncing,
   onSetConfidence,
 }) => {
-  if (!isOpen) return null
-
   const [activeTab, setActiveTab] = useState<'utilities' | 'files' | 'sessions' | 'system'>('utilities')
+
+  if (!isOpen) return null
   const theme = getConfidenceTheme(metrics.aiConfidence)
 
   return (
