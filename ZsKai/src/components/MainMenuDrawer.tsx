@@ -51,6 +51,10 @@ interface MainMenuDrawerProps {
   onSetConfidence?: (score: number) => void
 }
 
+/**
+ * Displays project files, saved sessions, utilities, and system metrics in a tabbed drawer.
+ * Delegates actions to the supplied callbacks and renders nothing when isOpen is false.
+ */
 export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   isOpen,
   onClose,
