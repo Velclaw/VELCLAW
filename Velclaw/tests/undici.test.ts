@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test, { type TestContext } from 'node:test'
 import { createRequire } from 'node:module'
-import { gzipSync } from 'node:zlib'
+import { brotliCompressSync, deflateSync, gzipSync } from 'node:zlib'
 
 // Exercise the transitive dependency used by the sandbox SDK, including under pnpm.
 const require = createRequire(import.meta.url)
@@ -218,5 +218,48 @@ test('decompression limits intermediate output even when the final body fits', {
     },
     { code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE' },
   )
+  agent.assertNoPendingInterceptors()
+})
+
+for (const [encoding, compress] of [
+  ['deflate', deflateSync],
+  ['br', brotliCompressSync],
+] as const) {
+  for (const size of [32, 33]) {
+    test(`${encoding} decompression enforces the limit at ${size} bytes`, { timeout: 5000 }, async (t) => {
+      const agent = mockAgent(t)
+      const dispatcher = agent.compose(interceptors.decompress({ maxSize: 32 }))
+      const payload = Buffer.alloc(size, 0x61)
+      const compressed = compress(payload)
+      agent
+        .get(origin)
+        .intercept({ path: '/compressed' })
+        .reply(200, compressed, {
+          headers: { 'content-encoding': encoding, 'content-length': String(compressed.length) },
+        })
+      const consume = async () => {
+        const response = await dispatcher.request({ origin, path: '/compressed', method: 'GET' })
+        assert.equal(response.headers['content-encoding'], undefined)
+        assert.equal(response.headers['content-length'], undefined)
+        return Buffer.from(await response.body.arrayBuffer())
+      }
+      if (size === 32) assert.deepEqual(await consume(), payload)
+      else await assert.rejects(consume(), { code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE' })
+      agent.assertNoPendingInterceptors()
+    })
+  }
+}
+
+test('decompression decodes mixed encodings in reverse application order', { timeout: 5000 }, async (t) => {
+  const agent = mockAgent(t)
+  const dispatcher = agent.compose(interceptors.decompress({ maxSize: 1024 }))
+  const payload = 'sandbox response 🌍'
+  agent
+    .get(origin)
+    .intercept({ path: '/layered' })
+    .reply(200, brotliCompressSync(gzipSync(payload)), { headers: { 'content-encoding': 'gzip, br' } })
+  const response = await dispatcher.request({ origin, path: '/layered', method: 'GET' })
+  assert.equal(await response.body.text(), payload)
+  assert.equal(response.headers['content-encoding'], undefined)
   agent.assertNoPendingInterceptors()
 })

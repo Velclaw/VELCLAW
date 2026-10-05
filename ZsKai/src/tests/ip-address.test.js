@@ -2,6 +2,40 @@ import { describe, expect, it } from 'vitest'
 import { Address4, Address6, AddressError } from 'ip-address'
 
 describe('ip-address dependency regressions', () => {
+  it.each([
+    [Address4, '192.0.2.255/24', 1, '192.0.3.0', 24],
+    [Address4, '192.0.3.0/24', -1, '192.0.2.255', 24],
+    [Address6, '2001:db8::ffff/112', 1n, '2001:db8::1:0', 112],
+    [Address6, '2001:db8::1:0/112', -1n, '2001:db8::ffff', 112],
+  ])(
+    'carries and borrows across address groups while retaining the prefix: %s %s',
+    (Address, input, offset, value, prefix) => {
+      const address = new Address(input)
+      const shifted = address.offset(offset)
+      expect(shifted.correctForm()).toBe(value)
+      expect(shifted.subnetMask).toBe(prefix)
+      expect(shifted.offset(-offset).correctForm()).toBe(address.correctForm())
+      expect(address.correctForm()).toBe(input.split('/')[0])
+    },
+  )
+
+  it.each([
+    [Address4, '0.0.0.0', (1n << 32n) - 1n, '255.255.255.255'],
+    [Address6, '::', (1n << 128n) - 1n, 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'],
+  ])('accepts exact address-space endpoints without wrapping: %s', (Address, first, distance, last) => {
+    expect(new Address(first).offset(distance).correctForm()).toBe(last)
+    expect(new Address(last).offset(-distance).correctForm()).toBe(first)
+    expect(() => new Address(first).offset(distance + 1n)).toThrow(AddressError)
+    expect(() => new Address(last).offset(-distance - 1n)).toThrow(AddressError)
+  })
+
+  it.each([
+    [Address4, '192.0.2.1/32', '192.0.2.2/32'],
+    [Address6, '2001:db8::1/128', '2001:db8::2/128'],
+  ])('advances a single-host network by exactly one address: %s', (Address, input, expected) => {
+    expect(new Address(input).nextNetwork().networkForm()).toBe(expected)
+  })
+
   it.each(['https://192.0.2.1:443/', 'https://example.com/', 'http://[1:2:3:4:5:6:7:8:9]/', 'http://[:::]/', ''])(
     'returns a failure object without throwing for %j',
     (url) => {

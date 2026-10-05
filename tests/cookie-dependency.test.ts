@@ -130,3 +130,26 @@ test('scoped cookie defaults and per-write overrides do not leak to the base ins
   assert.equal(document.cookie, 'selected-repo=third; path=/')
   assert.deepEqual(attributes, { path: '/repos', secure: true, sameSite: 'strict' })
 })
+
+test('cookie attribute values cannot inject additional attributes', (t) => {
+  const document = cookieDocument(t)
+  Cookies.set('selected-repo', 'safe', {
+    path: '/repos; secure',
+    domain: 'example.test; sameSite=None',
+    sameSite: 'strict',
+    secure: false,
+  })
+  assert.equal(document.cookie, 'selected-repo=safe; path=/repos; domain=example.test; sameSite=strict')
+})
+
+test('a converter failure skips only the malformed cookie', (t) => {
+  cookieDocument(t, 'broken=invalid; selected-repo=%22velclaw%22')
+  const jsonCookies = Cookies.withConverter({
+    read(value) {
+      return JSON.parse(decodeURIComponent(value))
+    },
+  })
+  assert.deepEqual(Object.entries(jsonCookies.get()), [['selected-repo', 'velclaw']])
+  assert.equal(jsonCookies.get('broken'), undefined)
+  assert.equal(Cookies.get('broken'), 'invalid')
+})
