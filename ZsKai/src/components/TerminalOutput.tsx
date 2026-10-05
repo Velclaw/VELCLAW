@@ -61,13 +61,13 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           <div className="p-3 font-mono text-[11px] leading-relaxed space-y-1">
             <div className="text-neutral-500">@@ -14,8 +14,12 @@</div>
             <div className="bg-red-950/40 text-red-300 px-2 py-0.5 border-l-2 border-red-500">
-              - &lt;div className="legacy-sidebar"&gt;Old Nav&lt;/div&gt;
+              - &lt;div className=&quot;legacy-sidebar&quot;&gt;Old Nav&lt;/div&gt;
             </div>
             <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
-              + &lt;div className="watson-clean-header"&gt;IETF Technical Header&lt;/div&gt;
+              + &lt;div className=&quot;watson-clean-header&quot;&gt;IETF Technical Header&lt;/div&gt;
             </div>
             <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
-              + &lt;nav className="nav-tabs"&gt;Cuộc trò chuyện | Diff | Nhật ký | RFC Specs&lt;/nav&gt;
+              + &lt;nav className=&quot;nav-tabs&quot;&gt;Cuộc trò chuyện | Diff | Nhật ký | RFC Specs&lt;/nav&gt;
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               + &lt;!DOCTYPE html&gt;
             </div>
             <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
-              + &lt;html lang="vi"&gt;
+              + &lt;html lang=&quot;vi&quot;&gt;
             </div>
             <div className="bg-cyan-950/40 text-cyan-300 px-2 py-0.5 border-l-2 border-cyan-500">
               + &lt;head&gt;&lt;title&gt;Watson Shell v4.0 - IETF/RFC Standards&lt;/title&gt;&lt;/head&gt;
