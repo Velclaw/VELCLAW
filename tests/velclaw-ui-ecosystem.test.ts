@@ -15,20 +15,20 @@ import {
   resolveVelclawVirtualDomain,
 } from '../lib/velclaw/virtual-domain'
 
-test('Velclaw uses velclaw.cfd as the sole canonical hostname', () => {
-  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.cfd')
-  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd'), 'velclaw.cfd')
-  assert.equal(resolveVelclawVirtualDomain('velclaw.cfd:3000'), 'velclaw.cfd')
-  assert.equal(isVelclawPublicDomain('velclaw.cfd'), true)
-  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.cfd'), true)
+test('Velclaw uses velclaw.site as the sole canonical hostname', () => {
+  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.site')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.site'), 'velclaw.site')
+  assert.equal(resolveVelclawVirtualDomain('velclaw.site:3000'), 'velclaw.site')
+  assert.equal(isVelclawPublicDomain('velclaw.site'), true)
+  assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.dev'), true)
   assert.equal(isVelclawPublicDomain('velclaw-git-main-velclaw.vercel.app'), false)
 })
 
 test('Velclaw product URLs are first-party and branch-derived', () => {
-  assert.equal(VELCLAW_PRODUCT_DOMAIN, 'velclaw.cfd')
-  assert.equal(VELCLAW_PRODUCT_URL, 'https://velclaw.cfd')
+  assert.equal(VELCLAW_PRODUCT_DOMAIN, 'velclaw.site')
+  assert.equal(VELCLAW_PRODUCT_URL, 'https://velclaw.site')
   const url = buildVelclawProductUrl('feat/velclaw-deploy-page3')
-  assert.equal(url, 'https://velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd')
+  assert.equal(url, 'https://velclaw-git-feat-velclaw-deploy-page3-velclaw.dev')
   assert.equal(isVelclawProductUrl(url), true)
   assert.equal(isVelclawProductUrl('https://velclaw-git-feat-velclaw-deploy-page3-velclaw.vercel.app'), false)
 })
