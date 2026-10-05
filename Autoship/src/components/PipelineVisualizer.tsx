@@ -121,7 +121,8 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xl">
-              &quot;{currentRun.commitMessage}&quot; bởi <strong className="text-slate-300">@{currentRun.author}</strong>
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
+              "{currentRun.commitMessage}" bởi <strong className="text-slate-300">@{currentRun.author}</strong>
             </p>
           </div>
         </div>
