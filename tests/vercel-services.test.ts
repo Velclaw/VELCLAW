@@ -64,6 +64,38 @@ test('static documentation uses the Vite documentation app and its existing HTML
   assert.notEqual(service.root, config.services.docs.root)
 })
 
+test('the Vite docs service resolves a buildable React application from its configured root', () => {
+  const root = path.join(repositoryRoot, config.services['velclaw-docs'].root)
+  const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'))
+  assert.equal(pkg.scripts.build, 'vite build')
+  assert.ok(pkg.dependencies.react)
+  assert.ok(pkg.dependencies['react-dom'])
+  assert.ok(pkg.devDependencies.vite)
+  assert.ok(pkg.devDependencies['@vitejs/plugin-react'])
+
+  const html = readFileSync(path.join(root, 'index.html'), 'utf8')
+  const entrypoint = html.match(/<script\s+type="module"\s+src="([^"]+)"/)
+  assert.ok(entrypoint, 'the Vite HTML entrypoint must load an application module')
+  assert.ok(statSync(path.join(root, entrypoint[1])).isFile())
+})
+
+test('the docs CI workflow builds the dedicated Vite service on relevant PRs and pushes', () => {
+  const workflow = readFileSync(path.join(repositoryRoot, '.github/workflows/velclaw-docs.yml'), 'utf8')
+  // Follow the repository's source-contract test convention without adding a YAML dependency.
+  for (const event of ['pull_request', 'push']) {
+    const block = workflow.match(new RegExp(`^  ${event}:\\n((?:    .*\\n)+)`, 'm'))?.[1]
+    assert.ok(block, `${event} must trigger docs validation`)
+    assert.match(block, /branches: \["main"\]/)
+    assert.match(block, /"velclaw-docs\/\*\*"/)
+    assert.match(block, /"\.github\/workflows\/velclaw-docs\.yml"/)
+  }
+  assert.match(workflow, /permissions:\n  contents: read/)
+  assert.match(workflow, /defaults:\n      run:\n        working-directory: velclaw-docs/)
+  assert.match(workflow, /node-version: 22\.x/)
+  assert.match(workflow, /cache-dependency-path: velclaw-docs\/package\.json/)
+  assert.match(workflow, /run: npm install --no-package-lock[\s\S]+run: npm run build/)
+})
+
 test('rewrites reference declared services', () => {
   for (const rewrite of config.rewrites) {
     assert.ok(Object.hasOwn(config.services, rewrite.destination.service), rewrite.source)
