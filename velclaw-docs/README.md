@@ -30,6 +30,10 @@ velclaw-docs/
 │       └── Deployment.jsx
 ```
 
+## Canonical documentation domain
+
+The canonical public documentation host is `https://docs.velclaw.ai`. The Vite documentation app in this directory is intended to be deployed as the dedicated documentation project, with this custom domain attached at the Vercel project level. The root monorepo `vercel.json` keeps the existing `/docs/*` service route separate from this dedicated documentation host.
+
 ## Chạy cục bộ
 
 ```bash
