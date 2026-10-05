@@ -1,4 +1,4 @@
-import { isVelclawHostname, VELCLAW_PRODUCT_DOMAIN } from '@/lib/velclaw/product-domain'
+import { isVelclawProductUrl, VELCLAW_PRODUCT_DOMAIN } from '@/lib/velclaw/product-domain'
 
 export const VELCLAW_PUBLIC_DOMAIN = VELCLAW_PRODUCT_DOMAIN
 export function resolveVelclawVirtualDomain(hostname: string | null | undefined): string {
@@ -8,5 +8,5 @@ export function resolveVelclawVirtualDomain(hostname: string | null | undefined)
 
 export function isVelclawPublicDomain(hostname: string | null | undefined): boolean {
   const normalized = (hostname || '').trim().toLowerCase().replace(/:\d+$/, '')
-  return isVelclawHostname(normalized)
+  return isVelclawProductUrl(`https://${normalized}`)
 }
