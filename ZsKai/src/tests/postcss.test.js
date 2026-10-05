@@ -2,6 +2,24 @@ import { describe, expect, it } from 'vitest'
 import postcss from 'postcss'
 
 describe('PostCSS dependency compatibility', () => {
+  it('keeps cloned nested declarations independent of their original stylesheet', () => {
+    const css = '@media screen { .card { color: red !important; --label: "a;b" } }'
+    const original = postcss.parse(css, { from: 'input.css' })
+    const cloned = original.clone()
+    cloned.walkDecls('color', (declaration) => {
+      declaration.value = 'blue'
+    })
+    cloned.walkDecls('--label', (declaration) => declaration.remove())
+    expect(original.toString()).toBe(css)
+    const rule = cloned.first.first
+    expect(rule.nodes).toHaveLength(1)
+    expect(rule.first.value).toBe('blue')
+    expect(rule.first.important).toBe(true)
+    expect(rule.first.parent).toBe(rule)
+    expect(rule.parent.parent).toBe(cloned)
+    expect(postcss.parse(cloned.toString()).first.first.first.value).toBe('blue')
+  })
+
   it('preserves nested rules, custom properties, comments and quoted delimiters', async () => {
     const css =
       '/* theme */\n@layer components { .card { --label: "a;b}c"; color: var(--ink, #123); &:hover { color: red } } }'
