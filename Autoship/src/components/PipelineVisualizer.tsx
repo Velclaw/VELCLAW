@@ -28,7 +28,8 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
   if (!currentRun) {
     return (
       <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 text-center text-slate-400">
-        Chưa có lượt chạy pipeline nào. Nhấn nút &quot;Kích Hoạt Deploy&quot; hoặc push code lên GitHub để bắt đầu.
+        Chưa có lượt chạy pipeline nào. Nhấn nút &quot;Kích Hoạt Deploy&quot; hoặc push code lên GitHub để
+        bắt đầu.
       </div>
     )
   }
