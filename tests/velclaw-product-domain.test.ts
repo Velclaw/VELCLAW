@@ -23,5 +23,5 @@ test('branch deployment URLs stay inside the Velclaw namespace', () => {
     'https://velclaw-git-feat-velclaw-deploy-page3-velclaw.dev',
   )
   assert.equal(buildVelclawProductUrl('main'), 'https://velclaw-git-main-velclaw.dev')
-  assert.match(buildVelclawProductUrl('feature/with spaces'), /^https:\/\/velclaw-git-[a-z0-9-]+-velclaw\.cfd$/)
+  assert.match(buildVelclawProductUrl('feature/with spaces'), /^https:\/\/velclaw-git-[a-z0-9-]+-velclaw\.dev$/)
 })
