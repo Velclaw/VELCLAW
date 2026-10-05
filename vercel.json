@@ -7,7 +7,7 @@
     "docs": { "root": ".", "buildCommand": "pip install -r docs/requirements.txt && mkdocs build", "outputDirectory": "site" },
     "kio": { "root": "KIO", "runtime": "node" },
     "velclaw": { "root": "Velclaw", "framework": "nextjs" },
-    "velclaw-docs": { "root": "docs.velclaw.ai", "framework": null },
+    "velclaw-docs": { "root": "velclaw-docs", "framework": "vite" },
     "velclaw-pages": { "root": "velclaw-pages", "runtime": "node" },
     "zskai": { "root": "ZsKai", "framework": "vite" },
     "huggingface-space-kimi-demo": { "root": "ZsKai/huggingface-space-kimi-demo", "runtime": "python" },

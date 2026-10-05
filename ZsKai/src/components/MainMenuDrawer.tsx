@@ -51,6 +51,10 @@ interface MainMenuDrawerProps {
   onSetConfidence?: (score: number) => void
 }
 
+/**
+ * Presents project files, sessions, utilities, and system controls through the supplied callbacks.
+ * Returns null while closed and preserves the selected tab while the component stays mounted.
+ */
 export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   isOpen,
   onClose,
@@ -73,9 +77,9 @@ export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   isSyncing,
   onSetConfidence,
 }) => {
-  if (!isOpen) return null
-
   const [activeTab, setActiveTab] = useState<'utilities' | 'files' | 'sessions' | 'system'>('utilities')
+
+  if (!isOpen) return null
   const theme = getConfidenceTheme(metrics.aiConfidence)
 
   return (

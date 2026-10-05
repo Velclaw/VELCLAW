@@ -6,8 +6,10 @@ import { fileURLToPath } from 'node:url'
 
 type Service = {
   root: string
-  framework?: string | null
+  framework?: string
   runtime?: string
+  buildCommand?: string
+  outputDirectory?: string
 }
 
 type DeploymentConfig = {
@@ -25,10 +27,10 @@ const expectedServices: Record<string, Service> = {
   app: { root: '.', framework: 'nextjs' },
   agentside: { root: 'AgentsIDE', framework: 'vite' },
   autoship: { root: 'Autoship', framework: 'vite' },
-  docs: { root: 'docs', runtime: 'python' },
+  docs: { root: '.', buildCommand: 'pip install -r docs/requirements.txt && mkdocs build', outputDirectory: 'site' },
   kio: { root: 'KIO', runtime: 'node' },
   velclaw: { root: 'Velclaw', framework: 'nextjs' },
-  'velclaw-docs': { root: 'docs.velclaw.ai', framework: null },
+  'velclaw-docs': { root: 'velclaw-docs', framework: 'vite' },
   'velclaw-pages': { root: 'velclaw-pages', runtime: 'node' },
   zskai: { root: 'ZsKai', framework: 'vite' },
   'huggingface-space-kimi-demo': { root: 'ZsKai/huggingface-space-kimi-demo', runtime: 'python' },
@@ -54,13 +56,44 @@ for (const [name, expected] of Object.entries(expectedServices)) {
   })
 }
 
-test('static documentation disables framework detection and points to the existing HTML site', () => {
+test('static documentation uses the Vite documentation app and its existing HTML entrypoint', () => {
   const service = config.services['velclaw-docs']
-  assert.equal(Object.hasOwn(service, 'framework'), true)
-  assert.equal(service.framework, null)
+  assert.equal(service.framework, 'vite')
   assert.equal(Object.hasOwn(service, 'runtime'), false)
   assert.ok(statSync(path.join(repositoryRoot, service.root, 'index.html')).isFile())
   assert.notEqual(service.root, config.services.docs.root)
+})
+
+test('the Vite docs service resolves a buildable React application from its configured root', () => {
+  const root = path.join(repositoryRoot, config.services['velclaw-docs'].root)
+  const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'))
+  assert.equal(pkg.scripts.build, 'vite build')
+  assert.ok(pkg.dependencies.react)
+  assert.ok(pkg.dependencies['react-dom'])
+  assert.ok(pkg.devDependencies.vite)
+  assert.ok(pkg.devDependencies['@vitejs/plugin-react'])
+
+  const html = readFileSync(path.join(root, 'index.html'), 'utf8')
+  const entrypoint = html.match(/<script\s+type="module"\s+src="([^"]+)"/)
+  assert.ok(entrypoint, 'the Vite HTML entrypoint must load an application module')
+  assert.ok(statSync(path.join(root, entrypoint[1])).isFile())
+})
+
+test('the docs CI workflow builds the dedicated Vite service on relevant PRs and pushes', () => {
+  const workflow = readFileSync(path.join(repositoryRoot, '.github/workflows/velclaw-docs.yml'), 'utf8')
+  // Follow the repository's source-contract test convention without adding a YAML dependency.
+  for (const event of ['pull_request', 'push']) {
+    const block = workflow.match(new RegExp(`^  ${event}:\\n((?:    .*\\n)+)`, 'm'))?.[1]
+    assert.ok(block, `${event} must trigger docs validation`)
+    assert.match(block, /branches: \["main"\]/)
+    assert.match(block, /"velclaw-docs\/\*\*"/)
+    assert.match(block, /"\.github\/workflows\/velclaw-docs\.yml"/)
+  }
+  assert.match(workflow, /permissions:\n  contents: read/)
+  assert.match(workflow, /defaults:\n      run:\n        working-directory: velclaw-docs/)
+  assert.match(workflow, /node-version: 22\.x/)
+  assert.match(workflow, /cache-dependency-path: velclaw-docs\/package\.json/)
+  assert.match(workflow, /run: npm install --no-package-lock[\s\S]+run: npm run build/)
 })
 
 test('rewrites reference declared services', () => {
@@ -99,4 +132,26 @@ test('the app catch-all source pattern includes the homepage, bare docs path, AP
   for (const pathname of ['/', '/docs', '/docs-old/guide', '/api/health', '/_next/static/chunk.js', '/repos/a/b']) {
     assert.equal(pattern.test(pathname), true, pathname)
   }
+})
+
+test('the Vite docs service has a build script and a resolvable module entrypoint', () => {
+  const docsRoot = path.join(repositoryRoot, config.services['velclaw-docs'].root)
+  const manifest = JSON.parse(readFileSync(path.join(docsRoot, 'package.json'), 'utf8'))
+  assert.equal(manifest.scripts.build, 'vite build')
+  assert.equal(manifest.type, 'module')
+  assert.ok(manifest.devDependencies.vite)
+  assert.ok(manifest.devDependencies['@vitejs/plugin-react'])
+  const entry = readFileSync(path.join(docsRoot, 'index.html'), 'utf8')
+  const modulePath = entry.match(/<script\s+type="module"\s+src="([^"<>]+)"/)
+  assert.ok(modulePath, 'the docs HTML must load the Vite application')
+  assert.ok(statSync(path.join(docsRoot, modulePath[1])).isFile())
+})
+
+test('the MkDocs build inputs resolve from its separately configured repository root', () => {
+  const docsRoot = path.join(repositoryRoot, config.services.docs.root)
+  for (const filename of ['mkdocs.yml', 'docs/requirements.txt']) {
+    assert.ok(statSync(path.join(docsRoot, filename)).isFile(), filename)
+  }
+  assert.equal(config.services.docs.outputDirectory, 'site')
+  assert.notEqual(config.services['velclaw-docs'].outputDirectory, 'site')
 })

@@ -144,13 +144,23 @@ async function waitDeployment(app) {
   throw new Error(`Application rollout timed out after ${ROLLOUT_TIMEOUT_MS}ms`)
 }
 
+/**
+ * Creates Secret, Deployment, Service, and Ingress manifests, in that order, without applying them.
+ * Uses the job's custom domain when present, otherwise a hostname under the configured public domain.
+ * Environment keys must match [A-Za-z_][A-Za-z0-9_]{0,127}; non-string values and values containing
+ * CR or LF are omitted. Accepted values are truncated to 8,192 UTF-16 code units.
+ *
+ * @param {object} job - Deployment record with a string id, projectName, and optional customDomain and env.
+ * @returns {object[]} Manifests in the configured runtime namespace, routing HTTP traffic to port 3000.
+ * @throws {TypeError} If job.id is missing or does not support string replacement.
+ */
 function appResources(job) {
   const app = appName(job)
   const host = hostname(job)
   const image = imageName(job)
   const env = Object.fromEntries(Object.entries(job.env || {}).filter(([k, v]) => /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(k) && typeof v === 'string' && !/[\r\n]/.test(v)).map(([k, v]) => [k, v.slice(0, 8192)]))
   const secret = { apiVersion: 'v1', kind: 'Secret', metadata: { name: `${app}-env`, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, type: 'Opaque', stringData: env }
-  const deployment = { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name: app, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { replicas: 1, revisionHistoryLimit: 3, progressDeadlineSeconds: 600, strategy: { type: 'RollingUpdate', rollingUpdate: { maxSurge: 1, maxUnavailable: 0 } }, selector: { matchLabels: { 'app.kubernetes.io/name': app } }, template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { containers: [{ name: 'web', image, imagePullPolicy: 'Always', ports: [{ name: 'http', containerPort: 3000 }], envFrom: [{ secretRef: { name: `${app}-env` } }], resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '1', memory: '1Gi' } }, securityContext: { runAsNonRoot: true, runAsUser: 10001, runAsGroup: 10001, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] }, seccompProfile: { type: 'RuntimeDefault' } }, readinessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 6 }, livenessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 30, periodSeconds: 20, timeoutSeconds: 3, failureThreshold: 6 }] } } } }
+  const deployment = { apiVersion: 'apps/v1', kind: 'Deployment', metadata: { name: app, namespace: NAMESPACE, labels: { 'app.kubernetes.io/part-of': 'velclaw', 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { replicas: 1, revisionHistoryLimit: 3, progressDeadlineSeconds: 600, strategy: { type: 'RollingUpdate', rollingUpdate: { maxSurge: 1, maxUnavailable: 0 } }, selector: { matchLabels: { 'app.kubernetes.io/name': app } }, template: { metadata: { labels: { 'app.kubernetes.io/name': app, 'velclaw.deployment': job.id } }, spec: { containers: [{ name: 'web', image, imagePullPolicy: 'Always', ports: [{ name: 'http', containerPort: 3000 }], envFrom: [{ secretRef: { name: `${app}-env` } }], resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '1', memory: '1Gi' } }, securityContext: { runAsNonRoot: true, runAsUser: 10001, runAsGroup: 10001, allowPrivilegeEscalation: false, capabilities: { drop: ['ALL'] }, seccompProfile: { type: 'RuntimeDefault' } }, readinessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 6 }, livenessProbe: { httpGet: { path: '/', port: 'http' }, initialDelaySeconds: 30, periodSeconds: 20, timeoutSeconds: 3, failureThreshold: 6 } }] } } } }
   const service = { apiVersion: 'v1', kind: 'Service', metadata: { name: app, namespace: NAMESPACE, labels: { 'velclaw.deployment': job.id } }, spec: { selector: { 'app.kubernetes.io/name': app }, ports: [{ name: 'http', port: 80, targetPort: 'http' }] } }
   const ingress = { apiVersion: 'networking.k8s.io/v1', kind: 'Ingress', metadata: { name: app, namespace: NAMESPACE, annotations: { 'cert-manager.io/cluster-issuer': 'letsencrypt-prod', 'nginx.ingress.kubernetes.io/ssl-redirect': 'true' }, labels: { 'velclaw.deployment': job.id } }, spec: { ingressClassName: 'nginx', tls: [{ hosts: [host], secretName: `${app}-tls` }], rules: [{ host, http: { paths: [{ path: '/', pathType: 'Prefix', backend: { service: { name: app, port: { name: 'http' } } } }] } }] } }
   return [secret, deployment, service, ingress]
