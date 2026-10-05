@@ -8,6 +8,8 @@ type Service = {
   root: string
   framework?: string
   runtime?: string
+  buildCommand?: string
+  outputDirectory?: string
 }
 
 type DeploymentConfig = {
