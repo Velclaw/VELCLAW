@@ -122,3 +122,84 @@ test('role origins, content, and aggregate configuration remain aligned', () => 
     allowedOrigins: Object.values(VELCLAW_DOMAIN_ROLES),
   })
 })
+
+const ENVIRONMENT_KEYS = [
+  'VELCLAW_PUBLIC_ORIGIN',
+  'VELCLAW_OAUTH_ISSUER',
+  'VELCLAW_APP_ORIGIN',
+  'VELCLAW_API_ORIGIN',
+  'VELCLAW_DOCS_ORIGIN',
+  'VELCLAW_ALLOWED_ORIGINS',
+] as const
+
+const defaultOrigins = ['https://velclaw.site', 'https://velclaw.dev', 'https://velclaw.app']
+
+test('an explicit empty environment returns the complete default configuration', () => {
+  assert.deepEqual(createVelclawDomainConfig({}), {
+    publicOrigin: 'https://velclaw.site',
+    oauthIssuer: 'https://velclaw.site',
+    appOrigin: 'https://velclaw.app',
+    apiOrigin: 'https://velclaw.dev',
+    docsOrigin: 'https://velclaw.dev',
+    publicDomain: 'velclaw.site',
+    allowedOrigins: defaultOrigins,
+  })
+})
+
+test('empty or undefined environment values use defaults', () => {
+  for (const value of ['', undefined]) {
+    const env = Object.fromEntries(ENVIRONMENT_KEYS.map((key) => [key, value]))
+    assert.deepEqual(createVelclawDomainConfig(env), createVelclawDomainConfig({}))
+  }
+})
+
+for (const key of ENVIRONMENT_KEYS) {
+  test(`the factory rejects a malformed origin in ${key}`, () => {
+    for (const value of ['not an origin', '/relative/path', 'https://']) {
+      const configuredValue = key === 'VELCLAW_ALLOWED_ORIGINS' ? `https://valid.example.test,${value}` : value
+      assert.throws(() => createVelclawDomainConfig({ [key]: configuredValue }), /Invalid Velclaw origin:/)
+    }
+  })
+}
+
+test('whitespace-only origins fail instead of silently becoming defaults', () => {
+  for (const key of ENVIRONMENT_KEYS.filter((key) => key !== 'VELCLAW_ALLOWED_ORIGINS')) {
+    assert.throws(() => createVelclawDomainConfig({ [key]: '   ' }), /Invalid Velclaw origin:/)
+  }
+})
+
+test('a separator-only allowlist contains no allowed origins', () => {
+  for (const value of [' ', ',,,', ' , , ']) {
+    assert.deepEqual(createVelclawDomainConfig({ VELCLAW_ALLOWED_ORIGINS: value }).allowedOrigins, [])
+  }
+})
+
+test('overriding the public origin does not implicitly change the issuer or allowlist', () => {
+  const config = createVelclawDomainConfig({ VELCLAW_PUBLIC_ORIGIN: 'https://CUSTOM.example.test:8443/path' })
+  assert.equal(config.publicOrigin, 'https://custom.example.test:8443')
+  assert.equal(config.publicDomain, 'custom.example.test')
+  assert.equal(config.oauthIssuer, 'https://velclaw.site')
+  assert.deepEqual(config.allowedOrigins, defaultOrigins)
+})
+
+test('factory calls do not mutate input or share their allowlist arrays', () => {
+  const env = Object.freeze({ VELCLAW_ALLOWED_ORIGINS: 'https://one.example.test/path' })
+  const first = createVelclawDomainConfig(env)
+  first.allowedOrigins.push('https://unexpected.example.test')
+  assert.deepEqual(createVelclawDomainConfig(env).allowedOrigins, ['https://one.example.test'])
+  assert.equal(env.VELCLAW_ALLOWED_ORIGINS, 'https://one.example.test/path')
+  assert.deepEqual(createVelclawDomainConfig({}).allowedOrigins, defaultOrigins)
+})
+
+test('the no-argument factory reads the current environment on each call', (t) => {
+  const previous = process.env.VELCLAW_PUBLIC_ORIGIN
+  t.after(() => {
+    if (previous === undefined) delete process.env.VELCLAW_PUBLIC_ORIGIN
+    else process.env.VELCLAW_PUBLIC_ORIGIN = previous
+  })
+  for (const origin of ['https://first.example.test', 'https://second.example.test']) {
+    process.env.VELCLAW_PUBLIC_ORIGIN = origin
+    assert.equal(createVelclawDomainConfig().publicOrigin, origin)
+    assert.equal(createVelclawDomainConfig({}).publicOrigin, 'https://velclaw.site')
+  }
+})
