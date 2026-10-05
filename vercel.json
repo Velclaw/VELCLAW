@@ -4,7 +4,7 @@
     "app": { "root": ".", "framework": "nextjs" },
     "agentside": { "root": "AgentsIDE", "framework": "vite" },
     "autoship": { "root": "Autoship", "framework": "vite" },
-    "docs": { "root": "docs", "runtime": "python" },
+    "docs": { "root": ".", "buildCommand": "pip install -r docs/requirements.txt && mkdocs build", "outputDirectory": "site" },
     "kio": { "root": "KIO", "runtime": "node" },
     "velclaw": { "root": "Velclaw", "framework": "nextjs" },
     "velclaw-docs": { "root": "docs.velclaw.ai", "framework": null },
