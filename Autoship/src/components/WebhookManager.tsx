@@ -209,7 +209,7 @@ export const WebhookManager: React.FC<WebhookManagerProps> = ({ project, onPipel
             <Send className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Giả Lập Sự Kiện "Git Push" (Test Trực Tiếp)</h3>
+            <h3 className="text-base font-bold text-white">Giả Lập Sự Kiện &quot;Git Push&quot; (Test Trực Tiếp)</h3>
             <p className="text-xs text-slate-400">
               Kiểm tra quy trình tự động hóa mà không cần phải thực sự mở terminal gõ git push trên máy tính của bạn.
             </p>
