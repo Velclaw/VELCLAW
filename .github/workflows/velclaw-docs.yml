@@ -1,0 +1,36 @@
+name: Velclaw Docs Build
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "velclaw-docs/**"
+      - ".github/workflows/velclaw-docs.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "velclaw-docs/**"
+      - ".github/workflows/velclaw-docs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: velclaw-docs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: velclaw-docs/package.json
+      - name: Install dependencies
+        run: npm install --no-package-lock
+      - name: Build documentation site
+        run: npm run build
