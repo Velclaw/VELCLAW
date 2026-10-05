@@ -30,6 +30,10 @@ velclaw-docs/
 │       └── Deployment.jsx
 ```
 
+## Canonical documentation domain
+
+The canonical public documentation host is `https://docs.velclaw.ai`. Attach this custom domain to the dedicated Vercel project whose root directory is `velclaw-docs`. The monorepo `/docs/*` route remains the separate MkDocs service and is not the canonical public documentation host.
+
 ## Chạy cục bộ
 
 ```bash
