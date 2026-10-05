@@ -19,6 +19,10 @@ interface ConfigGeneratorProps {
   project: DeploymentProject | null
 }
 
+/**
+ * Loads CI/CD templates for the selected project and offers setup steps, copying, and downloads.
+ * Shows a selection prompt without a project; failed template requests retain the previous templates.
+ */
 export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => {
   const [templates, setTemplates] = useState<GeneratedConfigTemplate[]>([])
   const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<number>(0)

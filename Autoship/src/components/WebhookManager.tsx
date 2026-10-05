@@ -21,6 +21,11 @@ interface WebhookManagerProps {
   onPipelineTriggered?: () => void
 }
 
+/**
+ * Displays a project's webhook credentials and history, with a form that posts a simulated push.
+ * Shows a selection prompt without a project. After a push response parses as JSON,
+ * invokes onPipelineTriggered regardless of HTTP status; request or parsing failures appear in the form.
+ */
 export const WebhookManager: React.FC<WebhookManagerProps> = ({ project, onPipelineTriggered }) => {
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedSecret, setCopiedSecret] = useState(false)

@@ -64,6 +64,10 @@ function parseEnv(text: string) {
   return env
 }
 
+/**
+ * Displays deployment records and forms for queueing releases and requesting rollbacks.
+ * Refreshes records on mount and every five seconds; request and environment parsing errors appear inline.
+ */
 export function VelclawHostingPage() {
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [projectName, setProjectName] = useState('velclaw-app')
@@ -92,6 +96,7 @@ export function VelclawHostingPage() {
     return () => window.clearInterval(timer)
   }, [])
 
+  /** Fills the form from an example project, normalizing its name and clearing the custom domain and error. */
   function selectProject(project: (typeof exampleProjects)[number]) {
     setProjectName(
       project.name

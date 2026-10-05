@@ -144,6 +144,14 @@ async function waitDeployment(app) {
   throw new Error(`Application rollout timed out after ${ROLLOUT_TIMEOUT_MS}ms`)
 }
 
+/**
+ * Returns Secret, Deployment, Service, and Ingress manifests, in that order, without applying them.
+ * Uses job.customDomain when truthy, otherwise a generated hostname under DOMAIN.
+ * Environment keys must match [A-Za-z_][A-Za-z0-9_]{0,127}; non-string values and values
+ * containing CR or LF are omitted, and retained values are truncated to 8,192 UTF-16 code units.
+ *
+ * @throws {TypeError} If job.id is missing or does not support string replacement.
+ */
 function appResources(job) {
   const app = appName(job)
   const host = hostname(job)

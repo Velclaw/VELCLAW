@@ -20,6 +20,10 @@ interface PipelineVisualizerProps {
   selectedStageId?: string
 }
 
+/**
+ * Displays a run's status and stages, or a prompt when no run is selected.
+ * Stage clicks report the stage ID through onSelectStage; selectedStageId controls the highlight.
+ */
 export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
   currentRun,
   onSelectStage,
