@@ -88,7 +88,9 @@ export const ConfigGenerator: React.FC<ConfigGeneratorProps> = ({ project }) => 
             <FolderGit2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">Hướng Dẫn Tích Hợp CI/CD Cho Dự Án &quot;{project.name}&quot;</h2>
+            <h2 className="text-base font-bold text-white">
+              Hướng Dẫn Tích Hợp CI/CD Cho Dự Án &quot;{project.name}&quot;
+            </h2>
             <p className="text-xs text-slate-400">
               Chỉ cần làm 3 bước này 1 lần duy nhất, từ nay mỗi khi bạn gõ{' '}
               <code className="text-indigo-300 font-mono bg-slate-800 px-1 py-0.5 rounded">git push</code>, web sẽ tự
