@@ -1,6 +1,7 @@
 import DocsLayout from '../components/DocsLayout'
 import CodeBlock from '../components/CodeBlock'
 
+/** Renders the documentation page for Vercel deployment, GitHub integration, and build commands. */
 export default function Deployment() {
   return (
     <DocsLayout

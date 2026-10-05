@@ -45,6 +45,7 @@ const components = [
   ['Security', LockKeyhole],
 ] as const
 
+/** Renders a static showcase of Velclaw's design tokens, components, screens, and UI states. */
 export function VelclawDesignSystem() {
   return (
     <main className={styles.page}>

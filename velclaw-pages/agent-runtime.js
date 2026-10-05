@@ -4,6 +4,11 @@
  const inputs=()=>[$('builderPrompt'),$('chatInput'),$('buildInput')].filter(Boolean);
  const buttons=()=>[$('builderSendBtn'),$('sendBtn'),$('buildSendBtn'),$('buildSend')].filter(Boolean);
  function workspace(){return $('panel-build')||$('buildWorkspace')||null}
+ /**
+  * Activates the build workspace and resets its messages, preview, and status indicators.
+  * @param {string} text - Build title, shortened to 70 UTF-16 code units plus an ellipsis when longer.
+  * @returns {HTMLElement|undefined} The active workspace, or undefined without changing the UI if none exists.
+  */
  function showWorkspace(text){const w=workspace();if(!w)return;if(w.id==='panel-build'){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));w.classList.add('active')}else w.classList.add('active');$('panel-builder')?.classList.add('building');if($('workspaceName'))$('workspaceName').textContent='Build';if($('buildTitle'))$('buildTitle').textContent=text.length>70?text.slice(0,70)+'…':text;if($('buildStatus'))$('buildStatus').textContent='● starting';if($('buildProgress'))$('buildProgress').textContent='Planning';if($('buildChatStatus'))$('buildChatStatus').textContent='working';if($('buildMessages'))$('buildMessages').innerHTML='';if($('previewStatus'))$('previewStatus').textContent='Waiting for runtime…';if($('previewFrame'))$('previewFrame').innerHTML='<div class="preview-empty" id="previewEmpty"><b>Building your project…</b><span>The agent is planning, editing files and running validation.</span></div>';;return w}
  function activity(){return $('buildActivity')||(()=>{const x=document.createElement('div');x.id='buildActivity';x.className='chat-activity';$('buildMessages')?.appendChild(x);return x})()}
  function addStep(kind,title,detail='',state='running'){const row=document.createElement('div');row.className=`agent-step ${state}`;row.dataset.kind=kind;row.innerHTML=`<span class="agent-step-dot"></span><div><b>${title}</b>${detail?`<small>${detail}</small>`:''}</div><span class="agent-step-state">${state==='done'?'✓':state==='error'?'!':'…'}</span>`;activity().appendChild(row);activity().scrollTop=activity().scrollHeight;return row}
