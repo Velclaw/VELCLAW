@@ -7,7 +7,7 @@
     "docs": { "root": "docs", "runtime": "python" },
     "kio": { "root": "KIO", "runtime": "node" },
     "velclaw": { "root": "Velclaw", "framework": "nextjs" },
-    "velclaw-docs": { "root": "docs.velclaw.ai", "framework": "vite" },
+    "velclaw-docs": { "root": "docs.velclaw.ai", "framework": null },
     "velclaw-pages": { "root": "velclaw-pages", "runtime": "node" },
     "zskai": { "root": "ZsKai", "framework": "vite" },
     "huggingface-space-kimi-demo": { "root": "ZsKai/huggingface-space-kimi-demo", "runtime": "python" },
