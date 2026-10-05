@@ -59,6 +59,7 @@ export const SidebarWatsonAnalysis: React.FC<SidebarWatsonAnalysisProps> = ({
   useEffect(() => {
     const now = Date.now()
     const timeStr = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHistory((prev) => {
       const last = prev[prev.length - 1]
       if (last && last.latency === metrics.queryLatencyMs && last.efficiency === metrics.nodeEfficiency) {
