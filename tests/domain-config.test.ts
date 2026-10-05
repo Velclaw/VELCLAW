@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { tsImport } from 'tsx/esm/api'
 
 const ENVIRONMENT_KEYS = [
   'VELCLAW_PUBLIC_ORIGIN',
@@ -26,7 +27,7 @@ async function importDomainConfig(
   moduleUrl.searchParams.set('testRun', String(importSequence++))
 
   try {
-    return await import(moduleUrl.href)
+    return await tsImport(moduleUrl.href, import.meta.url)
   } finally {
     for (const key of ENVIRONMENT_KEYS) {
       const value = originalEnvironment[key]
