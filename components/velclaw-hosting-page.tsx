@@ -92,7 +92,7 @@ export function VelclawHostingPage() {
     return () => window.clearInterval(timer)
   }, [])
 
-  function useProject(project: (typeof exampleProjects)[number]) {
+  function selectProject(project: (typeof exampleProjects)[number]) {
     setProjectName(
       project.name
         .toLowerCase()
@@ -364,7 +364,7 @@ export function VelclawHostingPage() {
                   <button
                     key={project.name}
                     type="button"
-                    onClick={() => useProject(project)}
+                    onClick={() => selectProject(project)}
                     className="block w-full border border-border p-3 text-left hover:border-violet-400/60"
                   >
                     <div className="flex items-center justify-between gap-2">
