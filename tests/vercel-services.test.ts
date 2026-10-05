@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 type Service = {
   root: string
-  framework?: string | null
+  framework?: string
   runtime?: string
 }
 
@@ -25,10 +25,10 @@ const expectedServices: Record<string, Service> = {
   app: { root: '.', framework: 'nextjs' },
   agentside: { root: 'AgentsIDE', framework: 'vite' },
   autoship: { root: 'Autoship', framework: 'vite' },
-  docs: { root: 'docs', runtime: 'python' },
+  docs: { root: '.', buildCommand: 'pip install -r docs/requirements.txt && mkdocs build', outputDirectory: 'site' },
   kio: { root: 'KIO', runtime: 'node' },
   velclaw: { root: 'Velclaw', framework: 'nextjs' },
-  'velclaw-docs': { root: 'docs.velclaw.ai', framework: null },
+  'velclaw-docs': { root: 'velclaw-docs', framework: 'vite' },
   'velclaw-pages': { root: 'velclaw-pages', runtime: 'node' },
   zskai: { root: 'ZsKai', framework: 'vite' },
   'huggingface-space-kimi-demo': { root: 'ZsKai/huggingface-space-kimi-demo', runtime: 'python' },
@@ -54,10 +54,9 @@ for (const [name, expected] of Object.entries(expectedServices)) {
   })
 }
 
-test('static documentation disables framework detection and points to the existing HTML site', () => {
+test('static documentation uses the Vite documentation app and its existing HTML entrypoint', () => {
   const service = config.services['velclaw-docs']
-  assert.equal(Object.hasOwn(service, 'framework'), true)
-  assert.equal(service.framework, null)
+  assert.equal(service.framework, 'vite')
   assert.equal(Object.hasOwn(service, 'runtime'), false)
   assert.ok(statSync(path.join(repositoryRoot, service.root, 'index.html')).isFile())
   assert.notEqual(service.root, config.services.docs.root)
