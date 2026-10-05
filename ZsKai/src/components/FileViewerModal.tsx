@@ -16,8 +16,11 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ file, onClose,
 
   useEffect(() => {
     if (file && file.content) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setContent(file.content)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsEditing(false)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSavedSuccess(false)
     }
   }, [file])

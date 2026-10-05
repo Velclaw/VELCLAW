@@ -6,7 +6,7 @@ const DEFAULT_CONFIG = path.join(ROOT, 'config', 'mcp.json');
 
 function resolveEnv(value, env = process.env) {
   if (typeof value !== 'string') return value;
-  return value.replace(/\\$\\{([A-Z0-9_]+)\\}/g, (_, key) => env[key] || '');
+  return value.replace(/\$\{([A-Z0-9_]+)\}/g, (_, key) => env[key] || '');
 }
 
 function loadMcpRegistry(configPath = DEFAULT_CONFIG, env = process.env) {

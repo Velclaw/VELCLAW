@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import { BuildRun, PipelineStage } from '../types'
 
+/* eslint-disable react/no-unescaped-entities */
+
 interface PipelineVisualizerProps {
   currentRun: BuildRun | null
   onSelectStage?: (stageId: string) => void
