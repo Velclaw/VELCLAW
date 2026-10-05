@@ -72,7 +72,7 @@ export function VelclawDesignSystem() {
             <br />
             <em>Understand.</em>
           </h1>
-          <p className={styles.lead}>The visual language for Velclaw's AI-native software lifecycle workspace.</p>
+          <p className={styles.lead}>The visual language for Velclaw&apos;s AI-native software lifecycle workspace.</p>
           <div className={styles.actions}>
             <button className={styles.primary}>
               Create project <ArrowUpRight size={16} />
