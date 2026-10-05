@@ -26,7 +26,7 @@ test('domain control plane renders the primary AI domain and the two service dom
 test('domain control plane initially selects the primary AI platform domain', () => {
   const markup = renderControlPlane()
 
-  assert.match(markup, /velclaw\.ai/)
+  assert.match(markup, /velclaw\.site/)
   assert.match(markup, /Platform/)
   assert.match(markup, /SSL pending/)
   assert.doesNotMatch(markup, /velclaw\.com/)
