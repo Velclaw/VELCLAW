@@ -101,3 +101,25 @@ test('the app catch-all source pattern includes the homepage, bare docs path, AP
     assert.equal(pattern.test(pathname), true, pathname)
   }
 })
+
+test('the Vite docs service has a build script and a resolvable module entrypoint', () => {
+  const docsRoot = path.join(repositoryRoot, config.services['velclaw-docs'].root)
+  const manifest = JSON.parse(readFileSync(path.join(docsRoot, 'package.json'), 'utf8'))
+  assert.equal(manifest.scripts.build, 'vite build')
+  assert.equal(manifest.type, 'module')
+  assert.ok(manifest.devDependencies.vite)
+  assert.ok(manifest.devDependencies['@vitejs/plugin-react'])
+  const entry = readFileSync(path.join(docsRoot, 'index.html'), 'utf8')
+  const modulePath = entry.match(/<script\s+type="module"\s+src="([^"<>]+)"/)
+  assert.ok(modulePath, 'the docs HTML must load the Vite application')
+  assert.ok(statSync(path.join(docsRoot, modulePath[1])).isFile())
+})
+
+test('the MkDocs build inputs resolve from its separately configured repository root', () => {
+  const docsRoot = path.join(repositoryRoot, config.services.docs.root)
+  for (const filename of ['mkdocs.yml', 'docs/requirements.txt']) {
+    assert.ok(statSync(path.join(docsRoot, filename)).isFile(), filename)
+  }
+  assert.equal(config.services.docs.outputDirectory, 'site')
+  assert.notEqual(config.services['velclaw-docs'].outputDirectory, 'site')
+})
