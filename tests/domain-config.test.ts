@@ -1,52 +1,31 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createVelclawDomainConfig } from '../lib/velclaw/domain-config'
+import {
+  createVelclawDomainConfig,
+  getVelclawDomainConfig,
+  getVelclawDomainRole,
+  getVelclawOriginForRole,
+  VELCLAW_DOMAIN_ROLE_CONTENT,
+  VELCLAW_DOMAIN_ROLES,
+  VELCLAW_PUBLIC_DOMAIN,
+} from '../lib/velclaw/domain-config'
 
-const ENVIRONMENT_KEYS = [
-  'VELCLAW_PUBLIC_ORIGIN',
-  'VELCLAW_OAUTH_ISSUER',
-  'VELCLAW_APP_ORIGIN',
-  'VELCLAW_API_ORIGIN',
-  'VELCLAW_DOCS_ORIGIN',
-  'VELCLAW_ALLOWED_ORIGINS',
-] as const
+test('domain configuration defaults each surface to its designated first-party origin', () => {
+  const config = createVelclawDomainConfig()
 
-type DomainConfigModule = typeof import('../lib/velclaw/domain-config')
-
-async function importDomainConfig(
-  overrides: Partial<Record<(typeof ENVIRONMENT_KEYS)[number], string>> = {},
-): Promise<DomainConfigModule> {
-  const originalEnvironment = Object.fromEntries(ENVIRONMENT_KEYS.map((key) => [key, process.env[key]]))
-
-  for (const key of ENVIRONMENT_KEYS) delete process.env[key]
-  Object.assign(process.env, overrides)
-
-  try {
-    return await tsImport('../lib/velclaw/domain-config.ts', import.meta.url)
-  } finally {
-    for (const key of ENVIRONMENT_KEYS) {
-      const value = originalEnvironment[key]
-      if (value === undefined) delete process.env[key]
-      else process.env[key] = value
-    }
-  }
-}
-
-test('domain configuration defaults each surface to its designated first-party origin', async () => {
-  const config = await importDomainConfig()
-
-  assert.deepEqual(config.VELCLAW_DOMAIN_ROLES, {
+  assert.deepEqual(VELCLAW_DOMAIN_ROLES, {
     platform: 'https://velclaw.site',
     developer: 'https://velclaw.dev',
     application: 'https://velclaw.app',
   })
-  assert.equal(config.VELCLAW_PUBLIC_ORIGIN, config.VELCLAW_DOMAIN_ROLES.platform)
-  assert.equal(config.VELCLAW_OAUTH_ISSUER, config.VELCLAW_DOMAIN_ROLES.platform)
-  assert.equal(config.VELCLAW_APP_ORIGIN, config.VELCLAW_DOMAIN_ROLES.application)
-  assert.equal(config.VELCLAW_API_ORIGIN, config.VELCLAW_DOMAIN_ROLES.developer)
-  assert.equal(config.VELCLAW_DOCS_ORIGIN, config.VELCLAW_DOMAIN_ROLES.developer)
-  assert.equal(config.VELCLAW_PUBLIC_DOMAIN, 'velclaw.site')
-  assert.deepEqual(config.VELCLAW_ALLOWED_ORIGINS, Object.values(config.VELCLAW_DOMAIN_ROLES))
+  assert.equal(config.publicOrigin, VELCLAW_DOMAIN_ROLES.platform)
+  assert.equal(config.oauthIssuer, VELCLAW_DOMAIN_ROLES.platform)
+  assert.equal(config.appOrigin, VELCLAW_DOMAIN_ROLES.application)
+  assert.equal(config.apiOrigin, VELCLAW_DOMAIN_ROLES.developer)
+  assert.equal(config.docsOrigin, VELCLAW_DOMAIN_ROLES.developer)
+  assert.equal(config.publicDomain, 'velclaw.site')
+  assert.equal(VELCLAW_PUBLIC_DOMAIN, 'velclaw.site')
+  assert.deepEqual(config.allowedOrigins, Object.values(VELCLAW_DOMAIN_ROLES))
 })
 
 test('configured origins are trimmed and reduced to scheme, host, and port', () => {
@@ -73,8 +52,18 @@ test('configured origins are trimmed and reduced to scheme, host, and port', () 
   ])
 })
 
-test('known bare, www, case-insensitive, and port-qualified hosts resolve to their roles', async () => {
-  const { getVelclawDomainRole } = await importDomainConfig()
+test('invalid configured origins fail fast', () => {
+  assert.throws(
+    () => createVelclawDomainConfig({ VELCLAW_PUBLIC_ORIGIN: 'not an origin' }),
+    /Invalid Velclaw origin: not an origin/,
+  )
+  assert.throws(
+    () => createVelclawDomainConfig({ VELCLAW_ALLOWED_ORIGINS: 'https://velclaw.site,not an origin' }),
+    /Invalid Velclaw origin: not an origin/,
+  )
+})
+
+test('known bare, www, case-insensitive, and port-qualified hosts resolve to their roles', () => {
   const cases = [
     ['velclaw.site', 'platform'],
     ['www.velclaw.site', 'platform'],
@@ -93,9 +82,7 @@ test('known bare, www, case-insensitive, and port-qualified hosts resolve to the
   }
 })
 
-test('missing, unknown, and lookalike hosts safely use the platform role', async () => {
-  const { getVelclawDomainRole } = await importDomainConfig()
-
+test('missing, unknown, and lookalike hosts safely use the platform role', () => {
   for (const hostname of [
     undefined,
     null,
@@ -109,15 +96,14 @@ test('missing, unknown, and lookalike hosts safely use the platform role', async
   }
 })
 
-test('role origins, content, and aggregate configuration remain aligned', async () => {
-  const config = await importDomainConfig()
+test('role origins, content, and aggregate configuration remain aligned', () => {
   const roles = ['platform', 'developer', 'application'] as const
-  const aggregate = config.getVelclawDomainConfig()
+  const aggregate = getVelclawDomainConfig()
 
-  assert.deepEqual(Object.keys(config.VELCLAW_DOMAIN_ROLE_CONTENT), roles)
+  assert.deepEqual(Object.keys(VELCLAW_DOMAIN_ROLE_CONTENT), roles)
   for (const role of roles) {
-    const content = config.VELCLAW_DOMAIN_ROLE_CONTENT[role]
-    assert.equal(config.getVelclawOriginForRole(role), config.VELCLAW_DOMAIN_ROLES[role])
+    const content = VELCLAW_DOMAIN_ROLE_CONTENT[role]
+    assert.equal(getVelclawOriginForRole(role), VELCLAW_DOMAIN_ROLES[role])
     assert.ok(content.name.length > 0)
     assert.ok(content.title.length > 0)
     assert.ok(content.description.length > 0)
@@ -126,13 +112,13 @@ test('role origins, content, and aggregate configuration remain aligned', async 
   }
 
   assert.deepEqual(aggregate, {
-    roles: config.VELCLAW_DOMAIN_ROLES,
-    publicOrigin: config.VELCLAW_PUBLIC_ORIGIN,
-    oauthIssuer: config.VELCLAW_OAUTH_ISSUER,
-    appOrigin: config.VELCLAW_APP_ORIGIN,
-    apiOrigin: config.VELCLAW_API_ORIGIN,
-    docsOrigin: config.VELCLAW_DOCS_ORIGIN,
-    publicDomain: config.VELCLAW_PUBLIC_DOMAIN,
-    allowedOrigins: config.VELCLAW_ALLOWED_ORIGINS,
+    roles: VELCLAW_DOMAIN_ROLES,
+    publicOrigin: VELCLAW_DOMAIN_ROLES.platform,
+    oauthIssuer: VELCLAW_DOMAIN_ROLES.platform,
+    appOrigin: VELCLAW_DOMAIN_ROLES.application,
+    apiOrigin: VELCLAW_DOMAIN_ROLES.developer,
+    docsOrigin: VELCLAW_DOMAIN_ROLES.developer,
+    publicDomain: VELCLAW_PUBLIC_DOMAIN,
+    allowedOrigins: Object.values(VELCLAW_DOMAIN_ROLES),
   })
 })
