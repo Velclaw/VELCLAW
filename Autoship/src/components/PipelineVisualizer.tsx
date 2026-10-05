@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 import {
   GitCommit,
@@ -28,7 +29,6 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
   if (!currentRun) {
     return (
       <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 text-center text-slate-400">
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
         Chưa có lượt chạy pipeline nào. Nhấn nút "Kích Hoạt Deploy" hoặc push code lên GitHub để bắt đầu.
       </div>
     )
@@ -121,7 +121,6 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xl">
-              {/* eslint-disable-next-line react/no-unescaped-entities */}
               "{currentRun.commitMessage}" bởi <strong className="text-slate-300">@{currentRun.author}</strong>
             </p>
           </div>
