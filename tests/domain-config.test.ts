@@ -13,8 +13,6 @@ const ENVIRONMENT_KEYS = [
 
 type DomainConfigModule = typeof import('../lib/velclaw/domain-config')
 
-let importSequence = 0
-
 async function importDomainConfig(
   overrides: Partial<Record<(typeof ENVIRONMENT_KEYS)[number], string>> = {},
 ): Promise<DomainConfigModule> {
@@ -23,11 +21,8 @@ async function importDomainConfig(
   for (const key of ENVIRONMENT_KEYS) delete process.env[key]
   Object.assign(process.env, overrides)
 
-  const moduleUrl = new URL('../lib/velclaw/domain-config.ts', import.meta.url)
-  moduleUrl.searchParams.set('testRun', String(importSequence++))
-
   try {
-    return await tsImport(moduleUrl.href, import.meta.url)
+    return await tsImport('../lib/velclaw/domain-config.ts', import.meta.url)
   } finally {
     for (const key of ENVIRONMENT_KEYS) {
       const value = originalEnvironment[key]
