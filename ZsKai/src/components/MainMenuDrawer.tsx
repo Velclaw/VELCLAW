@@ -51,6 +51,10 @@ interface MainMenuDrawerProps {
   onSetConfidence?: (score: number) => void
 }
 
+/**
+ * Presents project files, sessions, utilities, and system controls through the supplied callbacks.
+ * Returns null while closed and preserves the selected tab while the component stays mounted.
+ */
 export const MainMenuDrawer: React.FC<MainMenuDrawerProps> = ({
   isOpen,
   onClose,

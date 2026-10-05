@@ -144,6 +144,16 @@ async function waitDeployment(app) {
   throw new Error(`Application rollout timed out after ${ROLLOUT_TIMEOUT_MS}ms`)
 }
 
+/**
+ * Creates Secret, Deployment, Service, and Ingress manifests, in that order, without applying them.
+ * Uses the job's custom domain when present, otherwise a hostname under the configured public domain.
+ * Environment keys must match [A-Za-z_][A-Za-z0-9_]{0,127}; non-string values and values containing
+ * CR or LF are omitted. Accepted values are truncated to 8,192 UTF-16 code units.
+ *
+ * @param {object} job - Deployment record with a string id, projectName, and optional customDomain and env.
+ * @returns {object[]} Manifests in the configured runtime namespace, routing HTTP traffic to port 3000.
+ * @throws {TypeError} If job.id is missing or does not support string replacement.
+ */
 function appResources(job) {
   const app = appName(job)
   const host = hostname(job)

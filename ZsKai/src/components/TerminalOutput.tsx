@@ -22,6 +22,11 @@ interface TerminalOutputProps {
   activeNavTab?: 'chat' | 'diff' | 'logs' | 'rfc'
 }
 
+/**
+ * Renders command history for chat and logs, a static diff example, or the RFC viewer.
+ * In the history view, outputEndRef marks the end for caller-controlled scrolling, and
+ * aiConfidence selects command colors (values above 1 are interpreted as percentages).
+ */
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
   history,
   outputEndRef,
