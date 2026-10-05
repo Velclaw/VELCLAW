@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 import {
   GitCommit,
@@ -14,6 +13,8 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { BuildRun, PipelineStage } from '../types'
+
+/* eslint-disable react/no-unescaped-entities */
 
 interface PipelineVisualizerProps {
   currentRun: BuildRun | null
