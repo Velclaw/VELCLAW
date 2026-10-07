@@ -49,6 +49,10 @@ const domainIdentity: Record<
   },
 }
 
+/**
+ * Renders the Velclaw product landing page. The role selects the displayed domain
+ * identity and primary call to action, defaulting to the platform when omitted.
+ */
 export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole }) {
   const identity = domainIdentity[role]
 
