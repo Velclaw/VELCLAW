@@ -1,21 +1,21 @@
-import React from 'react';
-import { X, Bell, Sparkles, ShieldCheck, Activity, Check } from 'lucide-react';
-import { PushNotification } from '../types/shell';
+import React from 'react'
+import { X, Bell, Sparkles, ShieldCheck, Activity, Check } from 'lucide-react'
+import { PushNotification } from '../types/shell'
 
 interface NotificationsDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  notifications: PushNotification[];
-  onMarkAllRead: () => void;
+  isOpen: boolean
+  onClose: () => void
+  notifications: PushNotification[]
+  onMarkAllRead: () => void
 }
 
 export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   isOpen,
   onClose,
   notifications,
-  onMarkAllRead
+  onMarkAllRead,
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm select-none font-mono">
@@ -50,7 +50,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
               No recent notifications.
             </div>
           ) : (
-            notifications.map(n => (
+            notifications.map((n) => (
               <div
                 key={n.id}
                 className={`p-3 rounded-none border-2 text-xs transition-all space-y-1.5 ${
@@ -66,7 +66,9 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                     {n.type === 'warning' && <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />}
                     {n.title}
                   </span>
-                  <span className="text-[9px] font-mono text-cyan-300 font-bold bg-neutral-900 px-1.5 py-0.5 border border-neutral-700">{n.timestamp}</span>
+                  <span className="text-[9px] font-mono text-cyan-300 font-bold bg-neutral-900 px-1.5 py-0.5 border border-neutral-700">
+                    {n.timestamp}
+                  </span>
                 </div>
                 <p className="text-[11px] text-neutral-300 font-medium leading-relaxed">{n.message}</p>
               </div>
@@ -80,6 +82,5 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
         </div>
       </div>
     </div>
-  );
-};
-
+  )
+}

@@ -76,10 +76,7 @@ export function getMcpRuntimeStatus(): McpRuntimeStatus[] {
   const loaded = loadMcpRegistry()
 
   return Object.entries(config.mcpServers || {}).map(([id, server]) => {
-    const requiredEnv = findRequiredEnv([
-      ...Object.values(server.env || {}),
-      ...Object.values(server.headers || {}),
-    ])
+    const requiredEnv = findRequiredEnv([...Object.values(server.env || {}), ...Object.values(server.headers || {})])
     const configuredEnv = requiredEnv.filter((key) => Boolean(process.env[key]))
 
     let state: McpRuntimeStatus['state'] = 'ready'

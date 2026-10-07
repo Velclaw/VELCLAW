@@ -1,0 +1,391 @@
+<!doctype html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>velclawdomain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14171a;
+    --paper: #f6f5f2;
+    --line: #dcd9d2;
+    --claw: #c4432b;
+    --claw-dark: #9c3220;
+    --ok: #2f6b4f;
+    --muted: #5c6065;
+    --muted-2: #8b8f93;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', 'Segoe UI', -apple-system, sans-serif;
+  }
+  input, select, button { font-family: inherit; }
+  input:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--claw);
+    outline-offset: 2px;
+  }
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 22px 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .logo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--claw); }
+  .tagline {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  main {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 36px 24px 80px;
+  }
+  section { margin-bottom: 32px; }
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--ink);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  p.desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin: 6px 0 14px;
+    line-height: 1.5;
+  }
+  .row { display: flex; gap: 8px; }
+  .vc-field {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .vc-field:focus { border-color: var(--ink); }
+  label.field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .vc-btn {
+    cursor: pointer;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform .08s ease, background .15s ease;
+    flex-shrink: 0;
+  }
+  .vc-btn:hover:not(:disabled) { background: #2a2e33; }
+  .vc-btn:active:not(:disabled) { transform: translateY(1px); }
+  .vc-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .vc-btn-claw { background: var(--claw); border-color: var(--claw); width: 100%; margin-top: 20px; }
+  .vc-btn-claw:hover:not(:disabled) { background: var(--claw-dark); }
+  .status-ok {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ok);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok);
+    display: inline-block;
+  }
+  .banner {
+    border: 1.5px solid var(--claw);
+    background: #fbeae6;
+    color: var(--claw-dark);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    margin-bottom: 28px;
+  }
+  .banner.ok {
+    border-color: var(--ok);
+    background: #eaf4ee;
+    color: var(--ok);
+  }
+  #step2 { opacity: 0.4; pointer-events: none; }
+  #step2.active { opacity: 1; pointer-events: auto; }
+  .or-sep {
+    margin: 10px 0;
+    font-size: 12.5px;
+    color: var(--muted-2);
+    text-align: center;
+  }
+  .mt14 { margin-top: 14px; }
+  #result { margin-top: 14px; padding: 12px 14px; font-size: 13.5px; display: none; }
+  #result.ok { border: 1.5px solid var(--ok); background: #eaf4ee; color: var(--ok); display: block; }
+  #result.err { border: 1.5px solid var(--claw); background: #fbeae6; color: var(--claw-dark); display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">velclaw<span>domain</span></span>
+  <span class="tagline">gắn domain vào project — không cần rời khỏi trang này</span>
+</header>
+
+<main>
+  <section>
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <h2>Kết nối Vercel</h2>
+    </div>
+    <p class="desc">
+      Dán API token của bạn (Vercel → Settings → Tokens). Token chỉ được dùng trực tiếp từ trình duyệt của bạn tới Vercel, không đi qua máy chủ nào khác.
+    </p>
+    <div class="row">
+      <input class="vc-field" type="password" id="token" placeholder="vercel_xxxxxxxxxxxxxxxx" />
+      <button class="vc-btn" id="connectBtn">Kết nối</button>
+    </div>
+    <div class="status-ok" id="connStatus" style="display:none;">
+      <span class="dot"></span>
+      <span id="connStatusText"></span>
+    </div>
+    <div class="mt14" id="teamPicker" style="display:none;">
+      <label class="field-label">Team / tài khoản</label>
+      <select class="vc-field" id="teamSelect"></select>
+    </div>
+  </section>
+
+  <div class="banner" id="errorBanner" style="display:none;"></div>
+
+  <section id="step2">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <h2>Gắn domain vào project</h2>
+    </div>
+
+```
+<div class="mt14">
+  <label class="field-label">Project</label>
+  <select class="vc-field" id="projectSelect">
+    <option value="">— chọn project —</option>
+  </select>
+</div>
+
+<div class="mt14">
+  <label class="field-label">Domain có sẵn trong tài khoản</label>
+  <select class="vc-field" id="domainSelect">
+    <option value="">— chọn domain —</option>
+  </select>
+</div>
+
+<div class="or-sep">hoặc</div>
+
+<div>
+  <label class="field-label">Nhập domain thủ công</label>
+  <input class="vc-field" id="customDomain" placeholder="app.velclaw.com" />
+</div>
+
+<button class="vc-btn vc-btn-claw" id="attachBtn" disabled>Gắn domain vào project</button>
+
+<div id="result"></div>
+```
+
+  </section>
+</main>
+
+<script>
+  let token = "";
+  let teamId = "";
+  let projects = [];
+  let domains = [];
+
+  const $ = (id) => document.getElementById(id);
+
+  function authHeaders() {
+    return {
+      "Authorization": "Bearer " + token.trim(),
+      "Content-Type": "application/json"
+    };
+  }
+
+  function showError(msg) {
+    const el = $("errorBanner");
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+  function clearError() {
+    $("errorBanner").style.display = "none";
+  }
+
+  function populateSelect(selectEl, items, placeholder) {
+    selectEl.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = placeholder;
+    selectEl.appendChild(opt0);
+    items.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.value;
+      opt.textContent = item.label;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  async function fetchProjectsAndDomains(tid) {
+    const qs = tid ? ("?teamId=" + tid) : "";
+    const [projRes, domRes] = await Promise.all([
+      fetch("https://api.vercel.com/v9/projects" + qs, { headers: authHeaders() }).then(r => r.json()),
+      fetch("https://api.vercel.com/v5/domains" + qs, { headers: authHeaders() }).then(r => r.json()),
+    ]);
+    projects = projRes.projects || [];
+    domains = domRes.domains || [];
+    populateSelect($("projectSelect"), projects.map(p => ({ value: p.id, label: p.name })), "— chọn project —");
+    populateSelect($("domainSelect"), domains.map(d => ({ value: d.name, label: d.name })), "— chọn domain —");
+    $("connStatusText").textContent = "Đã kết nối — " + projects.length + " project, " + domains.length + " domain.";
+  }
+
+  $("connectBtn").addEventListener("click", async () => {
+    token = $("token").value;
+    if (!token.trim()) return;
+    clearError();
+    $("connStatus").style.display = "none";
+    $("connectBtn").disabled = true;
+    $("connectBtn").textContent = "Đang kết nối…";
+    try {
+      const me = await fetch("https://api.vercel.com/v2/user", { headers: authHeaders() });
+      const meData = await me.json();
+      if (!me.ok) throw new Error((meData.error && meData.error.message) || "Token không hợp lệ");
+
+      let teamList = [];
+      try {
+        const teamsRes = await fetch("https://api.vercel.com/v2/teams", { headers: authHeaders() });
+        const teamsData = await teamsRes.json();
+        if (teamsRes.ok) teamList = teamsData.teams || [];
+      } catch (_) {}
+
+      teamId = teamList[0] ? teamList[0].id : "";
+
+      if (teamList.length > 0) {
+        $("teamPicker").style.display = "block";
+        const sel = $("teamSelect");
+        sel.innerHTML = "";
+        const personalOpt = document.createElement("option");
+        personalOpt.value = "";
+        personalOpt.textContent = "Tài khoản cá nhân";
+        sel.appendChild(personalOpt);
+        teamList.forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t.id;
+          opt.textContent = t.name || t.slug;
+          sel.appendChild(opt);
+        });
+        sel.value = teamId;
+      } else {
+        $("teamPicker").style.display = "none";
+      }
+
+      await fetchProjectsAndDomains(teamId);
+
+      $("connStatus").style.display = "flex";
+      $("step2").classList.add("active");
+      $("connectBtn").textContent = "Kết nối lại";
+    } catch (e) {
+      showError(e.message || "Không kết nối được với Vercel.");
+      $("connectBtn").textContent = "Kết nối";
+    } finally {
+      $("connectBtn").disabled = false;
+    }
+  });
+
+  $("teamSelect").addEventListener("change", async (e) => {
+    teamId = e.target.value;
+    clearError();
+    try {
+      await fetchProjectsAndDomains(teamId);
+      $("customDomain").value = "";
+    } catch (err) {
+      showError(err.message || "Không tải được dữ liệu.");
+    }
+  });
+
+  function updateAttachBtnState() {
+    const proj = $("projectSelect").value;
+    const dom = $("domainSelect").value;
+    const custom = $("customDomain").value.trim();
+    $("attachBtn").disabled = !(proj && (dom || custom));
+  }
+  $("projectSelect").addEventListener("change", updateAttachBtnState);
+  $("domainSelect").addEventListener("change", () => {
+    if ($("domainSelect").value) $("customDomain").value = "";
+    updateAttachBtnState();
+  });
+  $("customDomain").addEventListener("input", () => {
+    if ($("customDomain").value.trim()) $("domainSelect").value = "";
+    updateAttachBtnState();
+  });
+
+  $("attachBtn").addEventListener("click", async () => {
+    const projectId = $("projectSelect").value;
+    const domainName = $("customDomain").value.trim() || $("domainSelect").value;
+    if (!projectId || !domainName) return;
+
+    const resultEl = $("result");
+    resultEl.className = "";
+    resultEl.style.display = "none";
+    $("attachBtn").disabled = true;
+    $("attachBtn").textContent = "Đang gắn…";
+
+    try {
+      const qs = teamId ? ("?teamId=" + teamId) : "";
+      const res = await fetch("https://api.vercel.com/v10/projects/" + projectId + "/domains" + qs, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ name: domainName })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error((data.error && data.error.message) || "Gắn domain thất bại.");
+      resultEl.textContent = "Đã gắn " + domainName + " vào project thành công.";
+      resultEl.className = "ok";
+    } catch (e) {
+      resultEl.textContent = e.message || "Có lỗi xảy ra.";
+      resultEl.className = "err";
+    } finally {
+      $("attachBtn").textContent = "Gắn domain vào project";
+      updateAttachBtnState();
+    }
+  });
+</script>
+
+</body>
+</html>

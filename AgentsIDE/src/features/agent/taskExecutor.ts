@@ -1,6 +1,6 @@
 import type { AgentTask, FileChange } from './types'
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const starterApp = `import { useState } from 'react'\n\nexport default function App() {\n  const [status, setStatus] = useState('Ready')\n\n  return (\n    <main>\n      <h1>AgentsIDE</h1>\n      <p>{status}</p>\n      <button onClick={() => setStatus('Built by Agent')}>\n        Run agent\n      </button>\n    </main>\n  )\n}`
 
@@ -9,15 +9,12 @@ const buildChange = (prompt: string): FileChange => ({
   kind: 'modified',
   before: starterApp,
   after: starterApp.replace(
-    "<p>{status}</p>",
+    '<p>{status}</p>',
     `<p>{status}</p>\n      <p data-agent-task="true">Task: ${prompt.slice(0, 80)}</p>`,
   ),
 })
 
-export async function executeTask(
-  prompt: string,
-  onUpdate: (task: AgentTask) => void,
-): Promise<AgentTask> {
+export async function executeTask(prompt: string, onUpdate: (task: AgentTask) => void): Promise<AgentTask> {
   const task: AgentTask = {
     id: crypto.randomUUID(),
     prompt,

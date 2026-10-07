@@ -1,4 +1,9 @@
-import { getHostingProvider, type HostingDeploymentInput, type HostingDeploymentResult, type HostingProviderAdapter } from './providers'
+import {
+  getHostingProvider,
+  type HostingDeploymentInput,
+  type HostingDeploymentResult,
+  type HostingProviderAdapter,
+} from './providers'
 import { RenderHostingProvider } from './render'
 import { VelclawHostProvider } from './velclawhost'
 
@@ -8,8 +13,7 @@ class SelfHostedProvider implements HostingProviderAdapter {
   async createDeployment(input: HostingDeploymentInput): Promise<HostingDeploymentResult> {
     const { createDeployment } = await import('@/lib/deploy/store')
     const deployment = await createDeployment(input)
-    const status: HostingDeploymentResult['status'] =
-      deployment.status === 'cancelled' ? 'failed' : deployment.status
+    const status: HostingDeploymentResult['status'] = deployment.status === 'cancelled' ? 'failed' : deployment.status
 
     return {
       provider: 'self-hosted',

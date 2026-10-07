@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       model: typeof body?.model === 'string' ? body.model : undefined,
       instructions: typeof body?.instructions === 'string' ? body.instructions : undefined,
       multiAgent,
-      maxConcurrentSubagents: typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
+      maxConcurrentSubagents:
+        typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
       environment,
     })
 

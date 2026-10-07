@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Cable, CheckCircle2, Database, ExternalLink, Plus, Server, ShieldCheck, TriangleAlert, Wrench } from 'lucide-react'
+import {
+  Cable,
+  CheckCircle2,
+  Database,
+  ExternalLink,
+  Plus,
+  Server,
+  ShieldCheck,
+  TriangleAlert,
+  Wrench,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConnectorDialog } from '@/components/connectors/manage-connectors'
@@ -116,10 +126,30 @@ export function McpPage() {
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Card><CardHeader className="pb-2"><CardDescription>Total</CardDescription><CardTitle>{runtime?.total ?? '—'}</CardTitle></CardHeader></Card>
-          <Card><CardHeader className="pb-2"><CardDescription>Ready</CardDescription><CardTitle className="text-emerald-400">{runtime?.ready ?? '—'}</CardTitle></CardHeader></Card>
-          <Card><CardHeader className="pb-2"><CardDescription>Missing env</CardDescription><CardTitle className="text-amber-400">{runtime?.missingEnv ?? '—'}</CardTitle></CardHeader></Card>
-          <Card><CardHeader className="pb-2"><CardDescription>Disabled</CardDescription><CardTitle>{runtime?.disabled ?? '—'}</CardTitle></CardHeader></Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Total</CardDescription>
+              <CardTitle>{runtime?.total ?? '—'}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Ready</CardDescription>
+              <CardTitle className="text-emerald-400">{runtime?.ready ?? '—'}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Missing env</CardDescription>
+              <CardTitle className="text-amber-400">{runtime?.missingEnv ?? '—'}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Disabled</CardDescription>
+              <CardTitle>{runtime?.disabled ?? '—'}</CardTitle>
+            </CardHeader>
+          </Card>
         </section>
 
         <section>
@@ -132,9 +162,16 @@ export function McpPage() {
           </div>
 
           {runtimeError ? (
-            <Card><CardContent className="flex items-center gap-2 p-5 text-sm text-amber-400"><TriangleAlert className="h-4 w-4" />{runtimeError}</CardContent></Card>
+            <Card>
+              <CardContent className="flex items-center gap-2 p-5 text-sm text-amber-400">
+                <TriangleAlert className="h-4 w-4" />
+                {runtimeError}
+              </CardContent>
+            </Card>
           ) : !runtime ? (
-            <Card><CardContent className="p-5 text-sm text-muted-foreground">Loading runtime registry…</CardContent></Card>
+            <Card>
+              <CardContent className="p-5 text-sm text-muted-foreground">Loading runtime registry…</CardContent>
+            </Card>
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {runtime.servers.map((server) => (
@@ -147,11 +184,17 @@ export function McpPage() {
                         </div>
                         <div>
                           <CardTitle className="text-sm">{server.id}</CardTitle>
-                          <CardDescription>{server.type === 'remote' ? 'HTTP / remote' : 'STDIO / local'}</CardDescription>
+                          <CardDescription>
+                            {server.type === 'remote' ? 'HTTP / remote' : 'STDIO / local'}
+                          </CardDescription>
                         </div>
                       </div>
                       <div className={`flex items-center gap-1.5 text-xs ${stateClass(server.state)}`}>
-                        {server.state === 'ready' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <TriangleAlert className="h-3.5 w-3.5" />}
+                        {server.state === 'ready' ? (
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        ) : (
+                          <TriangleAlert className="h-3.5 w-3.5" />
+                        )}
                         {stateLabel(server.state)}
                       </div>
                     </div>
@@ -164,7 +207,8 @@ export function McpPage() {
                       <div className="flex flex-wrap gap-1.5">
                         {server.requiredEnv.map((key) => (
                           <span key={key} className="rounded border border-border px-2 py-0.5 font-mono">
-                            {key}{server.configuredEnv.includes(key) ? ' ✓' : ' · missing'}
+                            {key}
+                            {server.configuredEnv.includes(key) ? ' ✓' : ' · missing'}
                           </span>
                         ))}
                       </div>

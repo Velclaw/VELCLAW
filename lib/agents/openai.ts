@@ -83,7 +83,9 @@ export async function runOpenAIAgent(input: AgentRunInput) {
         handoffs: [researchAgent, engineeringAgent],
       })
 
-      const result = await runner.run(rootAgent, message, { maxTurns: Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8) * 4 })
+      const result = await runner.run(rootAgent, message, {
+        maxTurns: Math.min(Math.max(input.maxConcurrentSubagents || 3, 1), 8) * 4,
+      })
       return { mode: 'multi' as const, model, output: result.finalOutput }
     }
 
@@ -123,9 +125,7 @@ export async function createOpenAIAgentsSession(input: {
       model,
       instructions,
       ...(tools ? { tools } : {}),
-      ...(input.multiAgent
-        ? { multi_agent: { enabled: true, max_concurrent_subagents: maxConcurrentSubagents } }
-        : {}),
+      ...(input.multiAgent ? { multi_agent: { enabled: true, max_concurrent_subagents: maxConcurrentSubagents } } : {}),
     },
     ...(vaultIds.length ? { vault_ids: vaultIds } : {}),
     environment: { type: input.environment || 'openai_hosted' },

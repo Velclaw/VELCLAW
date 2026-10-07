@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       model: typeof body?.model === 'string' ? body.model : undefined,
       instructions: typeof body?.instructions === 'string' ? body.instructions : undefined,
       mode,
-      maxConcurrentSubagents: typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
+      maxConcurrentSubagents:
+        typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
     })
 
     return NextResponse.json({ ok: true, provider: 'openai-agents-sdk', ...result })

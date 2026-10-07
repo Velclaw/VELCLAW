@@ -19,11 +19,18 @@ export async function POST(request: Request, { params }: Params) {
   const body = await request.json().catch(() => null)
   const status = typeof body?.status === 'string' ? body.status : ''
   const url = typeof body?.url === 'string' ? body.url.trim() : null
-  const logs = Array.isArray(body?.logs) ? body.logs.filter((v: unknown): v is string => typeof v === 'string').slice(-500) : null
+  const logs = Array.isArray(body?.logs)
+    ? body.logs.filter((v: unknown): v is string => typeof v === 'string').slice(-500)
+    : null
   const error = typeof body?.error === 'string' ? body.error.slice(0, 4000) : null
   if (!STATUS.has(status)) return NextResponse.json({ error: 'Invalid deployment status' }, { status: 400 })
-  if (url && !isVelclawProductUrl(url)) return NextResponse.json({ error: 'Runtime URL must remain inside the Velclaw .com/.ai/.dev/.io/.app product domains' }, { status: 400 })
-  if (status === 'ready' && !url) return NextResponse.json({ error: 'A ready deployment requires a verified product URL' }, { status: 400 })
+  if (url && !isVelclawProductUrl(url))
+    return NextResponse.json(
+      { error: 'Runtime URL must remain inside the Velclaw .com/.ai/.dev/.io/.app product domains' },
+      { status: 400 },
+    )
+  if (status === 'ready' && !url)
+    return NextResponse.json({ error: 'A ready deployment requires a verified product URL' }, { status: 400 })
 
   try {
     await ensureDeployStore()

@@ -136,4 +136,6 @@ saveState(state)
 
 const branches = Object.keys(state.branches)
 const branchText = branches.length ? ` branches=${branches.join(',')}` : ''
-console.log(`[${thoughtNumber}/${totalThoughts}] history=${state.thoughtHistory.length}${branchText} next=${nextThoughtNeeded}`)
+console.log(
+  `[${thoughtNumber}/${totalThoughts}] history=${state.thoughtHistory.length}${branchText} next=${nextThoughtNeeded}`,
+)

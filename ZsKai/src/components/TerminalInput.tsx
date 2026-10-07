@@ -1,156 +1,156 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Plus, ArrowUp, Terminal, Shield, Sparkles, BookOpen } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react'
+import { Plus, ArrowUp, Terminal, Shield, Sparkles, BookOpen } from 'lucide-react'
 
 interface TerminalInputProps {
-  onExecute: (command: string) => void;
-  onClear: () => void;
-  onToggleGraph?: () => void;
-  onToggleLogs?: () => void;
-  historyCommands: string[];
-  aiConfidence?: number;
+  onExecute: (command: string) => void
+  onClear: () => void
+  onToggleGraph?: () => void
+  onToggleLogs?: () => void
+  historyCommands: string[]
+  aiConfidence?: number
 }
 
 export const TerminalInput: React.FC<TerminalInputProps> = ({
   onExecute,
   onClear,
   historyCommands,
-  aiConfidence = 0.992
+  aiConfidence = 0.992,
 }) => {
-  const [input, setInput] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-  const [historyIndex, setHistoryIndex] = useState<number>(-1);
-  const [savedInput, setSavedInput] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [input, setInput] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const [historyIndex, setHistoryIndex] = useState<number>(-1)
+  const [savedInput, setSavedInput] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!input.trim()) return;
+    if (e) e.preventDefault()
+    if (!input.trim()) return
 
-    onExecute(input);
-    setInput('');
-    setHistoryIndex(-1);
-    setSavedInput('');
-  };
+    onExecute(input)
+    setInput('')
+    setHistoryIndex(-1)
+    setSavedInput('')
+  }
 
   // Keyboard shortcut handler
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey
 
     // 1. Ctrl + L -> Clear terminal
     if (isCtrlOrCmd && e.key.toLowerCase() === 'l') {
-      e.preventDefault();
-      onClear();
-      return;
+      e.preventDefault()
+      onClear()
+      return
     }
 
     // 2. Ctrl + C -> Cancel / Interrupt current process or line
     if (isCtrlOrCmd && e.key.toLowerCase() === 'c') {
       // If user selected text, allow standard copy
-      const selectedText = window.getSelection()?.toString();
-      if (selectedText) return;
+      const selectedText = window.getSelection()?.toString()
+      if (selectedText) return
 
-      e.preventDefault();
+      e.preventDefault()
       if (input.trim()) {
         // Clear input line and signal cancel
-        setInput('');
-        onExecute('^C (Cancelled command)');
+        setInput('')
+        onExecute('^C (Cancelled command)')
       } else {
         // Interrupt signal to active process
-        onExecute('^C');
+        onExecute('^C')
       }
-      setHistoryIndex(-1);
-      return;
+      setHistoryIndex(-1)
+      return
     }
 
     // 3. Ctrl + U -> Clear line before cursor
     if (isCtrlOrCmd && e.key.toLowerCase() === 'u') {
-      e.preventDefault();
-      const cursor = inputRef.current?.selectionStart ?? input.length;
-      setInput(input.slice(cursor));
-      return;
+      e.preventDefault()
+      const cursor = inputRef.current?.selectionStart ?? input.length
+      setInput(input.slice(cursor))
+      return
     }
 
     // 4. Ctrl + K -> Clear line from cursor to end
     if (isCtrlOrCmd && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      const cursor = inputRef.current?.selectionStart ?? 0;
+      e.preventDefault()
+      const cursor = inputRef.current?.selectionStart ?? 0
       if (cursor === 0 && input === '') {
         // If empty input, treat Ctrl+K as clear
-        onClear();
+        onClear()
       } else {
-        setInput(input.slice(0, cursor));
+        setInput(input.slice(0, cursor))
       }
-      return;
+      return
     }
 
     // 5. Ctrl + W -> Erase word backwards
     if (isCtrlOrCmd && e.key.toLowerCase() === 'w') {
-      e.preventDefault();
-      const cursor = inputRef.current?.selectionStart ?? input.length;
-      const beforeCursor = input.slice(0, cursor).trimEnd();
-      const lastSpaceIndex = beforeCursor.lastIndexOf(' ');
-      const newBefore = lastSpaceIndex >= 0 ? beforeCursor.slice(0, lastSpaceIndex + 1) : '';
-      setInput(newBefore + input.slice(cursor));
-      return;
+      e.preventDefault()
+      const cursor = inputRef.current?.selectionStart ?? input.length
+      const beforeCursor = input.slice(0, cursor).trimEnd()
+      const lastSpaceIndex = beforeCursor.lastIndexOf(' ')
+      const newBefore = lastSpaceIndex >= 0 ? beforeCursor.slice(0, lastSpaceIndex + 1) : ''
+      setInput(newBefore + input.slice(cursor))
+      return
     }
 
     // 6. Ctrl + A -> Jump to beginning of line
     if (isCtrlOrCmd && e.key.toLowerCase() === 'a') {
-      e.preventDefault();
-      inputRef.current?.setSelectionRange(0, 0);
-      return;
+      e.preventDefault()
+      inputRef.current?.setSelectionRange(0, 0)
+      return
     }
 
     // 7. Ctrl + E -> Jump to end of line
     if (isCtrlOrCmd && e.key.toLowerCase() === 'e') {
-      e.preventDefault();
-      const len = input.length;
-      inputRef.current?.setSelectionRange(len, len);
-      return;
+      e.preventDefault()
+      const len = input.length
+      inputRef.current?.setSelectionRange(len, len)
+      return
     }
 
     // 8. Tab -> Autocomplete common commands
     if (e.key === 'Tab') {
-      e.preventDefault();
-      const commonCommands = ['watson run-analysis', 'git diff', 'npm run build', 'watson optimize', 'help', 'clear'];
-      const match = commonCommands.find(c => c.startsWith(input.trim()));
+      e.preventDefault()
+      const commonCommands = ['watson run-analysis', 'git diff', 'npm run build', 'watson optimize', 'help', 'clear']
+      const match = commonCommands.find((c) => c.startsWith(input.trim()))
       if (match) {
-        setInput(match);
+        setInput(match)
       }
-      return;
+      return
     }
 
     // 9. ArrowUp -> Navigate command history (older)
     if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (historyCommands.length === 0) return;
+      e.preventDefault()
+      if (historyCommands.length === 0) return
 
       if (historyIndex === -1) {
-        setSavedInput(input);
+        setSavedInput(input)
       }
 
-      const nextIndex = historyIndex + 1;
+      const nextIndex = historyIndex + 1
       if (nextIndex < historyCommands.length) {
-        setHistoryIndex(nextIndex);
-        setInput(historyCommands[historyCommands.length - 1 - nextIndex]);
+        setHistoryIndex(nextIndex)
+        setInput(historyCommands[historyCommands.length - 1 - nextIndex])
       }
-      return;
+      return
     }
 
     // 10. ArrowDown -> Navigate command history (newer)
     if (e.key === 'ArrowDown') {
-      e.preventDefault();
+      e.preventDefault()
       if (historyIndex > 0) {
-        const nextIndex = historyIndex - 1;
-        setHistoryIndex(nextIndex);
-        setInput(historyCommands[historyCommands.length - 1 - nextIndex]);
+        const nextIndex = historyIndex - 1
+        setHistoryIndex(nextIndex)
+        setInput(historyCommands[historyCommands.length - 1 - nextIndex])
       } else if (historyIndex === 0) {
-        setHistoryIndex(-1);
-        setInput(savedInput);
+        setHistoryIndex(-1)
+        setInput(savedInput)
       }
-      return;
+      return
     }
-  };
+  }
 
   return (
     <div className="p-2 sm:p-3 bg-black border-t-2 border-neutral-800 sticky bottom-0 z-20 select-none font-mono">
@@ -192,9 +192,13 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
         </div>
 
         {/* Sharp Rectangular Input Box Container */}
-        <div className={`w-full bg-black border-2 transition-all duration-150 rounded-none p-1 pl-2 flex items-center ${
-          isFocused ? 'border-cyan-400 bg-black shadow-[0_0_15px_rgba(34,211,238,0.25)]' : 'border-neutral-700 hover:border-neutral-500'
-        }`}>
+        <div
+          className={`w-full bg-black border-2 transition-all duration-150 rounded-none p-1 pl-2 flex items-center ${
+            isFocused
+              ? 'border-cyan-400 bg-black shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+              : 'border-neutral-700 hover:border-neutral-500'
+          }`}
+        >
           {/* Sharp Rectangular Plus (+) Attachment Button */}
           <button
             type="button"
@@ -209,7 +213,7 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
             ref={inputRef}
             type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -231,9 +235,11 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
             title="Gửi câu hỏi (Enter)"
           >
             <span className="font-extrabold text-xs tracking-widest">GỬI</span>
-            <div className={`w-4 h-4 rounded-none flex items-center justify-center transition-colors ${
-              input.trim() ? 'bg-black text-cyan-300' : 'bg-neutral-900 text-neutral-600'
-            }`}>
+            <div
+              className={`w-4 h-4 rounded-none flex items-center justify-center transition-colors ${
+                input.trim() ? 'bg-black text-cyan-300' : 'bg-neutral-900 text-neutral-600'
+              }`}
+            >
               <ArrowUp className="w-3.5 h-3.5 stroke-[3]" />
             </div>
           </button>
@@ -242,17 +248,41 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
         {/* Terminal Shortcuts Quick Helper Footer */}
         <div className="flex flex-wrap items-center justify-between px-1 text-[10px] font-mono text-neutral-500 gap-2">
           <div className="flex items-center space-x-3">
-            <span className="flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help" title="Xóa toàn bộ màn hình Terminal">
-              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">Ctrl+L</kbd> Clear
+            <span
+              className="flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help"
+              title="Xóa toàn bộ màn hình Terminal"
+            >
+              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">
+                Ctrl+L
+              </kbd>{' '}
+              Clear
             </span>
-            <span className="flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help" title="Dừng hoặc hủy lệnh đang chạy">
-              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">Ctrl+C</kbd> Cancel
+            <span
+              className="flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help"
+              title="Dừng hoặc hủy lệnh đang chạy"
+            >
+              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">
+                Ctrl+C
+              </kbd>{' '}
+              Cancel
             </span>
-            <span className="hidden sm:flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help" title="Xem lại lịch sử lệnh đã thực thi">
-              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">↑↓</kbd> History
+            <span
+              className="hidden sm:flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help"
+              title="Xem lại lịch sử lệnh đã thực thi"
+            >
+              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">
+                ↑↓
+              </kbd>{' '}
+              History
             </span>
-            <span className="hidden md:flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help" title="Tự động hoàn thành dòng lệnh">
-              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">Tab</kbd> Complete
+            <span
+              className="hidden md:flex items-center gap-1 hover:text-neutral-300 transition-colors cursor-help"
+              title="Tự động hoàn thành dòng lệnh"
+            >
+              <kbd className="px-1 py-0.5 bg-neutral-900 rounded-none text-[9px] text-neutral-300 border border-neutral-800">
+                Tab
+              </kbd>{' '}
+              Complete
             </span>
           </div>
 
@@ -263,8 +293,5 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
         </div>
       </form>
     </div>
-  );
-};
-
-
-
+  )
+}

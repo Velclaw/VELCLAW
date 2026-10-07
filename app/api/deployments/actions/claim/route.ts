@@ -24,6 +24,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ deployment })
   } catch (error) {
     console.error('[deployments/claim]', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to claim deployment' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to claim deployment' },
+      { status: 500 },
+    )
   }
 }

@@ -18,11 +18,7 @@ export function getLinearOAuthConfig() {
   }
 }
 
-export function getLinearAuthorizeUrl(input: {
-  state: string
-  codeChallenge: string
-  scope?: string
-}) {
+export function getLinearAuthorizeUrl(input: { state: string; codeChallenge: string; scope?: string }) {
   const config = getLinearOAuthConfig()
   const params = new URLSearchParams({
     response_type: 'code',
@@ -102,7 +98,9 @@ export async function linearGraphQL<T>(accessToken: string, query: string, varia
 
   const payload = (await response.json()) as { data?: T; errors?: Array<{ message: string }> }
   if (!response.ok || payload.errors?.length) {
-    throw new Error(payload.errors?.map((error) => error.message).join('; ') || `Linear API failed (${response.status})`)
+    throw new Error(
+      payload.errors?.map((error) => error.message).join('; ') || `Linear API failed (${response.status})`,
+    )
   }
   return payload.data as T
 }
@@ -118,10 +116,7 @@ export async function getLinearWorkspace(accessToken: string) {
   return linearGraphQL<{
     viewer: { id: string; name: string; email: string }
     teams: { nodes: Array<{ id: string; name: string; key: string }> }
-  }>(
-    accessToken,
-    `query Workspace { viewer { id name email } teams(first: 50) { nodes { id name key } } }`,
-  )
+  }>(accessToken, `query Workspace { viewer { id name email } teams(first: 50) { nodes { id name key } } }`)
 }
 
 export async function getLinearIssues(accessToken: string, teamId?: string) {
