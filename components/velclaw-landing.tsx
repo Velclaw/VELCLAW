@@ -49,6 +49,13 @@ const domainIdentity: Record<
   },
 }
 
+/**
+ * Renders the Velclaw landing page with branding and a primary action for the selected domain role.
+ *
+ * @param props - Landing page options.
+ * @param props.role - Domain role used to select branding and the primary action; defaults to `platform`.
+ * @returns The landing page with navigation, product highlights, and calls to action.
+ */
 export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole }) {
   const identity = domainIdentity[role]
 
