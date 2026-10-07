@@ -24,20 +24,39 @@ function normalizeOrigin(value: string | undefined, fallback: string): string {
   }
 }
 
-export const VELCLAW_PUBLIC_ORIGIN = normalizeOrigin(process.env.VELCLAW_PUBLIC_ORIGIN, VELCLAW_DOMAIN_ROLES.platform)
-export const VELCLAW_OAUTH_ISSUER = normalizeOrigin(process.env.VELCLAW_OAUTH_ISSUER, VELCLAW_DOMAIN_ROLES.platform)
-export const VELCLAW_APP_ORIGIN = normalizeOrigin(process.env.VELCLAW_APP_ORIGIN, VELCLAW_DOMAIN_ROLES.application)
-export const VELCLAW_API_ORIGIN = normalizeOrigin(process.env.VELCLAW_API_ORIGIN, VELCLAW_DOMAIN_ROLES.developer)
-export const VELCLAW_DOCS_ORIGIN = normalizeOrigin(process.env.VELCLAW_DOCS_ORIGIN, VELCLAW_DOMAIN_ROLES.developer)
-export const VELCLAW_PUBLIC_DOMAIN = new URL(VELCLAW_PUBLIC_ORIGIN).hostname
+export function createVelclawDomainConfig(env: Record<string, string | undefined> = process.env) {
+  const publicOrigin = normalizeOrigin(env.VELCLAW_PUBLIC_ORIGIN, VELCLAW_DOMAIN_ROLES.platform)
+  const oauthIssuer = normalizeOrigin(env.VELCLAW_OAUTH_ISSUER, VELCLAW_DOMAIN_ROLES.platform)
+  const appOrigin = normalizeOrigin(env.VELCLAW_APP_ORIGIN, VELCLAW_DOMAIN_ROLES.application)
+  const apiOrigin = normalizeOrigin(env.VELCLAW_API_ORIGIN, VELCLAW_DOMAIN_ROLES.developer)
+  const docsOrigin = normalizeOrigin(env.VELCLAW_DOCS_ORIGIN, VELCLAW_DOMAIN_ROLES.developer)
+  const publicDomain = new URL(publicOrigin).hostname
+  const allowedOrigins = (env.VELCLAW_ALLOWED_ORIGINS || Object.values(VELCLAW_DOMAIN_ROLES).join(','))
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => normalizeOrigin(value, publicOrigin))
 
-export const VELCLAW_ALLOWED_ORIGINS = (
-  process.env.VELCLAW_ALLOWED_ORIGINS || Object.values(VELCLAW_DOMAIN_ROLES).join(',')
-)
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean)
-  .map((value) => normalizeOrigin(value, VELCLAW_PUBLIC_ORIGIN))
+  return {
+    publicOrigin,
+    oauthIssuer,
+    appOrigin,
+    apiOrigin,
+    docsOrigin,
+    publicDomain,
+    allowedOrigins,
+  }
+}
+
+const DOMAIN_CONFIG = createVelclawDomainConfig()
+
+export const VELCLAW_PUBLIC_ORIGIN = DOMAIN_CONFIG.publicOrigin
+export const VELCLAW_OAUTH_ISSUER = DOMAIN_CONFIG.oauthIssuer
+export const VELCLAW_APP_ORIGIN = DOMAIN_CONFIG.appOrigin
+export const VELCLAW_API_ORIGIN = DOMAIN_CONFIG.apiOrigin
+export const VELCLAW_DOCS_ORIGIN = DOMAIN_CONFIG.docsOrigin
+export const VELCLAW_PUBLIC_DOMAIN = DOMAIN_CONFIG.publicDomain
+export const VELCLAW_ALLOWED_ORIGINS = DOMAIN_CONFIG.allowedOrigins
 
 export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   platform: {

@@ -64,6 +64,10 @@ function parseEnv(text: string) {
   return env
 }
 
+/**
+ * Displays deployments, polls their status every five seconds, and offers deployment and rollback actions.
+ * Request failures are displayed in the form; polling stops when the component unmounts.
+ */
 export function VelclawHostingPage() {
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [projectName, setProjectName] = useState('velclaw-app')
@@ -92,7 +96,11 @@ export function VelclawHostingPage() {
     return () => window.clearInterval(timer)
   }, [])
 
-  function useProject(project: (typeof exampleProjects)[number]) {
+  /**
+   * Fills the form from an example project, normalizes its name, and clears the custom domain and error.
+   * Leaves environment variables unchanged.
+   */
+  function selectProject(project: (typeof exampleProjects)[number]) {
     setProjectName(
       project.name
         .toLowerCase()
@@ -364,7 +372,7 @@ export function VelclawHostingPage() {
                   <button
                     key={project.name}
                     type="button"
-                    onClick={() => useProject(project)}
+                    onClick={() => selectProject(project)}
                     className="block w-full border border-border p-3 text-left hover:border-violet-400/60"
                   >
                     <div className="flex items-center justify-between gap-2">

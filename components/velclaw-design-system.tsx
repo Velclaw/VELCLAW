@@ -45,6 +45,7 @@ const components = [
   ['Security', LockKeyhole],
 ] as const
 
+/** Renders a static showcase of Velclaw's design tokens, components, screens, and UI states. */
 export function VelclawDesignSystem() {
   return (
     <main className={styles.page}>
@@ -72,7 +73,7 @@ export function VelclawDesignSystem() {
             <br />
             <em>Understand.</em>
           </h1>
-          <p className={styles.lead}>The visual language for Velclaw's AI-native software lifecycle workspace.</p>
+          <p className={styles.lead}>The visual language for Velclaw&apos;s AI-native software lifecycle workspace.</p>
           <div className={styles.actions}>
             <button className={styles.primary}>
               Create project <ArrowUpRight size={16} />

@@ -8,7 +8,13 @@ if (missing.length) { console.error(`Runtime validation failed. Missing: ${missi
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8')
 const pkg = JSON.parse(read('package.json'))
 for (const name of ['build','type-check']) if (!pkg.scripts?.[name]) { console.error(`Runtime validation failed. Missing package script: ${name}`); process.exit(1) }
-if (fs.existsSync(path.join(root,'vercel.json'))) { console.error('Runtime validation failed: legacy Vercel deployment configuration is not part of Velclaw self-hosted runtime.'); process.exit(1) }
+if (fs.existsSync(path.join(root, 'vercel.json'))) {
+  const vercelConfig = JSON.parse(read('vercel.json'))
+  if (vercelConfig.$schema !== 'https://openapi.vercel.sh/vercel.json') {
+    console.error('Runtime validation failed: vercel.json must use the current Vercel schema.')
+    process.exit(1)
+  }
+}
 const config = read('next.config.ts')
 if (/output\s*:\s*['"]export['"]/.test(config)) { console.error('Runtime validation failed: Next.js static export is incompatible with Velclaw server/API routes.'); process.exit(1) }
 const dockerfile = read('Dockerfile')
@@ -32,7 +38,7 @@ for (const token of ["status='queued'","status='building'","SKIP LOCKED","interv
 const rollback = read('app/api/deployments/[id]/rollback/route.ts')
 for (const token of ['getServerSession','queueRollback','Unauthorized']) if (!rollback.includes(token)) { console.error(`Runtime validation failed: rollback authorization/queue contract is missing: ${token}`); process.exit(1) }
 const deploymentApi = read('app/api/deployments/route.ts')
-for (const token of ['github\\.com','velclaw\\.cfd','getServerSession','createHostingDeployment']) if (!deploymentApi.includes(token)) { console.error(`Runtime validation failed: deployment API contract is missing: ${token}`); process.exit(1) }
+for (const token of ['github\\.com','isVelclawHostname','getServerSession','createHostingDeployment']) if (!deploymentApi.includes(token)) { console.error(`Runtime validation failed: deployment API contract is missing: ${token}`); process.exit(1) }
 const bootstrap = read('.github/workflows/kubeops-bootstrap-secrets.yml')
 for (const token of ['KUBEOPS_KUBECONFIG_B64','velclaw-runtime','velclaw-github','velclaw-registry','github.token','packages: write']) if (!bootstrap.includes(token)) { console.error(`Runtime validation failed: KubeOps secret bootstrap is missing required contract: ${token}`); process.exit(1) }
 console.log('Runtime validation passed: Velclaw deployment queue, stale-claim recovery, rollback authorization, canonical Kubernetes publisher, domain isolation, private image pulls, secret bootstrap, and least-privilege RBAC contracts are present.')
