@@ -160,7 +160,7 @@ for (const [index, command] of diagnosticCommands.entries()) {
 
 const metadataScript = runScript(docker, 'Verify image metadata')
 
-function inspectMetadata(ports: string, user: string, failure = '') {
+function inspectMetadata(ports: string, user: string, { failure = '', exitCode = 1, diagnostic = '' } = {}) {
   // Execute the actual workflow shell with the Ubuntu runner's default bash -e
   // behavior. Only Docker is replaced; no daemon, image build, or temp script is needed.
   const result = spawnSync(
@@ -174,15 +174,18 @@ function inspectMetadata(ports: string, user: string, failure = '') {
         if [ "$#" -ne 5 ] || [ "$1" != image ] || [ "$2" != inspect ] || [ "$3" != velclaw:ci ] || [ "$4" != --format ]; then
           return 64
         fi
+        if [ -n "$INSPECT_DIAGNOSTIC" ]; then
+          printf '%s\\n' "$INSPECT_DIAGNOSTIC" >&2
+        fi
         case "$5" in
           '{{.Config.ExposedPorts}}')
             printf 'ports\\n' >&2
-            [ "$INSPECT_FAILURE" != ports ] || return 1
+            [ "$INSPECT_FAILURE" != ports ] || return "$INSPECT_EXIT_CODE"
             printf '%s\\n' "$IMAGE_PORTS"
             ;;
           '{{.Config.User}}')
             printf 'user\\n' >&2
-            [ "$INSPECT_FAILURE" != user ] || return 1
+            [ "$INSPECT_FAILURE" != user ] || return "$INSPECT_EXIT_CODE"
             printf '%s\\n' "$IMAGE_USER"
             ;;
           *) return 64 ;;
@@ -191,7 +194,15 @@ function inspectMetadata(ports: string, user: string, failure = '') {
       ${metadataScript}`,
     ],
     {
-      env: { PATH: process.env.PATH, NODE_ENV: 'test', IMAGE_PORTS: ports, IMAGE_USER: user, INSPECT_FAILURE: failure },
+      env: {
+        PATH: process.env.PATH,
+        NODE_ENV: 'test',
+        IMAGE_PORTS: ports,
+        IMAGE_USER: user,
+        INSPECT_FAILURE: failure,
+        INSPECT_EXIT_CODE: String(exitCode),
+        INSPECT_DIAGNOSTIC: diagnostic,
+      },
       encoding: 'utf8',
       timeout: 5_000,
     },
@@ -207,6 +218,27 @@ test('image verification accepts exactly TCP port 3000 and the velclaw user', ()
   assert.equal(result.stderr, 'ports\nuser\n')
 })
 
+test('image verification accepts trailing newlines from Docker command output', () => {
+  // Command substitution removes trailing newlines, while other whitespace is significant.
+  const result = inspectMetadata('map[3000/tcp:{}]\n\n', 'velclaw\n\n')
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(result.stdout, '')
+  assert.equal(result.stderr, 'ports\nuser\n')
+})
+
+test('image verification keeps Docker diagnostics separate from valid metadata', () => {
+  const result = inspectMetadata('map[3000/tcp:{}]', 'velclaw', { diagnostic: 'Docker diagnostic' })
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(result.stdout, '')
+  assert.equal(result.stderr, 'Docker diagnostic\nports\nDocker diagnostic\nuser\n')
+})
+
+test('image verification stops at the port check when both metadata fields are invalid', () => {
+  const result = inspectMetadata('map[8080/tcp:{}]', 'root')
+  assert.equal(result.status, 1)
+  assert.equal(result.stderr, 'ports\n')
+})
+
 for (const [label, ports] of [
   ['no exposed ports', 'map[]'],
   ['missing metadata', ''],
@@ -216,6 +248,8 @@ for (const [label, ports] of [
   ['leading whitespace', ' map[3000/tcp:{}]'],
   ['trailing whitespace', 'map[3000/tcp:{}] '],
   ['an extra output line', 'map[3000/tcp:{}]\nunexpected'],
+  ['a leading newline', '\nmap[3000/tcp:{}]'],
+  ['a carriage return', 'map[3000/tcp:{}]\r\n'],
   ['a shell wildcard', '*'],
 ]) {
   test(`image verification rejects ${label} even when the user is valid`, () => {
@@ -230,6 +264,7 @@ for (const [label, user] of [
   ['implicit root', ''],
   ['explicit root', 'root'],
   ['numeric root', '0'],
+  ['a numeric non-root user', '1000'],
   ['another unprivileged user', 'node'],
   ['a name with the expected prefix', 'velclaw-admin'],
   ['a user and group pair', 'velclaw:velclaw'],
@@ -237,6 +272,8 @@ for (const [label, user] of [
   ['leading whitespace', ' velclaw'],
   ['trailing whitespace', 'velclaw '],
   ['an extra output line', 'velclaw\nunexpected'],
+  ['a leading newline', '\nvelclaw'],
+  ['a carriage return', 'velclaw\r\n'],
   ['a shell wildcard', '*'],
 ]) {
   test(`image verification rejects ${label} with valid ports`, () => {
@@ -247,9 +284,22 @@ for (const [label, user] of [
 }
 
 for (const field of ['ports', 'user']) {
-  test(`image verification fails closed when Docker cannot inspect ${field}`, () => {
-    const result = inspectMetadata('map[3000/tcp:{}]', 'velclaw', field)
+  for (const exitCode of [1, 125, 127]) {
+    test(`image verification fails closed when Docker cannot inspect ${field} with exit ${exitCode}`, () => {
+      const result = inspectMetadata('map[3000/tcp:{}]', 'velclaw', { failure: field, exitCode })
+      // The failed equality check determines the step status, not Docker's exit code.
+      assert.equal(result.status, 1)
+      assert.equal(result.stdout, '')
+      assert.equal(result.stderr, field === 'ports' ? 'ports\n' : 'ports\nuser\n')
+    })
+  }
+
+  test(`image verification rejects missing ${field} even when stderr contains the expected metadata`, () => {
+    const result = inspectMetadata(field === 'ports' ? '' : 'map[3000/tcp:{}]', field === 'user' ? '' : 'velclaw', {
+      diagnostic: field === 'ports' ? 'map[3000/tcp:{}]' : 'velclaw',
+    })
     assert.equal(result.status, 1)
-    assert.equal(result.stderr, field === 'ports' ? 'ports\n' : 'ports\nuser\n')
+    assert.equal(result.stdout, '')
+    assert.equal(result.stderr, field === 'ports' ? 'map[3000/tcp:{}]\nports\n' : 'velclaw\nports\nvelclaw\nuser\n')
   })
 }
