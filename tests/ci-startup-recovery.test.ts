@@ -18,6 +18,15 @@ function block(source: string, header: string) {
   return lines.slice(start + 1, end).join('\n')
 }
 
+function runScript(job: string, step: string) {
+  const source = block(job, `      - name: ${step}`)
+  assert.match(source, /^        run: \|$/m)
+  return block(source, '        run: |')
+    .split('\n')
+    .map((line) => line.slice(10))
+    .join('\n')
+}
+
 const jobs = block(workflow, 'jobs:')
 const quality = block(jobs, '  quality:')
 const docker = block(jobs, '  docker:')
@@ -93,12 +102,63 @@ test('Docker builds the root image with a fresh base before inspecting its metad
   assert.ok(docker.indexOf('uses: actions/checkout@v4') < docker.indexOf('run: docker version'))
 })
 
-const metadata = block(docker, '      - name: Verify image metadata')
-assert.match(metadata, /^        run: \|$/m)
-const metadataScript = block(metadata, '        run: |')
-  .split('\n')
-  .map((line) => line.slice(10))
-  .join('\n')
+const diagnosticCommands = ['node --version', 'pnpm --version', 'uname -m', 'git --version']
+
+function runDiagnostics(failure = '', exitCode = 1) {
+  // Stub only the external tools and execute the workflow's actual shell body.
+  // A trace on stdout records which tools ran before a diagnostic failed.
+  const result = spawnSync(
+    'bash',
+    [
+      '--noprofile',
+      '--norc',
+      '-e',
+      '-c',
+      `diagnostic() {
+        printf '%s\\n' "$*"
+        if [ "$1" = "$DIAGNOSTIC_FAILURE" ]; then
+          return "$DIAGNOSTIC_EXIT_CODE"
+        fi
+      }
+      node() { diagnostic node "$@"; }
+      pnpm() { diagnostic pnpm "$@"; }
+      uname() { diagnostic uname "$@"; }
+      git() { diagnostic git "$@"; }
+      ${runScript(quality, 'Toolchain diagnostics')}`,
+    ],
+    {
+      env: {
+        PATH: process.env.PATH,
+        NODE_ENV: 'test',
+        DIAGNOSTIC_FAILURE: failure,
+        DIAGNOSTIC_EXIT_CODE: String(exitCode),
+      },
+      encoding: 'utf8',
+      timeout: 5_000,
+    },
+  )
+  assert.ifError(result.error)
+  assert.equal(result.signal, null)
+  return result
+}
+
+test('toolchain diagnostics execute every tool with the expected arguments in order', () => {
+  const result = runDiagnostics()
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(result.stdout, `${diagnosticCommands.join('\n')}\n`)
+})
+
+for (const [index, command] of diagnosticCommands.entries()) {
+  for (const exitCode of [1, 127]) {
+    test(`toolchain diagnostics stop and preserve exit ${exitCode} when ${command} fails`, () => {
+      const result = runDiagnostics(command.split(' ')[0], exitCode)
+      assert.equal(result.status, exitCode, result.stderr)
+      assert.equal(result.stdout, `${diagnosticCommands.slice(0, index + 1).join('\n')}\n`)
+    })
+  }
+}
+
+const metadataScript = runScript(docker, 'Verify image metadata')
 
 function inspectMetadata(ports: string, user: string, failure = '') {
   // Execute the actual workflow shell with the Ubuntu runner's default bash -e
@@ -131,7 +191,7 @@ function inspectMetadata(ports: string, user: string, failure = '') {
       ${metadataScript}`,
     ],
     {
-      env: { PATH: process.env.PATH, IMAGE_PORTS: ports, IMAGE_USER: user, INSPECT_FAILURE: failure },
+      env: { PATH: process.env.PATH, NODE_ENV: 'test', IMAGE_PORTS: ports, IMAGE_USER: user, INSPECT_FAILURE: failure },
       encoding: 'utf8',
       timeout: 5_000,
     },
@@ -153,7 +213,10 @@ for (const [label, ports] of [
   ['the wrong port', 'map[8080/tcp:{}]'],
   ['UDP instead of TCP', 'map[3000/udp:{}]'],
   ['an additional exposed port', 'map[3000/tcp:{} 8080/tcp:{}]'],
+  ['leading whitespace', ' map[3000/tcp:{}]'],
   ['trailing whitespace', 'map[3000/tcp:{}] '],
+  ['an extra output line', 'map[3000/tcp:{}]\nunexpected'],
+  ['a shell wildcard', '*'],
 ]) {
   test(`image verification rejects ${label} even when the user is valid`, () => {
     const result = inspectMetadata(ports, 'velclaw')
@@ -169,7 +232,12 @@ for (const [label, user] of [
   ['numeric root', '0'],
   ['another unprivileged user', 'node'],
   ['a name with the expected prefix', 'velclaw-admin'],
+  ['a user and group pair', 'velclaw:velclaw'],
+  ['different capitalization', 'Velclaw'],
+  ['leading whitespace', ' velclaw'],
   ['trailing whitespace', 'velclaw '],
+  ['an extra output line', 'velclaw\nunexpected'],
+  ['a shell wildcard', '*'],
 ]) {
   test(`image verification rejects ${label} with valid ports`, () => {
     const result = inspectMetadata('map[3000/tcp:{}]', user)
