@@ -82,7 +82,7 @@ export function HomePageContent({
 
   // Show toast if GitHub was connected (user was already logged in)
   useEffect(() => {
-    if (searchParams.get('github_connected') === 'true') {
+    if (searchParams?.get('github_connected') === 'true') {
       toast.success('GitHub account connected successfully!')
       // Remove the query parameter from URL
       const newUrl = new URL(window.location.href)
@@ -115,8 +115,8 @@ export function HomePageContent({
 
   // Check for URL query parameters for owner and repo
   useEffect(() => {
-    const urlOwner = searchParams.get('owner')
-    const urlRepo = searchParams.get('repo')
+    const urlOwner = searchParams?.get('owner')
+    const urlRepo = searchParams?.get('repo')
 
     if (urlOwner && urlOwner !== selectedOwner) {
       setSelectedOwnerState(urlOwner)
