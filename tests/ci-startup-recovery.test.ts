@@ -6,8 +6,10 @@ import test from 'node:test'
 const workflow = readFileSync(new URL('../.github/workflows/velclaw-ci-startup-recovery.yml', import.meta.url), 'utf8')
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
 
-// Follow the existing workflow contract tests without adding a YAML dependency.
-// Restrict each assertion to its own block so another job cannot satisfy it.
+/**
+ * Extract the indented body beneath an exact workflow header, failing if it is missing.
+ * Scope assertions to one block without adding a YAML parser dependency.
+ */
 function block(source: string, header: string) {
   const lines = source.split('\n')
   const start = lines.indexOf(header)
@@ -18,6 +20,7 @@ function block(source: string, header: string) {
   return lines.slice(start + 1, end).join('\n')
 }
 
+/** Extract and unindent a named step's literal shell script, asserting that it uses `run: |`. */
 function runScript(job: string, step: string) {
   const source = block(job, `      - name: ${step}`)
   assert.match(source, /^        run: \|$/m)
@@ -154,6 +157,10 @@ for (const [job, step, tool, args] of commandSteps) {
 
 const diagnosticCommands = ['node --version', 'pnpm --version', 'uname -m', 'git --version']
 
+/**
+ * Run the workflow diagnostics with stubbed tools and return the shell result and command trace.
+ * Optionally make the named tool fail with the supplied exit code to verify fail-fast behavior.
+ */
 function runDiagnostics(failure = '', exitCode = 1) {
   // Stub only the external tools and execute the workflow's actual shell body.
   // A trace on stdout records which tools ran before a diagnostic failed.
@@ -210,6 +217,10 @@ for (const [index, command] of diagnosticCommands.entries()) {
 
 const metadataScript = runScript(docker, 'Verify image metadata')
 
+/**
+ * Run the workflow's image checks in bash with Docker stubbed to return the supplied metadata.
+ * Optionally fail inspection of `ports` or `user`, returning the shell result and inspection trace.
+ */
 function inspectMetadata(ports: string, user: string, failure = '') {
   // Execute the actual workflow shell with the Ubuntu runner's default bash -e
   // behavior. Only Docker is replaced; no daemon, image build, or temp script is needed.
