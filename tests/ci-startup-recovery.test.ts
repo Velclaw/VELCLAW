@@ -47,6 +47,8 @@ test('startup recovery has read-only repository access and cancels stale runs pe
 })
 
 test('both jobs use bounded Ubuntu runners and Docker depends on successful quality checks', () => {
+  // Shell overrides can remove bash -e and let a later command mask a failure.
+  assert.doesNotMatch(workflow, /^\s*shell:/m)
   for (const job of [quality, docker]) {
     assert.match(job, /^    runs-on: ubuntu-22\.04$/m)
     assert.match(job, /^    timeout-minutes: 30$/m)
@@ -101,6 +103,54 @@ test('Docker builds the root image with a fresh base before inspecting its metad
   assert.deepEqual(commands, ['docker version', 'docker build --pull --tag velclaw:ci .', '|'])
   assert.ok(docker.indexOf('uses: actions/checkout@v4') < docker.indexOf('run: docker version'))
 })
+
+const commandSteps = [
+  [quality, 'Install dependencies', 'pnpm', ['install', '--no-frozen-lockfile']],
+  [quality, 'Type check', 'pnpm', ['type-check']],
+  [quality, 'Lint', 'pnpm', ['lint']],
+  [quality, 'Format check', 'pnpm', ['format:check']],
+  [quality, 'Tests', 'pnpm', ['test']],
+  [quality, 'Production build', 'pnpm', ['build']],
+  [docker, 'Docker version', 'docker', ['version']],
+  [docker, 'Build image', 'docker', ['build', '--pull', '--tag', 'velclaw:ci', '.']],
+] as const
+
+for (const [job, step, tool, args] of commandSteps) {
+  for (const exitCode of [0, 42, 127]) {
+    test(`${step} passes the expected arguments and preserves tool exit ${exitCode}`, () => {
+      const source = block(job, `      - name: ${step}`)
+      const command = source.match(/^        run: (.+)$/m)?.[1]
+      assert.ok(command)
+      assert.notEqual(command, '|')
+
+      // Run the real step with the runner's default bash -e behavior. Functions
+      // replace the tools so these tests never install, build, or launch tests.
+      const result = spawnSync(
+        'bash',
+        [
+          '--noprofile',
+          '--norc',
+          '-e',
+          '-c',
+          `stub() { printf '%s\\n' "$@"; return "$TOOL_EXIT_CODE"; }
+          pnpm() { stub pnpm "$@"; }
+          docker() { stub docker "$@"; }
+          ${command}`,
+        ],
+        {
+          env: { PATH: process.env.PATH, NODE_ENV: 'test', TOOL_EXIT_CODE: String(exitCode) },
+          encoding: 'utf8',
+          timeout: 5_000,
+        },
+      )
+      assert.ifError(result.error)
+      assert.equal(result.signal, null)
+      assert.equal(result.status, exitCode, result.stderr)
+      assert.equal(result.stdout, `${[tool, ...args].join('\n')}\n`)
+      assert.equal(result.stderr, '')
+    })
+  }
+}
 
 const diagnosticCommands = ['node --version', 'pnpm --version', 'uname -m', 'git --version']
 
@@ -210,6 +260,7 @@ test('image verification accepts exactly TCP port 3000 and the velclaw user', ()
 for (const [label, ports] of [
   ['no exposed ports', 'map[]'],
   ['missing metadata', ''],
+  ['null metadata', '<nil>'],
   ['the wrong port', 'map[8080/tcp:{}]'],
   ['UDP instead of TCP', 'map[3000/udp:{}]'],
   ['an additional exposed port', 'map[3000/tcp:{} 8080/tcp:{}]'],
@@ -217,6 +268,8 @@ for (const [label, ports] of [
   ['trailing whitespace', 'map[3000/tcp:{}] '],
   ['an extra output line', 'map[3000/tcp:{}]\nunexpected'],
   ['a shell wildcard', '*'],
+  ['a shell command substitution', '$(printf map[3000/tcp:{}])'],
+  ['carriage-return line endings', 'map[3000/tcp:{}]\r'],
 ]) {
   test(`image verification rejects ${label} even when the user is valid`, () => {
     const result = inspectMetadata(ports, 'velclaw')
@@ -230,6 +283,8 @@ for (const [label, user] of [
   ['implicit root', ''],
   ['explicit root', 'root'],
   ['numeric root', '0'],
+  ['an unprivileged numeric UID', '1000'],
+  ['a named user with the root group', 'velclaw:0'],
   ['another unprivileged user', 'node'],
   ['a name with the expected prefix', 'velclaw-admin'],
   ['a user and group pair', 'velclaw:velclaw'],
@@ -238,6 +293,8 @@ for (const [label, user] of [
   ['trailing whitespace', 'velclaw '],
   ['an extra output line', 'velclaw\nunexpected'],
   ['a shell wildcard', '*'],
+  ['a shell command substitution', '$(printf velclaw)'],
+  ['carriage-return line endings', 'velclaw\r'],
 ]) {
   test(`image verification rejects ${label} with valid ports`, () => {
     const result = inspectMetadata('map[3000/tcp:{}]', user)
