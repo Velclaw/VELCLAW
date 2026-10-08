@@ -107,6 +107,16 @@ test('Docker builds the root image with a fresh base before inspecting its metad
   assert.ok(docker.indexOf('uses: actions/checkout@v4') < docker.indexOf('run: docker version'))
 })
 
+test('workflow defaults cannot redirect quality commands or the Docker build into a nested application', () => {
+  // Job and step overrides are checked above; workflow-level defaults also
+  // affect pnpm commands and the relative Docker build context.
+  assert.doesNotMatch(workflow, /^\s*working-directory:/m)
+  for (const job of [quality, docker]) {
+    const checkout = block(job, '      - name: Checkout')
+    assert.doesNotMatch(checkout, /^\s*path:/m)
+  }
+})
+
 const commandSteps = [
   [quality, 'Install dependencies', 'pnpm', ['install', '--no-frozen-lockfile']],
   [quality, 'Type check', 'pnpm', ['type-check']],
@@ -268,6 +278,28 @@ test('image verification accepts exactly TCP port 3000 and the velclaw user', ()
   assert.equal(result.stderr, 'ports\nuser\n')
 })
 
+for (const [label, ports, user] of [
+  ['ports', 'map[3000/tcp:{}]\n\n', 'velclaw'],
+  ['user', 'map[3000/tcp:{}]', 'velclaw\n\n'],
+  ['both fields', 'map[3000/tcp:{}]\n\n', 'velclaw\n\n'],
+]) {
+  test(`image verification accepts trailing output newlines in ${label}`, () => {
+    // Bash command substitution strips trailing newlines from Docker output.
+    // Whitespace inside a value must still be rejected by the cases below.
+    const result = inspectMetadata(ports, user)
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(result.stderr, 'ports\nuser\n')
+    assert.equal(result.stdout, '')
+  })
+}
+
+test('image verification stops at invalid ports when both metadata fields are invalid', () => {
+  const result = inspectMetadata('map[]', 'root')
+  assert.equal(result.status, 1)
+  assert.equal(result.stderr, 'ports\n')
+  assert.equal(result.stdout, '')
+})
+
 for (const [label, ports] of [
   ['no exposed ports', 'map[]'],
   ['missing metadata', ''],
@@ -278,6 +310,9 @@ for (const [label, ports] of [
   ['leading whitespace', ' map[3000/tcp:{}]'],
   ['trailing whitespace', 'map[3000/tcp:{}] '],
   ['an extra output line', 'map[3000/tcp:{}]\nunexpected'],
+  ['a leading blank line', '\nmap[3000/tcp:{}]'],
+  ['a tab inside the port map', 'map[3000/tcp:{}\t]'],
+  ['an option-like value', '-n'],
   ['a shell wildcard', '*'],
   ['a shell command substitution', '$(printf map[3000/tcp:{}])'],
   ['carriage-return line endings', 'map[3000/tcp:{}]\r'],
@@ -303,6 +338,9 @@ for (const [label, user] of [
   ['leading whitespace', ' velclaw'],
   ['trailing whitespace', 'velclaw '],
   ['an extra output line', 'velclaw\nunexpected'],
+  ['a leading blank line', '\nvelclaw'],
+  ['a tab inside the user name', 'vel\tclaw'],
+  ['an option-like value', '-n'],
   ['a shell wildcard', '*'],
   ['a shell command substitution', '$(printf velclaw)'],
   ['carriage-return line endings', 'velclaw\r'],
