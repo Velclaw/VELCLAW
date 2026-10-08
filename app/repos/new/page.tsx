@@ -67,7 +67,7 @@ interface Organization {
 export default function VelclawRepoPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const ownerParam = searchParams.get('owner') || ''
+  const ownerParam = searchParams?.get('owner') || ''
   const session = useAtomValue(sessionAtom)
 
   const [isCreatingRepo, setIsCreatingRepo] = useState(false)

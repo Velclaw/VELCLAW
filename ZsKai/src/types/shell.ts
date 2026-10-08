@@ -23,6 +23,7 @@ export interface ProjectFile {
   type: 'file' | 'folder'
   language?: string
   content?: string
+  size?: string
   children?: ProjectFile[]
 }
 
