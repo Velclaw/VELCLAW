@@ -1,99 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import { CheckSquare, Square, Plus, Trash2, RefreshCw, X, Calendar, Check, ExternalLink, ListTodo } from 'lucide-react';
+import React, { useState, useEffect } from 'react'
+import { CheckSquare, Square, Plus, Trash2, RefreshCw, X, Calendar, Check, ExternalLink, ListTodo } from 'lucide-react'
 
 export interface GoogleTask {
-  id: string;
-  title: string;
-  notes?: string;
-  status: 'needsAction' | 'completed';
-  due?: string;
-  updated?: string;
+  id: string
+  title: string
+  notes?: string
+  status: 'needsAction' | 'completed'
+  due?: string
+  updated?: string
 }
 
 export interface GoogleTaskList {
-  id: string;
-  title: string;
+  id: string
+  title: string
 }
 
 interface GoogleTasksDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, onClose }) => {
   const [taskLists, setTaskLists] = useState<GoogleTaskList[]>([
     { id: '@default', title: 'My Tasks' },
-    { id: 'devops_tasks', title: 'DevOps & Watson Backlog' }
-  ]);
-  const [selectedListId, setSelectedListId] = useState<string>('@default');
+    { id: 'devops_tasks', title: 'DevOps & Watson Backlog' },
+  ])
+  const [selectedListId, setSelectedListId] = useState<string>('@default')
   const [tasks, setTasks] = useState<GoogleTask[]>([
     {
       id: 't1',
       title: 'Audit Cloudant DB cluster shard distribution',
       notes: 'Check watson prune --duplicates report and clean node 03 logs',
       status: 'needsAction',
-      due: new Date().toISOString()
+      due: new Date().toISOString(),
     },
     {
       id: 't2',
       title: 'Review TLS 1.3 RFC 8446 cipher suites',
       notes: 'Verify forward secrecy configuration on edge gateway',
-      status: 'needsAction'
+      status: 'needsAction',
     },
     {
       id: 't3',
       title: 'Configure Google Tasks API integration',
       notes: 'OAuth 2.0 scopes granted for tasks and tasks.readonly',
-      status: 'completed'
-    }
-  ]);
+      status: 'completed',
+    },
+  ])
 
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskNotes, setNewTaskNotes] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskNotes, setNewTaskNotes] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(true)
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+    e.preventDefault()
+    if (!newTaskTitle.trim()) return
 
     const newTask: GoogleTask = {
       id: `task_${Date.now()}`,
       title: newTaskTitle.trim(),
       notes: newTaskNotes.trim() || undefined,
       status: 'needsAction',
-      updated: new Date().toISOString()
-    };
+      updated: new Date().toISOString(),
+    }
 
-    setTasks(prev => [newTask, ...prev]);
-    setNewTaskTitle('');
-    setNewTaskNotes('');
-  };
+    setTasks((prev) => [newTask, ...prev])
+    setNewTaskTitle('')
+    setNewTaskNotes('')
+  }
 
   const handleToggleTaskStatus = (taskId: string) => {
-    setTasks(prev =>
-      prev.map(t => {
+    setTasks((prev) =>
+      prev.map((t) => {
         if (t.id === taskId) {
-          const newStatus = t.status === 'completed' ? 'needsAction' : 'completed';
-          return { ...t, status: newStatus };
+          const newStatus = t.status === 'completed' ? 'needsAction' : 'completed'
+          return { ...t, status: newStatus }
         }
-        return t;
-      })
-    );
-  };
+        return t
+      }),
+    )
+  }
 
   const handleDeleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
-  };
+    setTasks((prev) => prev.filter((t) => t.id !== taskId))
+  }
 
-  const filteredTasks = tasks.filter(t => {
-    if (filter === 'active') return t.status === 'needsAction';
-    if (filter === 'completed') return t.status === 'completed';
-    return true;
-  });
+  const filteredTasks = tasks.filter((t) => {
+    if (filter === 'active') return t.status === 'needsAction'
+    if (filter === 'completed') return t.status === 'completed'
+    return true
+  })
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm select-none font-mono">
@@ -121,10 +121,10 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
         <div className="p-3 bg-neutral-950 border-b-2 border-neutral-800 flex items-center justify-between gap-2">
           <select
             value={selectedListId}
-            onChange={e => setSelectedListId(e.target.value)}
+            onChange={(e) => setSelectedListId(e.target.value)}
             className="flex-1 bg-black text-cyan-300 text-xs font-extrabold uppercase border-2 border-neutral-700 p-1.5 focus:border-cyan-400 focus:outline-none"
           >
-            {taskLists.map(list => (
+            {taskLists.map((list) => (
               <option key={list.id} value={list.id}>
                 LIST: {list.title}
               </option>
@@ -145,7 +145,7 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
 
         {/* Filter Controls */}
         <div className="flex items-center space-x-1 p-2 bg-black border-b-2 border-neutral-800 text-[11px]">
-          {(['all', 'active', 'completed'] as const).map(f => (
+          {(['all', 'active', 'completed'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -155,7 +155,13 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
                   : 'bg-black text-neutral-400 border-neutral-800 hover:border-neutral-600'
               }`}
             >
-              {f} ({tasks.filter(t => (f === 'active' ? t.status === 'needsAction' : f === 'completed' ? t.status === 'completed' : true)).length})
+              {f} (
+              {
+                tasks.filter((t) =>
+                  f === 'active' ? t.status === 'needsAction' : f === 'completed' ? t.status === 'completed' : true,
+                ).length
+              }
+              )
             </button>
           ))}
         </div>
@@ -167,7 +173,7 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
               type="text"
               placeholder="Thêm công việc Google Tasks mới..."
               value={newTaskTitle}
-              onChange={e => setNewTaskTitle(e.target.value)}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
               className="flex-1 bg-black text-white text-xs font-bold p-2 border-2 border-neutral-700 focus:border-cyan-400 focus:outline-none"
             />
             <button
@@ -184,7 +190,7 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
               type="text"
               placeholder="Ghi chú thêm (không bắt buộc)..."
               value={newTaskNotes}
-              onChange={e => setNewTaskNotes(e.target.value)}
+              onChange={(e) => setNewTaskNotes(e.target.value)}
               className="w-full bg-black text-neutral-300 text-[11px] p-1.5 border border-neutral-800 focus:border-cyan-400 focus:outline-none"
             />
           )}
@@ -197,7 +203,7 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
               Không có công việc nào trong danh sách.
             </div>
           ) : (
-            filteredTasks.map(task => (
+            filteredTasks.map((task) => (
               <div
                 key={task.id}
                 className={`p-3 bg-black border-2 transition-all space-y-1 ${
@@ -225,9 +231,7 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
                         {task.title}
                       </span>
                       {task.notes && (
-                        <p className="text-[11px] text-neutral-400 mt-0.5 font-sans leading-relaxed">
-                          {task.notes}
-                        </p>
+                        <p className="text-[11px] text-neutral-400 mt-0.5 font-sans leading-relaxed">{task.notes}</p>
                       )}
                     </div>
                   </button>
@@ -252,5 +256,5 @@ export const GoogleTasksDrawer: React.FC<GoogleTasksDrawerProps> = ({ isOpen, on
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

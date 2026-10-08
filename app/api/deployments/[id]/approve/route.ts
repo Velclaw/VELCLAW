@@ -14,7 +14,8 @@ export async function POST(_request: Request, { params }: Params) {
 
   try {
     const deployment = await approveDeployment(id, session.user.id)
-    if (!deployment) return NextResponse.json({ error: 'Deployment is not awaiting approval or was not found' }, { status: 409 })
+    if (!deployment)
+      return NextResponse.json({ error: 'Deployment is not awaiting approval or was not found' }, { status: 409 })
     return NextResponse.json({ deployment })
   } catch (error) {
     console.error('[deployments/approve]', error)

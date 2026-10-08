@@ -30,11 +30,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/docs/',
-        destination: 'https://docs.velclaw.ai/',
+        destination: 'https://velclaw.cfd/docs/',
       },
       {
         source: '/docs/:path*',
-        destination: 'https://docs.velclaw.ai/:path*',
+        destination: 'https://velclaw.cfd/docs/:path*',
       },
     ]
   },

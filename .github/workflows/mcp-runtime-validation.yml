@@ -1,0 +1,96 @@
+name: MCP Runtime Validation
+
+on:
+  pull_request:
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+      - 'lib/mcp/**'
+      - 'app/api/mcp/**'
+      - 'components/mcp-page.tsx'
+      - 'tests/mcp-runtime-registry.test.ts'
+  push:
+    branches: [main]
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+      - 'lib/mcp/**'
+      - 'app/api/mcp/**'
+      - 'components/mcp-page.tsx'
+      - 'tests/mcp-runtime-registry.test.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Validate MCP registry
+        run: pnpm mcp:config-check
+
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('config/mcp.json','utf8')); JSON.parse(require('fs').readFileSync('.mcp.json','utf8')); console.log('MCP JSON valid')"
+
+      - name: Install test dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test runtime registry
+        run: pnpm exec tsx --test tests/mcp-runtime-registry.test.ts
+
+  mcp-runtime:
+    runs-on: ubuntu-latest
+    needs: mcp-config
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify runtime tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          go version
+          python3 --version
+
+      - name: Resolve Playwright MCP
+        run: npx --yes @playwright/mcp@latest --help
+
+      - name: Resolve Context7 MCP
+        run: timeout 20s npx --yes @upstash/context7-mcp --help || test "$?" = "124"
+
+      - name: Resolve filesystem MCP
+        run: go run github.com/mark3labs/mcp-filesystem-server@latest --help
+
+      - name: Verify PostgreSQL MCP runner
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input uv
+          uvx --version
+
+      - name: Probe GitHub MCP endpoint
+        run: |
+          status="$(curl -sS -o /dev/null -w '%{http_code}' https://api.githubcopilot.com/mcp/)"
+          case "$status" in
+            200|401|403) echo "GitHub MCP endpoint reachable (HTTP $status)" ;;
+            *) echo "Unexpected GitHub MCP endpoint status: $status"; exit 1 ;;
+          esac

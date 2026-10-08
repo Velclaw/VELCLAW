@@ -66,26 +66,27 @@ The goal is to give coding agents and developers one coherent environment instea
 | **Deployment** | Move validated software toward production |
 | **Developer UI** | A single workspace for the software lifecycle |
 
-## Product URLs
+## Authentication
 
-The public product surface uses **`velclaw.cfd`** as the canonical host. Product areas are path-based instead of separate product subdomains.
+Authentication is separated into the dedicated Velclaw OAuth repository.
 
-| Product surface | Canonical URL |
-| --- | --- |
-| Velclaw | `https://velclaw.cfd/` |
-| Velclaw Docs | `https://velclaw.cfd/docs` |
-| VelclawHub | `https://velclaw.cfd/velclawhub` |
-| VelclawHub Ecosystem | `https://velclaw.cfd/hub` |
-| Velclaw Deploy | `https://velclaw.cfd/deploy` |
-| Velclaw Skills | `https://velclaw.cfd/skills` |
-| Velclaw Plugins | `https://velclaw.cfd/plugins` |
-| Velclaw MCP | `https://velclaw.cfd/mcp` |
-| Velclaw Tasks | `https://velclaw.cfd/tasks` |
-| Velclaw Dashboard | `https://velclaw.cfd/velclaw` |
-| Velclaw Repo | `https://velclaw.cfd/repos/new` |
-| Velclaw API Keys | `https://velclaw.cfd/api-keys` |
+| Surface | Repository | Purpose |
+| --- | --- | --- |
+| Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
+| Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-Infrastructure-generated hostnames are not product URLs.
+**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+
+## Product Domains
+
+Velclaw currently uses `velclaw.app` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
+
+| Domain | Role | Examples |
+| --- | --- | --- |
+| `velclaw.app` | Brand / canonical product | `https://velclaw.app` |
+| `velclaw.app` | All active Velclaw surfaces | `https://velclaw.app`, `https://velclaw.app/docs`, `https://velclaw.app/api/*` |
+
+Product code must use `velclaw.app` as the active canonical runtime domain. Preview deployments use the `*.velclaw.app` namespace; platform-generated hostnames are not product URLs.
 
 ## Technology stack
 
@@ -183,7 +184,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/VELCLAW)
 - [Issues](https://github.com/Velclaw/VELCLAW/issues)
 - [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
-- Official documentation: `https://velclaw.cfd/docs`
+- Official documentation: `https://velclaw.app/docs`
 
 ## Contributing
 
@@ -205,10 +206,10 @@ The roadmap should reflect shipped work rather than fictional dates or commitmen
 - [x] Core workspace
 - [x] GitHub integration foundation
 - [x] Build/runtime workflow foundation
-- [ ] Expand agent workflows
-- [ ] Expand deployment automation
-- [ ] Production-grade observability
-- [ ] Broader ecosystem integrations
+- [x] Expand agent workflows — auditable workflow state machine and operations control plane
+- [x] Expand deployment automation — queue/reconciliation contracts retained and surfaced through operations
+- [x] Production-grade observability — persistent event store, health checks and 24h summaries
+- [x] Broader ecosystem integrations — GitHub, MCP, Vercel, GitLab, Slack and Ollama adapter registry
 
 ## License
 

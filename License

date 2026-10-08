@@ -1,9 +1,21 @@
-Giấy phép MIT
+MIT License
 
-Bản quyền (c) 2016 Lucian Naie
+Copyright (c) [year] [fullname]
 
-Theo đây, bất kỳ người nào có được bản sao phần mềm này và các tệp tài liệu liên quan (gọi là "Phần mềm") đều được phép sử dụng Phần mềm mà không bị hạn chế, bao gồm nhưng không giới hạn quyền sử dụng, sao chép, sửa đổi, hợp nhất, xuất bản, phân phối, cấp phép lại và/hoặc bán các bản sao của Phần mềm, và cho phép những người được cung cấp Phần mềm thực hiện điều đó, với điều kiện tuân theo các điều kiện sau:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Thông báo bản quyền và thông báo cho phép nêu trên phải được bao gồm trong tất cả các bản sao hoặc các phần quan trọng của Phần mềm.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-PHẦN MỀM ĐƯỢC CUNG CẤP "NGUYÊN TRẠNG", KHÔNG CÓ BẢO ĐẢM NÀO, DÙ RÕ RÀNG HAY NGẦM HIỂU, BAO GỒM NHƯNG KHÔNG GIỚI HẠN Ở CÁC BẢO ĐẢM VỀ KHẢ NĂNG THƯƠNG MẠI, SỰ PHÙ HỢP CHO MỤC ĐÍCH CỤ THỂ VÀ KHÔNG VI PHẠM BẢN QUYỀN. TRONG MỌI TRƯỜNG HỢP, CÁC TÁC GIẢ HOẶC NGƯỜI GIỮ BẢN QUYỀN SẼ KHÔNG CHỊU TRÁCH NHIỆM ĐỐI VỚI BẤT KỲ KHIẾU NGHĨ, THIỆT HẠI HOẶC TRÁCH NHIỆM PHÁP LÝ NÀO KHÁC, CHO DÙ TRONG HÀNH ĐỘNG HỢP ĐỒNG, HÀNH VI SAI TRÁI HOẶC PHÁT SINH TỪ HOẶC LIÊN QUAN ĐẾN PHẦN MỀM HOẶC VIỆC SỬ DỤNG HOẶC CÁC GIAO DỊCH KHÁC LIÊN QUAN ĐẾN PHẦN MỀM.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,29 +1,38 @@
 ---
-name: Báo lỗi
-a bout: Báo cáo lỗi để đội Velclaw kiểm tra
-labels: bug
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
-## Mô tả lỗi
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-Mô tả ngắn gọn lỗi đã xảy ra.
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-## Cách tái hiện
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-1. 
-2. 
-3. 
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-## Kết quả mong đợi
+**Desktop (please complete the following information):**
+ - OS: [e.g. iOS]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
 
-## Kết quả thực tế
+**Smartphone (please complete the following information):**
+ - Device: [e.g. iPhone6]
+ - OS: [e.g. iOS8.1]
+ - Browser [e.g. stock browser, safari]
+ - Version [e.g. 22]
 
-## Môi trường
-
-- Thiết bị:
-- Trình duyệt / phiên bản:
-- Phiên bản Velclaw:
-
-## Ảnh hoặc log
-
-> Không đăng API key, token, mật khẩu hoặc dữ liệu bí mật.
+**Additional context**
+Add any other context about the problem here.

@@ -1,11 +1,4 @@
-export type TaskStatus =
-  | 'idle'
-  | 'planning'
-  | 'executing'
-  | 'testing'
-  | 'review'
-  | 'complete'
-  | 'error'
+export type TaskStatus = 'idle' | 'planning' | 'executing' | 'testing' | 'review' | 'complete' | 'error'
 
 export type ChangeKind = 'modified' | 'added' | 'deleted'
 

@@ -23,7 +23,9 @@ export type AutoshipRun = {
 }
 
 const configuredBaseUrl = (import.meta.env.VITE_AUTOSHIP_URL as string | undefined)?.trim()
-export const AUTOSHIP_URL = (configuredBaseUrl || 'https://autoship-control-plane-gateway.nvht25052002.workers.dev').replace(/\/$/, '')
+export const AUTOSHIP_URL = (
+  configuredBaseUrl || 'https://autoship-control-plane-gateway.nvht25052002.workers.dev'
+).replace(/\/$/, '')
 
 export class AutoshipConnectionError extends Error {
   constructor(message: string) {
@@ -45,7 +47,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       const body = contentType.includes('application/json') ? await response.text() : ''
       throw new AutoshipConnectionError(`Autoship ${response.status}${body ? `: ${body.slice(0, 180)}` : ''}`)
     }
-    if (!contentType.includes('application/json')) throw new AutoshipConnectionError('Autoship returned a non-JSON response (authentication or proxy may be active).')
+    if (!contentType.includes('application/json'))
+      throw new AutoshipConnectionError(
+        'Autoship returned a non-JSON response (authentication or proxy may be active).',
+      )
     return response.json() as Promise<T>
   } catch (error) {
     if (error instanceof AutoshipConnectionError) throw error
@@ -66,8 +71,11 @@ export async function getAutoshipRun(runId: string): Promise<AutoshipRun> {
 export async function ensureAgentsIDEProject(): Promise<AutoshipProject> {
   const repoUrl = 'https://github.com/zskbot/AgentsIDE'
   const projects = await getAutoshipProjects()
-  const existing = projects.find(project => project.repoUrl.replace(/\/$/, '') === repoUrl)
-  if (!existing) throw new AutoshipConnectionError('AgentsIDE is not registered in Autoship yet. The GitHub deployment workflow will bootstrap it.')
+  const existing = projects.find((project) => project.repoUrl.replace(/\/$/, '') === repoUrl)
+  if (!existing)
+    throw new AutoshipConnectionError(
+      'AgentsIDE is not registered in Autoship yet. The GitHub deployment workflow will bootstrap it.',
+    )
   return existing
 }
 

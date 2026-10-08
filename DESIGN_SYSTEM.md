@@ -34,21 +34,13 @@ Giao diện Velclaw phải dùng chung design system của hệ sinh thái.
 
 ## Domain identity
 
-**`velclaw.cfd` là domain duy nhất của Velclaw.**
+## Domain identity
 
-Không sử dụng domain cũ, domain thử nghiệm hoặc virtual hostname khác trong source code, UI, test gateway, wiki hoặc ecosystem navigation.
+`velclaw.cfd` is the current temporary canonical production domain. All active first-party URLs, deployment endpoints, API routes, documentation routes and preview deployments use the `velclaw.cfd` namespace.
 
-Các route ecosystem dùng cùng canonical host:
+Preview deployments use `*.velclaw.cfd`. Future primary domains (`.com`, `.ai`, `.dev`, `.io`, `.app`) are migration targets only and must not be used as active runtime defaults until an explicit migration is performed.
 
-- `https://velclaw.cfd/`
-- `https://velclaw.cfd/docs`
-- `https://velclaw.cfd/hub`
-- `https://velclaw.cfd/mcp`
-- `https://velclaw.cfd/api-keys`
-- `https://velclaw.cfd/wiki`
-- `https://velclaw.cfd/test`
-
-Mapping DNS/proxy được quản lý ở hạ tầng deploy; source code chỉ duy trì canonical domain `velclaw.cfd`.
+DNS/proxy state is managed by the hosting infrastructure. The application must treat `velclaw.cfd` as the only active first-party domain boundary.
 
 ## Quy tắc cho dự án con
 

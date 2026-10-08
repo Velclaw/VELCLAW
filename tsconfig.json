@@ -33,7 +33,7 @@
     "Velclaw/**",
     "ZsKai/**",
     "Zvelclaw/**",
-    "docs.velclaw.ai/**",
+    "velclaw.cfd/docs/**",
     "velclaw-pages/**"
   ]
 }

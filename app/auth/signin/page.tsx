@@ -27,7 +27,8 @@ export default async function SignInPage() {
             Một workspace cho <span className="text-violet-300">code, agents và deploy.</span>
           </h2>
           <p className="mt-6 max-w-lg text-sm leading-7 text-muted-foreground">
-            Đăng nhập một lần để truy cập workspace AI-native, quản lý dự án, chạy agent, review thay đổi và đưa ứng dụng lên môi trường triển khai.
+            Đăng nhập một lần để truy cập workspace AI-native, quản lý dự án, chạy agent, review thay đổi và đưa ứng
+            dụng lên môi trường triển khai.
           </p>
           <div className="mt-10 grid max-w-lg grid-cols-2 gap-px border border-border bg-border">
             {['Code', 'Agents', 'Builds', 'Deploy'].map((item) => (

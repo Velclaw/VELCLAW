@@ -18,11 +18,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await createOpenAIAgentsSession({
+      userId: session.user.id,
       message,
       model: typeof body?.model === 'string' ? body.model : undefined,
       instructions: typeof body?.instructions === 'string' ? body.instructions : undefined,
       multiAgent,
-      maxConcurrentSubagents: typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
+      maxConcurrentSubagents:
+        typeof body?.maxConcurrentSubagents === 'number' ? body.maxConcurrentSubagents : undefined,
       environment,
     })
 

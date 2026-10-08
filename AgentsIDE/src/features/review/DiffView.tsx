@@ -12,12 +12,14 @@ export function DiffView({ change }: { change: FileChange }) {
       <div className="diff-lines">
         {before.map((line, index) => (
           <div className="diff-line removed" key={`before-${index}`}>
-            <span className="diff-sign">−</span><code>{line || ' '}</code>
+            <span className="diff-sign">−</span>
+            <code>{line || ' '}</code>
           </div>
         ))}
         {after.map((line, index) => (
           <div className="diff-line added" key={`after-${index}`}>
-            <span className="diff-sign">+</span><code>{line || ' '}</code>
+            <span className="diff-sign">+</span>
+            <code>{line || ' '}</code>
           </div>
         ))}
       </div>

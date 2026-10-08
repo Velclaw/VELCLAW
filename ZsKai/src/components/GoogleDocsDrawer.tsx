@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   FileText,
   Search,
@@ -14,14 +14,9 @@ import {
   Lock,
   Sparkles,
   FilePlus,
-  BookOpen
-} from 'lucide-react';
-import {
-  initGoogleAuth,
-  signInWithGoogle,
-  googleSignOut,
-  getGoogleAccessToken
-} from '../utils/googleAuth';
+  BookOpen,
+} from 'lucide-react'
+import { initGoogleAuth, signInWithGoogle, googleSignOut, getGoogleAccessToken } from '../utils/googleAuth'
 import {
   listGoogleDocs,
   getGoogleDoc,
@@ -29,208 +24,201 @@ import {
   insertTextToGoogleDoc,
   extractPlainTextFromGoogleDoc,
   GoogleDocFile,
-  GoogleDocDetail
-} from '../utils/googleDocsService';
-import { User } from 'firebase/auth';
+  GoogleDocDetail,
+} from '../utils/googleDocsService'
+import { User } from 'firebase/auth'
 
 interface GoogleDocsDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  terminalHistoryText?: string;
+  isOpen: boolean
+  onClose: () => void
+  terminalHistoryText?: string
 }
 
-export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
-  isOpen,
-  onClose,
-  terminalHistoryText = ''
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({ isOpen, onClose, terminalHistoryText = '' }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [isAuthChecking, setIsAuthChecking] = useState(true)
+  const [isSigningIn, setIsSigningIn] = useState(false)
 
-  const [docsList, setDocsList] = useState<GoogleDocFile[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [activeDocDetail, setActiveDocDetail] = useState<GoogleDocDetail | null>(null);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [docsList, setDocsList] = useState<GoogleDocFile[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isLoadingDocs, setIsLoadingDocs] = useState(false)
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
+  const [activeDocDetail, setActiveDocDetail] = useState<GoogleDocDetail | null>(null)
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
 
   // New Doc Form
-  const [isCreatingDoc, setIsCreatingDoc] = useState(false);
-  const [newDocTitle, setNewDocTitle] = useState('');
-  const [isSubmittingNewDoc, setIsSubmittingNewDoc] = useState(false);
+  const [isCreatingDoc, setIsCreatingDoc] = useState(false)
+  const [newDocTitle, setNewDocTitle] = useState('')
+  const [isSubmittingNewDoc, setIsSubmittingNewDoc] = useState(false)
 
   // Append Text / Append Terminal History State & Confirmation Modal
-  const [appendInputText, setAppendInputText] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [textToConfirmAppend, setTextToConfirmAppend] = useState('');
-  const [isAppendingText, setIsAppendingText] = useState(false);
+  const [appendInputText, setAppendInputText] = useState('')
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [textToConfirmAppend, setTextToConfirmAppend] = useState('')
+  const [isAppendingText, setIsAppendingText] = useState(false)
 
   // Notifications / Feedback
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
 
   // Auth Listener
   useEffect(() => {
     const unsubscribe = initGoogleAuth(
       (authedUser, accessToken) => {
-        setUser(authedUser);
-        setToken(accessToken);
-        setIsAuthChecking(false);
+        setUser(authedUser)
+        setToken(accessToken)
+        setIsAuthChecking(false)
       },
       () => {
-        setUser(null);
-        setToken(null);
-        setIsAuthChecking(false);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
+        setUser(null)
+        setToken(null)
+        setIsAuthChecking(false)
+      },
+    )
+    return () => unsubscribe()
+  }, [])
 
   // Fetch docs when drawer opens or token is available
   useEffect(() => {
     if (isOpen && token) {
-      handleFetchDocs();
+      handleFetchDocs()
     }
-  }, [isOpen, token]);
+  }, [isOpen, token])
 
   // Fetch selected doc detail
   useEffect(() => {
     if (selectedDocId && token) {
-      handleLoadDocDetail(selectedDocId);
+      handleLoadDocDetail(selectedDocId)
     } else {
-      setActiveDocDetail(null);
+      setActiveDocDetail(null)
     }
-  }, [selectedDocId, token]);
+  }, [selectedDocId, token])
 
   const handleSignIn = async () => {
-    setIsSigningIn(true);
-    setStatusMessage(null);
+    setIsSigningIn(true)
+    setStatusMessage(null)
     try {
-      const res = await signInWithGoogle();
+      const res = await signInWithGoogle()
       if (res) {
-        setUser(res.user);
-        setToken(res.accessToken);
-        setStatusMessage({ type: 'success', text: 'Đăng nhập Google thành công!' });
+        setUser(res.user)
+        setToken(res.accessToken)
+        setStatusMessage({ type: 'success', text: 'Đăng nhập Google thành công!' })
       }
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi đăng nhập Google Docs' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi đăng nhập Google Docs' })
     } finally {
-      setIsSigningIn(false);
+      setIsSigningIn(false)
     }
-  };
+  }
 
   const handleSignOut = async () => {
-    await googleSignOut();
-    setUser(null);
-    setToken(null);
-    setDocsList([]);
-    setSelectedDocId(null);
-    setActiveDocDetail(null);
-    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google.' });
-  };
+    await googleSignOut()
+    setUser(null)
+    setToken(null)
+    setDocsList([])
+    setSelectedDocId(null)
+    setActiveDocDetail(null)
+    setStatusMessage({ type: 'info', text: 'Đã đăng xuất Google.' })
+  }
 
   const handleFetchDocs = async () => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingDocs(true);
-    setStatusMessage(null);
+    setIsLoadingDocs(true)
+    setStatusMessage(null)
     try {
-      const docs = await listGoogleDocs(activeToken, searchQuery);
-      setDocsList(docs);
+      const docs = await listGoogleDocs(activeToken, searchQuery)
+      setDocsList(docs)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải danh sách Google Docs' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải danh sách Google Docs' })
     } finally {
-      setIsLoadingDocs(false);
+      setIsLoadingDocs(false)
     }
-  };
+  }
 
   const handleLoadDocDetail = async (docId: string) => {
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsLoadingDetail(true);
+    setIsLoadingDetail(true)
     try {
-      const detail = await getGoogleDoc(activeToken, docId);
-      setActiveDocDetail(detail);
+      const detail = await getGoogleDoc(activeToken, docId)
+      setActiveDocDetail(detail)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải nội dung tài liệu' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Không thể tải nội dung tài liệu' })
     } finally {
-      setIsLoadingDetail(false);
+      setIsLoadingDetail(false)
     }
-  };
+  }
 
   const handleCreateNewDoc = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newDocTitle.trim()) return;
+    e.preventDefault()
+    if (!newDocTitle.trim()) return
 
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsSubmittingNewDoc(true);
-    setStatusMessage(null);
+    setIsSubmittingNewDoc(true)
+    setStatusMessage(null)
     try {
-      const created = await createGoogleDoc(activeToken, newDocTitle.trim());
-      setNewDocTitle('');
-      setIsCreatingDoc(false);
-      setStatusMessage({ type: 'success', text: `Tạo tài liệu "${created.title}" thành công!` });
-      await handleFetchDocs();
-      setSelectedDocId(created.documentId);
+      const created = await createGoogleDoc(activeToken, newDocTitle.trim())
+      setNewDocTitle('')
+      setIsCreatingDoc(false)
+      setStatusMessage({ type: 'success', text: `Tạo tài liệu "${created.title}" thành công!` })
+      await handleFetchDocs()
+      setSelectedDocId(created.documentId)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tạo Google Doc' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi tạo Google Doc' })
     } finally {
-      setIsSubmittingNewDoc(false);
+      setIsSubmittingNewDoc(false)
     }
-  };
+  }
 
   const triggerAppendConfirmation = (textToAppend: string) => {
-    if (!textToAppend.trim()) return;
-    setTextToConfirmAppend(textToAppend);
-    setShowConfirmModal(true);
-  };
+    if (!textToAppend.trim()) return
+    setTextToConfirmAppend(textToAppend)
+    setShowConfirmModal(true)
+  }
 
   const handleConfirmedAppend = async () => {
-    if (!selectedDocId || !textToConfirmAppend.trim()) return;
+    if (!selectedDocId || !textToConfirmAppend.trim()) return
 
-    const activeToken = token || getGoogleAccessToken();
-    if (!activeToken) return;
+    const activeToken = token || getGoogleAccessToken()
+    if (!activeToken) return
 
-    setIsAppendingText(true);
-    setStatusMessage(null);
+    setIsAppendingText(true)
+    setStatusMessage(null)
     try {
-      await insertTextToGoogleDoc(activeToken, selectedDocId, textToConfirmAppend.trim());
-      setStatusMessage({ type: 'success', text: 'Đã cập nhật nội dung vào Google Doc thành công!' });
-      setShowConfirmModal(false);
-      setAppendInputText('');
-      setTextToConfirmAppend('');
+      await insertTextToGoogleDoc(activeToken, selectedDocId, textToConfirmAppend.trim())
+      setStatusMessage({ type: 'success', text: 'Đã cập nhật nội dung vào Google Doc thành công!' })
+      setShowConfirmModal(false)
+      setAppendInputText('')
+      setTextToConfirmAppend('')
       // Reload document detail
-      await handleLoadDocDetail(selectedDocId);
+      await handleLoadDocDetail(selectedDocId)
     } catch (err: any) {
-      console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi ghi vào Google Doc' });
+      console.error(err)
+      setStatusMessage({ type: 'error', text: err.message || 'Lỗi khi ghi vào Google Doc' })
     } finally {
-      setIsAppendingText(false);
+      setIsAppendingText(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm select-none font-mono">
       <div className="w-full max-w-2xl bg-black border-l-2 border-neutral-800 h-full flex flex-col shadow-2xl text-white">
-        
         {/* Drawer Top Bar */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b-2 border-neutral-800 bg-black">
           <div className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">
-              Google Docs Manager
-            </h2>
+            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Google Docs Manager</h2>
             <span className="px-2 py-0.5 text-[10px] bg-cyan-400 text-black font-extrabold uppercase border border-cyan-300">
               Workspace API
             </span>
@@ -281,8 +269,8 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
               statusMessage.type === 'success'
                 ? 'bg-cyan-950/80 text-cyan-300 border-cyan-700'
                 : statusMessage.type === 'error'
-                ? 'bg-red-950/80 text-red-300 border-red-700'
-                : 'bg-neutral-900 text-neutral-300 border-neutral-700'
+                  ? 'bg-red-950/80 text-red-300 border-red-700'
+                  : 'bg-neutral-900 text-neutral-300 border-neutral-700'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -311,7 +299,8 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                 Kết Nối Google Docs Workspace
               </h3>
               <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-                Đăng nhập tài khoản Google để trực tiếp xem, tìm kiếm, tạo mới và đồng bộ dữ liệu nhật ký terminal / ghi chú Watson AI vào Google Docs của bạn.
+                Đăng nhập tài khoản Google để trực tiếp xem, tìm kiếm, tạo mới và đồng bộ dữ liệu nhật ký terminal / ghi
+                chú Watson AI vào Google Docs của bạn.
               </p>
             </div>
 
@@ -322,10 +311,22 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
               className="px-6 py-3 bg-white hover:bg-neutral-100 text-neutral-800 font-bold border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all cursor-pointer active:scale-95 flex items-center space-x-3 rounded-none uppercase text-xs"
             >
               <svg className="w-5 h-5" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                ></path>
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                ></path>
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                ></path>
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                ></path>
               </svg>
               <span>{isSigningIn ? 'Đang xác thực...' : 'Sign in with Google'}</span>
             </button>
@@ -333,10 +334,8 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
         ) : (
           /* Authenticated Workspace View */
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            
             {/* Left Column: Documents List & Search */}
             <div className="w-full md:w-5/12 border-b-2 md:border-b-0 md:border-r-2 border-neutral-800 flex flex-col bg-black">
-              
               {/* Search & Action Controls */}
               <div className="p-3 border-b-2 border-neutral-800 space-y-2 bg-neutral-950">
                 <div className="flex items-center space-x-1.5">
@@ -345,8 +344,8 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                       type="text"
                       placeholder="Tìm Google Doc..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleFetchDocs()}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleFetchDocs()}
                       className="w-full pl-8 pr-2 py-1.5 bg-black border-2 border-neutral-700 focus:border-cyan-400 text-white text-xs rounded-none focus:outline-none"
                     />
                     <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-2.5" />
@@ -373,12 +372,14 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                 {/* Inline New Doc Form */}
                 {isCreatingDoc && (
                   <form onSubmit={handleCreateNewDoc} className="p-2 bg-black border-2 border-cyan-400 space-y-2">
-                    <label className="text-[10px] text-neutral-300 uppercase font-extrabold block">Tên Tài Liệu Mới</label>
+                    <label className="text-[10px] text-neutral-300 uppercase font-extrabold block">
+                      Tên Tài Liệu Mới
+                    </label>
                     <input
                       type="text"
                       placeholder="Ví dụ: Watson_ETL_Report_2026"
                       value={newDocTitle}
-                      onChange={e => setNewDocTitle(e.target.value)}
+                      onChange={(e) => setNewDocTitle(e.target.value)}
                       required
                       className="w-full p-1.5 bg-neutral-900 border-2 border-neutral-700 text-white text-xs rounded-none focus:border-cyan-400 focus:outline-none"
                     />
@@ -414,7 +415,7 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                     Không tìm thấy tài liệu Google Docs nào.
                   </div>
                 ) : (
-                  docsList.map(doc => (
+                  docsList.map((doc) => (
                     <div
                       key={doc.id}
                       onClick={() => setSelectedDocId(doc.id)}
@@ -424,7 +425,9 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                           : 'bg-black border-neutral-800 hover:border-neutral-600 text-neutral-300'
                       }`}
                     >
-                      <FileText className={`w-4 h-4 shrink-0 mt-0.5 ${selectedDocId === doc.id ? 'text-cyan-400' : 'text-neutral-400'}`} />
+                      <FileText
+                        className={`w-4 h-4 shrink-0 mt-0.5 ${selectedDocId === doc.id ? 'text-cyan-400' : 'text-neutral-400'}`}
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-xs truncate leading-tight">{doc.name}</div>
                         <div className="text-[10px] text-neutral-400 mt-1 flex items-center justify-between">
@@ -434,7 +437,7 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                               href={doc.webViewLink}
                               target="_blank"
                               rel="noreferrer"
-                              onClick={e => e.stopPropagation()}
+                              onClick={(e) => e.stopPropagation()}
                               className="text-cyan-400 hover:underline flex items-center gap-0.5"
                             >
                               <span>Mở</span>
@@ -456,7 +459,9 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                   {/* Selected Doc Top Bar */}
                   <div className="p-3 border-b-2 border-neutral-800 bg-neutral-950 flex items-center justify-between">
                     <div className="min-w-0 pr-2">
-                      <span className="text-[10px] uppercase font-extrabold text-cyan-400 block">Đang xem document</span>
+                      <span className="text-[10px] uppercase font-extrabold text-cyan-400 block">
+                        Đang xem document
+                      </span>
                       <h3 className="font-extrabold text-xs text-white truncate">
                         {activeDocDetail?.title || 'Đang tải...'}
                       </h3>
@@ -516,10 +521,10 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                         type="text"
                         placeholder="Nhập ghi chú cần chèn vào Google Doc..."
                         value={appendInputText}
-                        onChange={e => setAppendInputText(e.target.value)}
-                        onKeyDown={e => {
+                        onChange={(e) => setAppendInputText(e.target.value)}
+                        onKeyDown={(e) => {
                           if (e.key === 'Enter' && appendInputText.trim()) {
-                            triggerAppendConfirmation(appendInputText);
+                            triggerAppendConfirmation(appendInputText)
                           }
                         }}
                         className="flex-1 p-1.5 bg-black border-2 border-neutral-700 focus:border-cyan-400 text-white text-xs rounded-none focus:outline-none font-mono"
@@ -542,7 +547,6 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
                 </div>
               )}
             </div>
-
           </div>
         )}
 
@@ -552,9 +556,7 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
             <div className="bg-black border-2 border-cyan-400 p-5 max-w-md w-full space-y-4 shadow-[0_0_20px_rgba(34,211,238,0.4)]">
               <div className="flex items-center space-x-2 text-cyan-400">
                 <AlertTriangle className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-extrabold text-sm uppercase text-white">
-                  Xác Nhận Cập Nhật Google Doc
-                </h3>
+                <h3 className="font-extrabold text-sm uppercase text-white">Xác Nhận Cập Nhật Google Doc</h3>
               </div>
 
               <p className="text-xs text-neutral-300 leading-relaxed font-sans">
@@ -585,8 +587,7 @@ export const GoogleDocsDrawer: React.FC<GoogleDocsDrawerProps> = ({
             </div>
           </div>
         )}
-
       </div>
     </div>
-  );
-};
+  )
+}

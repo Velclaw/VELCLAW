@@ -8,7 +8,7 @@
   "repositories": [
     {"role":"core","repository":"Velclaw/VELCLAW","required":true},
     {"role":"auth","repository":"Velclaw/Oauth","required":true},
-    {"role":"official-docs","repository":"Velclaw/docs.velclaw.ai","required":true},
+    {"role":"official-docs","repository":"Velclaw/velclaw.cfd/docs","required":true},
     {"role":"docs-pages","repository":"zskbot/repo-docs-Velclaw","required":true},
     {"role":"deploy","repository":"Velclaw/deploy-velclaw","required":true},
     {"role":"release","repository":"zskbot/Autoship","required":true},

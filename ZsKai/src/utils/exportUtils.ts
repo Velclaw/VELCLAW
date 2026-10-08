@@ -1,80 +1,80 @@
-import { CommandHistoryItem, WatsonMetrics } from '../types/shell';
+import { CommandHistoryItem, WatsonMetrics } from '../types/shell'
 
 /**
  * Downloads a file to user's device
  */
 function downloadFile(filename: string, content: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 /**
  * Exports command history & Watson insights to Markdown
  */
 export function exportToMarkdown(history: CommandHistoryItem[], metrics: WatsonMetrics) {
-  const now = new Date().toISOString();
-  let md = `# Watson Shell Session Export Report\n`;
-  md += `**Generated At**: ${now}\n`;
-  md += `**IBM Cloudant Sync**: Active (SHA-256 Verified)\n\n`;
+  const now = new Date().toISOString()
+  let md = `# Watson Shell Session Export Report\n`
+  md += `**Generated At**: ${now}\n`
+  md += `**IBM Cloudant Sync**: Active (SHA-256 Verified)\n\n`
 
-  md += `## 📊 Watson Analytics Summary\n`;
-  md += `- **Node Efficiency**: ${metrics.nodeEfficiency}%\n`;
-  md += `- **Query Latency**: ${metrics.queryLatencyMs}ms\n`;
-  md += `- **Anomalies Detected**: ${metrics.anomaliesDetected}\n`;
-  md += `- **AI Confidence**: ${metrics.aiConfidence * 100}%\n`;
-  md += `- **Records Processed**: ${metrics.recordsProcessed.toLocaleString()}\n\n`;
+  md += `## 📊 Watson Analytics Summary\n`
+  md += `- **Node Efficiency**: ${metrics.nodeEfficiency}%\n`
+  md += `- **Query Latency**: ${metrics.queryLatencyMs}ms\n`
+  md += `- **Anomalies Detected**: ${metrics.anomaliesDetected}\n`
+  md += `- **AI Confidence**: ${metrics.aiConfidence * 100}%\n`
+  md += `- **Records Processed**: ${metrics.recordsProcessed.toLocaleString()}\n\n`
 
-  md += `## 📜 Terminal Command History (${history.length} commands)\n\n`;
+  md += `## 📜 Terminal Command History (${history.length} commands)\n\n`
 
   history.forEach((item, index) => {
-    md += `### ${index + 1}. \`${item.command}\` [${item.status.toUpperCase()}]\n`;
-    md += `- **Time**: ${item.timestamp}\n`;
-    md += `- **CWD**: \`${item.cwd}\`\n`;
-    if (item.durationMs) md += `- **Execution Duration**: ${item.durationMs}ms\n`;
-    md += `\n\`\`\`${item.output.language || 'bash'}\n`;
-    md += `${item.output.content}\n`;
-    md += `\`\`\`\n\n`;
-  });
+    md += `### ${index + 1}. \`${item.command}\` [${item.status.toUpperCase()}]\n`
+    md += `- **Time**: ${item.timestamp}\n`
+    md += `- **CWD**: \`${item.cwd}\`\n`
+    if (item.durationMs) md += `- **Execution Duration**: ${item.durationMs}ms\n`
+    md += `\n\`\`\`${item.output.language || 'bash'}\n`
+    md += `${item.output.content}\n`
+    md += `\`\`\`\n\n`
+  })
 
-  md += `---\n*Exported from Watson Shell v4.0.1 - IBM Cloudant & Watson AI Powered*\n`;
+  md += `---\n*Exported from Watson Shell v4.0.1 - IBM Cloudant & Watson AI Powered*\n`
 
-  downloadFile(`watson_shell_export_${Date.now()}.md`, md, 'text/markdown');
+  downloadFile(`watson_shell_export_${Date.now()}.md`, md, 'text/markdown')
 }
 
 /**
  * Exports history to CSV file
  */
 export function exportToCSV(history: CommandHistoryItem[]) {
-  const headers = ['ID', 'Timestamp', 'CWD', 'Command', 'Status', 'Duration (ms)', 'Output Snippet'];
-  const rows = history.map(item => [
+  const headers = ['ID', 'Timestamp', 'CWD', 'Command', 'Status', 'Duration (ms)', 'Output Snippet']
+  const rows = history.map((item) => [
     item.id,
     `"${item.timestamp}"`,
     `"${item.cwd}"`,
     `"${item.command.replace(/"/g, '""')}"`,
     item.status,
     item.durationMs || 0,
-    `"${item.output.content.slice(0, 100).replace(/"/g, '""').replace(/\n/g, ' ')}"`
-  ]);
+    `"${item.output.content.slice(0, 100).replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+  ])
 
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  downloadFile(`watson_terminal_queries_${Date.now()}.csv`, csvContent, 'text/csv');
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+  downloadFile(`watson_terminal_queries_${Date.now()}.csv`, csvContent, 'text/csv')
 }
 
 /**
  * Triggers PDF export using clean formatted print template or window print stream
  */
 export function exportToPDF(history: CommandHistoryItem[], metrics: WatsonMetrics) {
-  const printWindow = window.open('', '_blank');
+  const printWindow = window.open('', '_blank')
   if (!printWindow) {
-    alert('Please allow popups to generate the PDF report.');
-    return;
+    alert('Please allow popups to generate the PDF report.')
+    return
   }
 
   const html = `
@@ -126,7 +126,9 @@ export function exportToPDF(history: CommandHistoryItem[], metrics: WatsonMetric
         </div>
 
         <h2>Command Execution Log (${history.length} items)</h2>
-        ${history.map((item, idx) => `
+        ${history
+          .map(
+            (item, idx) => `
           <div class="cmd-item">
             <div class="cmd-header">
               <span>➜ ${item.cwd} ${item.command}</span>
@@ -134,7 +136,9 @@ export function exportToPDF(history: CommandHistoryItem[], metrics: WatsonMetric
             </div>
             <div class="cmd-body">${escapeHtml(item.output.content)}</div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join('')}
 
         <div class="footer">
           Watson Shell v4.0.1 &bull; IBM Cloudant Sync Active &bull; Confidentially Generated
@@ -146,12 +150,12 @@ export function exportToPDF(history: CommandHistoryItem[], metrics: WatsonMetric
         </script>
       </body>
     </html>
-  `;
+  `
 
-  printWindow.document.write(html);
-  printWindow.document.close();
+  printWindow.document.write(html)
+  printWindow.document.close()
 }
 
 function escapeHtml(str: string) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }

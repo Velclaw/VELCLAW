@@ -33,11 +33,17 @@ export async function GET(_request: NextRequest, { params }: Params) {
   if (!sessionId) return NextResponse.json({ error: 'sessionId is required' }, { status: 400 })
 
   try {
-    const response = await openaiRequest(auth.apiKey, `https://api.openai.com/v1/agents/sessions/${encodeURIComponent(sessionId)}`)
+    const response = await openaiRequest(
+      auth.apiKey,
+      `https://api.openai.com/v1/agents/sessions/${encodeURIComponent(sessionId)}`,
+    )
     const data = await response.json().catch(() => ({}))
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Session retrieval failed' }, { status: 503 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Session retrieval failed' },
+      { status: 503 },
+    )
   }
 }
 
@@ -77,7 +83,10 @@ export async function POST(request: NextRequest, { params }: Params) {
     const data = await response.json().catch(() => ({}))
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Session event failed' }, { status: 503 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Session event failed' },
+      { status: 503 },
+    )
   }
 }
 
@@ -97,6 +106,9 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     const data = await response.json().catch(() => ({}))
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Session deletion failed' }, { status: 503 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Session deletion failed' },
+      { status: 503 },
+    )
   }
 }
