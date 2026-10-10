@@ -75,18 +75,11 @@ Authentication is separated into the dedicated Velclaw OAuth repository.
 | Workspace | Velclaw/VELCLAW | Product UI, projects, agents, builds and deployment |
 | Identity | Velclaw/Oauth | OAuth entry point, provider callbacks and session boundary |
 
-**OAuth deployment status:** hostname not assigned yet. Do not use `auth.velclaw.app` or register it as an OAuth callback until DNS, HTTPS, HTTP reachability, and deployment have been verified.
+**OAuth deployment status:** hostname and routing are not yet verified. Use `https://velclaw.dev` as the only canonical Velclaw domain. Do not register OAuth callbacks or assume `/auth` routing works until the OAuth service is deployed and HTTPS, callback URLs, and reverse-proxy/path routing have been verified.
 
 ## Product Domains
 
-Velclaw currently uses `velclaw.app` as the temporary canonical first-party domain. All active product surfaces are consolidated under this host; future primary domains are migration targets only.
-
-| Domain | Role | Examples |
-| --- | --- | --- |
-| `velclaw.app` | Brand / canonical product | `https://velclaw.app` |
-| `velclaw.app` | All active Velclaw surfaces | `https://velclaw.app`, `https://velclaw.app/docs`, `https://velclaw.app/api/*` |
-
-Product code must use `velclaw.app` as the active canonical runtime domain. Preview deployments use the `*.velclaw.app` namespace; platform-generated hostnames are not product URLs.
+Velclaw uses **`https://velclaw.dev` as its single canonical product domain** for the platform, developer workspace, application, documentation, and API origin. Product code must use `velclaw.dev` as the default origin. This configuration does not itself provision DNS, HTTPS, OAuth callbacks, or reverse-proxy routes; those must be verified in the hosting provider before claiming production readiness.
 
 ## Technology stack
 
@@ -184,7 +177,7 @@ Velclaw references open-source software and community tooling. Each external pro
 - [Velclaw repository](https://github.com/Velclaw/VELCLAW)
 - [Issues](https://github.com/Velclaw/VELCLAW/issues)
 - [Pull requests](https://github.com/Velclaw/VELCLAW/pulls)
-- Official documentation: `https://velclaw.app/docs`
+- Official documentation: `https://velclaw.dev/docs`
 
 ## Contributing
 
