@@ -13,12 +13,14 @@
     "requireAuthenticatedContractAndHealthCheck": true
   },
   "domainDecision": {
-    "status": "unresolved",
-    "candidates": [
-      "velclaw.site",
-      "velclaw.app"
-    ],
-    "note": "Repository documentation conflicts; do not change DNS or OAuth callbacks until canonical domain is explicitly reconciled and verified."
+    "status": "needs-reconciliation-before-DNS-changes",
+    "currentCodeRoles": {
+      "velclaw.site": "platform",
+      "velclaw.dev": "developer",
+      "velclaw.app": "application"
+    },
+    "conflictingStatement": "The core README also describes velclaw.app as the temporary canonical first-party domain.",
+    "note": "Treat these as product-domain roles, not proof of live DNS/HTTPS. Do not change DNS, redirects, or OAuth callbacks until intended roles and reachability are verified."
   },
   "modules": [
     {
