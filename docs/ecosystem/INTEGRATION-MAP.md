@@ -52,7 +52,7 @@ PostgreSQL / durable job state / audit events
 ## Implementation sequence
 
 - [x] Create an initial repository inventory and integration boundary.
-- [ ] Reconcile domain policy before changing DNS: current code maps `velclaw.site` to platform, `velclaw.dev` to developer, and `velclaw.app` to application; the README also calls `.app` a temporary canonical domain. Verify the intended role/canonical URL and redirects against DNS/HTTPS before changing callbacks.
+- [x] Set `https://velclaw.dev` as the single canonical domain in application defaults and documentation. DNS, HTTPS, OAuth callbacks, and any path/reverse-proxy routing still require production verification; do not assume they are configured.
 - [ ] Verify the OAuth repository's deployment, callback URLs, cookie/session domain and logout behavior.
 - [ ] Add a read-only GitHub repository registry and per-repository connection status to the core workspace.
 - [ ] Define and test a versioned VelclawHost API client; health checks must use the real `GET /api/v1/health` endpoint.
