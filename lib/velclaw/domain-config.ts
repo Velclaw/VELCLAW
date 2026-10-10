@@ -1,18 +1,14 @@
 export type VelclawDomainRole = 'platform' | 'developer' | 'application'
 
 export const VELCLAW_DOMAIN_ROLES = {
-  platform: 'https://velclaw.site',
+  platform: 'https://velclaw.dev',
   developer: 'https://velclaw.dev',
-  application: 'https://velclaw.app',
+  application: 'https://velclaw.dev',
 } as const
 
 const DOMAIN_ROLE_BY_HOST: Record<string, VelclawDomainRole> = {
-  'velclaw.site': 'platform',
-  'www.velclaw.site': 'platform',
-  'velclaw.dev': 'developer',
-  'www.velclaw.dev': 'developer',
-  'velclaw.app': 'application',
-  'www.velclaw.app': 'application',
+  'velclaw.dev': 'platform',
+  'www.velclaw.dev': 'platform',
 }
 
 function normalizeOrigin(value: string | undefined, fallback: string): string {
@@ -63,9 +59,9 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
     name: 'Velclaw AI',
     title: 'Velclaw AI — AI-native Software Platform',
     description:
-      'Velclaw.site is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
+      'Velclaw.dev is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
     heading: 'Main AI-native software platform',
-    intro: 'The main Velclaw.site platform for the company, product ecosystem, workspace and production delivery.',
+    intro: 'The main Velclaw.dev platform for the company, product ecosystem, workspace and production delivery.',
   },
   developer: {
     name: 'Velclaw Developer',
@@ -76,12 +72,12 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
     intro: 'Build with Velclaw through the developer workspace, IDE, documentation, APIs, SDKs and engineering tools.',
   },
   application: {
-    name: 'Velclaw App',
+    name: 'Velclaw Workspace',
     title: 'Velclaw App — AI Software Workspace',
     description:
-      'Velclaw.app is the application surface for the Velclaw workspace, projects, deployments and user services.',
+      'Velclaw.dev is the application surface for the Velclaw workspace, projects, deployments and user services.',
     heading: 'Velclaw applications and services',
-    intro: 'Access the Velclaw application experience for workspaces, projects, deployments and user-facing services.',
+    intro: 'Access the Velclaw workspace experience for workspaces, projects, deployments and user-facing services.',
   },
 } as const
 
