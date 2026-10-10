@@ -230,8 +230,14 @@ const metadataScript = runScript(docker, 'Verify image metadata')
 /**
  * Run the workflow's image checks in bash with Docker stubbed to return the supplied metadata.
  * Optionally fail inspection of `ports` or `user`, returning the shell result and inspection trace.
+ * Per-field diagnostics simulate Docker writing warnings or metadata to stderr.
  */
-function inspectMetadata(ports: string, user: string, failure = '') {
+function inspectMetadata(
+  ports: string,
+  user: string,
+  failure = '',
+  diagnostics: { ports?: string; user?: string } = {},
+) {
   // Execute the actual workflow shell with the Ubuntu runner's default bash -e
   // behavior. Only Docker is replaced; no daemon, image build, or temp script is needed.
   const result = spawnSync(
@@ -248,11 +254,13 @@ function inspectMetadata(ports: string, user: string, failure = '') {
         case "$5" in
           '{{.Config.ExposedPorts}}')
             printf 'ports\\n' >&2
+            printf '%s' "$PORTS_DIAGNOSTICS" >&2
             [ "$INSPECT_FAILURE" != ports ] || return 1
             printf '%s\\n' "$IMAGE_PORTS"
             ;;
           '{{.Config.User}}')
             printf 'user\\n' >&2
+            printf '%s' "$USER_DIAGNOSTICS" >&2
             [ "$INSPECT_FAILURE" != user ] || return 1
             printf '%s\\n' "$IMAGE_USER"
             ;;
@@ -262,7 +270,15 @@ function inspectMetadata(ports: string, user: string, failure = '') {
       ${metadataScript}`,
     ],
     {
-      env: { PATH: process.env.PATH, NODE_ENV: 'test', IMAGE_PORTS: ports, IMAGE_USER: user, INSPECT_FAILURE: failure },
+      env: {
+        PATH: process.env.PATH,
+        NODE_ENV: 'test',
+        IMAGE_PORTS: ports,
+        IMAGE_USER: user,
+        INSPECT_FAILURE: failure,
+        PORTS_DIAGNOSTICS: diagnostics.ports ?? '',
+        USER_DIAGNOSTICS: diagnostics.user ?? '',
+      },
       encoding: 'utf8',
       timeout: 5_000,
     },
@@ -277,6 +293,35 @@ test('image verification accepts exactly TCP port 3000 and the velclaw user', ()
   assert.equal(result.status, 0, result.stderr)
   assert.equal(result.stderr, 'ports\nuser\n')
 })
+
+for (const field of ['ports', 'user'] as const) {
+  test(`image verification accepts valid stdout despite a ${field} inspection warning on stderr`, () => {
+    const warning = 'Warning: synthetic Docker diagnostic\n'
+    const result = inspectMetadata('map[3000/tcp:{}]', 'velclaw', '', { [field]: warning })
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(result.stderr, field === 'ports' ? `ports\n${warning}user\n` : `ports\nuser\n${warning}`)
+    assert.equal(result.stdout, '')
+  })
+
+  for (const output of ['missing', 'invalid'] as const) {
+    test(`image verification rejects ${output} ${field} stdout even when stderr contains the expected metadata`, () => {
+      const expected = field === 'ports' ? 'map[3000/tcp:{}]' : 'velclaw'
+      const actual = output === 'missing' ? '' : field === 'ports' ? 'map[]' : 'root'
+      const result = inspectMetadata(
+        field === 'ports' ? actual : 'map[3000/tcp:{}]',
+        field === 'user' ? actual : 'velclaw',
+        '',
+        {
+          [field]: `${expected}\n`,
+        },
+      )
+      assert.equal(result.status, 1, result.stderr)
+      // Stderr must never satisfy a metadata check or allow the next check to hide its failure.
+      assert.equal(result.stderr, field === 'ports' ? `ports\n${expected}\n` : `ports\nuser\n${expected}\n`)
+      assert.equal(result.stdout, '')
+    })
+  }
+}
 
 for (const [label, ports, user] of [
   ['ports', 'map[3000/tcp:{}]\n\n', 'velclaw'],
