@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "ecosystem": "Velclaw",
+  "hub": {
+    "repository": "Velclaw/VELCLAW",
+    "role": "product-workspace",
+    "status": "hub-candidate"
+  },
+  "policy": {
+    "repositoryStrategy": "keep-repositories-separate",
+    "secretsInGit": false,
+    "autoConnectUnreviewedRepositories": false,
+    "requireAuthenticatedContractAndHealthCheck": true
+  },
+  "domainDecision": {
+    "status": "unresolved",
+    "candidates": [
+      "velclaw.site",
+      "velclaw.app"
+    ],
+    "note": "Repository documentation conflicts; do not change DNS or OAuth callbacks until canonical domain is explicitly reconciled and verified."
+  },
+  "modules": [
+    {
+      "id": "workspace",
+      "repository": "Velclaw/VELCLAW",
+      "role": "product-workspace",
+      "integration": "hub-candidate",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "identity",
+      "repository": "Velclaw/Oauth",
+      "role": "oauth-identity",
+      "integration": "repository-referenced-deployment-unverified",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "hosting-control-plane",
+      "repository": "Velclaw/VelclawHost",
+      "role": "hosting-domain-control-plane",
+      "integration": "service-live-api-contract-needs-e2e-verification",
+      "baseUrl": "https://velclawhost.onrender.com",
+      "healthPath": "/api/v1/health"
+    },
+    {
+      "id": "sandbox-orchestrator",
+      "repository": "zskbot/CodeXsanBox",
+      "role": "agent-orchestration-and-sandbox-design",
+      "integration": "review-required",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "ai-workspace",
+      "repository": "zskbot/bbit",
+      "role": "browser-ai-ide",
+      "integration": "candidate-api-contract-unverified",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "riks-ai",
+      "repository": "zskbot/riks",
+      "role": "coding-assistant-prototype",
+      "integration": "prototype-contract-unverified",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "documentation",
+      "repository": "zskbot/SandboxCode",
+      "role": "documentation",
+      "integration": "candidate-deployment-unverified",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "sandboxcode-com",
+      "repository": "zskbot/SandboxCode.com",
+      "role": "multi-agent-coding-template",
+      "integration": "template-lineage-review-required",
+      "baseUrl": null,
+      "healthPath": null
+    },
+    {
+      "id": "coding-agent-platform",
+      "repository": "zskbot/coding-agent-platform",
+      "role": "coding-agent-template",
+      "integration": "template-lineage-review-required",
+      "baseUrl": null,
+      "healthPath": null
+    }
+  ]
+}
