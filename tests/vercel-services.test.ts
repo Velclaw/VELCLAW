@@ -8,6 +8,7 @@ type Service = {
   root: string
   framework?: string
   runtime?: string
+  entrypoint?: string
   buildCommand?: string
   outputDirectory?: string
 }
@@ -27,13 +28,17 @@ const expectedServices: Record<string, Service> = {
   app: { root: '.', framework: 'nextjs' },
   agentside: { root: 'AgentsIDE', framework: 'vite' },
   autoship: { root: 'Autoship', framework: 'vite' },
-  docs: { root: '.', buildCommand: 'pip install -r docs/requirements.txt && mkdocs build', outputDirectory: 'site' },
-  kio: { root: 'KIO', runtime: 'node' },
+  docs: {
+    root: '.',
+    framework: 'vite',
+    buildCommand: 'pip install -r docs/requirements.txt && mkdocs build',
+    outputDirectory: 'site',
+  },
+  kio: { root: 'KIO', runtime: 'node', entrypoint: 'server.js' },
   velclaw: { root: 'Velclaw', framework: 'nextjs' },
   'velclaw-docs': { root: 'velclaw-docs', framework: 'vite' },
-  'velclaw-pages': { root: 'velclaw-pages', runtime: 'node' },
+  'velclaw-pages': { root: 'velclaw-pages', runtime: 'node', entrypoint: 'server.js' },
   zskai: { root: 'ZsKai', framework: 'vite' },
-  'huggingface-space-kimi-demo': { root: 'ZsKai/huggingface-space-kimi-demo', runtime: 'python' },
   zvelclaw: { root: 'Zvelclaw', runtime: 'container' },
 }
 
@@ -55,6 +60,53 @@ for (const [name, expected] of Object.entries(expectedServices)) {
     )
   })
 }
+
+for (const name of ['kio', 'velclaw-pages']) {
+  test(`service ${name} resolves its Node entrypoint within its own root and matches its start script`, () => {
+    const service = config.services[name]
+    assert.equal(service.runtime, 'node')
+    assert.equal(Object.hasOwn(service, 'framework'), false)
+    assert.ok(service.entrypoint, 'Node services must declare an entrypoint')
+    assert.equal(path.isAbsolute(service.entrypoint), false, 'entrypoints must be relative to the service root')
+
+    const root = realpathSync(path.resolve(repositoryRoot, service.root))
+    const entrypoint = realpathSync(path.resolve(root, service.entrypoint))
+    const relativeEntrypoint = path.relative(root, entrypoint)
+    assert.ok(statSync(entrypoint).isFile(), 'the entrypoint must resolve to an existing file')
+    assert.ok(
+      relativeEntrypoint !== '..' &&
+        !relativeEntrypoint.startsWith(`..${path.sep}`) &&
+        !path.isAbsolute(relativeEntrypoint),
+      'the entrypoint must remain inside its service root',
+    )
+
+    const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'))
+    assert.equal(manifest.scripts.start, `node ${service.entrypoint}`)
+  })
+}
+
+test('the Hugging Face demo is neither deployed under an alias nor referenced by a rewrite', () => {
+  const retiredName = 'huggingface-space-kimi-demo'
+  const retiredRoot = path.resolve(repositoryRoot, 'ZsKai/huggingface-space-kimi-demo')
+  assert.equal(Object.hasOwn(config.services, retiredName), false)
+  for (const service of Object.values(config.services)) {
+    assert.notEqual(realpathSync(path.resolve(repositoryRoot, service.root)), retiredRoot)
+  }
+  assert.equal(
+    config.rewrites.some((rewrite) => rewrite.destination.service === retiredName),
+    false,
+  )
+  assert.equal(config.services.zskai.root, 'ZsKai', 'the parent application must remain deployed')
+})
+
+test('the MkDocs service keeps its custom static build despite the Vite framework setting', () => {
+  const service = config.services.docs
+  assert.equal(service.framework, 'vite')
+  assert.equal(service.buildCommand, 'pip install -r docs/requirements.txt && mkdocs build')
+  assert.equal(service.outputDirectory, 'site')
+  assert.equal(Object.hasOwn(service, 'runtime'), false)
+  assert.equal(Object.hasOwn(service, 'entrypoint'), false)
+})
 
 test('static documentation uses the Vite documentation app and its existing HTML entrypoint', () => {
   const service = config.services['velclaw-docs']
