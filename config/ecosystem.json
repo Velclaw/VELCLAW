@@ -13,14 +13,10 @@
     "requireAuthenticatedContractAndHealthCheck": true
   },
   "domainDecision": {
-    "status": "needs-reconciliation-before-DNS-changes",
-    "currentCodeRoles": {
-      "velclaw.site": "platform",
-      "velclaw.dev": "developer",
-      "velclaw.app": "application"
-    },
-    "conflictingStatement": "The core README also describes velclaw.app as the temporary canonical first-party domain.",
-    "note": "Treat these as product-domain roles, not proof of live DNS/HTTPS. Do not change DNS, redirects, or OAuth callbacks until intended roles and reachability are verified."
+    "status": "canonical-domain-selected",
+    "canonicalDomain": "velclaw.dev",
+    "canonicalOrigin": "https://velclaw.dev",
+    "note": "Application defaults and documentation should use this one domain. DNS, HTTPS, OAuth callback configuration, and service path routing remain unverified and must be checked before production claims."
   },
   "modules": [
     {
