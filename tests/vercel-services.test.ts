@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { readFileSync, realpathSync, statSync } from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
@@ -62,6 +63,20 @@ for (const [name, expected] of Object.entries(expectedServices)) {
 }
 
 for (const name of ['kio', 'velclaw-pages']) {
+  test(`service ${name} declares an entrypoint that parses in its package's Node module mode`, () => {
+    const service = config.services[name]
+    const entrypoint = service.entrypoint
+    assert.ok(entrypoint, 'Node services must declare an entrypoint')
+    // Syntax checking respects each package's CommonJS/ESM mode without starting a server.
+    assert.doesNotThrow(() => {
+      execFileSync(process.execPath, ['--check', entrypoint], {
+        cwd: path.resolve(repositoryRoot, service.root),
+        timeout: 10_000,
+        stdio: 'pipe',
+      })
+    }, 'the configured entrypoint must be valid for the Node runtime in its service root')
+  })
+
   test(`service ${name} resolves its Node entrypoint within its own root and matches its start script`, () => {
     const service = config.services[name]
     assert.equal(service.runtime, 'node')
