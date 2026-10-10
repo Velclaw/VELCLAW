@@ -1,20 +1,67 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
-    "app": { "root": ".", "framework": "nextjs" },
-    "agentside": { "root": "AgentsIDE", "framework": "vite" },
-    "autoship": { "root": "Autoship", "framework": "vite" },
-    "docs": { "root": ".", "framework": "vite", "buildCommand": "pip install -r docs/requirements.txt && mkdocs build", "outputDirectory": "site" },
-    "kio": { "root": "KIO", "runtime": "node" },
-    "velclaw": { "root": "Velclaw", "framework": "nextjs" },
-    "velclaw-docs": { "root": "velclaw-docs", "framework": "vite" },
-    "velclaw-pages": { "root": "velclaw-pages", "runtime": "node" },
-    "zskai": { "root": "ZsKai", "framework": "vite" },
-    "huggingface-space-kimi-demo": { "root": "ZsKai/huggingface-space-kimi-demo", "runtime": "python" },
-    "zvelclaw": { "root": "Zvelclaw", "runtime": "container" }
+    "app": {
+      "root": ".",
+      "framework": "nextjs"
+    },
+    "agentside": {
+      "root": "AgentsIDE",
+      "framework": "vite"
+    },
+    "autoship": {
+      "root": "Autoship",
+      "framework": "vite"
+    },
+    "docs": {
+      "root": ".",
+      "framework": "vite",
+      "buildCommand": "pip install -r docs/requirements.txt && mkdocs build",
+      "outputDirectory": "site"
+    },
+    "kio": {
+      "root": "KIO",
+      "runtime": "node",
+      "entrypoint": "server.js"
+    },
+    "velclaw": {
+      "root": "Velclaw",
+      "framework": "nextjs"
+    },
+    "velclaw-docs": {
+      "root": "velclaw-docs",
+      "framework": "vite"
+    },
+    "velclaw-pages": {
+      "root": "velclaw-pages",
+      "runtime": "node",
+      "entrypoint": "server.js"
+    },
+    "zskai": {
+      "root": "ZsKai",
+      "framework": "vite"
+    },
+    "huggingface-space-kimi-demo": {
+      "root": "ZsKai/huggingface-space-kimi-demo",
+      "runtime": "python"
+    },
+    "zvelclaw": {
+      "root": "Zvelclaw",
+      "runtime": "container"
+    }
   },
   "rewrites": [
-    { "source": "/docs/(.*)", "destination": { "service": "docs" } },
-    { "source": "/(.*)", "destination": { "service": "app" } }
+    {
+      "source": "/docs/(.*)",
+      "destination": {
+        "service": "docs"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "app"
+      }
+    }
   ]
 }
