@@ -41,10 +41,6 @@
       "root": "ZsKai",
       "framework": "vite"
     },
-    "huggingface-space-kimi-demo": {
-      "root": "ZsKai/huggingface-space-kimi-demo",
-      "runtime": "python"
-    },
     "zvelclaw": {
       "root": "Zvelclaw",
       "runtime": "container"
