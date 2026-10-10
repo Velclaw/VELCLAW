@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { readFileSync, realpathSync, statSync } from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
@@ -122,6 +122,51 @@ test('the MkDocs service keeps its custom static build despite the Vite framewor
   assert.equal(Object.hasOwn(service, 'runtime'), false)
   assert.equal(Object.hasOwn(service, 'entrypoint'), false)
 })
+
+for (const scenario of [
+  { name: 'installs requirements before building', installStatus: 0, buildStatus: 0, expectedStatus: 0 },
+  { name: 'stops when dependency installation fails', installStatus: 17, buildStatus: 0, expectedStatus: 17 },
+  { name: 'propagates a documentation build failure', installStatus: 0, buildStatus: 23, expectedStatus: 23 },
+]) {
+  test(`the configured MkDocs command ${scenario.name}`, () => {
+    const service = config.services.docs
+    assert.ok(service.buildCommand, 'the Vite framework must retain the explicit MkDocs build command')
+
+    // Exercise the actual command with shell function doubles. An empty PATH prevents
+    // package installation or a real build if the configuration invokes another tool.
+    const result = spawnSync(
+      '/bin/sh',
+      [
+        '-c',
+        `
+          pip() {
+            printf '%s\\n' pip "$@"
+            return ${scenario.installStatus}
+          }
+          mkdocs() {
+            printf '%s\\n' mkdocs "$@"
+            return ${scenario.buildStatus}
+          }
+          ${service.buildCommand}
+        `,
+      ],
+      {
+        cwd: path.resolve(repositoryRoot, service.root),
+        env: { PATH: '' },
+        encoding: 'utf8',
+        timeout: 5_000,
+      },
+    )
+
+    assert.ifError(result.error)
+    assert.equal(result.signal, null)
+    assert.equal(result.status, scenario.expectedStatus, result.stderr)
+    assert.equal(result.stderr, '')
+    const expectedCalls = ['pip', 'install', '-r', 'docs/requirements.txt']
+    if (scenario.installStatus === 0) expectedCalls.push('mkdocs', 'build')
+    assert.equal(result.stdout, `${expectedCalls.join('\n')}\n`)
+  })
+}
 
 test('static documentation uses the Vite documentation app and its existing HTML entrypoint', () => {
   const service = config.services['velclaw-docs']
