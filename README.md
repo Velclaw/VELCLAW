@@ -1,3 +1,83 @@
+# VELCLAW · CONTROL CENTER
+
+**Một trang quản trị thống nhất cho dự án, tài nguyên và triển khai.**
+
+![Velclaw logo](assets/velclaw_logo_7color_transparent.gif)
+
+[Repository chính](https://github.com/Velclaw/VELCLAW) · [Control Center UI](app/control-center/page.tsx) · [Kế hoạch triển khai](docs/CONTROL-CENTER.md) · [Danh mục hệ sinh thái](docs/ECOSYSTEM.md)
+
+## Giới thiệu
+
+VELCLAW là hệ sinh thái phát triển phần mềm AI-native dành cho agent, developer và nhóm kỹ thuật. VELCLAW Control Center là lớp quản trị thống nhất để liên kết mã nguồn, môi trường triển khai, domain, database và các tích hợp trong cùng một góc nhìn.
+
+Mục tiêu không phải ép tất cả source code vào một repository duy nhất. Mỗi sản phẩm có thể tiếp tục giữ repo, lịch sử Git, quyền truy cập và vòng đời phát hành riêng; Control Center kết nối chúng qua một registry có thể kiểm chứng.
+
+## Kiến trúc tổng thể
+
+- **GitHub:** repositories, branches, pull requests và CI.
+- **Render / Vercel:** dịch vụ ứng dụng, deployments và URLs.
+- **Cloudflare:** DNS, TLS, Access/WAF, Workers và routes.
+- **PostgreSQL / Supabase:** dữ liệu bền vững, migrations và health.
+- **OAuth / AI providers / MCP:** danh tính, mô hình AI và mở rộng agent.
+
+## Module
+
+| Module | Chức năng |
+| --- | --- |
+| Overview | Tổng quan dự án, dịch vụ, trạng thái và cảnh báo |
+| Repositories | Danh mục repo theo owner, quyền và vai trò |
+| Deployments | Ánh xạ repo, branch, commit, dịch vụ và URL |
+| Domains & DNS | Kiểm kê DNS, TLS, Access/WAF và origin routes |
+| Databases | Theo dõi PostgreSQL/Supabase, migrations và health |
+| Integrations | GitHub, Render, Vercel, Cloudflare, OAuth, AI providers, MCP |
+| Security | Kiểm tra cấu hình quyền truy cập và quản lý secrets an toàn |
+| Audit log | Lịch sử quét, nguồn dữ liệu, thời điểm và kết quả |
+
+## Trạng thái hiện tại
+
+- [x] Giao diện ban đầu được thêm tại [app/control-center/page.tsx](app/control-center/page.tsx).
+- [x] Kế hoạch triển khai và nguyên tắc vận hành tại [docs/CONTROL-CENTER.md](docs/CONTROL-CENTER.md).
+- [x] Danh mục kiến trúc tại [docs/ECOSYSTEM.md](docs/ECOSYSTEM.md).
+- [x] Đã phát hiện một phần GitHub repositories, Render services và Vercel projects qua các kết nối hiện có.
+- [ ] Quét hoàn chỉnh mọi trang repository của từng tài khoản/tổ chức được cấp quyền.
+- [ ] Đồng bộ registry từ API thật thay vì dữ liệu mẫu/tĩnh.
+- [ ] Hoàn tất kiểm kê Cloudflare DNS/Access/Workers, database và OAuth.
+- [ ] Chạy type-check, tests, build và xác minh deployment production.
+
+**Minh bạch:** giao diện đã được commit nhưng chưa có bằng chứng xác nhận route đã deploy thành công hoặc production health đạt. Danh mục hiện tại chỉ là một phần của cuộc kiểm kê, không phải snapshot đầy đủ của toàn bộ tài khoản.
+
+## Chạy local
+
+Yêu cầu: Node.js tương thích với phiên bản khai báo trong package.json. Trong terminal:
+
+    git clone https://github.com/Velclaw/VELCLAW.git
+    cd VELCLAW
+    npm install
+    npm run dev
+
+Mở http://localhost:3000/control-center.
+
+Các lệnh kiểm tra có sẵn trong project: npm run type-check, npm test và npm run build. Dùng package manager và lockfile đã được commit; không tạo nhiều lockfile cạnh tranh.
+
+## Nguyên tắc bảo mật
+
+1. Không commit API keys, OAuth secrets, database URLs hoặc deployment tokens.
+2. Chỉ gọi API nhà cung cấp từ server-side routes; xác thực session và phân quyền trước khi trả dữ liệu.
+3. Chỉ hiển thị tên biến secrets và trạng thái cấu hình; không trả giá trị secrets ra trình duyệt.
+4. Không tự động xóa/chuyển repository, sửa DNS, đổi production routes hay chạy migration phá hủy khi chưa có kế hoạch rollback.
+5. Mọi trạng thái phải có nguồn, thời điểm kiểm tra và kết quả health check.
+6. Chỉ đánh dấu tích hợp là hoạt động khi có bằng chứng API hoặc health check thực tế.
+
+## Nhà cung cấp và nhà tài trợ
+
+GitHub, Render, Vercel, Cloudflare, PostgreSQL/Supabase và AI providers được xem là hệ thống tích hợp. Không tuyên bố họ là nhà tài trợ chính thức nếu không có xác nhận tài trợ riêng. Tôn trọng giấy phép, thông báo bản quyền và attribution của mọi thư viện/tài nguyên bên ngoài.
+
+## Giấy phép
+
+Kiểm tra file LICENSE trước khi tuyên bố giấy phép phân phối của dự án.
+
+---
+
 <div align="center">
 
 <a href="https://github.com/Velclaw/VELCLAW"><img src="assets/velclaw_logo_7color_transparent.gif" alt="Velclaw" width="620"></a>
