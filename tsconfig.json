@@ -34,6 +34,7 @@
     "ZsKai/**",
     "Zvelclaw/**",
     "velclaw.cfd/docs/**",
-    "velclaw-pages/**"
+    "velclaw-pages/**",
+    "vite.config.ts"
   ]
 }
