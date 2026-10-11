@@ -17,6 +17,8 @@ Build, inspect, test, deploy, and operate software from one developer-focused wo
 
 <p><a href="#quick-start">Get started</a> · <a href="#architecture">Architecture</a> · <a href="#capabilities">Capabilities</a> · <a href="#technology-ecosystem">Ecosystem</a> · <a href="#development">Development</a></p>
 
+**Ecosystem master document:** [docs/ECOSYSTEM.md](docs/ECOSYSTEM.md) — project registry, deployment map, domain policy, integration contracts, and verification checklist.
+
 </div>
 
 ---
