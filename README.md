@@ -312,3 +312,8 @@ The repository includes the official Velclaw mark and a lightweight product-intr
 
 **Velclaw**  
 *Code. Innovate. Elevate.*
+
+## AI Agent Skills and Vercel Plugin
+
+- [Vercel Platform Agent Skill](.agents/skills/vercel-platform/SKILL.md) — Vercel deployment diagnostics, pnpm monorepos, safe configuration changes, and production verification.
+- [Installation guide](docs/integrations/vercel-agent-skills.md) — install the Velclaw skill, the official Vercel plugin, or Vercel-maintained Agent Skills.
