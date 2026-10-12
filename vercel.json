@@ -9,8 +9,7 @@
     "agentside": {
       "root": "AgentsIDE",
       "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile --prod=false",
-      "buildCommand": "pnpm exec tsc -b && pnpm exec vite build"
+      "installCommand": "pnpm install --no-frozen-lockfile --prod=false"
     },
     "autoship": {
       "root": "Autoship",
@@ -58,7 +57,17 @@
     }
   },
   "rewrites": [
-    { "source": "/docs/(.*)", "destination": { "service": "docs" } },
-    { "source": "/(.*)", "destination": { "service": "app" } }
+    {
+      "source": "/docs/(.*)",
+      "destination": {
+        "service": "docs"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "app"
+      }
+    }
   ]
 }
