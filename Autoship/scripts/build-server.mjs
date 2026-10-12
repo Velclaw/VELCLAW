@@ -5,7 +5,7 @@ import { build } from 'esbuild'
 
 const root = process.cwd()
 const source = fs.readFileSync(path.join(root, 'server.ts'), 'utf8')
-const markerMatch = source.match(/app\\.use\\(express\\.json\\(\\)\\);?/) 
+const markerMatch = source.match(/app\.use\(express\.json\(\)\);?/)
 if (!markerMatch) throw new Error('Autoship server JSON middleware marker not found')
 const marker = markerMatch[0]
 
