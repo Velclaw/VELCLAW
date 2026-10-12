@@ -1,6 +1,8 @@
 # Velclaw Dashboard
 
-![Velclaw Logo](./assets/logo.png)
+<p align="center">
+  <img src="./assets/logo-white.png" alt="Velclaw Logo" width="200" />
+</p>
 
 **AI-native Control Center** — Layout inspired by Cursor, built for the Velclaw ecosystem.
 
