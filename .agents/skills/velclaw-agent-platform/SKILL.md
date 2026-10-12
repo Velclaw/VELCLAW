@@ -51,6 +51,21 @@ Sau khi config: restart gateway/channel và `probe` / status để verify.
 
 ## 5. Cursor Auth Plugin Integration
 
+### Script hỗ trợ setup
+Có sẵn script tự động hướng dẫn:
+```bash
+# Từ thư mục skill
+bash scripts/setup-cursor-auth.sh
+# hoặc
+chmod +x scripts/setup-cursor-auth.sh && ./scripts/setup-cursor-auth.sh
+```
+Script sẽ:
+- Kiểm tra CLI đã cài chưa
+- Hiển thị status hiện tại
+- Cho chọn Browser login hoặc nhập API Key (ẩn input)
+- Tùy chọn ghi vào `~/.bashrc` / `~/.zshrc`
+- Verify lại bằng `agent status`
+
 ### API Key (khuyến nghị cho automation)
 ```bash
 export CURSOR_API_KEY=your_api_key_here
