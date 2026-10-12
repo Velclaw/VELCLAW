@@ -30,6 +30,8 @@ jobs:
        github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      OPENAI_API_KEY_AVAILABLE: ${{ secrets.OPENAI_API_KEY != '' }}
     steps:
       - name: Checkout trusted main
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -65,7 +67,7 @@ jobs:
         run: gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
 
       - name: Run Codex repair agent
-        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        if: ${{ env.OPENAI_API_KEY_AVAILABLE == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         id: codex
         uses: openai/codex-action@v1
         with:
@@ -85,7 +87,7 @@ jobs:
             Do not push or create a pull request yourself.
 
       - name: Create repair branch and commit
-        if: ${{ secrets.OPENAI_API_KEY != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        if: ${{ env.OPENAI_API_KEY_AVAILABLE == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -105,7 +107,7 @@ jobs:
             --body-file codex-result.txt || true
 
       - name: Open diagnostic issue when repair is unavailable
-        if: ${{ secrets.OPENAI_API_KEY == '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
+        if: ${{ env.OPENAI_API_KEY_AVAILABLE != 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id || inputs.run_id }}
