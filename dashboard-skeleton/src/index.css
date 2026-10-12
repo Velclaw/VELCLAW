@@ -1,0 +1,96 @@
+:root {
+  --bg: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-panel: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #e8e8e8;
+  --text-muted: #888;
+  --violet: #8b5cf6;
+  --violet-glow: rgba(139, 92, 246, 0.35);
+  --font: 'JetBrains Mono', 'DejaVu Sans Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; }
+a { color: var(--violet); text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr 320px;
+  height: 100vh;
+}
+.sidebar {
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  overflow-y: auto;
+}
+.sidebar-header {
+  padding: 8px 16px 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--violet);
+}
+.nav-item {
+  display: block;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  border-left: 2px solid transparent;
+}
+.nav-item:hover, .nav-item.active {
+  color: var(--text);
+  background: #222;
+  border-left-color: var(--violet);
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.header {
+  height: 48px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+}
+.chat-panel {
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.chat-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.chat-messages { flex: 1; padding: 12px; overflow: auto; }
+.chat-input {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.chat-input input {
+  width: 100%;
+  background: #111;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 10px;
+  outline: none;
+}
+.chat-input input:focus { border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet-glow); }
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.page-title { margin-bottom: 16px; font-size: 18px; color: var(--violet); }
