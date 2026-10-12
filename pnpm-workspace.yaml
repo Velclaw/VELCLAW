@@ -1,6 +1,5 @@
 packages:
   - "."
-  - "AgentsIDE"
   - "Autoship"
   - "Velclaw"
   - "velclaw-docs"
