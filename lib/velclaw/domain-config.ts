@@ -53,21 +53,24 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   platform: {
     name: 'Velclaw AI',
     title: 'Velclaw AI — AI-native Software Platform',
-    description: 'Velclaw.site is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
+    description:
+      'Velclaw.site is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
     heading: 'Main AI-native software platform',
     intro: 'The main Velclaw.site platform for the company, product ecosystem, workspace and production delivery.',
   },
   developer: {
     name: 'Velclaw Developer',
     title: 'Velclaw Dev — Developer Platform, IDE, Docs & API',
-    description: 'Velclaw.dev is the developer surface for the Velclaw IDE, documentation, SDKs, APIs and engineering tools.',
+    description:
+      'Velclaw.dev is the developer surface for the Velclaw IDE, documentation, SDKs, APIs and engineering tools.',
     heading: 'Developer platform, IDE and API',
     intro: 'Build with Velclaw through the developer workspace, IDE, documentation, APIs, SDKs and engineering tools.',
   },
   application: {
     name: 'Velclaw Workspace',
     title: 'Velclaw App — AI Software Workspace',
-    description: 'Velclaw.app is the application surface for the Velclaw workspace, projects, deployments and user services.',
+    description:
+      'Velclaw.app is the application surface for the Velclaw workspace, projects, deployments and user services.',
     heading: 'Velclaw applications and services',
     intro: 'Access the Velclaw workspace experience for workspaces, projects, deployments and user-facing services.',
   },

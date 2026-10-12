@@ -1,5 +1,7 @@
 export interface Env {
-  AUTOSHIP: Fetcher
+  AUTOSHIP: {
+    fetch(request: Request): Promise<Response>
+  }
 }
 
 export default {
