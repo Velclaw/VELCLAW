@@ -1,0 +1,12 @@
+{
+  "skill": "velclaw-agent-platform",
+  "test_cases": [
+    {"input": "tạo multi-agent orchestration cho velclaw", "should_trigger": true},
+    {"input": "tích hợp telegram và wechat channel", "should_trigger": true},
+    {"input": "cấu hình cursor api key và mcp auth", "should_trigger": true},
+    {"input": "coding agent review code và deploy vercel", "should_trigger": true},
+    {"input": "monitoring dashboard health check agent", "should_trigger": true},
+    {"input": "thời tiết hôm nay", "should_trigger": false},
+    {"input": "viết hàm python đơn giản không liên quan", "should_trigger": false}
+  ]
+}
