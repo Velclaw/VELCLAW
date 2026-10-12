@@ -1,0 +1,38 @@
+name: Velclaw MCP Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/mcp/worker/**"
+      - ".github/workflows/velclaw-mcp-worker.yml"
+  pull_request:
+    paths:
+      - "app/mcp/worker/**"
+      - ".github/workflows/velclaw-mcp-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/mcp/worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/mcp/worker/package.json
+      - name: Install dependencies
+        run: npm install
+      - name: Type-check Worker
+        run: npm run typecheck
+      - name: Validate Cloudflare bundle (dry run)
+        run: npx wrangler deploy --dry-run
