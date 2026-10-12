@@ -1,6 +1,13 @@
 packages:
   - "."
   - "AgentsIDE"
+  - "Autoship"
+  - "Velclaw"
+  - "velclaw-docs"
+  - "ZsKai"
+  - "KIO"
+  - "velclaw-pages"
+  - "Zvelclaw"
 
 allowBuilds:
   esbuild: true
