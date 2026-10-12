@@ -22,6 +22,38 @@ export type VelclawIntegration = {
 /** Only integrations that materially help the current Velclaw workflow are kept here. */
 export const VELCLAW_INTEGRATIONS: VelclawIntegration[] = [
   {
+    id: 'claude-agent',
+    name: 'Claude',
+    kind: 'agent',
+    status: 'planned',
+    source: 'https://claude.ai/',
+    capabilities: ['mcp-client', 'agent-workflows', 'oauth-connector'],
+  },
+  {
+    id: 'openai-codex',
+    name: 'OpenAI Codex',
+    kind: 'agent',
+    status: 'planned',
+    source: 'https://chatgpt.com/codex',
+    capabilities: ['coding-agent', 'repository-tasks', 'code-review'],
+  },
+  {
+    id: 'sandbox-chatgpt',
+    name: 'Sandbox ChatGPT',
+    kind: 'workspace',
+    status: 'planned',
+    source: 'https://chatgpt.com/',
+    capabilities: ['chat-workspace', 'sandbox', 'project-context'],
+  },
+  {
+    id: 'gemini-agent',
+    name: 'Google Gemini',
+    kind: 'agent',
+    status: 'planned',
+    source: 'https://gemini.google.com/',
+    capabilities: ['agent-workflows', 'model-provider', 'tool-use'],
+  },
+  {
     id: 'github-cloud',
     name: 'GitHub Cloud',
     kind: 'source-control',
