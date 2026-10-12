@@ -70,6 +70,6 @@ jobs:
         with:
           node-version: 22
       - name: Install MCP Worker dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
       - name: Type-check MCP Worker
         run: npm run typecheck
