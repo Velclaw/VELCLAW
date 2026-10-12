@@ -19,7 +19,7 @@ function createServer() {
       inputSchema: {},
     },
     async () => ({
-      content: [{ type: "text", text: "pong" }],
+      content: [{ type: "text" as const, text: "pong" }],
     }),
   );
 
@@ -30,7 +30,7 @@ function createServer() {
       inputSchema: { message: z.string().describe("Text to echo back") },
     },
     async ({ message }) => ({
-      content: [{ type: "text", text: message }],
+      content: [{ type: "text" as const, text: message }],
     }),
   );
 
@@ -41,7 +41,7 @@ function createServer() {
       inputSchema: {},
     },
     async () => ({
-      content: [{ type: "text", text: new Date().toISOString() }],
+      content: [{ type: "text" as const, text: new Date().toISOString() }],
     }),
   );
 
