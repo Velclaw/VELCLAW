@@ -468,39 +468,79 @@ function Review() {
         </span>
       </div>
       <div className="security-hero">
-        <div className="security-icon"><ShieldCheck size={25} /></div>
+        <div className="security-icon">
+          <ShieldCheck size={25} />
+        </div>
         <div>
           <span className="mini-label">LOW RISK · 0.8 / 10</span>
           <strong>Agent decision: safe to ship</strong>
           <p>Policy v2.4 · sandbox-7f3 · 34 seconds ago</p>
         </div>
-        <div className="decision-lock"><LockKeyhole size={17} /><span>Policy locked</span></div>
+        <div className="decision-lock">
+          <LockKeyhole size={17} />
+          <span>Policy locked</span>
+        </div>
       </div>
       <div className="security-grid">
         <div className="security-panel">
-          <div className="panel-heading"><span>Automated checks</span><span className="check-count">4 / 4 passed</span></div>
+          <div className="panel-heading">
+            <span>Automated checks</span>
+            <span className="check-count">4 / 4 passed</span>
+          </div>
           <div className="check-list">
             {checks.map((check) => (
               <div className="security-check" key={check.label}>
-                <span className="check-icon"><CircleCheck size={16} /></span>
-                <div><strong>{check.label}</strong><small>{check.detail}</small></div>
+                <span className="check-icon">
+                  <CircleCheck size={16} />
+                </span>
+                <div>
+                  <strong>{check.label}</strong>
+                  <small>{check.detail}</small>
+                </div>
                 <span className="passed-label">PASSED</span>
               </div>
             ))}
           </div>
         </div>
         <div className="security-panel policy-panel">
-          <div className="panel-heading"><span>Decision policy</span><span className="policy-active">ACTIVE</span></div>
-          <div className="policy-row"><span>Low risk</span><strong>Auto-approve</strong></div>
-          <div className="policy-row"><span>Medium risk</span><strong>Human review</strong></div>
-          <div className="policy-row"><span>High / critical</span><strong className="danger-text">Block & reject</strong></div>
-          <div className="policy-note"><AlertTriangle size={15} /> Auth, infra and migrations always require human review.</div>
+          <div className="panel-heading">
+            <span>Decision policy</span>
+            <span className="policy-active">ACTIVE</span>
+          </div>
+          <div className="policy-row">
+            <span>Low risk</span>
+            <strong>Auto-approve</strong>
+          </div>
+          <div className="policy-row">
+            <span>Medium risk</span>
+            <strong>Human review</strong>
+          </div>
+          <div className="policy-row">
+            <span>High / critical</span>
+            <strong className="danger-text">Block & reject</strong>
+          </div>
+          <div className="policy-note">
+            <AlertTriangle size={15} /> Auth, infra and migrations always require human review.
+          </div>
         </div>
       </div>
-      <div className="review-commit"><div><GitCommitHorizontal size={17} /><span><strong>feat: refresh deployment controls</strong><small>main · 8 files changed · signed commit</small></span></div><span className="commit-id">a81f3c2</span></div>
+      <div className="review-commit">
+        <div>
+          <GitCommitHorizontal size={17} />
+          <span>
+            <strong>feat: refresh deployment controls</strong>
+            <small>main · 8 files changed · signed commit</small>
+          </span>
+        </div>
+        <span className="commit-id">a81f3c2</span>
+      </div>
       <div className="review-actions">
-        <button className="secondary-btn" onClick={() => setDecision('blocked')}><Ban size={15} /> Block release</button>
-        <button className="primary-btn" onClick={() => setDecision('approved')}><ShieldCheck size={15} /> Approve & deploy</button>
+        <button className="secondary-btn" onClick={() => setDecision('blocked')}>
+          <Ban size={15} /> Block release
+        </button>
+        <button className="primary-btn" onClick={() => setDecision('approved')}>
+          <ShieldCheck size={15} /> Approve & deploy
+        </button>
       </div>
     </section>
   )
