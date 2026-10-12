@@ -1,14 +1,18 @@
 export type VelclawDomainRole = 'platform' | 'developer' | 'application'
 
 export const VELCLAW_DOMAIN_ROLES = {
-  platform: 'https://velclaw.dev',
+  platform: 'https://velclaw.site',
   developer: 'https://velclaw.dev',
-  application: 'https://velclaw.dev',
+  application: 'https://velclaw.app',
 } as const
 
 const DOMAIN_ROLE_BY_HOST: Record<string, VelclawDomainRole> = {
-  'velclaw.dev': 'platform',
-  'www.velclaw.dev': 'platform',
+  'velclaw.site': 'platform',
+  'www.velclaw.site': 'platform',
+  'velclaw.dev': 'developer',
+  'www.velclaw.dev': 'developer',
+  'velclaw.app': 'application',
+  'www.velclaw.app': 'application',
 }
 
 function normalizeOrigin(value: string | undefined, fallback: string): string {
@@ -33,19 +37,10 @@ export function createVelclawDomainConfig(env: Record<string, string | undefined
     .filter(Boolean)
     .map((value) => normalizeOrigin(value, publicOrigin))
 
-  return {
-    publicOrigin,
-    oauthIssuer,
-    appOrigin,
-    apiOrigin,
-    docsOrigin,
-    publicDomain,
-    allowedOrigins,
-  }
+  return { publicOrigin, oauthIssuer, appOrigin, apiOrigin, docsOrigin, publicDomain, allowedOrigins }
 }
 
 const DOMAIN_CONFIG = createVelclawDomainConfig()
-
 export const VELCLAW_PUBLIC_ORIGIN = DOMAIN_CONFIG.publicOrigin
 export const VELCLAW_OAUTH_ISSUER = DOMAIN_CONFIG.oauthIssuer
 export const VELCLAW_APP_ORIGIN = DOMAIN_CONFIG.appOrigin
@@ -58,24 +53,21 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
   platform: {
     name: 'Velclaw AI',
     title: 'Velclaw AI — AI-native Software Platform',
-    description:
-      'Velclaw.dev is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
+    description: 'Velclaw.site is the main AI-native software platform for agents, code, builds, runtime, review and delivery.',
     heading: 'Main AI-native software platform',
-    intro: 'The main Velclaw.dev platform for the company, product ecosystem, workspace and production delivery.',
+    intro: 'The main Velclaw.site platform for the company, product ecosystem, workspace and production delivery.',
   },
   developer: {
     name: 'Velclaw Developer',
     title: 'Velclaw Dev — Developer Platform, IDE, Docs & API',
-    description:
-      'Velclaw.dev is the developer surface for the Velclaw IDE, documentation, SDKs, APIs and engineering tools.',
+    description: 'Velclaw.dev is the developer surface for the Velclaw IDE, documentation, SDKs, APIs and engineering tools.',
     heading: 'Developer platform, IDE and API',
     intro: 'Build with Velclaw through the developer workspace, IDE, documentation, APIs, SDKs and engineering tools.',
   },
   application: {
     name: 'Velclaw Workspace',
     title: 'Velclaw App — AI Software Workspace',
-    description:
-      'Velclaw.dev is the application surface for the Velclaw workspace, projects, deployments and user services.',
+    description: 'Velclaw.app is the application surface for the Velclaw workspace, projects, deployments and user services.',
     heading: 'Velclaw applications and services',
     intro: 'Access the Velclaw workspace experience for workspaces, projects, deployments and user-facing services.',
   },
@@ -83,12 +75,11 @@ export const VELCLAW_DOMAIN_ROLE_CONTENT = {
 
 export const getVelclawDomainRoleContent = VELCLAW_DOMAIN_ROLE_CONTENT
 
-/** Maps a hostname, with or without a port, to a role and defaults unknown hosts to the platform role. */
 export function getVelclawDomainRole(hostname: string | null | undefined): VelclawDomainRole {
-  return DOMAIN_ROLE_BY_HOST[(hostname || '').toLowerCase().split(':')[0]] || 'platform'
+  const host = (hostname || '').toLowerCase().replace(/:\d+$/, '')
+  return DOMAIN_ROLE_BY_HOST[host] || 'platform'
 }
 
-/** Returns the canonical public origin assigned to a Velclaw domain role. */
 export function getVelclawOriginForRole(role: VelclawDomainRole): string {
   return VELCLAW_DOMAIN_ROLES[role]
 }

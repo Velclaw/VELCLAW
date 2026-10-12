@@ -119,6 +119,11 @@ const PRESETS: PresetConfig[] = [
     type: 'remote',
     url: 'https://mcp.supabase.com/mcp',
   },
+  {
+    name: 'Velclaw MCP',
+    type: 'remote',
+    url: 'https://mcp.velclaw.site/mcp',
+  },
 ]
 
 export function ConnectorDialog({ open, onOpenChange }: ConnectorDialogProps) {

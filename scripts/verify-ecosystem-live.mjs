@@ -11,6 +11,7 @@ if (!token) {
 }
 
 const failures = []
+const warnings = []
 if (contract.canonicalRepository !== 'Velclaw/VELCLAW') failures.push('canonical repository mismatch')
 if (contract.canonicalDomain !== 'velclaw.cfd') failures.push('canonical domain mismatch')
 
@@ -23,7 +24,13 @@ for (const item of contract.repositories) {
     },
   })
   if (!response.ok) {
-    failures.push(`${item.repository}: GitHub API ${response.status}`)
+    // GitHub intentionally returns 404 for private repositories that the built-in
+    // workflow token cannot access. Do not misreport those as deleted repositories.
+    if (response.status === 404 && item.repository !== contract.canonicalRepository) {
+      warnings.push(`${item.repository}: not visible to this workflow token (private or unavailable)`)
+    } else {
+      failures.push(`${item.repository}: GitHub API ${response.status}`)
+    }
     continue
   }
   const repo = await response.json()
@@ -33,10 +40,11 @@ for (const item of contract.repositories) {
   if (repo.archived) failures.push(`${item.repository}: archived`)
 }
 
+for (const warning of warnings) console.warn(`WARN: ${warning}`)
 if (failures.length) {
   console.error('Velclaw live ecosystem audit FAILED')
   for (const failure of failures) console.error(`- ${failure}`)
   process.exit(1)
 }
 
-console.log(`Velclaw live ecosystem audit PASSED: ${contract.repositories.length} repositories reachable and contract identity verified.`)
+console.log(`Velclaw live ecosystem audit PASSED: canonical identity verified; ${warnings.length} repository visibility warning(s).`)

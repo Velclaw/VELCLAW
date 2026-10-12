@@ -12,6 +12,7 @@ type Service = {
   entrypoint?: string
   buildCommand?: string
   outputDirectory?: string
+  installCommand?: string
 }
 
 type DeploymentConfig = {
@@ -26,21 +27,22 @@ const config: DeploymentConfig = JSON.parse(readFileSync(new URL('../vercel.json
 // These mappings are the deployment contract: directory casing and the distinction
 // between a framework and a runtime matter on the deployment filesystem.
 const expectedServices: Record<string, Service> = {
-  app: { root: '.', framework: 'nextjs' },
-  agentside: { root: 'AgentsIDE', framework: 'vite' },
-  autoship: { root: 'Autoship', framework: 'vite' },
+  app: { root: '.', framework: 'nextjs', installCommand: 'pnpm install --no-frozen-lockfile' },
+  agentside: { root: 'AgentsIDE', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile --prod=false' },
+  autoship: { root: 'Autoship', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile' },
   docs: {
     root: '.',
     framework: 'vite',
+    installCommand: 'pnpm install --no-frozen-lockfile',
     buildCommand: 'pip install -r docs/requirements.txt && mkdocs build',
     outputDirectory: 'site',
   },
-  kio: { root: 'KIO', runtime: 'node', entrypoint: 'server.js' },
-  velclaw: { root: 'Velclaw', framework: 'nextjs' },
-  'velclaw-docs': { root: 'velclaw-docs', framework: 'vite' },
-  'velclaw-pages': { root: 'velclaw-pages', runtime: 'node', entrypoint: 'server.js' },
-  zskai: { root: 'ZsKai', framework: 'vite' },
-  zvelclaw: { root: 'Zvelclaw', runtime: 'container' },
+  kio: { root: 'KIO', runtime: 'node', entrypoint: 'server.js', installCommand: 'pnpm install --no-frozen-lockfile' },
+  velclaw: { root: 'Velclaw', framework: 'nextjs', installCommand: 'pnpm install --no-frozen-lockfile' },
+  'velclaw-docs': { root: 'velclaw-docs', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile' },
+  'velclaw-pages': { root: 'velclaw-pages', runtime: 'node', entrypoint: 'server.js', installCommand: 'pnpm install --no-frozen-lockfile' },
+  zskai: { root: 'ZsKai', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile' },
+  zvelclaw: { root: 'Zvelclaw', runtime: 'container', installCommand: 'pnpm install --no-frozen-lockfile' },
 }
 
 test('deployment configuration declares the Vercel schema and complete service topology', () => {

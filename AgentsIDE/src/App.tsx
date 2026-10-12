@@ -18,6 +18,12 @@ import {
   TestTube2,
   Rocket,
   ExternalLink,
+  ShieldCheck,
+  LockKeyhole,
+  AlertTriangle,
+  CircleCheck,
+  Ban,
+  GitCommitHorizontal,
 } from 'lucide-react'
 import { CodeEditor } from './components/CodeEditor'
 import { FileExplorer } from './components/FileExplorer'
@@ -440,26 +446,100 @@ function Agent({
   )
 }
 function Review() {
+  const [decision, setDecision] = useState<'pending' | 'approved' | 'blocked'>('pending')
+  const checks = [
+    { label: 'Secrets & credentials', detail: 'No exposed tokens or private keys', status: 'passed' },
+    { label: 'Malware & obfuscation', detail: 'Static analysis completed in sandbox', status: 'passed' },
+    { label: 'Dependency risk', detail: '126 packages · 0 critical advisories', status: 'passed' },
+    { label: 'Production policy', detail: 'Protected files unchanged', status: 'passed' },
+  ]
+
   return (
     <section className="screen review-screen">
-      <div className="eyebrow">05 · REVIEW</div>
+      <div className="eyebrow">05 · SECURITY REVIEW AGENT</div>
       <div className="review-title">
         <div>
-          <h1>Ready for review</h1>
-          <p className="muted">No pending agent changes in this workspace.</p>
+          <h1>Autonomous gatekeeper</h1>
+          <p className="muted">Every change is scanned before it can reach production.</p>
         </div>
-        <span className="clean-badge">
-          <Check size={14} /> Clean
+        <span className={`clean-badge ${decision === 'blocked' ? 'blocked' : ''}`}>
+          {decision === 'blocked' ? <Ban size={14} /> : <ShieldCheck size={14} />}
+          {decision === 'pending' ? 'Awaiting decision' : decision === 'approved' ? 'Auto-approved' : 'Blocked'}
         </span>
       </div>
-      <div className="diff-empty">
-        <GitPullRequest size={30} />
-        <strong>Nothing to review</strong>
-        <span>Start an agent task and its file-by-file diff will appear here.</span>
+      <div className="security-hero">
+        <div className="security-icon">
+          <ShieldCheck size={25} />
+        </div>
+        <div>
+          <span className="mini-label">LOW RISK · 0.8 / 10</span>
+          <strong>Agent decision: safe to ship</strong>
+          <p>Policy v2.4 · sandbox-7f3 · 34 seconds ago</p>
+        </div>
+        <div className="decision-lock">
+          <LockKeyhole size={17} />
+          <span>Policy locked</span>
+        </div>
+      </div>
+      <div className="security-grid">
+        <div className="security-panel">
+          <div className="panel-heading">
+            <span>Automated checks</span>
+            <span className="check-count">4 / 4 passed</span>
+          </div>
+          <div className="check-list">
+            {checks.map((check) => (
+              <div className="security-check" key={check.label}>
+                <span className="check-icon">
+                  <CircleCheck size={16} />
+                </span>
+                <div>
+                  <strong>{check.label}</strong>
+                  <small>{check.detail}</small>
+                </div>
+                <span className="passed-label">PASSED</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="security-panel policy-panel">
+          <div className="panel-heading">
+            <span>Decision policy</span>
+            <span className="policy-active">ACTIVE</span>
+          </div>
+          <div className="policy-row">
+            <span>Low risk</span>
+            <strong>Auto-approve</strong>
+          </div>
+          <div className="policy-row">
+            <span>Medium risk</span>
+            <strong>Human review</strong>
+          </div>
+          <div className="policy-row">
+            <span>High / critical</span>
+            <strong className="danger-text">Block & reject</strong>
+          </div>
+          <div className="policy-note">
+            <AlertTriangle size={15} /> Auth, infra and migrations always require human review.
+          </div>
+        </div>
+      </div>
+      <div className="review-commit">
+        <div>
+          <GitCommitHorizontal size={17} />
+          <span>
+            <strong>feat: refresh deployment controls</strong>
+            <small>main · 8 files changed · signed commit</small>
+          </span>
+        </div>
+        <span className="commit-id">a81f3c2</span>
       </div>
       <div className="review-actions">
-        <button className="secondary-btn" onClick={() => {}}>
-          Request agent task
+        <button className="secondary-btn" onClick={() => setDecision('blocked')}>
+          <Ban size={15} /> Block release
+        </button>
+        <button className="primary-btn" onClick={() => setDecision('approved')}>
+          <ShieldCheck size={15} /> Approve & deploy
         </button>
       </div>
     </section>

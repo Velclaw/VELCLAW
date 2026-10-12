@@ -33,7 +33,9 @@
     "Velclaw/**",
     "ZsKai/**",
     "Zvelclaw/**",
+    "app/mcp/worker/**",
     "velclaw.cfd/docs/**",
-    "velclaw-pages/**"
+    "velclaw-pages/**",
+    "vite.config.ts"
   ]
 }
