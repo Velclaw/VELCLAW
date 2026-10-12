@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createElement, type ComponentProps } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { createRequire } from 'node:module'
+import type { ComponentProps } from 'react'
 import { MainMenuDrawer } from '../ZsKai/src/components/MainMenuDrawer'
 import { TerminalOutput } from '../ZsKai/src/components/TerminalOutput'
+
+// ZsKai intentionally uses React 18 while the monorepo root uses React 19.
+// Render with the same React/ReactDOM pair as the components to avoid invalid hook calls.
+const zskaiRequire = createRequire(new URL('../ZsKai/package.json', import.meta.url))
+const { createElement } = zskaiRequire('react') as typeof import('react')
+const { renderToStaticMarkup } = zskaiRequire('react-dom/server') as typeof import('react-dom/server')
 
 function drawerProps(isOpen: boolean): ComponentProps<typeof MainMenuDrawer> {
   const unexpectedCallback = () => assert.fail('rendering must not trigger an action callback')
