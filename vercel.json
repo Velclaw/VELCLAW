@@ -3,7 +3,8 @@
   "services": {
     "app": {
       "root": ".",
-      "framework": "nextjs"
+      "framework": "nextjs",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "agentside": {
       "root": "AgentsIDE",
@@ -13,53 +14,51 @@
     },
     "autoship": {
       "root": "Autoship",
-      "framework": "vite"
+      "framework": "vite",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "docs": {
       "root": ".",
       "framework": "vite",
+      "installCommand": "pnpm install --no-frozen-lockfile",
       "buildCommand": "pip install -r docs/requirements.txt && mkdocs build",
       "outputDirectory": "site"
     },
     "kio": {
       "root": "KIO",
       "runtime": "node",
-      "entrypoint": "server.js"
+      "entrypoint": "server.js",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "velclaw": {
       "root": "Velclaw",
-      "framework": "nextjs"
+      "framework": "nextjs",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "velclaw-docs": {
       "root": "velclaw-docs",
-      "framework": "vite"
+      "framework": "vite",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "velclaw-pages": {
       "root": "velclaw-pages",
       "runtime": "node",
-      "entrypoint": "server.js"
+      "entrypoint": "server.js",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "zskai": {
       "root": "ZsKai",
-      "framework": "vite"
+      "framework": "vite",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     },
     "zvelclaw": {
       "root": "Zvelclaw",
-      "runtime": "container"
+      "runtime": "container",
+      "installCommand": "pnpm install --no-frozen-lockfile"
     }
   },
   "rewrites": [
-    {
-      "source": "/docs/(.*)",
-      "destination": {
-        "service": "docs"
-      }
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "app"
-      }
-    }
+    { "source": "/docs/(.*)", "destination": { "service": "docs" } },
+    { "source": "/(.*)", "destination": { "service": "app" } }
   ]
 }
