@@ -9,6 +9,19 @@ export const runtime = 'nodejs'
 const headers = { 'Cache-Control': 'private, no-store, max-age=0' }
 const validName = /^[A-Za-z0-9_.-]{1,100}$/
 
+/**
+ * Reads the latest GitHub Actions run on the default branch and up to five recent deployments with their latest statuses.
+ * Returns private, non-cacheable JSON with observation timestamps. Failed Actions or deployment list requests yield
+ * `unavailable`; failed individual deployment status requests yield `unknown`, while an empty status list yields `pending`.
+ *
+ * Returns 401 without a signed-in user, 409 when no GitHub token is available, or 400 for invalid query parameters.
+ * Repository lookup failures return 404 for GitHub 404 errors and otherwise 502; GitHub 403 errors use
+ * GITHUB_ACCESS_DENIED_OR_RATE_LIMITED. Other errors caught by the outer handler also return 404 or 502 by status.
+ *
+ * @param request - Supplies session cookies and required owner/repo query parameters; each trimmed name must contain
+ * 1–100 ASCII letters, digits, underscores, periods, or hyphens.
+ * @throws If session lookup fails, including when a session cookie exists but JWE_SECRET is missing.
+ */
 export async function GET(request: NextRequest) {
   const session = await getServerSession()
   if (!session?.user?.id) {
