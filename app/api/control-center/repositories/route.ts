@@ -53,6 +53,7 @@ export async function GET() {
     return NextResponse.json(
       {
         source: 'GitHub REST API',
+        scope: 'repositories accessible to the authenticated GitHub user',
         observed_at: observedAt,
         last_checked_at: observedAt,
         complete: true,
@@ -65,7 +66,6 @@ export async function GET() {
     const status = typeof error === 'object' && error !== null && 'status' in error
       ? Number((error as { status?: unknown }).status)
       : 0
-    const responseStatus = status === 401 || status === 403 ? 502 : 502
     return NextResponse.json(
       {
         error: 'Unable to synchronize repositories from GitHub',
@@ -74,7 +74,7 @@ export async function GET() {
         observed_at: observedAt,
         last_checked_at: observedAt,
       },
-      { status: responseStatus, headers },
+      { status: 502, headers },
     )
   }
 }
