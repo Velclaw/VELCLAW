@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const headers = { 'Cache-Control': 'private, no-store, max-age=0' }
-const validName = /^[A-Za-z0-9_.-]{1,100}$/
+const validName = /^(?!\.{1,2}$)[A-Za-z0-9_.-]{1,100}$/
 
 /**
  * Reads the latest GitHub Actions run on the default branch and up to five recent deployments with their latest statuses.
@@ -39,10 +39,7 @@ export async function GET(request: NextRequest) {
   const owner = request.nextUrl.searchParams.get('owner')?.trim() ?? ''
   const repo = request.nextUrl.searchParams.get('repo')?.trim() ?? ''
   if (!validName.test(owner) || !validName.test(repo)) {
-    return NextResponse.json(
-      { error: 'Valid owner and repo query parameters are required' },
-      { status: 400, headers },
-    )
+    return NextResponse.json({ error: 'Valid owner and repo query parameters are required' }, { status: 400, headers })
   }
 
   const observedAt = new Date().toISOString()
@@ -60,12 +57,9 @@ export async function GET(request: NextRequest) {
       octokit.rest.repos.listDeployments({ owner, repo, per_page: 5 }),
     ])
 
-    const latestRun = workflowResult.status === 'fulfilled'
-      ? workflowResult.value.data.workflow_runs[0] ?? null
-      : null
-    const deployments = deploymentResult.status === 'fulfilled'
-      ? deploymentResult.value.data
-      : []
+    const latestRun =
+      workflowResult.status === 'fulfilled' ? (workflowResult.value.data.workflow_runs[0] ?? null) : null
+    const deployments = deploymentResult.status === 'fulfilled' ? deploymentResult.value.data : []
 
     const deploymentStatuses = await Promise.all(
       deployments.map(async (deployment) => {
@@ -114,8 +108,11 @@ export async function GET(request: NextRequest) {
         observed_at: observedAt,
         last_checked_at: observedAt,
         ci: {
-          state: workflowResult.status === 'rejected' ? 'unavailable' : latestRun?.conclusion ?? latestRun?.status ?? 'no-runs',
-          status: workflowResult.status === 'rejected' ? 'unavailable' : latestRun?.status ?? 'no-runs',
+          state:
+            workflowResult.status === 'rejected'
+              ? 'unavailable'
+              : (latestRun?.conclusion ?? latestRun?.status ?? 'no-runs'),
+          status: workflowResult.status === 'rejected' ? 'unavailable' : (latestRun?.status ?? 'no-runs'),
           conclusion: latestRun?.conclusion ?? null,
           head_sha: latestRun?.head_sha ?? null,
           url: latestRun?.html_url ?? null,
@@ -133,9 +130,10 @@ export async function GET(request: NextRequest) {
       { headers },
     )
   } catch (error) {
-    const status = typeof error === 'object' && error !== null && 'status' in error
-      ? Number((error as { status?: unknown }).status)
-      : 0
+    const status =
+      typeof error === 'object' && error !== null && 'status' in error
+        ? Number((error as { status?: unknown }).status)
+        : 0
     return NextResponse.json(
       {
         error: 'Unable to read CI/deployment status from GitHub',

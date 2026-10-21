@@ -73,13 +73,20 @@ export async function GET() {
       { headers },
     )
   } catch (error) {
-    const status = typeof error === 'object' && error !== null && 'status' in error
-      ? Number((error as { status?: unknown }).status)
-      : 0
+    const status =
+      typeof error === 'object' && error !== null && 'status' in error
+        ? Number((error as { status?: unknown }).status)
+        : 0
+    console.error('GitHub repository synchronization failed:', status)
     return NextResponse.json(
       {
         error: 'Unable to synchronize repositories from GitHub',
-        code: status === 403 ? 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED' : 'GITHUB_SYNC_FAILED',
+        code:
+          status === 401
+            ? 'GITHUB_TOKEN_INVALID'
+            : status === 403 || status === 429
+              ? 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED'
+              : 'GITHUB_SYNC_FAILED',
         source: 'GitHub REST API',
         observed_at: observedAt,
         last_checked_at: observedAt,

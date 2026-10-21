@@ -35,6 +35,7 @@ Endpoint `GET /api/control-center/repositories` được bổ sung trong nhánh 
 - Mỗi bản ghi chứa repository ID, full name, owner, visibility, archived, default branch, language, thời điểm cập nhật/push, nguồn dữ liệu và `observed_at`.
 - Response có `source`, `scope`, `observed_at`, `last_checked_at`, `complete` và `count`; cache đặt `private, no-store`.
 - Nếu GitHub chưa được kết nối, trả `409 GITHUB_NOT_CONNECTED`. Lỗi upstream không được thay bằng dữ liệu giả; response nêu mã lỗi tổng quát và timestamp.
+- Lỗi đồng bộ upstream trả `502`: `401` từ GitHub được ánh xạ thành `GITHUB_TOKEN_INVALID`, `403` hoặc `429` thành `GITHUB_ACCESS_DENIED_OR_RATE_LIMITED`, các lỗi khác thành `GITHUB_SYNC_FAILED`.
 - `complete: true` chỉ có nghĩa phân trang hoàn tất trong phạm vi token người dùng hiện tại; không chứng minh đã quét tất cả tài khoản hoặc tổ chức trong hệ sinh thái.
 - Endpoint `GET /api/control-center/repositories/status?owner=OWNER&repo=REPO` trả về workflow run mới nhất trên default branch và tối đa 5 GitHub deployments gần nhất kèm trạng thái mới nhất.
 - Mỗi status có nguồn dữ liệu và `observed_at`; lỗi riêng của Actions hoặc deployment được biểu diễn là `unavailable`/`unknown`, không giả lập thành công.
