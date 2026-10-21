@@ -25,6 +25,21 @@ OAuth / AI / MCP ────┘
 - Danh sách repo trong UI hiện là seed inventory, chưa được đồng bộ đầy đủ từ mọi trang API. Không được trình bày nó như danh mục hoàn chỉnh.
 - Chưa xác nhận route Control Center đã deploy, chưa xác nhận production health của route này.
 
+## Đồng bộ repository GitHub — triển khai theo nhánh
+
+Endpoint `GET /api/control-center/repositories` được bổ sung trong nhánh `feat/control-center-live-repositories`.
+
+- Yêu cầu session đăng nhập; không có session trả về `401`.
+- Dùng GitHub token của tài khoản đã kết nối thông qua `getUserGitHubToken()`; không đọc token từ client và không trả token trong payload.
+- Gọi GitHub REST API với phân trang `per_page=100`, bao gồm repository thuộc phạm vi owner/collaborator/organization member mà token người dùng được phép đọc.
+- Mỗi bản ghi chứa repository ID, full name, owner, visibility, archived, default branch, language, thời điểm cập nhật/push, nguồn dữ liệu và `observed_at`.
+- Response có `source`, `scope`, `observed_at`, `last_checked_at`, `complete` và `count`; cache đặt `private, no-store`.
+- Nếu GitHub chưa được kết nối, trả `409 GITHUB_NOT_CONNECTED`. Lỗi upstream không được thay bằng dữ liệu giả; response nêu mã lỗi tổng quát và timestamp.
+- `complete: true` chỉ có nghĩa phân trang hoàn tất trong phạm vi token người dùng hiện tại; không chứng minh đã quét tất cả tài khoản hoặc tổ chức trong hệ sinh thái.
+- Endpoint này mới đồng bộ metadata repository. CI status, GitHub deployments, Render/Vercel deployment state và UI refresh chưa được tích hợp trong thay đổi này.
+
+Trước khi hợp nhất, cần CI type-check/test/build và review cách token được cấp quyền. Không deploy production trong bước này.
+
 ## Các module
 
 1. **Overview** — số liệu tổng quan, health và cảnh báo.
@@ -49,6 +64,7 @@ OAuth / AI / MCP ────┘
 ## Lộ trình triển khai
 
 ### P0 — Inventory có thể kiểm chứng
+- [x] Tạo endpoint GitHub repository sync có session guard, phân trang và provenance metadata (nhánh PR; chưa xác minh CI).
 - [ ] Quét tất cả trang repository cho từng GitHub account/org được kết nối.
 - [ ] Ghi owner, repo ID, visibility, default branch, archived, URL và quyền đọc.
 - [ ] Lấy toàn bộ Render services/workspaces và Vercel projects/deployments.
