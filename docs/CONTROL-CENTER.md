@@ -36,7 +36,9 @@ Endpoint `GET /api/control-center/repositories` được bổ sung trong nhánh 
 - Response có `source`, `scope`, `observed_at`, `last_checked_at`, `complete` và `count`; cache đặt `private, no-store`.
 - Nếu GitHub chưa được kết nối, trả `409 GITHUB_NOT_CONNECTED`. Lỗi upstream không được thay bằng dữ liệu giả; response nêu mã lỗi tổng quát và timestamp.
 - `complete: true` chỉ có nghĩa phân trang hoàn tất trong phạm vi token người dùng hiện tại; không chứng minh đã quét tất cả tài khoản hoặc tổ chức trong hệ sinh thái.
-- Endpoint này mới đồng bộ metadata repository. CI status, GitHub deployments, Render/Vercel deployment state và UI refresh chưa được tích hợp trong thay đổi này.
+- Endpoint `GET /api/control-center/repositories/status?owner=OWNER&repo=REPO` trả về workflow run mới nhất trên default branch và tối đa 5 GitHub deployments gần nhất kèm trạng thái mới nhất.
+- Mỗi status có nguồn dữ liệu và `observed_at`; lỗi riêng của Actions hoặc deployment được biểu diễn là `unavailable`/`unknown`, không giả lập thành công.
+- Các endpoint này chưa được nối vào UI và chưa đồng bộ trạng thái Render/Vercel; danh mục live hiện vẫn giới hạn ở GitHub token của người dùng đăng nhập.
 
 Trước khi hợp nhất, cần CI type-check/test/build và review cách token được cấp quyền. Không deploy production trong bước này.
 
@@ -64,7 +66,8 @@ Trước khi hợp nhất, cần CI type-check/test/build và review cách token
 ## Lộ trình triển khai
 
 ### P0 — Inventory có thể kiểm chứng
-- [x] Tạo endpoint GitHub repository sync có session guard, phân trang và provenance metadata (nhánh PR; chưa xác minh CI).
+- [x] Tạo endpoint GitHub repository sync có session guard, phân trang và provenance metadata (nhánh PR; CI chưa xác minh).
+- [x] Tạo endpoint đọc trạng thái GitHub Actions và GitHub deployments theo repository (nhánh PR; CI chưa xác minh).
 - [ ] Quét tất cả trang repository cho từng GitHub account/org được kết nối.
 - [ ] Ghi owner, repo ID, visibility, default branch, archived, URL và quyền đọc.
 - [ ] Lấy toàn bộ Render services/workspaces và Vercel projects/deployments.
