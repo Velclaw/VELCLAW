@@ -8,6 +8,17 @@ export const runtime = 'nodejs'
 
 const headers = { 'Cache-Control': 'private, no-store, max-age=0' }
 
+/**
+ * Return all repositories accessible to the signed-in user's GitHub token, newest updated first.
+ * The private, non-cacheable JSON includes repository metadata and ISO observation timestamps
+ * captured before fetching; `complete` means pagination finished within that token's scope.
+ *
+ * Return 401 without a signed-in user, 409 when no token can be retrieved (including token
+ * lookup or decryption failures), or 502 when synchronization fails. GitHub 403 errors use
+ * GITHUB_ACCESS_DENIED_OR_RATE_LIMITED; other synchronization errors use GITHUB_SYNC_FAILED.
+ *
+ * @throws If session retrieval fails, including a missing JWE secret when a session cookie is present.
+ */
 export async function GET() {
   const session = await getServerSession()
   if (!session?.user?.id) {

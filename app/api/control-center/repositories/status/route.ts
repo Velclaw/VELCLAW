@@ -9,6 +9,23 @@ export const runtime = 'nodejs'
 const headers = { 'Cache-Control': 'private, no-store, max-age=0' }
 const validName = /^[A-Za-z0-9_.-]{1,100}$/
 
+/**
+ * Return the latest GitHub Actions run on the default branch and up to five recent deployments
+ * with their latest statuses, using the signed-in user's GitHub token. JSON responses are private
+ * and non-cacheable; ISO observation timestamps are captured before fetching repository data.
+ *
+ * Failed Actions or deployment list requests produce `unavailable` sections in a successful response.
+ * No workflow runs yields `no-runs`; a deployment without statuses is `pending`, while a failed
+ * deployment status lookup yields `unknown`.
+ *
+ * @param request - Supplies the token lookup's session cookie and required `owner` and `repo` query
+ * parameters, each trimmed and limited to 1–100 ASCII letters, digits, underscores, periods, or hyphens.
+ * @returns JSON with 401 without a signed-in user, 409 when no token can be retrieved (including
+ * token lookup or decryption failures), or 400 for invalid names after authentication. Repository
+ * lookup failures return 404 for GitHub 404 errors, otherwise 502; GitHub 403 errors use
+ * GITHUB_ACCESS_DENIED_OR_RATE_LIMITED. Successful responses contain CI and deployment metadata.
+ * @throws If session retrieval fails, including a missing JWE secret when a session cookie is present.
+ */
 export async function GET(request: NextRequest) {
   const session = await getServerSession()
   if (!session?.user?.id) {
