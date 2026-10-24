@@ -1,0 +1,8 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "velclaw-mcp-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "preview_urls": false
+}
