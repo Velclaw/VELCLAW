@@ -65,11 +65,13 @@ export function VelclawPluginsPage() {
                 <PlugZap className="h-5 w-5 text-violet-300" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-violet-300">VELCLAW / EXTENSIONS</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-violet-300">
+                  VELCLAW / EXTENSIONS
+                </p>
                 <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Skills & Plugins</h1>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                  Khám phá và quản lý registry tích hợp cho Claude, OpenAI Codex, Sandbox ChatGPT, Gemini, MCP và các dịch vụ
-                  hỗ trợ quy trình phát triển của Velclaw.
+                  Khám phá và quản lý registry tích hợp cho Claude, OpenAI Codex, Sandbox ChatGPT, Gemini, MCP và các
+                  dịch vụ hỗ trợ quy trình phát triển của Velclaw.
                 </p>
               </div>
             </div>
@@ -168,7 +170,10 @@ export function VelclawPluginsPage() {
           {filteredIntegrations.length ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {filteredIntegrations.map((integration) => (
-                <Card key={integration.id} className="flex min-w-0 flex-col border-border/80 transition-colors hover:border-violet-400/50">
+                <Card
+                  key={integration.id}
+                  className="flex min-w-0 flex-col border-border/80 transition-colors hover:border-violet-400/50"
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-violet-400/30 bg-violet-500/10">
@@ -177,7 +182,11 @@ export function VelclawPluginsPage() {
                       <span
                         className={`inline-flex items-center gap-1 border px-2 py-1 font-mono text-[9px] uppercase tracking-wider ${integration.status === 'available' ? 'border-emerald-400/40 text-emerald-300' : 'border-border text-muted-foreground'}`}
                       >
-                        {integration.status === 'available' ? <CheckCircle2 className="h-3 w-3" /> : <Network className="h-3 w-3" />}
+                        {integration.status === 'available' ? (
+                          <CheckCircle2 className="h-3 w-3" />
+                        ) : (
+                          <Network className="h-3 w-3" />
+                        )}
                         {integration.status}
                       </span>
                     </div>
@@ -188,7 +197,10 @@ export function VelclawPluginsPage() {
                     <div className="text-muted-foreground">{kindLabels[integration.kind] ?? integration.kind}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {(integration.capabilities ?? []).map((capability) => (
-                        <span key={capability} className="border border-border bg-background px-2 py-1 font-mono text-[9px] text-muted-foreground">
+                        <span
+                          key={capability}
+                          className="border border-border bg-background px-2 py-1 font-mono text-[9px] text-muted-foreground"
+                        >
                           {capability}
                         </span>
                       ))}
@@ -196,7 +208,12 @@ export function VelclawPluginsPage() {
                     <div className="mt-auto border-t border-border pt-3">
                       <p className="mb-2 break-all font-mono text-[10px] text-muted-foreground">{integration.source}</p>
                       {integration.source.startsWith('http') ? (
-                        <a className="inline-flex items-center gap-1 text-violet-300 hover:underline" href={integration.source} target="_blank" rel="noreferrer">
+                        <a
+                          className="inline-flex items-center gap-1 text-violet-300 hover:underline"
+                          href={integration.source}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Mở trang dịch vụ <ExternalLink className="h-3 w-3" />
                         </a>
                       ) : (
@@ -230,9 +247,9 @@ export function VelclawPluginsPage() {
         <section className="border border-border bg-card p-4 text-xs leading-5 text-muted-foreground">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-300">Trạng thái triển khai</p>
           <p className="mt-2">
-            Đây là registry giao diện và metadata. Các tích hợp mang trạng thái Planned chưa được kết nối runtime hoặc OAuth
-            chỉ vì chúng xuất hiện ở đây. Kết nối thật cần adapter, quyền truy cập và cấu hình bí mật tương ứng; trang này
-            không giả lập nút cài đặt hay báo kết nối thành công.
+            Đây là registry giao diện và metadata. Các tích hợp mang trạng thái Planned chưa được kết nối runtime hoặc
+            OAuth chỉ vì chúng xuất hiện ở đây. Kết nối thật cần adapter, quyền truy cập và cấu hình bí mật tương ứng;
+            trang này không giả lập nút cài đặt hay báo kết nối thành công.
           </p>
         </section>
       </div>
