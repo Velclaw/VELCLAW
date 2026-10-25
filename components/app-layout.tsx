@@ -79,7 +79,7 @@ function SidebarLoader({ width }: { width: number }) {
 
 export function AppLayout({ children, initialSidebarWidth, initialSidebarOpen, initialIsMobile }: AppLayoutProps) {
   const pathname = usePathname()
-  const isStandalone = pathname === '/' || pathname === '/docs' || pathname.startsWith('/docs/')
+  const isStandalone = pathname === '/' || pathname === '/docs' || pathname?.startsWith('/docs/')
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => (initialIsMobile ? false : (initialSidebarOpen ?? true)))

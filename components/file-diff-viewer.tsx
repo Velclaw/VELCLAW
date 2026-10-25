@@ -43,7 +43,7 @@ export function FileDiffViewer({
   onFileLoaded,
 }: FileDiffViewerProps) {
   const params = useParams()
-  const taskId = taskIdProp || (params.taskId as string)
+  const taskId = taskIdProp || (params?.taskId as string)
 
   const [diffData, setDiffData] = useState<DiffData | null>(null)
   const [loading, setLoading] = useState(false)

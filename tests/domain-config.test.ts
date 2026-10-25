@@ -11,7 +11,7 @@ import {
 } from '../lib/velclaw/domain-config'
 
 test('domain configuration defaults each surface to its designated first-party origin', () => {
-  const config = createVelclawDomainConfig()
+  const config = createVelclawDomainConfig({})
 
   assert.deepEqual(VELCLAW_DOMAIN_ROLES, {
     platform: 'https://velclaw.site',

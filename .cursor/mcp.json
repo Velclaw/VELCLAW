@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "velclaw": {
+      "url": "https://mcp.velclaw.site/mcp",
+      "description": "Velclaw MCP — status, capabilities, and ecosystem tools (read-only by default). Authenticate via Cloudflare Access on first connect."
+    }
+  }
+}

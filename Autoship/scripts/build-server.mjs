@@ -5,8 +5,9 @@ import { build } from 'esbuild'
 
 const root = process.cwd()
 const source = fs.readFileSync(path.join(root, 'server.ts'), 'utf8')
-const marker = 'app.use(express.json());'
-if (!source.includes(marker)) throw new Error(`Autoship server marker not found: ${marker}`)
+const markerMatch = source.match(/app\.use\(express\.json\(\)\);?/)
+if (!markerMatch) throw new Error('Autoship server JSON middleware marker not found')
+const marker = markerMatch[0]
 
 const middleware = `
 const autoshipAllowedOrigins = (process.env.AUTOSHIP_CORS_ORIGINS || process.env.APP_URL || '*').split(',').map(value => value.trim()).filter(Boolean)
@@ -35,12 +36,13 @@ app.use('/api', (req, res, next) => {
 })
 `
 
-const importMarker = "import dotenv from 'dotenv';"
-if (!source.includes(importMarker)) throw new Error('dotenv import marker not found')
+const importMatch = source.match(/import dotenv from ['"]dotenv['"];?/)
+if (!importMatch) throw new Error('dotenv import marker not found')
+const importMarker = importMatch[0]
 const runnerPath = path.join(root, 'src/runner/pipeline-runner.mjs')
 const statePath = path.join(root, 'src/state/state-store.mjs')
 let transformed = source.replace(importMarker, `${importMarker}\nimport { runRealPipeline } from ${JSON.stringify(runnerPath)};\nimport { loadState, saveState, persistenceEnabled } from ${JSON.stringify(statePath)};`)
-transformed = transformed.replace("const __filename = fileURLToPath(import.meta.url);\nconst __dirname = path.dirname(__filename);", "const __dirname = process.cwd();")
+transformed = transformed.replace(/const __filename = fileURLToPath\(import\.meta\.url\);?\s*const __dirname = path\.dirname\(__filename\);?/, "const __dirname = process.cwd();")
 transformed = transformed.replace(marker, "app.use(express.json({ verify: (req, _res, buf) => { req.rawBody = Buffer.from(buf); } }));" + middleware)
 
 const healthMarker = "// 1. Projects API"
@@ -52,8 +54,9 @@ if (!transformed.includes(upsertMarker)) throw new Error('pipeline API marker no
 const upsertRoute = `app.post('/api/projects/upsert', (req: Request, res: Response) => {\n  const body = req.body || {};\n  if (!body.repoUrl) return res.status(400).json({ error: 'repoUrl is required' });\n  const repoUrl = String(body.repoUrl).replace(/\\/$/, '');\n  const existing = projects.find((p) => p.repoUrl.replace(/\\/$/, '') === repoUrl);\n  if (existing) return res.json({ project: existing, created: false });\n  const project: DeploymentProject = {\n    id: 'proj-' + crypto.createHash('sha256').update(repoUrl).digest('hex').slice(0, 16), name: body.name || repoUrl.split('/').pop()?.replace(/\\.git$/, '') || 'project', repoUrl, branch: body.branch || 'main', target: body.target || 'static-server', serverIp: body.serverIp || '', serverPort: Number(body.serverPort) || 22, serverUser: body.serverUser || 'root', deployPath: body.deployPath || '', dockerfilePath: body.dockerfilePath || '', webhookUrl: body.webhookUrl || '', healthcheckUrl: body.healthcheckUrl || '', webhookSecret: body.webhookSecret || 'whsec_' + crypto.randomBytes(16).toString('hex'), autoDeployOnPush: body.autoDeployOnPush !== false, notifyOnSuccess: body.notifyOnSuccess !== false, notifyOnFailure: body.notifyOnFailure !== false, framework: body.framework || 'react-vite', buildCommand: body.buildCommand || 'npm ci && npm run build', startCommand: body.startCommand || '', envVariables: body.envVariables || [], createdAt: new Date().toISOString(), totalBuilds: 0\n  };\n  projects.unshift(project); res.status(201).json({ project, created: true });\n});\n\n`
 transformed = transformed.replace(upsertMarker, upsertRoute + upsertMarker)
 
-const webhookMarker = '  const payload = req.body || {};'
-if (!transformed.includes(webhookMarker)) throw new Error('webhook payload marker not found')
+const webhookMatch = transformed.match(/  const payload = req\.body \|\| \{\};?/)
+if (!webhookMatch) throw new Error('webhook payload marker not found')
+const webhookMarker = webhookMatch[0]
 const webhookVerification = `${webhookMarker}\n\n  if (githubEvent !== 'ping') {\n    const secret = project.webhookSecret || ''; const signature = githubSignature || '';\n    if (!secret || !signature.startsWith('sha256=')) return res.status(401).json({ error: 'Invalid GitHub webhook signature' });\n    const expected = 'sha256=' + crypto.createHmac('sha256', secret).update((req as any).rawBody || Buffer.from(JSON.stringify(payload))).digest('hex');\n    const a = Buffer.from(signature); const b = Buffer.from(expected);\n    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return res.status(401).json({ error: 'Invalid GitHub webhook signature' });\n  }`
 transformed = transformed.replace(webhookMarker, webhookVerification)
 transformed = transformed.replace("payload.head_commit?.id?.slice(0, 7)", "payload.head_commit?.id")

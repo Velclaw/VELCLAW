@@ -22,7 +22,9 @@ export type AutoshipRun = {
   errorMessage?: string
 }
 
-const configuredBaseUrl = (import.meta.env.VITE_AUTOSHIP_URL as string | undefined)?.trim()
+const configuredBaseUrl = (
+  import.meta as ImportMeta & { env?: Record<string, string | undefined> }
+).env?.VITE_AUTOSHIP_URL?.trim()
 export const AUTOSHIP_URL = (
   configuredBaseUrl || 'https://autoship-control-plane-gateway.nvht25052002.workers.dev'
 ).replace(/\/$/, '')
