@@ -1,84 +1,84 @@
-import { createMcpHandler } from "agents/mcp/server";
-import { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
+import { createMcpHandler } from 'agents/mcp/server'
+import { McpServer } from '@modelcontextprotocol/server'
+import { z } from 'zod'
 
 interface Env {
-  MCP_AUTH_TOKEN?: string;
+  MCP_AUTH_TOKEN?: string
 }
 
 function createServer() {
   const server = new McpServer({
-    name: "velclaw-mcp",
-    version: "0.1.0",
-  });
+    name: 'velclaw-mcp',
+    version: '0.1.0',
+  })
 
   server.registerTool(
-    "ping",
+    'ping',
     {
-      description: "Check whether the Velclaw MCP server is responding.",
+      description: 'Check whether the Velclaw MCP server is responding.',
       inputSchema: {},
     },
     async () => ({
-      content: [{ type: "text" as const, text: "pong" }],
+      content: [{ type: 'text' as const, text: 'pong' }],
     }),
-  );
+  )
 
   server.registerTool(
-    "echo",
+    'echo',
     {
-      description: "Return the supplied message without modifying it.",
-      inputSchema: { message: z.string().describe("Text to echo back") },
+      description: 'Return the supplied message without modifying it.',
+      inputSchema: { message: z.string().describe('Text to echo back') },
     },
     async ({ message }) => ({
-      content: [{ type: "text" as const, text: message }],
+      content: [{ type: 'text' as const, text: message }],
     }),
-  );
+  )
 
   server.registerTool(
-    "get_time",
+    'get_time',
     {
-      description: "Return the current server time in ISO 8601 UTC format.",
+      description: 'Return the current server time in ISO 8601 UTC format.',
       inputSchema: {},
     },
     async () => ({
-      content: [{ type: "text" as const, text: new Date().toISOString() }],
+      content: [{ type: 'text' as const, text: new Date().toISOString() }],
     }),
-  );
+  )
 
-  return server;
+  return server
 }
 
-const mcpHandler = createMcpHandler(createServer);
+const mcpHandler = createMcpHandler(createServer)
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
+    const url = new URL(request.url)
 
-    if (url.pathname === "/health") {
+    if (url.pathname === '/health') {
       return Response.json({
         ok: true,
-        service: "velclaw-mcp",
-        endpoint: "/mcp",
+        service: 'velclaw-mcp',
+        endpoint: '/mcp',
         authConfigured: Boolean(env.MCP_AUTH_TOKEN),
-      });
+      })
     }
 
-    if (url.pathname !== "/mcp") {
-      return Response.json({ error: "Not found" }, { status: 404 });
+    if (url.pathname !== '/mcp') {
+      return Response.json({ error: 'Not found' }, { status: 404 })
     }
 
     // Configure MCP_AUTH_TOKEN as a Worker secret to require bearer authentication.
     // Keep this sample server limited to non-sensitive tools until portal auth is verified.
     if (env.MCP_AUTH_TOKEN) {
-      const authorization = request.headers.get("Authorization");
+      const authorization = request.headers.get('Authorization')
       if (authorization !== `Bearer ${env.MCP_AUTH_TOKEN}`) {
-        return new Response("Unauthorized", {
+        return new Response('Unauthorized', {
           status: 401,
-          headers: { "WWW-Authenticate": "Bearer" },
-        });
+          headers: { 'WWW-Authenticate': 'Bearer' },
+        })
       }
     }
 
-    return mcpHandler(request, env, ctx);
+    return mcpHandler(request, env, ctx)
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<Env>

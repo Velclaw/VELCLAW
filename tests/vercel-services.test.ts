@@ -40,7 +40,12 @@ const expectedServices: Record<string, Service> = {
   kio: { root: 'KIO', runtime: 'node', entrypoint: 'server.js', installCommand: 'pnpm install --no-frozen-lockfile' },
   velclaw: { root: 'Velclaw', framework: 'nextjs', installCommand: 'pnpm install --no-frozen-lockfile' },
   'velclaw-docs': { root: 'velclaw-docs', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile' },
-  'velclaw-pages': { root: 'velclaw-pages', runtime: 'node', entrypoint: 'server.js', installCommand: 'pnpm install --no-frozen-lockfile' },
+  'velclaw-pages': {
+    root: 'velclaw-pages',
+    runtime: 'node',
+    entrypoint: 'server.js',
+    installCommand: 'pnpm install --no-frozen-lockfile',
+  },
   zskai: { root: 'ZsKai', framework: 'vite', installCommand: 'pnpm install --no-frozen-lockfile' },
   zvelclaw: { root: 'Zvelclaw', runtime: 'container', installCommand: 'pnpm install --no-frozen-lockfile' },
 }
