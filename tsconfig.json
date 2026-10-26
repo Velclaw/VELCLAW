@@ -34,6 +34,7 @@
     "ZsKai/**",
     "Zvelclaw/**",
     "app/mcp/worker/**",
+    "dashboard-skeleton/**",
     "velclaw.cfd/docs/**",
     "velclaw-pages/**",
     "vite.config.ts"
