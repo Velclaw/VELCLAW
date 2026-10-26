@@ -37,6 +37,7 @@
     "dashboard-skeleton/**",
     "velclaw.cfd/docs/**",
     "velclaw-pages/**",
+    "dashboard-skeleton/**",
     "vite.config.ts"
   ]
 }
