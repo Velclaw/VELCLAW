@@ -291,15 +291,15 @@ for (const count of [0, 101]) {
   })
 }
 
-for (const [label, error, denied] of [
-  ['access denied or rate limited', { status: 403, message: token }, true],
-  ['string access-denied status', { status: '403', message: token }, true],
-  ['expired credentials', { status: 401, message: token }, false],
-  ['missing upstream resource', { status: 404, message: token }, false],
-  ['upstream failure', { status: 500, message: token }, false],
-  ['network error', new Error(token), false],
-  ['null rejection', null, false],
-  ['string rejection', token, false],
+for (const [label, error, expectedCode] of [
+  ['access denied or rate limited', { status: 403, message: token }, 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED'],
+  ['string access-denied status', { status: '403', message: token }, 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED'],
+  ['expired credentials', { status: 401, message: token }, 'GITHUB_TOKEN_INVALID'],
+  ['missing upstream resource', { status: 404, message: token }, 'GITHUB_SYNC_FAILED'],
+  ['upstream failure', { status: 500, message: token }, 'GITHUB_SYNC_FAILED'],
+  ['network error', new Error(token), 'GITHUB_SYNC_FAILED'],
+  ['null rejection', null, 'GITHUB_SYNC_FAILED'],
+  ['string rejection', token, 'GITHUB_SYNC_FAILED'],
 ] as const) {
   test(`inventory sanitizes ${label} and never reports a complete sync`, async (t) => {
     const harness = createHarness(t)
@@ -316,11 +316,7 @@ for (const [label, error, denied] of [
     assertObservedAt(body.observed_at, before, after)
     assert.deepEqual(body, {
       error: 'Unable to synchronize repositories from GitHub',
-      code: denied
-        ? 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED'
-        : error && typeof error === 'object' && 'status' in error && Number(error.status) === 401
-          ? 'GITHUB_TOKEN_INVALID'
-          : 'GITHUB_SYNC_FAILED',
+      code: expectedCode,
       source: 'GitHub REST API',
       observed_at: body.observed_at,
       last_checked_at: body.observed_at,
