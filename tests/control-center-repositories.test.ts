@@ -316,7 +316,7 @@ for (const [label, error, denied] of [
     assertObservedAt(body.observed_at, before, after)
     assert.deepEqual(body, {
       error: 'Unable to synchronize repositories from GitHub',
-      code: denied ? 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED' : 'GITHUB_SYNC_FAILED',
+      code: denied ? 'GITHUB_ACCESS_DENIED_OR_RATE_LIMITED' : error && typeof error === 'object' && 'status' in error && Number((error as { status?: unknown }).status) === 401 ? 'GITHUB_TOKEN_INVALID' : 'GITHUB_SYNC_FAILED',
       source: 'GitHub REST API',
       observed_at: body.observed_at,
       last_checked_at: body.observed_at,
