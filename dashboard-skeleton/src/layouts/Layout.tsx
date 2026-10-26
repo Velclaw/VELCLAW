@@ -17,8 +17,12 @@ export default function Layout() {
     <div className="app">
       <aside className="sidebar">
         <div className="sidebar-header">VELCLAW</div>
-        {nav.map(item => (
-          <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+        {nav.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
             {item.label}
           </NavLink>
         ))}
