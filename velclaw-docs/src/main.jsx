@@ -6,7 +6,7 @@ import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/docs.velclaw.ai">
       <App />
     </BrowserRouter>
   </StrictMode>,
