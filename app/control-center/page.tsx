@@ -331,6 +331,12 @@ export default function ControlCenterPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" /> Connected accounts
               </span>
               <a
+                className="rounded-xl border border-violet-300/40 bg-violet-400/10 px-3 py-2 text-xs text-violet-100 hover:bg-violet-400/20"
+                href="/deploy/engine"
+              >
+                Deploy OCodeJS ↗
+              </a>
+              <a
                 className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:bg-white/5"
                 href="https://github.com/Velclaw/VELCLAW"
               >
