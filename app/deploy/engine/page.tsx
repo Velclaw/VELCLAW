@@ -14,7 +14,14 @@ interface Deployment {
   error: string | null
   createdAt: string
 }
-type DeploymentTarget = { projectName: string; repoUrl: string; branch: string; path: string; destination: string; description: string }
+type DeploymentTarget = {
+  projectName: string
+  repoUrl: string
+  branch: string
+  path: string
+  destination: string
+  description: string
+}
 const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
   {
     projectName: 'ask-ocodejs',
@@ -239,7 +246,11 @@ export default function VelclawDeployEnginePage() {
                   {PIPELINE.map((stage, i) => (
                     <div
                       key={stage}
-                      className={`border p-2 font-mono text-[9px] uppercase ${i + 1 <= current ? 'border-violet-400/60 bg-violet-500/10 text-violet-200' : 'border-border text-muted-foreground'}`}
+                      className={`border p-2 font-mono text-[9px] uppercase ${
+                        i + 1 <= current
+                          ? 'border-violet-400/60 bg-violet-500/10 text-violet-200'
+                          : 'border-border text-muted-foreground'
+                      }`}
                     >
                       <span className="block">{String(i + 1).padStart(2, '0')}</span>
                       {stage}
@@ -247,7 +258,9 @@ export default function VelclawDeployEnginePage() {
                   ))}
                 </div>
                 {d.status === 'waiting_approval' && (
-                  <div className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3">
+                  <div
+                    className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3"
+                  >
                     <span className="text-xs">Production deployment is blocked until approved.</span>
                     <button
                       type="button"
@@ -284,7 +297,9 @@ export default function VelclawDeployEnginePage() {
                   </a>
                 )}
                 {d.error && <p className="mt-2 text-xs text-red-300">{d.error}</p>}
-                <pre className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground">
+                <pre
+                  className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground"
+                >
                   {(d.logs || []).join('\n')}
                 </pre>
               </article>
