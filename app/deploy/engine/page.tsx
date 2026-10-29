@@ -14,13 +14,30 @@ interface Deployment {
   error: string | null
   createdAt: string
 }
-type DeploymentTarget = { projectName: string; repoUrl: string; branch: string; path: string; description: string }
+type DeploymentTarget = { projectName: string; repoUrl: string; branch: string; path: string; destination: string; description: string }
 const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
+  {
+    projectName: 'ask-ocodejs',
+    repoUrl: 'https://github.com/zskbot/ask-ocodejs.git',
+    branch: 'main',
+    path: '/OCodejs',
+    destination: 'Velclaw Host provider assigns the deployment URL after a successful build',
+    description: 'Ask OCode.js application · primary deployment target',
+  },
+  {
+    projectName: 'ocodejs-docs',
+    repoUrl: 'https://github.com/OCodejs/docs-ocodejs.git',
+    branch: 'main',
+    path: '/docs-ocodejs',
+    destination: 'Docs preview/deployment URL is returned by the configured provider',
+    description: 'OCode.js documentation · separate deploy target',
+  },
   {
     projectName: 'velclaw-pages',
     repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git',
     branch: 'main',
     path: '/',
+    destination: 'https://velclaw.cfd/',
     description: 'Velclaw public product landing',
   },
   {
@@ -28,6 +45,7 @@ const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
     repoUrl: 'https://github.com/Velclaw/velclaw.cfd/docs.git',
     branch: 'main',
     path: '/docs',
+    destination: 'https://velclaw.cfd/docs',
     description: 'Velclaw documentation surface',
   },
 ]
@@ -137,7 +155,7 @@ export default function VelclawDeployEnginePage() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300">Deployment target</p>
                   <h2 className="mt-1 text-lg font-semibold">{t.projectName}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {t.description} → <span className="font-mono text-violet-300">https://velclaw.cfd{t.path}</span>.
+                    {t.description} → <span className="font-mono text-violet-300">{t.destination}</span>.
                   </p>
                 </div>
                 <button
