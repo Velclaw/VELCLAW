@@ -1041,7 +1041,10 @@ export function TaskChat({ taskId, task }: TaskChatProps) {
                                   code: (rendererProps: any) => {
                                     const { className, children, ...props } = rendererProps
                                     return (
-                                      <code className={`${typeof className === 'string' ? className : ''} !text-xs`} {...props}>
+                                      <code
+                                        className={`${typeof className === 'string' ? className : ''} !text-xs`}
+                                        {...props}
+                                      >
                                         {children}
                                       </code>
                                     )
