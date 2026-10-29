@@ -34,8 +34,12 @@
       "destination": "/docs/$1"
     },
     {
+      "source": "/docs-ocodejs",
+      "destination": "https://ocodejs-docs.vercel.app/"
+    },
+    {
       "source": "/docs-ocodejs/(.*)",
-      "destination": "https://ocode.js/$1"
+      "destination": "https://ocodejs-docs.vercel.app/$1"
     },
     {
       "source": "/api/(.*)",
