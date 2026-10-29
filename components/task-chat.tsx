@@ -1038,12 +1038,11 @@ export function TaskChat({ taskId, task }: TaskChatProps) {
                             return (
                               <Streamdown
                                 components={{
-                                  code: (rendererProps: Record<string, unknown> & { className?: unknown; children?: unknown }) => {
+                                  code: (rendererProps: any) => {
                                     const { className, children, ...props } = rendererProps
-                                    const safeClassName = typeof className === 'string' ? className : ''
                                     return (
-                                      <code className={`${safeClassName} !text-xs`} {...props}>
-                                        {children as React.ReactNode}
+                                      <code className={`${typeof className === 'string' ? className : ''} !text-xs`} {...props}>
+                                        {children}
                                       </code>
                                     )
                                   },
