@@ -49,7 +49,7 @@ const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
   },
   {
     projectName: 'velclaw-docs',
-    repoUrl: 'https://github.com/Velclaw/velclaw.cfd/docs.git',
+    repoUrl: 'https://github.com/Velclaw/docs.velclaw.ai.git',
     branch: 'main',
     path: '/docs',
     destination: 'https://velclaw.cfd/docs',
