@@ -18,11 +18,7 @@ export default function Layout() {
       <aside className="sidebar">
         <div className="sidebar-header">VELCLAW</div>
         {nav.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-          >
+          <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
             {item.label}
           </NavLink>
         ))}

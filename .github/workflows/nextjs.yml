@@ -34,5 +34,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       - name: Type-check
         run: pnpm type-check
+      - name: Unit and integration tests
+        run: pnpm test
       - name: Build Next.js application
         run: pnpm build

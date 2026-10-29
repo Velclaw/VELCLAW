@@ -30,10 +30,7 @@ const principles = [
   ['03', 'Có bằng chứng', 'Build, test, review và deployment tạo thành một chuỗi trạng thái có thể kiểm tra.'],
 ] as const
 
-const domainIdentity: Record<
-  VelclawDomainRole,
-  { label: string; descriptor: string; cta: string; ctaHref: string }
-> = {
+const domainIdentity: Record<VelclawDomainRole, { label: string; descriptor: string; cta: string; ctaHref: string }> = {
   platform: {
     label: 'velclaw.app',
     descriptor: 'Platform & company',
@@ -98,7 +95,9 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
         </nav>
 
         <div className={styles.authActions}>
-          <Link className={styles.signIn} href="/auth/signin">Đăng nhập</Link>
+          <Link className={styles.signIn} href="/auth/signin">
+            Đăng nhập
+          </Link>
         </div>
       </header>
 
