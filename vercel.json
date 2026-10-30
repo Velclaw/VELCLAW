@@ -1,73 +1,89 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "app": {
-      "root": ".",
-      "framework": "nextjs",
-      "installCommand": "pnpm install --no-frozen-lockfile"
+  "framework": "nextjs",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "redirects": [
+    {
+      "source": "/OCodejs",
+      "destination": "/OCodejs/",
+      "permanent": true
     },
-    "agentside": {
-      "root": "AgentsIDE",
-      "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile --prod=false"
+    {
+      "source": "/docs.velclaw.ai",
+      "destination": "/docs.velclaw.ai/",
+      "permanent": true
     },
-    "autoship": {
-      "root": "Autoship",
-      "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "docs": {
-      "root": ".",
-      "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile",
-      "buildCommand": "pip install -r docs/requirements.txt && mkdocs build",
-      "outputDirectory": "site"
-    },
-    "kio": {
-      "root": "KIO",
-      "runtime": "node",
-      "entrypoint": "server.js",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "velclaw": {
-      "root": "Velclaw",
-      "framework": "nextjs",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "velclaw-docs": {
-      "root": "velclaw-docs",
-      "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "velclaw-pages": {
-      "root": "velclaw-pages",
-      "runtime": "node",
-      "entrypoint": "server.js",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "zskai": {
-      "root": "ZsKai",
-      "framework": "vite",
-      "installCommand": "pnpm install --no-frozen-lockfile"
-    },
-    "zvelclaw": {
-      "root": "Zvelclaw",
-      "runtime": "container",
-      "installCommand": "pnpm install --no-frozen-lockfile"
+    {
+      "source": "/docs-ocodejs",
+      "destination": "/docs-ocodejs/",
+      "permanent": true
     }
-  },
+  ],
   "rewrites": [
     {
-      "source": "/docs/(.*)",
-      "destination": {
-        "service": "docs"
-      }
+      "source": "/OCodejs/(.*)",
+      "destination": "https://ask-ocodejs.vercel.app/OCodejs/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": {
-        "service": "app"
-      }
+      "source": "/docs.velclaw.ai",
+      "destination": "/docs"
+    },
+    {
+      "source": "/docs.velclaw.ai/(.*)",
+      "destination": "/docs/$1"
+    },
+    {
+      "source": "/docs-ocodejs",
+      "destination": "https://ocodejs-docs.vercel.app/"
+    },
+    {
+      "source": "/docs-ocodejs/(.*)",
+      "destination": "https://ocodejs-docs.vercel.app/$1"
+    },
+    {
+      "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "referer",
+          "value": ".*/OCodejs.*"
+        }
+      ],
+      "destination": "https://ask-ocodejs.vercel.app/api/$1"
+    },
+    {
+      "source": "/v1/chat",
+      "has": [
+        {
+          "type": "header",
+          "key": "referer",
+          "value": ".*/OCodejs.*"
+        }
+      ],
+      "destination": "https://ask-ocodejs.vercel.app/v1/chat"
+    },
+    {
+      "source": "/chat",
+      "has": [
+        {
+          "type": "header",
+          "key": "referer",
+          "value": ".*/OCodejs.*"
+        }
+      ],
+      "destination": "https://ask-ocodejs.vercel.app/chat"
+    },
+    {
+      "source": "/health",
+      "has": [
+        {
+          "type": "header",
+          "key": "referer",
+          "value": ".*/OCodejs.*"
+        }
+      ],
+      "destination": "https://ask-ocodejs.vercel.app/health"
     }
   ]
 }

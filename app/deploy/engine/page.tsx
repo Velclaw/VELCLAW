@@ -14,13 +14,37 @@ interface Deployment {
   error: string | null
   createdAt: string
 }
-type DeploymentTarget = { projectName: string; repoUrl: string; branch: string; path: string; description: string }
+type DeploymentTarget = {
+  projectName: string
+  repoUrl: string
+  branch: string
+  path: string
+  destination: string
+  description: string
+}
 const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
+  {
+    projectName: 'ask-ocodejs',
+    repoUrl: 'https://github.com/zskbot/ask-ocodejs.git',
+    branch: 'main',
+    path: '/OCodejs',
+    destination: 'Velclaw Host provider assigns the deployment URL after a successful build',
+    description: 'Ask OCode.js application · primary deployment target',
+  },
+  {
+    projectName: 'ocodejs-docs',
+    repoUrl: 'https://github.com/OCodejs/docs-ocodejs.git',
+    branch: 'main',
+    path: '/docs-ocodejs',
+    destination: 'Docs preview/deployment URL is returned by the configured provider',
+    description: 'OCode.js documentation · separate deploy target',
+  },
   {
     projectName: 'velclaw-pages',
     repoUrl: 'https://github.com/Velclaw/deploy-velclaw.git',
     branch: 'main',
     path: '/',
+    destination: 'https://velclaw.cfd/',
     description: 'Velclaw public product landing',
   },
   {
@@ -28,6 +52,7 @@ const DEPLOYMENT_TARGETS: DeploymentTarget[] = [
     repoUrl: 'https://github.com/Velclaw/velclaw.cfd/docs.git',
     branch: 'main',
     path: '/docs',
+    destination: 'https://velclaw.cfd/docs',
     description: 'Velclaw documentation surface',
   },
 ]
@@ -137,7 +162,7 @@ export default function VelclawDeployEnginePage() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300">Deployment target</p>
                   <h2 className="mt-1 text-lg font-semibold">{t.projectName}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {t.description} → <span className="font-mono text-violet-300">https://velclaw.cfd{t.path}</span>.
+                    {t.description} → <span className="font-mono text-violet-300">{t.destination}</span>.
                   </p>
                 </div>
                 <button
@@ -221,7 +246,11 @@ export default function VelclawDeployEnginePage() {
                   {PIPELINE.map((stage, i) => (
                     <div
                       key={stage}
-                      className={`border p-2 font-mono text-[9px] uppercase ${i + 1 <= current ? 'border-violet-400/60 bg-violet-500/10 text-violet-200' : 'border-border text-muted-foreground'}`}
+                      className={`border p-2 font-mono text-[9px] uppercase ${
+                        i + 1 <= current
+                          ? 'border-violet-400/60 bg-violet-500/10 text-violet-200'
+                          : 'border-border text-muted-foreground'
+                      }`}
                     >
                       <span className="block">{String(i + 1).padStart(2, '0')}</span>
                       {stage}
@@ -229,7 +258,9 @@ export default function VelclawDeployEnginePage() {
                   ))}
                 </div>
                 {d.status === 'waiting_approval' && (
-                  <div className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3">
+                  <div
+                    className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3"
+                  >
                     <span className="text-xs">Production deployment is blocked until approved.</span>
                     <button
                       type="button"
@@ -266,7 +297,9 @@ export default function VelclawDeployEnginePage() {
                   </a>
                 )}
                 {d.error && <p className="mt-2 text-xs text-red-300">{d.error}</p>}
-                <pre className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground">
+                <pre
+                  className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground"
+                >
                   {(d.logs || []).join('\n')}
                 </pre>
               </article>
