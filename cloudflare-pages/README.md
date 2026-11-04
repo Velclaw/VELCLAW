@@ -14,7 +14,7 @@ This directory is a static entrypoint for the Velclaw ecosystem. It is intention
 - Production branch: `main`, with production deployments explicitly disabled.
 - Preview branch allowlist: `feat/cloudflare-unified-pages-preview`
 
-The Pages project has been created with Git integration. No deployment has been reported yet; wait for a deployment record before treating the preview URL as live.
+The Pages project has been created with Git integration. The latest Preview deployment completed all stages successfully. The branch-specific preview alias is `https://feat-cloudflare-unified-page.velclaw-workspace-preview.pages.dev`. A direct external HTTP/browser smoke test is still pending.
 
 ## Scope
 
