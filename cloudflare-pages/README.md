@@ -4,12 +4,17 @@ This directory is a static entrypoint for the Velclaw ecosystem. It is intention
 
 ## Cloudflare Pages preview configuration
 
+- Project: `velclaw-workspace-preview`
+- Preview hostname: `velclaw-workspace-preview.pages.dev`
 - Repository: `Velclaw/VELCLAW`
 - Branch: `feat/cloudflare-unified-pages-preview`
 - Root directory: `cloudflare-pages`
-- Build command: leave empty (static HTML)
+- Build command: empty (static HTML)
 - Build output directory: `.`
-- Production branch: do not point this project at `main` during the preview phase.
+- Production branch: `main`, with production deployments explicitly disabled.
+- Preview branch allowlist: `feat/cloudflare-unified-pages-preview`
+
+The Pages project has been created with Git integration. No deployment has been reported yet; wait for a deployment record before treating the preview URL as live.
 
 ## Scope
 
@@ -20,8 +25,8 @@ This directory is a static entrypoint for the Velclaw ecosystem. It is intention
 
 ## Migration gates
 
-1. Build and deploy this branch to an isolated Pages preview project.
-2. Verify mobile navigation, all source links, HTTP status, asset loading, and security headers.
+1. Deploy this branch to the isolated Pages preview project.
+2. Verify mobile layout, all source links, HTTP status, asset loading, and security headers.
 3. Add application routes only after confirming each application's current origin and runtime requirements.
-4. Keep existing Pages projects and Workers unchanged until route-by-route parity is proven.
+4. Keep existing Pages projects and Worker routes unchanged until route-by-route parity is proven.
 5. Production cutover and DNS changes require separate explicit approval.
