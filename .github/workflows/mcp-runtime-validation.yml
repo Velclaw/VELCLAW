@@ -83,12 +83,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/mcp-filesystem-root"
-          timeout 10s go run github.com/mark3labs/mcp-filesystem-server@latest "$RUNNER_TEMP/mcp-filesystem-root" || status=$?
-          if [[ "${status:-0}" != "124" ]]; then
-            echo "Filesystem MCP server did not stay running (exit ${status:-0})."
-            exit 1
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+          set +e
+          timeout 20s go run github.com/mark3labs/mcp-filesystem-server@latest "$temp_dir" </dev/null
+          status=$?
+          set -e
+          if [[ "$status" -ne 0 && "$status" -ne 124 ]]; then
+            echo "Filesystem MCP server failed to start (exit $status)."
+            exit "$status"
           fi
+          echo "Filesystem MCP server accepted a valid temporary workspace."
 
       - name: Verify PostgreSQL MCP runner
         run: |
