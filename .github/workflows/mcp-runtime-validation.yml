@@ -103,7 +103,7 @@ jobs:
               selector.register(process.stdout, selectors.EVENT_READ)
 
               def send(message):
-                  process.stdin.write(json.dumps(message) + "\\n")
+                  process.stdin.write(json.dumps(message) + "\n")
                   process.stdin.flush()
 
               def receive(message_id):
