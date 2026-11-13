@@ -69,7 +69,7 @@ jobs:
       - name: Run Codex repair agent
         if: ${{ env.OPENAI_API_KEY_AVAILABLE == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.run_attempt != 1) }}
         id: codex
-        uses: openai/codex-action@v1
+        uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           permission-profile: ':workspace'
