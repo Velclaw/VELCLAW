@@ -2,11 +2,12 @@ name: grok-review
 on: pull_request
 permissions:
   contents: read
+  pull-requests: write
 jobs:
   review:
     runs-on: ubuntu-latest
     env:
-      XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+      XAI_API_KEY: \${{ secrets.XAI_API_KEY }}
     steps:
       - name: Checkout
         if: env.XAI_API_KEY != ''
@@ -20,7 +21,7 @@ jobs:
         if: env.XAI_API_KEY != ''
         run: grok -p "Review this PR for bugs" --always-approve
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: \${{ github.token }}
 
       - name: Explain skipped review
         if: env.XAI_API_KEY == ''
