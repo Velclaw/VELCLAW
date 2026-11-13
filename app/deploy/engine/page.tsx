@@ -258,9 +258,7 @@ export default function VelclawDeployEnginePage() {
                   ))}
                 </div>
                 {d.status === 'waiting_approval' && (
-                  <div
-                    className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3"
-                  >
+                  <div className="mt-4 flex flex-wrap items-center gap-3 border border-violet-400/40 bg-violet-500/5 p-3">
                     <span className="text-xs">Production deployment is blocked until approved.</span>
                     <button
                       type="button"
@@ -297,9 +295,7 @@ export default function VelclawDeployEnginePage() {
                   </a>
                 )}
                 {d.error && <p className="mt-2 text-xs text-red-300">{d.error}</p>}
-                <pre
-                  className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground"
-                >
+                <pre className="mt-3 max-h-40 overflow-auto bg-background p-3 text-[11px] leading-5 text-muted-foreground">
                   {(d.logs || []).join('\n')}
                 </pre>
               </article>
