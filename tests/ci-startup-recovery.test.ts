@@ -55,7 +55,7 @@ test('both jobs use bounded Ubuntu runners and Docker depends on successful qual
   for (const job of [quality, docker]) {
     assert.match(job, /^    runs-on: ubuntu-22\.04$/m)
     assert.match(job, /^    timeout-minutes: 30$/m)
-    assert.match(job, /^        uses: actions\/checkout@v4$/m)
+    assert.match(job, /^        uses: actions\/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4\.2\.2$/m)
     assert.doesNotMatch(job, /^\s+(?:if|continue-on-error|working-directory):/m)
   }
   assert.match(docker, /^    needs: quality$/m)
@@ -64,19 +64,19 @@ test('both jobs use bounded Ubuntu runners and Docker depends on successful qual
 
 test('quality installs the declared pnpm before configuring the Node 22 dependency cache', () => {
   const pnpm = block(quality, '      - name: Setup pnpm')
-  assert.match(pnpm, /^        uses: pnpm\/action-setup@v4$/m)
+  assert.match(pnpm, /^        uses: pnpm\/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4\.1\.0$/m)
   const version = pnpm.match(/^          version: (\S+)$/m)?.[1]
   assert.ok(version)
   assert.equal(`pnpm@${version}`, manifest.packageManager)
   assert.match(pnpm, /^          run_install: false$/m)
 
   const node = block(quality, '      - name: Setup Node.js')
-  assert.match(node, /^        uses: actions\/setup-node@v4$/m)
+  assert.match(node, /^        uses: actions\/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4\.4\.0$/m)
   assert.match(node, /^          node-version: 22$/m)
   assert.match(node, /^          cache: pnpm$/m)
-  const checkout = quality.indexOf('uses: actions/checkout@v4')
-  const setupPnpm = quality.indexOf('uses: pnpm/action-setup@v4')
-  const setupNode = quality.indexOf('uses: actions/setup-node@v4')
+  const checkout = quality.indexOf('uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683')
+  const setupPnpm = quality.indexOf('uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda')
+  const setupNode = quality.indexOf('uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020')
   const install = quality.indexOf('run: pnpm install ')
   assert.ok(checkout < setupPnpm && setupPnpm < setupNode && setupNode < install)
 })
@@ -104,7 +104,10 @@ test('quality installs dependencies then runs every required gate before the pro
 test('Docker builds the root image with a fresh base before inspecting its metadata', () => {
   const commands = [...docker.matchAll(/^        run: (.+)$/gm)].map((match) => match[1])
   assert.deepEqual(commands, ['docker version', 'docker build --pull --tag velclaw:ci .', '|'])
-  assert.ok(docker.indexOf('uses: actions/checkout@v4') < docker.indexOf('run: docker version'))
+  assert.ok(
+    docker.indexOf('uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683') <
+      docker.indexOf('run: docker version'),
+  )
 })
 
 test('workflow defaults cannot redirect quality commands or the Docker build into a nested application', () => {
