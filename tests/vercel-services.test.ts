@@ -57,14 +57,8 @@ test('OCode.js documentation routes target the dedicated docs deployment', () =>
 })
 
 test('Velclaw documentation aliases resolve to the local docs path', () => {
-  assert.equal(
-    config.rewrites.find((rewrite) => rewrite.source === '/docs.velclaw.ai')?.destination,
-    '/docs',
-  )
-  assert.equal(
-    config.rewrites.find((rewrite) => rewrite.source === '/docs.velclaw.ai/(.*)')?.destination,
-    '/docs/$1',
-  )
+  assert.equal(config.rewrites.find((rewrite) => rewrite.source === '/docs.velclaw.ai')?.destination, '/docs')
+  assert.equal(config.rewrites.find((rewrite) => rewrite.source === '/docs.velclaw.ai/(.*)')?.destination, '/docs/$1')
 })
 
 test('Ask OCode.js API rewrites are scoped to requests originating from its subpath', () => {
@@ -77,8 +71,6 @@ test('Ask OCode.js API rewrites are scoped to requests originating from its subp
     const route = config.rewrites.find((rewrite) => rewrite.source === source)
     assert.ok(route, `missing rewrite for ${source}`)
     assert.equal(route.destination, destination)
-    assert.deepEqual(route.has, [
-      { type: 'header', key: 'referer', value: '.*/OCodejs.*' },
-    ])
+    assert.deepEqual(route.has, [{ type: 'header', key: 'referer', value: '.*/OCodejs.*' }])
   }
 })
