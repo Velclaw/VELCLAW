@@ -83,17 +83,79 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          temp_dir="$(mktemp -d)"
-          trap 'rm -rf "$temp_dir"' EXIT
-          set +e
-          timeout 20s go run github.com/mark3labs/mcp-filesystem-server@latest "$temp_dir" </dev/null
-          status=$?
-          set -e
-          if [[ "$status" -ne 0 && "$status" -ne 124 ]]; then
-            echo "Filesystem MCP server failed to start (exit $status)."
-            exit "$status"
-          fi
-          echo "Filesystem MCP server accepted a valid temporary workspace."
+          python3 - <<'PY'
+          import json
+          import selectors
+          import subprocess
+          import tempfile
+          import time
+
+          with tempfile.TemporaryDirectory(prefix="mcp-filesystem-") as workspace:
+              process = subprocess.Popen(
+                  ["go", "run", "github.com/mark3labs/mcp-filesystem-server@latest", workspace],
+                  stdin=subprocess.PIPE,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.DEVNULL,
+                  text=True,
+                  bufsize=1,
+              )
+              selector = selectors.DefaultSelector()
+              selector.register(process.stdout, selectors.EVENT_READ)
+
+              def send(message):
+                  process.stdin.write(json.dumps(message) + "\\n")
+                  process.stdin.flush()
+
+              def receive(message_id):
+                  deadline = time.monotonic() + 60
+                  while time.monotonic() < deadline:
+                      ready = selector.select(deadline - time.monotonic())
+                      if not ready:
+                          raise RuntimeError(f"Timed out waiting for MCP response {message_id}")
+                      line = process.stdout.readline()
+                      if not line:
+                          raise RuntimeError(f"MCP server exited with code {process.poll()}")
+                      response = json.loads(line)
+                      if response.get("id") == message_id:
+                          if "error" in response:
+                              raise RuntimeError(f"MCP request failed: {response['error']}")
+                          return response.get("result")
+                  raise RuntimeError(f"Timed out waiting for MCP response {message_id}")
+
+              try:
+                  send({
+                      "jsonrpc": "2.0",
+                      "id": 1,
+                      "method": "initialize",
+                      "params": {
+                          "protocolVersion": "2024-11-05",
+                          "capabilities": {},
+                          "clientInfo": {"name": "velclaw-ci", "version": "1.0.0"},
+                      },
+                  })
+                  initialized = receive(1)
+                  if not initialized or "serverInfo" not in initialized:
+                      raise RuntimeError("MCP initialize response did not include serverInfo")
+
+                  send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+                  send({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+                  tool_result = receive(2)
+                  tools = tool_result.get("tools") if isinstance(tool_result, dict) else None
+                  if not isinstance(tools, list) or not tools:
+                      raise RuntimeError("MCP tools/list returned no tools")
+                  print(f"Filesystem MCP handshake passed; discovered {len(tools)} tools.")
+              finally:
+                  selector.close()
+                  if process.stdin:
+                      process.stdin.close()
+                  if process.poll() is None:
+                      process.terminate()
+                      try:
+                          process.wait(timeout=5)
+                      except subprocess.TimeoutExpired:
+                          process.kill()
+                          process.wait(timeout=5)
+          PY
 
       - name: Verify PostgreSQL MCP runner
         run: |
