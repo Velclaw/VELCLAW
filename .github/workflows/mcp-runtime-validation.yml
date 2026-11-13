@@ -80,7 +80,20 @@ jobs:
         run: timeout 20s npx --yes @upstash/context7-mcp --help || test "$?" = "124"
 
       - name: Resolve filesystem MCP
-        run: go run github.com/mark3labs/mcp-filesystem-server@latest --help
+        shell: bash
+        run: |
+          set -euo pipefail
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+          set +e
+          timeout 20s go run github.com/mark3labs/mcp-filesystem-server@latest "$temp_dir" </dev/null
+          status=$?
+          set -e
+          if [[ "$status" -ne 0 && "$status" -ne 124 ]]; then
+            echo "Filesystem MCP server failed to start (exit $status)."
+            exit "$status"
+          fi
+          echo "Filesystem MCP server accepted a valid temporary workspace."
 
       - name: Verify PostgreSQL MCP runner
         run: |
