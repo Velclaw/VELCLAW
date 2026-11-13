@@ -104,7 +104,10 @@ test('quality installs dependencies then runs every required gate before the pro
 test('Docker builds the root image with a fresh base before inspecting its metadata', () => {
   const commands = [...docker.matchAll(/^        run: (.+)$/gm)].map((match) => match[1])
   assert.deepEqual(commands, ['docker version', 'docker build --pull --tag velclaw:ci .', '|'])
-  assert.ok(docker.indexOf('uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683') < docker.indexOf('run: docker version'))
+  assert.ok(
+    docker.indexOf('uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683') <
+      docker.indexOf('run: docker version'),
+  )
 })
 
 test('workflow defaults cannot redirect quality commands or the Docker build into a nested application', () => {
