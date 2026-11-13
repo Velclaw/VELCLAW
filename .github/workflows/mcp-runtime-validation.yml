@@ -80,7 +80,15 @@ jobs:
         run: timeout 20s npx --yes @upstash/context7-mcp --help || test "$?" = "124"
 
       - name: Resolve filesystem MCP
-        run: go run github.com/mark3labs/mcp-filesystem-server@latest --help
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mcp-filesystem-root"
+          timeout 10s go run github.com/mark3labs/mcp-filesystem-server@latest "$RUNNER_TEMP/mcp-filesystem-root" || status=$?
+          if [[ "${status:-0}" != "124" ]]; then
+            echo "Filesystem MCP server did not stay running (exit ${status:-0})."
+            exit 1
+          fi
 
       - name: Verify PostgreSQL MCP runner
         run: |
