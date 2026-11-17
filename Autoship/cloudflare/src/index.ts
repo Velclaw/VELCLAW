@@ -107,7 +107,7 @@ async function route(request: Request, env: Env) {
       await env.DB.prepare('SELECT 1').first()
       return json({ ok: true, database: 'd1' }, 200, origin)
     } catch (error) {
-      return json({ ok: false, error: String(error) }, 503, origin)
+      return json({ ok: false, error: 'Service unavailable' }, 503, origin)
     }
   }
 
