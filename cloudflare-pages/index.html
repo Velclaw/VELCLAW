@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#05070f">
+  <meta name="description" content="Velclaw Workspace — một cổng điều hành cho toàn bộ hệ sinh thái sản phẩm và dịch vụ.">
+  <title>Velclaw Workspace</title>
+  <style>
+    :root{color-scheme:dark;--bg:#05070f;--panel:#0b1020;--line:#202943;--muted:#8d9ab4;--text:#f3f6ff;--blue:#5687ff;--violet:#9b7bff}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#18234b 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:inherit;text-decoration:none}.shell{max-width:1160px;margin:auto;padding:24px 18px 64px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 0 34px}.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.16em}.mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #667fff77;border-radius:14px;background:#526fff20;color:#c5d2ff;font-size:20px}.tag{border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:#a9b6d2;font-size:12px}
+    .hero{padding:42px 0 32px}.eyebrow{color:#9cb5ff;font-size:11px;letter-spacing:.2em;font-weight:700}.hero h1{font-size:clamp(38px,7vw,68px);line-height:1.02;letter-spacing:-.055em;margin:16px 0;max-width:780px}.hero p{max-width:650px;color:var(--muted);font-size:16px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid var(--line);border-radius:12px;background:#111a31;font-weight:650;font-size:13px}.btn.primary{background:#dbe5ff;color:#10172b;border-color:#dbe5ff}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:30px 0 14px}.section-head h2{margin:0;font-size:18px}.section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}.grid{display:grid;grid-template-columns:repeat( auto-fit,minmax(230px,1fr));gap:12px}.card{min-height:160px;padding:19px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#10182b,#090e1b);display:flex;flex-direction:column;justify-content:space-between;transition:border-color .2s,transform .2s}.card:hover{border-color:#718cff88;transform:translateY(-2px)}.card-top{display:flex;justify-content:space-between;gap:12px}.symbol{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#6b83ff1c;color:#b9c8ff;font-weight:800}.status{font-size:10px;color:#aab8d4;border:1px solid #34415f;border-radius:99px;padding:4px 8px;height:max-content}.card h3{font-size:16px;margin:16px 0 4px}.card p{font-size:12px;color:var(--muted);margin:0}.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:#aebfff;font-size:12px}.muted-card{opacity:.78}.infra{margin-top:28px;border:1px solid var(--line);border-radius:18px;padding:20px;background:#090e1b}.infra h2{font-size:16px;margin:0 0 8px}.infra p{color:var(--muted);font-size:13px;margin:0}.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.pill{border:1px solid #293653;border-radius:9px;padding:6px 9px;color:#b7c4df;font-size:11px}.foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:#687792;font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:560px){.shell{padding:16px 14px 42px}.top{padding-bottom:18px}.tag{font-size:10px}.hero{padding:30px 0 20px}.hero p{font-size:14px}.section-head{align-items:start;flex-direction:column}.card{min-height:145px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <a class="brand" href="/" aria-label="Velclaw Workspace home"><span class="mark">V</span><span>VELCLAW</span></a>
+      <span class="tag">UNIFIED WORKSPACE · PREVIEW TRACK</span>
+    </header>
+    <section class="hero">
+      <div class="eyebrow">ONE ENTRY POINT · MANY INDEPENDENT SERVICES</div>
+      <h1>Một workspace.<br>Toàn bộ hệ sinh thái.</h1>
+      <p>Điểm vào thống nhất để khám phá sản phẩm, mã nguồn và hạ tầng Velclaw. Mỗi ứng dụng vẫn giữ repository, dữ liệu và vòng đời triển khai riêng; trạng thái chỉ được xác nhận sau khi kiểm tra thực tế.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/Velclaw/VELCLAW">Mở repository trung tâm ↗</a>
+        <a class="btn" href="#products">Khám phá sản phẩm ↓</a>
+      </div>
+    </section>
+    <section id="products">
+      <div class="section-head"><div><h2>Product workspace</h2><p>Danh mục khởi tạo — liên kết triển khai sẽ được bật sau khi xác minh từng ứng dụng.</p></div></div>
+      <div class="grid">
+        <a class="card" href="https://github.com/Velclaw/VELCLAW"><div class="card-top"><span class="symbol">V</span><span class="status">Core · source verified</span></div><div><h3>Velclaw Control Center</h3><p>Workspace điều phối repository, deployments và integrations.</p></div><div class="card-foot"><span>Velclaw/VELCLAW</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/zskbot/woww"><div class="card-top"><span class="symbol">W</span><span class="status">Pages · deployed</span></div><div><h3>woww Framework</h3><p>Framework full-stack và static web, triển khai trên Cloudflare Pages.</p></div><div class="card-foot"><span>zskbot/woww</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/zskbot/ask-ocodejs"><div class="card-top"><span class="symbol">O</span><span class="status">Source linked</span></div><div><h3>OCode.js</h3><p>AI app builder — giữ ứng dụng và API hiện hữu trong giai đoạn tích hợp.</p></div><div class="card-foot"><span>zskbot/ask-ocodejs</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/OCodejs/docs-ocodejs"><div class="card-top"><span class="symbol">D</span><span class="status">Source linked</span></div><div><h3>OCode.js Docs</h3><p>Tài liệu sản phẩm và hướng dẫn hệ sinh thái.</p></div><div class="card-foot"><span>OCodejs/docs-ocodejs</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/Velclaw/VELCLAW"><div class="card-top"><span class="symbol">H</span><span class="status">Integration pending</span></div><div><h3>VelclawHost</h3><p>Hosting control plane và quản lý dịch vụ.</p></div><div class="card-foot"><span>Backend giữ độc lập</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/Velclaw/Cloudxx"><div class="card-top"><span class="symbol">C</span><span class="status">Integration pending</span></div><div><h3>Cloudxx / DNS</h3><p>Quản lý domain và DNS — chưa thay đổi route hoặc cấu hình DNS.</p></div><div class="card-foot"><span>Repository riêng</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/zskbot/phim"><div class="card-top"><span class="symbol">T</span><span class="status">Integration pending</span></div><div><h3>TX.TOP</h3><p>Streaming frontend — chỉ tích hợp nguồn và nội dung có quyền phân phối.</p></div><div class="card-foot"><span>Repository riêng</span><span>↗</span></div></a>
+        <a class="card" href="https://github.com/zskbot/woww"><div class="card-top"><span class="symbol">+</span><span class="status">Registry planned</span></div><div><h3>More projects</h3><p>Danh mục mở rộng từ registry có kiểm chứng, không dùng dữ liệu mẫu làm trạng thái thật.</p></div><div class="card-foot"><span>Project registry</span><span>↗</span></div></a>
+      </div>
+    </section>
+    <section class="infra">
+      <h2>Runtime & infrastructure</h2>
+      <p>Pages phục vụ cổng giao diện. Worker/API, OAuth, database và các dịch vụ có trạng thái động tiếp tục chạy độc lập; không chuyển secrets hoặc dữ liệu backend vào frontend tĩnh.</p>
+      <div class="pills"><span class="pill">Cloudflare Pages · frontend</span><span class="pill">Cloudflare Workers · APIs</span><span class="pill">GitHub · source of truth</span><span class="pill">Preview-first delivery</span><span class="pill">No DNS mutation</span></div>
+    </section>
+    <footer class="foot"><span>© Velclaw · Unified Workspace</span><span>Deployment status: preview not yet provisioned</span></footer>
+  </main>
+</body>
+</html>

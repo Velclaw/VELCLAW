@@ -30,11 +30,13 @@ const principles = [
   ['03', 'Có bằng chứng', 'Build, test, review và deployment tạo thành một chuỗi trạng thái có thể kiểm tra.'],
 ] as const
 
-const domainIdentity: Record<
-  VelclawDomainRole,
-  { label: string; descriptor: string; cta: string; ctaHref: string }
-> = {
-  platform: { label: 'velclaw.app', descriptor: 'Platform & company', cta: 'Khám phá Platform', ctaHref: '/projects' },
+const domainIdentity: Record<VelclawDomainRole, { label: string; descriptor: string; cta: string; ctaHref: string }> = {
+  platform: {
+    label: 'velclaw.app',
+    descriptor: 'Platform & company',
+    cta: 'Khám phá Platform',
+    ctaHref: '/projects',
+  },
   developer: {
     label: 'velclaw.dev',
     descriptor: 'Developer · IDE · Docs · API',
@@ -83,7 +85,9 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
         </Link>
 
         <nav className={styles.navlinks} aria-label="Velclaw navigation">
-          <Link className={styles.active} href="#platform">Nền tảng</Link>
+          <Link className={styles.active} href="#platform">
+            Nền tảng
+          </Link>
           <Link href="/console">Console</Link>
           <Link href="/builder">Builder</Link>
           <Link href="/velclaw">Workspace</Link>
@@ -91,7 +95,9 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
         </nav>
 
         <div className={styles.authActions}>
-          <Link className={styles.signIn} href="/auth/signin">Đăng nhập</Link>
+          <Link className={styles.signIn} href="/auth/signin">
+            Đăng nhập
+          </Link>
         </div>
       </header>
 
@@ -132,15 +138,32 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
             <span className={styles.live}>READY</span>
           </div>
           <div className={styles.commandBody}>
-            <div><span className={styles.prompt}>$</span> velclaw run task</div>
-            <div className={styles.dim}>agent <b>workspace-agent</b></div>
-            <div className={styles.dim}>source <b>GitHub / branch</b></div>
-            <div className={styles.dim}>runtime <b>WebContainer</b></div>
+            <div>
+              <span className={styles.prompt}>$</span> velclaw run task
+            </div>
+            <div className={styles.dim}>
+              agent <b>workspace-agent</b>
+            </div>
+            <div className={styles.dim}>
+              source <b>GitHub / branch</b>
+            </div>
+            <div className={styles.dim}>
+              runtime <b>WebContainer</b>
+            </div>
             <div className={styles.divider} />
-            <div><span className={styles.ok}>✓</span> context loaded</div>
-            <div><span className={styles.ok}>✓</span> workspace ready</div>
-            <div><span className={styles.ok}>✓</span> checks passed</div>
-            <div><span className={styles.arrow}>→</span> build <span className={styles.arrow}>→</span> review <span className={styles.arrow}>→</span> deploy</div>
+            <div>
+              <span className={styles.ok}>✓</span> context loaded
+            </div>
+            <div>
+              <span className={styles.ok}>✓</span> workspace ready
+            </div>
+            <div>
+              <span className={styles.ok}>✓</span> checks passed
+            </div>
+            <div>
+              <span className={styles.arrow}>→</span> build <span className={styles.arrow}>→</span> review{' '}
+              <span className={styles.arrow}>→</span> deploy
+            </div>
           </div>
         </div>
       </section>
@@ -203,7 +226,9 @@ export function VelclawLanding({ role = 'platform' }: { role?: VelclawDomainRole
                 <strong>{title}</strong>
               </div>
               {index < flow.length - 1 && (
-                <span className={styles.flowArrow} aria-hidden="true">→</span>
+                <span className={styles.flowArrow} aria-hidden="true">
+                  →
+                </span>
               )}
             </div>
           ))}

@@ -1038,11 +1038,17 @@ export function TaskChat({ taskId, task }: TaskChatProps) {
                             return (
                               <Streamdown
                                 components={{
-                                  code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'>) => (
-                                    <code className={`${className} !text-xs`} {...props}>
-                                      {children}
-                                    </code>
-                                  ),
+                                  code: (rendererProps: any) => {
+                                    const { className, children, ...props } = rendererProps
+                                    return (
+                                      <code
+                                        className={`${typeof className === 'string' ? className : ''} !text-xs`}
+                                        {...props}
+                                      >
+                                        {children}
+                                      </code>
+                                    )
+                                  },
                                   pre: ({ children, ...props }: React.ComponentPropsWithoutRef<'pre'>) => (
                                     <pre className="!text-xs" {...props}>
                                       {children}
