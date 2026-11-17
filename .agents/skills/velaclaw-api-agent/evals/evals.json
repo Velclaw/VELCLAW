@@ -1,0 +1,25 @@
+{
+  "skill": "velaclaw-api-agent",
+  "test_cases": [
+    {
+      "name": "setup_velaclaw_byok",
+      "input": "Hướng dẫn tôi setup VelaClaw với API key OpenAI và Anthropic",
+      "assertions": ["Hướng dẫn export env vars", "Nhắc velaclaw onboard", "Giải thích provider_mode = byok", "Không hardcode key"]
+    },
+    {
+      "name": "configure_vclaw_gateway_token",
+      "input": "Làm sao cấu hình auth token cho gateway trong repo Vclaw",
+      "assertions": ["Chỉ ra vclaw.json gateway.auth.token", "Khuyên dùng random token dài", "Hướng dẫn restart gateway"]
+    },
+    {
+      "name": "create_custom_skill",
+      "input": "Tôi muốn tạo skill mới cho agent VelaClaw để xử lý file code",
+      "assertions": ["Nhắc hệ thống velaclaw skills", "Gợi ý tool loop hoặc MCP", "Tham chiếu workspace nếu là Vclaw"]
+    },
+    {
+      "name": "secure_channel_secrets",
+      "input": "Cấu hình WeChat KF plugin với secret an toàn trong Vclaw",
+      "assertions": ["Dùng ${ENV_VAR} trong config", "Không commit secret", "Nhắc channels status --probe"]
+    }
+  ]
+}

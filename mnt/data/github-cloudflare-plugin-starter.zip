@@ -1,0 +1,497 @@
+import os, zipfile, textwrap, json
+base="/mnt/data/github-cloudflare-plugin-starter"
+files = {
+"README.md": r"""
+# GitHub ↔ Cloudflare Plugin Starter (AI Platform)
+
+Bộ khung MVP: giao diện Pages + API Worker + nhật ký D1. Plugin liệt kê repository GitHub và gửi yêu cầu chạy GitHub Actions để triển khai Worker/Pages. Mã nguồn **không** chứa token.
+
+## Kiến trúc
+
+- `dashboard/`: giao diện quản trị tĩnh, có thể triển khai lên Cloudflare Pages.
+- `worker/`: API chạy trên Cloudflare Workers.
+- `worker/migrations/0001_init.sql`: bảng nhật ký D1.
+- `.github/workflows/deploy-worker.yml`: workflow triển khai Worker, chạy D1 migrations trước.
+- `.github/workflows/deploy-pages.yml`: workflow triển khai Pages.
+
+> Đây là bộ khung quản trị một tài khoản (MVP), chưa phải hệ thống nhiều người dùng. Bảo vệ dashboard bằng Cloudflare Access hoặc thêm đăng nhập OAuth trước khi đưa vào dùng công khai.
+
+## 1. Chuẩn bị
+
+Cần có:
+- Repo GitHub hiện tại, có quyền quản trị.
+- Tài khoản Cloudflare.
+- Node.js LTS và npm trên máy tính để chạy Wrangler (trên iPhone có thể chỉnh sửa repo qua GitHub web, nhưng lần thiết lập ban đầu dễ hơn trên máy tính).
+- Tạo một GitHub fine-grained personal access token (PAT), chỉ cấp quyền cho repo cần dùng:
+  - Contents: Read-only
+  - Metadata: Read-only
+  - Actions: Read and write (để gọi workflow_dispatch)
+  Không dùng token có quyền quản trị toàn bộ tổ chức nếu không cần.
+
+## 2. Đưa bộ khung vào repo hiện có
+
+Giải nén ZIP, sao chép các thư mục/tệp vào repo của bạn rồi commit/push. Không xóa mã nguồn đang có. Sửa các giá trị `YOUR_GITHUB_OWNER`, `YOUR_REPO_NAME`, `YOUR_D1_DATABASE_NAME` trong cấu hình và workflow.
+
+## 3. Tạo D1
+
+```bash
+cd worker
+npm install
+npx wrangler login
+npx wrangler d1 create ai-platform-logs
+```
+
+Lệnh cuối trả về `database_id`. Dán ID vào `worker/wrangler.toml` ở `database_id`, giữ tên binding `DB`.
+Sau đó:
+
+```bash
+npx wrangler d1 migrations apply ai-platform-logs --remote
+```
+
+## 4. Cấu hình Worker
+
+Trong `worker/wrangler.toml`:
+- Sửa `ALLOWED_ORIGIN` thành URL Pages thực tế (ví dụ `https://your-dashboard.pages.dev`).
+- Sửa `GITHUB_OWNER` thành chủ sở hữu repo GitHub.
+- Sửa `GITHUB_REPO` thành repo có workflow deploy.
+- Sửa `D1_DATABASE_NAME` nếu đổi tên database.
+- Sửa `database_id` thành ID thật.
+
+Cài đặt và triển khai Worker:
+
+```bash
+cd worker
+npm install
+npx wrangler secret put ADMIN_TOKEN
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler deploy
+```
+
+Khi được hỏi:
+- `ADMIN_TOKEN`: tạo chuỗi ngẫu nhiên dài (ít nhất 32 ký tự), chỉ dùng để gọi API của plugin.
+- `GITHUB_TOKEN`: GitHub fine-grained PAT nêu ở phần 1.
+
+Không đưa hai giá trị này vào `wrangler.toml`, HTML, repo, ảnh chụp màn hình hoặc cuộc trò chuyện.
+
+## 5. Cấu hình GitHub Actions secrets
+
+Trong repo GitHub: Settings → Secrets and variables → Actions → New repository secret, tạo:
+
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API Token chỉ có quyền cần thiết để triển khai Workers/Pages và chạy D1 migrations cho tài nguyên mục tiêu.
+- `CLOUDFLARE_ACCOUNT_ID`: Account ID của Cloudflare.
+- `D1_DATABASE_NAME`: tên D1 database, ví dụ `ai-platform-logs`.
+
+Tạo Cloudflare API Token từ Cloudflare Dashboard → My Profile → API Tokens. Ưu tiên quyền theo đúng tài nguyên; không dùng Global API Key.
+
+## 6. Cấu hình Pages
+
+Sửa `dashboard/app.js`:
+- `API_BASE`: URL Worker sau khi deploy, ví dụ `https://github-cloudflare-control.<subdomain>.workers.dev`.
+- `DEFAULT_OWNER`: chủ sở hữu GitHub.
+
+Trong `dashboard/index.html`, dashboard sẽ yêu cầu token quản trị mỗi lần mở và chỉ giữ trong bộ nhớ của trang. Không bật tính năng ghi nhớ token trên thiết bị dùng chung.
+
+Triển khai Pages:
+
+```bash
+npx wrangler pages project create ai-platform-dashboard
+npx wrangler pages deploy dashboard --project-name ai-platform-dashboard
+```
+
+Sau khi có URL Pages, cập nhật `ALLOWED_ORIGIN` trong Worker rồi deploy Worker lại.
+
+## 7. Dùng plugin
+
+1. Mở URL Pages.
+2. Dán `ADMIN_TOKEN` vào ô token.
+3. Bấm “Tải repository”.
+4. Chọn repo và nhánh, sau đó chọn triển khai Worker hoặc Pages.
+5. Plugin chỉ gửi yêu cầu chạy workflow. GitHub Actions mới là nơi triển khai thực tế.
+6. Xem nhật ký yêu cầu trong dashboard.
+
+Workflow phải tồn tại ở `.github/workflows/deploy-worker.yml` và `.github/workflows/deploy-pages.yml` trên nhánh mặc định, vì GitHub `workflow_dispatch` cần workflow được nhận diện trong repo.
+
+## 8. Bảo mật và giới hạn
+
+- Dùng Cloudflare Access trước khi công khai dashboard.
+- Không bao giờ đưa `GITHUB_TOKEN`, `CLOUDFLARE_API_TOKEN` vào frontend.
+- Giới hạn GitHub PAT vào một repo và quyền tối thiểu có thể.
+- Đặt giới hạn tốc độ/giám sát trước khi mở cho nhiều người.
+- Các workflow mẫu giả định repo có `worker/` và `dashboard/`. Nếu repo hiện tại có cấu trúc khác, chỉnh `working-directory` và thư mục deploy.
+- Trước khi chạy migration trên production, sao lưu D1 và kiểm tra SQL.
+- Mẫu này không tự đọc/chạy code tùy ý; nó chỉ kích hoạt workflow đã định nghĩa sẵn.
+""",
+"worker/package.json": r"""
+{
+  "name": "github-cloudflare-control-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
+""",
+"worker/wrangler.toml": r"""
+name = "github-cloudflare-control"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+GITHUB_OWNER = "YOUR_GITHUB_OWNER"
+GITHUB_REPO = "YOUR_REPO_NAME"
+ALLOWED_ORIGIN = "https://YOUR_PAGES_PROJECT.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-platform-logs"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+""",
+"worker/migrations/0001_init.sql": r"""
+CREATE TABLE IF NOT EXISTS deployment_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action TEXT NOT NULL,
+  owner TEXT NOT NULL,
+  repo TEXT NOT NULL,
+  ref TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+""",
+"worker/src/index.js": r"""
+const json = (data, status = 200, extraHeaders = {}) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", ...extraHeaders },
+  });
+
+function cors(request, env) {
+  const origin = request.headers.get("Origin");
+  const allowed = env.ALLOWED_ORIGIN;
+  const headers = {
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    "Vary": "Origin",
+  };
+  if (origin && allowed && origin === allowed) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
+
+function authorized(request, env) {
+  const header = request.headers.get("Authorization") || "";
+  return Boolean(env.ADMIN_TOKEN && header === `Bearer ${env.ADMIN_TOKEN}`);
+}
+
+async function github(path, env, init = {}) {
+  const response = await fetch(`https://api.github.com${path}`, {
+    ...init,
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "ai-platform-github-cloudflare-plugin",
+      ...(init.headers || {}),
+    },
+  });
+  const text = await response.text();
+  let data;
+  try { data = text ? JSON.parse(text) : null; } catch { data = { message: text }; }
+  if (!response.ok) {
+    const error = new Error(data?.message || `GitHub API error ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
+async function logAction(env, { action, owner, repo, ref, status }) {
+  await env.DB.prepare(
+    "INSERT INTO deployment_logs (action, owner, repo, ref, status) VALUES (?, ?, ?, ?, ?)"
+  ).bind(action, owner, repo, ref, status).run();
+}
+
+export default {
+  async fetch(request, env) {
+    const headers = cors(request, env);
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
+
+    const url = new URL(request.url);
+    if (url.pathname === "/health") return json({ ok: true, service: "github-cloudflare-control" }, 200, headers);
+
+    if (!authorized(request, env)) return json({ error: "Không được phép. Hãy kiểm tra ADMIN_TOKEN." }, 401, headers);
+
+    try {
+      if (request.method === "GET" && url.pathname === "/api/repos") {
+        const owner = (url.searchParams.get("owner") || env.GITHUB_OWNER || "").trim();
+        if (!owner) return json({ error: "Thiếu owner GitHub." }, 400, headers);
+        const repos = await github(`/users/${encodeURIComponent(owner)}/repos?per_page=100&sort=updated`, env);
+        const result = repos.map(r => ({
+          name: r.name,
+          full_name: r.full_name,
+          private: r.private,
+          default_branch: r.default_branch,
+          html_url: r.html_url,
+          updated_at: r.updated_at
+        }));
+        return json({ repos: result }, 200, headers);
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/branches") {
+        const owner = (url.searchParams.get("owner") || env.GITHUB_OWNER || "").trim();
+        const repo = (url.searchParams.get("repo") || env.GITHUB_REPO || "").trim();
+        if (!owner || !repo) return json({ error: "Thiếu owner hoặc repo." }, 400, headers);
+        const branches = await github(`/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches?per_page=100`, env);
+        return json({ branches: branches.map(b => ({ name: b.name, protected: b.protected })) }, 200, headers);
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/deploy") {
+        const body = await request.json();
+        const owner = String(body.owner || env.GITHUB_OWNER || "").trim();
+        const repo = String(body.repo || env.GITHUB_REPO || "").trim();
+        const ref = String(body.ref || "main").trim();
+        const target = body.target;
+        const workflows = { worker: "deploy-worker.yml", pages: "deploy-pages.yml" };
+        const workflow = workflows[target];
+        if (!/^[A-Za-z0-9_.-]{1,100}$/.test(owner) ||
+            !/^[A-Za-z0-9_.-]{1,100}$/.test(repo) ||
+            !/^[A-Za-z0-9_./-]{1,200}$/.test(ref) || ref.includes("..") ||
+            !workflow) {
+          return json({ error: "Thông tin repo, nhánh hoặc đích triển khai không hợp lệ." }, 400, headers);
+        }
+
+        await github(`/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${workflow}/dispatches`, env, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ref }),
+        });
+        await logAction(env, { action: target, owner, repo, ref, status: "dispatch_requested" });
+        return json({ ok: true, message: `Đã gửi yêu cầu triển khai ${target}. Kiểm tra GitHub Actions để xem tiến trình.` }, 202, headers);
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/logs") {
+        const result = await env.DB.prepare(
+          "SELECT id, action, owner, repo, ref, status, created_at FROM deployment_logs ORDER BY id DESC LIMIT 50"
+        ).all();
+        return json({ logs: result.results || [] }, 200, headers);
+      }
+
+      return json({ error: "Không tìm thấy đường dẫn API." }, 404, headers);
+    } catch (error) {
+      const status = error.status && error.status >= 400 && error.status < 600 ? error.status : 500;
+      return json({ error: error.message || "Lỗi máy chủ." }, status, headers);
+    }
+  },
+};
+""",
+"dashboard/index.html": r"""
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>AI Platform · GitHub ↔ Cloudflare</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="mark">↔</div>
+      <div><p class="eyebrow">AI PLATFORM / CONNECTORS</p><h1>GitHub <span>↔</span> Cloudflare</h1><p class="muted">Quản lý repo và yêu cầu triển khai Workers, Pages, D1.</p></div>
+    </header>
+    <section class="panel">
+      <label for="token">Mã quản trị của plugin (ADMIN_TOKEN)</label>
+      <input id="token" type="password" autocomplete="off" placeholder="Dán ADMIN_TOKEN vào đây">
+      <div class="row"><label for="owner">Chủ sở hữu GitHub</label><input id="owner" placeholder="ví dụ: ten-tai-khoan"></div>
+      <div class="actions"><button id="load">Tải repository</button><button class="secondary" id="logs">Xem nhật ký</button></div>
+      <p class="muted tiny">Mã quản trị chỉ giữ trong bộ nhớ trang hiện tại, không lưu vào localStorage.</p>
+    </section>
+    <section class="panel">
+      <h2>Repository</h2>
+      <div id="repos" class="empty">Nhập mã quản trị và tải repository.</div>
+      <div id="deployBox" hidden>
+        <label for="repo">Repository đã chọn</label><select id="repo"></select>
+        <label for="branch">Nhánh triển khai</label><input id="branch" value="main">
+        <div class="actions"><button id="deployWorker">Triển khai Worker</button><button id="deployPages" class="secondary">Triển khai Pages</button></div>
+      </div>
+    </section>
+    <section class="panel"><h2>Trạng thái</h2><pre id="status" role="status">Chưa kết nối.</pre></section>
+    <section class="panel"><h2>Nhật ký triển khai</h2><div id="logList" class="empty">Chưa tải nhật ký.</div></section>
+    <footer>Token phải được bảo vệ. Chỉ dùng trên thiết bị đáng tin cậy.</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
+""",
+"dashboard/style.css": r"""
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#edf2f7;background:#0a1018;font-synthesis:none}*{box-sizing:border-box}body{margin:0} .shell{max-width:880px;margin:0 auto;padding:28px 16px 48px}header{display:flex;gap:16px;align-items:center;margin:12px 0 28px}.mark{display:grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#b7f7d1;color:#082b20;font-size:32px;font-weight:800}h1{font-size:clamp(24px,5vw,38px);margin:0;letter-spacing:-1px}h1 span{color:#b7f7d1}.eyebrow{font-size:11px;letter-spacing:2px;color:#9caec0;font-weight:700}.muted{color:#9caec0;line-height:1.5}.tiny{font-size:12px}.panel{background:#111b27;border:1px solid #263547;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 12px 30px #0002}h2{font-size:17px;margin:0 0 16px}label{display:block;font-size:13px;color:#c5d1de;margin:12px 0 7px}input,select{width:100%;border:1px solid #35485c;border-radius:10px;padding:12px;background:#0a121d;color:#f5f7fa;font:inherit;min-height:44px}.row{margin-top:10px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:10px;padding:12px 16px;background:#b7f7d1;color:#082b20;font-weight:750;font-size:14px;cursor:pointer;min-height:44px}button.secondary{background:#24364a;color:#edf2f7}button:disabled{opacity:.55;cursor:wait}.repo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;border:1px solid #2b3d50;border-radius:12px;margin:8px 0}.repo small{display:block;color:#9caec0;margin-top:5px}.empty{color:#9caec0;padding:10px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#b7f7d1;font:13px/1.6 ui-monospace,monospace;background:#0a121d;padding:12px;border-radius:10px;min-height:48px}a{color:#b7f7d1}footer{text-align:center;color:#77899d;font-size:12px;padding:18px}@media(max-width:520px){.panel{padding:15px}.actions button{flex:1}.repo{align-items:flex-start;flex-direction:column}}
+""",
+"dashboard/app.js": r"""
+(() => {
+  const API_BASE = "https://REPLACE_WITH_WORKER_URL";
+  const $ = id => document.getElementById(id);
+  let token = "";
+  let repositories = [];
+
+  function say(value) { $("status").textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2); }
+  async function api(path, options = {}) {
+    token = $("token").value.trim();
+    if (!token) throw new Error("Hãy nhập ADMIN_TOKEN.");
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers || {})
+      }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Lỗi HTTP ${response.status}`);
+    return data;
+  }
+  function safeText(tag, text, className) {
+    const node = document.createElement(tag);
+    node.textContent = text ?? "";
+    if (className) node.className = className;
+    return node;
+  }
+  $("load").addEventListener("click", async () => {
+    try {
+      say("Đang tải repository…");
+      const owner = $("owner").value.trim();
+      const data = await api(`/api/repos?owner=${encodeURIComponent(owner)}`);
+      repositories = data.repos || [];
+      const select = $("repo");
+      select.replaceChildren();
+      $("repos").replaceChildren();
+      for (const repo of repositories) {
+        const option = document.createElement("option");
+        option.value = repo.name;
+        option.textContent = `${repo.name}${repo.private ? " · riêng tư" : " · công khai"}`;
+        select.append(option);
+        const row = document.createElement("div"); row.className = "repo";
+        const info = document.createElement("div");
+        info.append(safeText("strong", repo.full_name), safeText("small", `Nhánh mặc định: ${repo.default_branch || "main"}`));
+        const link = document.createElement("a"); link.href = repo.html_url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Mở GitHub";
+        row.append(info, link); $("repos").append(row);
+      }
+      $("deployBox").hidden = repositories.length === 0;
+      if (repositories.length) $("branch").value = repositories[0].default_branch || "main";
+      say(`Đã tải ${repositories.length} repository.`);
+    } catch (e) { say(`Lỗi: ${e.message}`); }
+  });
+  async function deploy(target) {
+    try {
+      const owner = $("owner").value.trim();
+      const repo = $("repo").value;
+      const ref = $("branch").value.trim();
+      if (!owner || !repo || !ref) throw new Error("Hãy nhập owner, chọn repo và nhánh.");
+      say(`Đang gửi yêu cầu triển khai ${target}…`);
+      const result = await api("/api/deploy", { method: "POST", body: JSON.stringify({ owner, repo, ref, target }) });
+      say(result);
+    } catch (e) { say(`Lỗi: ${e.message}`); }
+  }
+  $("deployWorker").addEventListener("click", () => deploy("worker"));
+  $("deployPages").addEventListener("click", () => deploy("pages"));
+  $("logs").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/logs");
+      const list = $("logList"); list.replaceChildren();
+      if (!data.logs?.length) list.textContent = "Chưa có nhật ký.";
+      for (const item of data.logs || []) {
+        const row = document.createElement("div"); row.className = "repo";
+        row.append(
+          safeText("strong", `${item.action.toUpperCase()} · ${item.owner}/${item.repo}`),
+          safeText("small", `${item.ref} · ${item.status} · ${item.created_at}`)
+        );
+        list.append(row);
+      }
+      say(`Đã tải ${data.logs?.length || 0} bản ghi nhật ký.`);
+    } catch (e) { say(`Lỗi: ${e.message}`); }
+  });
+})();
+""",
+".github/workflows/deploy-worker.yml": r"""
+name: Deploy Worker and apply D1 migrations
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: 'Nhập DEPLOY để xác nhận triển khai'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_production == 'DEPLOY' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Worker dependencies
+        working-directory: worker
+        run: npm ci
+      - name: Apply D1 migrations
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations apply ai-platform-logs --remote
+      - name: Deploy Worker
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
+""",
+".github/workflows/deploy-pages.yml": r"""
+name: Deploy Pages dashboard
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: 'Nhập DEPLOY để xác nhận triển khai'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_production == 'DEPLOY' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Deploy static dashboard to Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy dashboard --project-name ai-platform-dashboard
+"""
+}
+os.makedirs(base, exist_ok=True)
+for rel, content in files.items():
+    path=os.path.join(base, rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path,"w",encoding="utf-8") as f: f.write(textwrap.dedent(content).lstrip())
+zip_path="/mnt/data/github-cloudflare-plugin-starter.zip"
+with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+    for root,dirs,fs in os.walk(base):
+        for fn in fs:
+            p=os.path.join(root,fn)
+            z.write(p, os.path.relpath(p, base))
+print(f"Đã tạo bộ khung: {zip_path}\nSố tệp: {sum(len(fs) for _,_,fs in os.walk(base))}")

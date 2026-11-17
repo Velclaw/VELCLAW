@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
 
   if (!PACKAGE_NAME.test(name)) return NextResponse.json({ error: 'Invalid package name' }, { status: 400 })
   if (version && !VERSION.test(version)) return NextResponse.json({ error: 'Invalid package version' }, { status: 400 })
-  if (!REPO_URL.test(repoUrl)) return NextResponse.json({ error: 'A GitHub repository URL is required' }, { status: 400 })
+  if (!REPO_URL.test(repoUrl))
+    return NextResponse.json({ error: 'A GitHub repository URL is required' }, { status: 400 })
 
   const taskId = generateId(12)
   const githubToken = await getUserGitHubToken()
@@ -48,7 +49,13 @@ export async function POST(request: NextRequest) {
     const mkdir = await runCommandInSandbox(sandbox, 'mkdir', ['-p', PROJECT_DIR])
     if (!mkdir.success) throw new Error('Failed to create sandbox project directory')
 
-    const clone = await runCommandInSandbox(sandbox, 'git', ['clone', '--depth', '1', authenticatedRepoUrl, PROJECT_DIR])
+    const clone = await runCommandInSandbox(sandbox, 'git', [
+      'clone',
+      '--depth',
+      '1',
+      authenticatedRepoUrl,
+      PROJECT_DIR,
+    ])
     if (!clone.success) throw new Error('Failed to clone the GitHub repository')
 
     const packageJson = await runInProject(sandbox, 'test', ['-f', 'package.json'])
@@ -63,21 +70,25 @@ export async function POST(request: NextRequest) {
 
     const spec = packageSpec(name, version || undefined)
     const command = manager === 'pnpm' ? 'pnpm' : manager === 'yarn' ? 'yarn' : 'npm'
-    const args = manager === 'pnpm'
-      ? ['add', '--ignore-scripts', spec]
-      : manager === 'yarn'
+    const args =
+      manager === 'pnpm'
         ? ['add', '--ignore-scripts', spec]
-        : ['install', '--ignore-scripts', '--no-audit', '--no-fund', spec]
+        : manager === 'yarn'
+          ? ['add', '--ignore-scripts', spec]
+          : ['install', '--ignore-scripts', '--no-audit', '--no-fund', spec]
 
     const install = await runInProject(sandbox, command, args)
     if (!install.success) {
-      return NextResponse.json({
-        error: 'Library installation failed',
-        sandboxId: sandbox.sandboxId,
-        package: spec,
-        packageManager: manager,
-        details: install.error || install.output || 'unknown installer error',
-      }, { status: 422 })
+      return NextResponse.json(
+        {
+          error: 'Library installation failed',
+          sandboxId: sandbox.sandboxId,
+          package: spec,
+          packageManager: manager,
+          details: install.error || install.output || 'unknown installer error',
+        },
+        { status: 422 },
+      )
     }
 
     const manifest = await runInProject(sandbox, 'cat', ['package.json'])
@@ -97,6 +108,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Library installation failed:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Library installation failed' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Library installation failed' },
+      { status: 500 },
+    )
   }
 }

@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
   if (!signature) return NextResponse.json({ error: 'Missing X-Hub-Signature-256' }, { status: 401 })
 
   const payload = await request.text()
-  if (!verifySignature(payload, signature, secret)) return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
+  if (!verifySignature(payload, signature, secret))
+    return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
 
   let body: unknown
   try {
@@ -45,15 +46,18 @@ export async function POST(request: NextRequest) {
       after?: string
       repository?: { clone_url?: string; html_url?: string; name?: string }
     }
-    if (data.deleted || !data.ref?.startsWith('refs/heads/')) return NextResponse.json({ ok: true, verified: true, ignored: 'non-branch-push', deliveryId })
+    if (data.deleted || !data.ref?.startsWith('refs/heads/'))
+      return NextResponse.json({ ok: true, verified: true, ignored: 'non-branch-push', deliveryId })
 
     const repoUrl = data.repository?.clone_url || data.repository?.html_url || ''
     const branch = data.ref.slice('refs/heads/'.length)
     const commitSha = data.after || ''
-    if (!repoUrl || !branch || !commitSha || /^0+$/.test(commitSha)) return NextResponse.json({ ok: true, verified: true, ignored: 'invalid-push-payload', deliveryId })
+    if (!repoUrl || !branch || !commitSha || /^0+$/.test(commitSha))
+      return NextResponse.json({ ok: true, verified: true, ignored: 'invalid-push-payload', deliveryId })
 
     const config = await getWebhookDeploymentConfig(repoUrl, branch)
-    if (!config) return NextResponse.json({ ok: true, verified: true, ignored: 'repository-not-configured', deliveryId })
+    if (!config)
+      return NextResponse.json({ ok: true, verified: true, ignored: 'repository-not-configured', deliveryId })
 
     const deployment = await createDeployment({
       userId: config.deployment.userId,

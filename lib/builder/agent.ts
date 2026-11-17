@@ -6,7 +6,8 @@ import { getUserApiKey } from '@/lib/api-keys/user-keys'
 
 export type BuilderWorkspaceFile = { path: string; content: string }
 
-const SAFE_PATH = /^(?!\/)(?!.*\.\.)(?!.*(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage)(?:\/|$))[A-Za-z0-9._/-]+$/
+const SAFE_PATH =
+  /^(?!\/)(?!.*\.\.)(?!.*(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage)(?:\/|$))[A-Za-z0-9._/-]+$/
 const changeSchema = z.object({
   path: z.string().min(1).max(240).regex(SAFE_PATH, 'unsafe workspace path'),
   content: z.string().max(300_000),
@@ -24,7 +25,10 @@ function validateWorkspace(files: BuilderWorkspaceFile[]) {
 }
 
 function workspaceContext(files: BuilderWorkspaceFile[]) {
-  return files.slice(0, 150).map((file) => `\n--- FILE: ${file.path} ---\n${file.content.slice(0, 80_000)}`).join('\n')
+  return files
+    .slice(0, 150)
+    .map((file) => `\n--- FILE: ${file.path} ---\n${file.content.slice(0, 80_000)}`)
+    .join('\n')
 }
 
 export async function runBuilderAgent(input: {
@@ -47,7 +51,8 @@ export async function runBuilderAgent(input: {
 
   const applyWorkspaceChanges = tool({
     name: 'apply_workspace_changes',
-    description: 'Apply complete replacement contents for files in the current Velclaw Builder browser workspace. Use only for deliberate code changes requested by the user.',
+    description:
+      'Apply complete replacement contents for files in the current Velclaw Builder browser workspace. Use only for deliberate code changes requested by the user.',
     parameters: z.object({ changes: z.array(changeSchema).max(30) }),
     async execute({ changes: requested }) {
       for (const change of requested) collectedChanges.push(change)
@@ -58,16 +63,20 @@ export async function runBuilderAgent(input: {
   let roleInstructions: string
   switch (input.role) {
     case 'coder':
-      roleInstructions = 'You are the Velclaw Coder. Inspect the provided workspace, implement the requested feature, preserve existing conventions, and call apply_workspace_changes with complete file contents for every changed file. Never invent files you do not need.'
+      roleInstructions =
+        'You are the Velclaw Coder. Inspect the provided workspace, implement the requested feature, preserve existing conventions, and call apply_workspace_changes with complete file contents for every changed file. Never invent files you do not need.'
       break
     case 'reviewer':
-      roleInstructions = 'You are the Velclaw Reviewer. Audit the workspace for correctness, security, maintainability, accessibility, and obvious runtime failures. Do not modify files. Return findings ordered by severity and concrete fixes.'
+      roleInstructions =
+        'You are the Velclaw Reviewer. Audit the workspace for correctness, security, maintainability, accessibility, and obvious runtime failures. Do not modify files. Return findings ordered by severity and concrete fixes.'
       break
     case 'tester':
-      roleInstructions = 'You are the Velclaw Tester. Review package scripts and source for test/build/type-check risks. Do not claim tests were executed. Return a verification plan plus likely failures and exact commands the browser runtime should run.'
+      roleInstructions =
+        'You are the Velclaw Tester. Review package scripts and source for test/build/type-check risks. Do not claim tests were executed. Return a verification plan plus likely failures and exact commands the browser runtime should run.'
       break
     case 'deployer':
-      roleInstructions = 'You are the Velclaw Deployer. Inspect the workspace and explain deployment readiness, required build/start commands, exposed port assumptions, configuration risks, and the exact handoff to Velclaw Hosting. Do not claim deployment occurred.'
+      roleInstructions =
+        'You are the Velclaw Deployer. Inspect the workspace and explain deployment readiness, required build/start commands, exposed port assumptions, configuration risks, and the exact handoff to Velclaw Hosting. Do not claim deployment occurred.'
       break
   }
 
@@ -98,7 +107,12 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
   validateWorkspace(workspace)
   const steps: Array<{ role: 'coder' | 'tester' | 'reviewer' | 'deployer'; output: string }> = []
 
-  const coder = await runBuilderAgent({ role: 'coder', prompt: `Implement this request completely: ${input.prompt}`, files: workspace, ...(input.model ? { model: input.model } : {}) })
+  const coder = await runBuilderAgent({
+    role: 'coder',
+    prompt: `Implement this request completely: ${input.prompt}`,
+    files: workspace,
+    ...(input.model ? { model: input.model } : {}),
+  })
   steps.push({ role: 'coder', output: coder.output })
   if (coder.changes.length) {
     const map = new Map(workspace.map((file) => [file.path, file.content]))
@@ -133,7 +147,9 @@ export async function runBuilderWorkflow(input: { prompt: string; files: Builder
   return {
     model: clean(input.model, 120) || process.env.OPENAI_AGENTS_MODEL || 'gpt-5.6-luna',
     output: steps.map((step) => `[${step.role}]\n${step.output}`).join('\n\n'),
-    changes: workspace.filter((file) => !input.files.some((original) => original.path === file.path && original.content === file.content)),
+    changes: workspace.filter(
+      (file) => !input.files.some((original) => original.path === file.path && original.content === file.content),
+    ),
     steps,
   }
 }

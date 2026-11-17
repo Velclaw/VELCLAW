@@ -1,0 +1,69 @@
+### Breaking changes
+
+The `ubuntu-latest` label is ready to become the default version for Ubuntu 26.04.
+
+### Target date
+
+This change will be rolled out over a period of several weeks beginning October 19, 2026. 
+We plan to complete the migration by November 19, 2026.
+
+### The motivation for the changes
+
+Ubuntu 26.04 has completed its public preview period and is generally available for production workloads. 
+We have monitored customer feedback and image stability, and are now ready to set it as the latest version for the x64 `ubuntu-latest` label.
+
+### Possible impact
+
+Workflows and pipelines that depend on Ubuntu 24.04-specific software, package versions, system libraries, compilers, or prebuilt binaries may be affected.
+
+### Software difference between Ubuntu 24.04 and Ubuntu 26.04
+
+| Tool name | Ubuntu 24.04 | Ubuntu 26.04 | Notes |
+|-----------|--------------|--------------|-------|
+| Operating system | Ubuntu 24.04.5 LTS | Ubuntu 26.04.1 LTS | New Ubuntu LTS release |
+| Kernel | 6.17.0-1022-azure | 7.0.0-1012-azure | Updated with the new operating system |
+| Systemd | 255.4-1ubuntu8.17 | 259.5-0ubuntu3.4 | Updated with the new operating system |
+| Docker Buildx | 0.37.0 | 0.37.0 | Available on both images |
+| Minikube | 1.39.0 | 1.39.0 | Available on both images |
+| AWS CLI | 2.36.40 | 2.36.40 | Available on both images |
+| Azure CLI | 2.90.0 | 2.90.0 | Available on both images |
+| Google Cloud CLI | 583.0.0 | 583.0.0 | Available on both images |
+| Rust | 1.98.1 | 1.98.1 | Available on both images |
+| Firefox | 155.0 | 155.0 | Available on both images |
+| Java | 17.0.20+1 (default) | 17.0.20+1 (default) | Default version remains Java 17 |
+
+For the complete list of installed software, see the [Ubuntu 26.04](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2604-Readme.md) image documentation.
+
+### Platforms affected
+
+- [x] Azure DevOps
+- [x] GitHub Actions
+
+### Runner images affected
+
+- [ ] Ubuntu 22.04
+- [ ] Ubuntu 22.04 Arm64
+- [x] Ubuntu 24.04
+- [ ] Ubuntu 24.04 Arm64
+- [x] Ubuntu 26.04
+- [ ] Ubuntu 26.04 Arm64
+- [ ] Ubuntu Slim
+- [ ] macOS 14
+- [ ] macOS 14 Arm64
+- [ ] macOS 15
+- [ ] macOS 15 Arm64
+- [ ] macOS 26
+- [ ] macOS 26 Arm64
+- [ ] Windows Server 2022
+- [ ] Windows Server 2025
+- [ ] Windows Server 2025 with Visual Studio 2026
+- [ ] Windows Desktop 11
+- [ ] Windows Desktop 11 with Visual Studio 2026
+
+### Mitigation ways
+
+If you see any issues with your workflows during this transition period:
+
+- File an issue in this repository.
+- Switch back to Ubuntu 24.04 by specifying the `ubuntu-24.04` label.
+- Use `ubuntu-26.04` to test against the new image explicitly.

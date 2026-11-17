@@ -1,5 +1,8 @@
-export const VELCLAW_PRODUCT_DOMAIN = 'velclaw.cfd'
-export const VELCLAW_PRODUCT_URL = `https://${VELCLAW_PRODUCT_DOMAIN}`
+export const VELCLAW_PRODUCT_DOMAIN = 'velclaw.site'
+export const VELCLAW_PRODUCT_URL = 'https://velclaw.site'
+
+const FIRST_PARTY_HOST = /^(?:[a-z0-9-]+\.)*velclaw\.(?:site|dev|app)$/i
+const BRANCH_HOST = /^velclaw-git-[a-z0-9-]+-velclaw\.dev$/i
 
 function slugify(value: string): string {
   return value
@@ -9,16 +12,13 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-/**
- * Build the first-party public URL for a branch deployment.
- * Example: feat/velclaw-deploy-page3 ->
- * https://velclaw-git-feat-velclaw-deploy-page3-velclaw.cfd
- */
 export function buildVelclawProductUrl(branchName: string): string {
   const branchSlug = slugify(branchName) || 'main'
-  const availableBranchLength = 63 - 'velclaw-git-'.length - '-velclaw'.length
+  const prefix = 'velclaw-git-'
+  const suffix = '-velclaw.dev'
+  const availableBranchLength = 253 - prefix.length - suffix.length
   const boundedBranch = branchSlug.slice(0, availableBranchLength).replace(/-+$/g, '') || 'main'
-  return `https://velclaw-git-${boundedBranch}-velclaw.cfd`
+  return `https://${prefix}${boundedBranch}${suffix}`
 }
 
 export function isVelclawProductUrl(value: string | null | undefined): value is string {
@@ -26,9 +26,12 @@ export function isVelclawProductUrl(value: string | null | undefined): value is 
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:') return false
-    if (url.hostname === VELCLAW_PRODUCT_DOMAIN) return true
-    return /^velclaw-git-[a-z0-9-]+-velclaw\.cfd$/.test(url.hostname)
+    return FIRST_PARTY_HOST.test(url.hostname) || BRANCH_HOST.test(url.hostname)
   } catch {
     return false
   }
+}
+
+export function isVelclawHostname(value: string | null | undefined): boolean {
+  return Boolean(value && FIRST_PARTY_HOST.test(value.trim().toLowerCase()))
 }

@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Terminal, 
-  Copy, 
-  Check, 
-  Download, 
-  Sparkles, 
-  RotateCw, 
-  Maximize2, 
-  Filter, 
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  Terminal,
+  Copy,
+  Check,
+  Download,
+  Sparkles,
+  RotateCw,
+  Maximize2,
+  Filter,
   AlertTriangle,
-  Play
-} from 'lucide-react';
-import { BuildRun, PipelineStage } from '../types';
+  Play,
+} from 'lucide-react'
+import { BuildRun, PipelineStage } from '../types'
 
 interface LiveTerminalProps {
-  currentRun: BuildRun | null;
-  selectedStageId?: string;
-  onSelectStage: (stageId: string) => void;
-  onDiagnoseErrorWithAi: (logSnippet: string) => void;
+  currentRun: BuildRun | null
+  selectedStageId?: string
+  onSelectStage: (stageId: string) => void
+  onDiagnoseErrorWithAi: (logSnippet: string) => void
 }
 
 export const LiveTerminal: React.FC<LiveTerminalProps> = ({
@@ -26,74 +26,78 @@ export const LiveTerminal: React.FC<LiveTerminalProps> = ({
   onSelectStage,
   onDiagnoseErrorWithAi,
 }) => {
-  const [copied, setCopied] = useState(false);
-  const [filterText, setFilterText] = useState('');
-  const [autoScroll, setAutoScroll] = useState(true);
-  const terminalEndRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false)
+  const [filterText, setFilterText] = useState('')
+  const [autoScroll, setAutoScroll] = useState(true)
+  const terminalEndRef = useRef<HTMLDivElement>(null)
 
-  const stages = currentRun?.stages || [];
-  const activeStage = stages.find((s) => s.id === selectedStageId) || stages[0];
+  const stages = currentRun?.stages || []
+  const activeStage = stages.find((s) => s.id === selectedStageId) || stages[0]
 
   // Collect all logs or active stage logs
-  const displayLogs: string[] = activeStage ? activeStage.logs : [];
+  const displayLogs: string[] = activeStage ? activeStage.logs : []
 
   const filteredLogs = filterText
     ? displayLogs.filter((log) => log.toLowerCase().includes(filterText.toLowerCase()))
-    : displayLogs;
+    : displayLogs
 
   useEffect(() => {
     if (autoScroll && terminalEndRef.current) {
-      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [displayLogs, autoScroll]);
+  }, [displayLogs, autoScroll])
 
   const handleCopyLogs = () => {
-    const text = displayLogs.join('\n');
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    const text = displayLogs.join('\n')
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const handleDownloadLogs = () => {
-    const text = displayLogs.join('\n');
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pipeline-${currentRun?.id || 'build'}-${activeStage?.type || 'log'}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+    const text = displayLogs.join('\n')
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `pipeline-${currentRun?.id || 'build'}-${activeStage?.type || 'log'}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const formatLogLine = (line: string, index: number) => {
-    const isCommand = line.startsWith('>') || line.startsWith('$');
-    const isError = line.toLowerCase().includes('error') || line.toLowerCase().includes('failed') || line.includes('ERR!');
-    const isSuccess = line.includes('✔') || line.includes('✓') || line.includes('Success') || line.includes('HTTP/2 200') || line.includes('passed');
-    const isWarning = line.toLowerCase().includes('warn') || line.toLowerCase().includes('notice');
+    const isCommand = line.startsWith('>') || line.startsWith('$')
+    const isError =
+      line.toLowerCase().includes('error') || line.toLowerCase().includes('failed') || line.includes('ERR!')
+    const isSuccess =
+      line.includes('✔') ||
+      line.includes('✓') ||
+      line.includes('Success') ||
+      line.includes('HTTP/2 200') ||
+      line.includes('passed')
+    const isWarning = line.toLowerCase().includes('warn') || line.toLowerCase().includes('notice')
 
     return (
       <div key={index} className="flex font-mono text-xs leading-relaxed hover:bg-slate-900/60 px-2 py-0.5 rounded">
-        <span className="text-slate-600 select-none w-10 text-right pr-3 shrink-0">
-          {index + 1}
-        </span>
+        <span className="text-slate-600 select-none w-10 text-right pr-3 shrink-0">{index + 1}</span>
         <span
           className={`flex-1 break-all ${
             isCommand
               ? 'text-cyan-400 font-semibold'
               : isError
-              ? 'text-rose-400 bg-rose-950/30 px-1 rounded'
-              : isSuccess
-              ? 'text-emerald-400'
-              : isWarning
-              ? 'text-amber-400'
-              : 'text-slate-300'
+                ? 'text-rose-400 bg-rose-950/30 px-1 rounded'
+                : isSuccess
+                  ? 'text-emerald-400'
+                  : isWarning
+                    ? 'text-amber-400'
+                    : 'text-slate-300'
           }`}
         >
           {line}
         </span>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col h-[520px]">
@@ -125,10 +129,10 @@ export const LiveTerminal: React.FC<LiveTerminalProps> = ({
                     stg.status === 'running'
                       ? 'bg-amber-400 animate-pulse'
                       : stg.status === 'success'
-                      ? 'bg-emerald-400'
-                      : stg.status === 'failed'
-                      ? 'bg-rose-400'
-                      : 'bg-slate-500'
+                        ? 'bg-emerald-400'
+                        : stg.status === 'failed'
+                          ? 'bg-rose-400'
+                          : 'bg-slate-500'
                   }`}
                 />
                 <span className="truncate max-w-[130px]">{stg.name.split('.')[1] || stg.name}</span>
@@ -189,7 +193,9 @@ export const LiveTerminal: React.FC<LiveTerminalProps> = ({
             <span className="text-slate-200">{activeStage.command}</span>
           </div>
           <span className="text-[11px] text-slate-500 shrink-0">
-            {activeStage.durationMs ? `${(activeStage.durationMs / 1000).toFixed(2)}s` : 'Status: ' + activeStage.status}
+            {activeStage.durationMs
+              ? `${(activeStage.durationMs / 1000).toFixed(2)}s`
+              : 'Status: ' + activeStage.status}
           </span>
         </div>
       )}
@@ -211,11 +217,17 @@ export const LiveTerminal: React.FC<LiveTerminalProps> = ({
       <div className="bg-slate-900/80 border-t border-slate-800 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${
-              currentRun?.status === 'running' ? 'bg-amber-400 animate-pulse' :
-              currentRun?.status === 'success' ? 'bg-emerald-400' :
-              currentRun?.status === 'failed' ? 'bg-rose-400' : 'bg-slate-500'
-            }`} />
+            <span
+              className={`w-2 h-2 rounded-full ${
+                currentRun?.status === 'running'
+                  ? 'bg-amber-400 animate-pulse'
+                  : currentRun?.status === 'success'
+                    ? 'bg-emerald-400'
+                    : currentRun?.status === 'failed'
+                      ? 'bg-rose-400'
+                      : 'bg-slate-500'
+              }`}
+            />
             Trạng thái: {currentRun?.status?.toUpperCase() || 'IDLE'}
           </span>
           <span>•</span>
@@ -237,5 +249,5 @@ export const LiveTerminal: React.FC<LiveTerminalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

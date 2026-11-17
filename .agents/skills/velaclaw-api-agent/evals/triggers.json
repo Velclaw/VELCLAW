@@ -1,0 +1,11 @@
+{
+  "skill": "velaclaw-api-agent",
+  "test_cases": [
+    {"input": "setup api key cho velaclaw", "should_trigger": true},
+    {"input": "cấu hình gateway token vclaw", "should_trigger": true},
+    {"input": "tạo plugin skill cho agent VELCLAW", "should_trigger": true},
+    {"input": "tích hợp API token vào dự án AI với Velclaw", "should_trigger": true},
+    {"input": "viết code python đơn giản", "should_trigger": false},
+    {"input": "thời tiết hôm nay", "should_trigger": false}
+  ]
+}

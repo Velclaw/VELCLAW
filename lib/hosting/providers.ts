@@ -1,4 +1,4 @@
-export type HostingProvider = 'render' | 'self-hosted'
+export type HostingProvider = 'render' | 'self-hosted' | 'velclawhost'
 
 export type HostingDeploymentInput = {
   userId: string
@@ -25,7 +25,9 @@ export interface HostingProviderAdapter {
 
 export function getHostingProvider(): HostingProvider {
   const provider = (process.env.VELCLAW_HOSTING_PROVIDER || 'self-hosted').toLowerCase()
-  return provider === 'render' ? 'render' : 'self-hosted'
+  if (provider === 'render') return 'render'
+  if (provider === 'velclawhost') return 'velclawhost'
+  return 'self-hosted'
 }
 
 export function getRenderConfig() {

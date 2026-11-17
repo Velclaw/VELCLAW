@@ -1,0 +1,171 @@
+name: MCP Runtime Validation
+
+on:
+  pull_request:
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+      - 'lib/mcp/**'
+      - 'app/api/mcp/**'
+      - 'components/mcp-page.tsx'
+      - 'tests/mcp-runtime-registry.test.ts'
+  push:
+    branches: [main]
+    paths:
+      - 'config/mcp.json'
+      - '.mcp.json'
+      - 'scripts/mcp/**'
+      - 'skills/agents/sequential-thinking/**'
+      - 'package.json'
+      - '.env.example'
+      - 'lib/mcp/**'
+      - 'app/api/mcp/**'
+      - 'components/mcp-page.tsx'
+      - 'tests/mcp-runtime-registry.test.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          version: 10.15.1
+          run_install: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Validate MCP registry
+        run: pnpm mcp:config-check
+
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('config/mcp.json','utf8')); JSON.parse(require('fs').readFileSync('.mcp.json','utf8')); console.log('MCP JSON valid')"
+
+      - name: Install test dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test runtime registry
+        run: pnpm exec tsx --test tests/mcp-runtime-registry.test.ts
+
+  mcp-runtime:
+    runs-on: ubuntu-latest
+    needs: mcp-config
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Verify runtime tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          go version
+          python3 --version
+
+      - name: Resolve Playwright MCP
+        run: npx --yes @playwright/mcp@latest --help
+
+      - name: Resolve Context7 MCP
+        run: timeout 20s npx --yes @upstash/context7-mcp --help || test "$?" = "124"
+
+      - name: Resolve filesystem MCP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import selectors
+          import subprocess
+          import tempfile
+          import time
+
+          with tempfile.TemporaryDirectory(prefix="mcp-filesystem-") as workspace:
+              process = subprocess.Popen(
+                  ["go", "run", "github.com/mark3labs/mcp-filesystem-server@latest", workspace],
+                  stdin=subprocess.PIPE,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.DEVNULL,
+                  text=True,
+                  bufsize=1,
+              )
+              selector = selectors.DefaultSelector()
+              selector.register(process.stdout, selectors.EVENT_READ)
+
+              def send(message):
+                  process.stdin.write(json.dumps(message) + "\n")
+                  process.stdin.flush()
+
+              def receive(message_id):
+                  deadline = time.monotonic() + 60
+                  while time.monotonic() < deadline:
+                      ready = selector.select(deadline - time.monotonic())
+                      if not ready:
+                          raise RuntimeError(f"Timed out waiting for MCP response {message_id}")
+                      line = process.stdout.readline()
+                      if not line:
+                          raise RuntimeError(f"MCP server exited with code {process.poll()}")
+                      response = json.loads(line)
+                      if response.get("id") == message_id:
+                          if "error" in response:
+                              raise RuntimeError(f"MCP request failed: {response['error']}")
+                          return response.get("result")
+                  raise RuntimeError(f"Timed out waiting for MCP response {message_id}")
+
+              try:
+                  send({
+                      "jsonrpc": "2.0",
+                      "id": 1,
+                      "method": "initialize",
+                      "params": {
+                          "protocolVersion": "2024-11-05",
+                          "capabilities": {},
+                          "clientInfo": {"name": "velclaw-ci", "version": "1.0.0"},
+                      },
+                  })
+                  initialized = receive(1)
+                  if not initialized or "serverInfo" not in initialized:
+                      raise RuntimeError("MCP initialize response did not include serverInfo")
+
+                  send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+                  send({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+                  tool_result = receive(2)
+                  tools = tool_result.get("tools") if isinstance(tool_result, dict) else None
+                  if not isinstance(tools, list) or not tools:
+                      raise RuntimeError("MCP tools/list returned no tools")
+                  print(f"Filesystem MCP handshake passed; discovered {len(tools)} tools.")
+              finally:
+                  selector.close()
+                  if process.stdin:
+                      process.stdin.close()
+                  if process.poll() is None:
+                      process.terminate()
+                      try:
+                          process.wait(timeout=5)
+                      except subprocess.TimeoutExpired:
+                          process.kill()
+                          process.wait(timeout=5)
+          PY
+
+      - name: Verify PostgreSQL MCP runner
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input uv
+          uvx --version
+
+      - name: Probe GitHub MCP endpoint
+        run: |
+          status="$(curl -sS -o /dev/null -w '%{http_code}' https://api.githubcopilot.com/mcp/)"
+          case "$status" in
+            200|401|403) echo "GitHub MCP endpoint reachable (HTTP $status)" ;;
+            *) echo "Unexpected GitHub MCP endpoint status: $status"; exit 1 ;;
+          esac

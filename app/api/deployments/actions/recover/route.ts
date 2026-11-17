@@ -7,7 +7,8 @@ const sql = postgres(process.env.POSTGRES_URL || '', { max: 2 })
 export async function POST(request: Request) {
   const expected = process.env.VELCLAW_DEPLOY_API_TOKEN
   const provided = request.headers.get('authorization')
-  if (!expected || provided !== `Bearer ${expected}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!expected || provided !== `Bearer ${expected}`)
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const rows = await sql`

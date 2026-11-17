@@ -16,7 +16,10 @@ export function UnifiedBuilderBar() {
   const mode = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mode') : null
 
   return (
-    <nav aria-label="Builder modes" className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-[#080a0e] px-3 py-2">
+    <nav
+      aria-label="Builder modes"
+      className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-[#080a0e] px-3 py-2"
+    >
       <span className="mr-2 shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">Build</span>
       {modes.map(({ id, label, icon: Icon, href }) => {
         const active = id === 'app' ? pathname === '/builder' && !mode : pathname === '/builder' && mode === id

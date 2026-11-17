@@ -63,7 +63,8 @@ export async function POST(request: Request, { params }: Params) {
         LIMIT 1
         FOR UPDATE
       `
-      if (previousRows.length === 0) return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
+      if (previousRows.length === 0)
+        return { error: 'No previous ready deployment is available for rollback', httpStatus: 409 } as const
 
       const previous = previousRows[0] as PreviousDeploymentRow
       await tx`

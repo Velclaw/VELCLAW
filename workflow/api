@@ -1,0 +1,49 @@
+---
+title: workflow/api
+description: Runtime functions to inspect runs, start workflows, and manage hooks.
+type: overview
+summary: Explore runtime functions for starting workflows, inspecting runs, and managing hooks.
+---
+
+# workflow/api
+
+
+
+The `workflow/api` package provides runtime functions to inspect runs, start new runs, and manage hooks.
+
+## Functions
+
+<Cards>
+  <Card href="/docs/api-reference/workflow-api/start" title="start()">
+    Start/enqueue a new workflow run.
+  </Card>
+
+  <Card href="/docs/api-reference/workflow-api/resume-hook" title="resumeHook()">
+    Resume a workflow by sending a payload to a hook.
+  </Card>
+
+  <Card href="/docs/api-reference/workflow-api/resume-webhook" title="resumeWebhook()">
+    Resume a workflow by sending a `Request` to a webhook.
+  </Card>
+
+  <Card href="/docs/api-reference/workflow-api/get-hook-by-token" title="getHookByToken()">
+    Get hook details and metadata by its token.
+  </Card>
+
+  <Card href="/docs/api-reference/workflow-api/get-run" title="getRun()">
+    Get workflow run status and metadata without waiting for completion.
+  </Card>
+</Cards>
+
+<Callout type="info">
+  Looking for `getWorld()` and the World SDK? They are exported from `workflow/runtime`. See the [`workflow/runtime` reference](/docs/api-reference/workflow-runtime).
+</Callout>
+
+
+---
+
+For a semantic overview of all documentation, see [/sitemap.md](/sitemap.md)
+
+For an index of all available documentation, see [/llms.txt](/llms.txt)
+
+For agent-facing discovery, including API and MCP surfaces, see [/agents.md](/agents.md)

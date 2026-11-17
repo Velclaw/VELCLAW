@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
 const MODEL_OPTIONS = [
   { value: 'zsk', label: 'ZsK Free Agent (local demo)' },
@@ -6,77 +6,74 @@ const MODEL_OPTIONS = [
   { value: 'openai', label: 'OpenAI (API key required)' },
   { value: 'gemini', label: 'Google Gemini' },
   { value: 'qwen', label: 'Qwen' },
-  { value: 'claude', label: 'Claude' }
-];
+  { value: 'claude', label: 'Claude' },
+]
 
 interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
+  role: 'user' | 'assistant' | 'system'
+  content: string
 }
 
 interface AIChatPanelProps {
-  selectedModel: string;
-  onSelectModel: (model: string) => void;
+  selectedModel: string
+  onSelectModel: (model: string) => void
 }
 
-export const AIChatPanel: React.FC<AIChatPanelProps> = ({
-  selectedModel,
-  onSelectModel
-}) => {
+export const AIChatPanel: React.FC<AIChatPanelProps> = ({ selectedModel, onSelectModel }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'system',
-      content: 'ZsK AI Free Agent đã sẵn sàng. Chọn provider và gửi câu hỏi của bạn.'
-    }
-  ]);
-  const [input, setInput] = useState('');
+      content: 'ZsK AI Free Agent đã sẵn sàng. Chọn provider và gửi câu hỏi của bạn.',
+    },
+  ])
+  const [input, setInput] = useState('')
   const [status, setStatus] = useState<{ type: 'info' | 'error'; text: string } | null>({
     type: 'info',
-    text: 'Mô hình local zsk đang chạy miễn phí. Đổi sang ohmaba nếu bạn có endpoint custom.'
-  });
-  const [isSending, setIsSending] = useState(false);
+    text: 'Mô hình local zsk đang chạy miễn phí. Đổi sang ohmaba nếu bạn có endpoint custom.',
+  })
+  const [isSending, setIsSending] = useState(false)
 
   const handleSend = async () => {
-    const trimmed = input.trim();
-    if (!trimmed) return;
+    const trimmed = input.trim()
+    if (!trimmed) return
 
-    const nextMessages = [...messages, { role: 'user', content: trimmed }];
-    setMessages(nextMessages);
-    setInput('');
-    setIsSending(true);
-    setStatus(null);
+    const nextMessages = [...messages, { role: 'user', content: trimmed }]
+    setMessages(nextMessages)
+    setInput('')
+    setIsSending(true)
+    setStatus(null)
 
     try {
       const response = await fetch('/api/chat', {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: trimmed, model: selectedModel })
-      });
+        body: JSON.stringify({ message: trimmed, model: selectedModel }),
+      })
 
       if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(errText || `HTTP ${response.status}`);
+        const errText = await response.text()
+        throw new Error(errText || `HTTP ${response.status}`)
       }
 
-      const data = await response.json();
-      const content = data.response || data.result || 'No response returned.';
-      setMessages(prev => [...prev, { role: 'assistant', content }]);
-      setStatus({ type: 'info', text: 'Đã nhận phản hồi từ agent.' });
+      const data = await response.json()
+      const content = data.response || data.result || 'No response returned.'
+      setMessages((prev) => [...prev, { role: 'assistant', content }])
+      setStatus({ type: 'info', text: 'Đã nhận phản hồi từ agent.' })
     } catch (err) {
-      setStatus({ type: 'error', text: err instanceof Error ? err.message : 'Lỗi khi gọi agent.' });
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Lỗi: không thể nhận phản hồi từ agent.' }]);
+      setStatus({ type: 'error', text: err instanceof Error ? err.message : 'Lỗi khi gọi agent.' })
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Lỗi: không thể nhận phản hồi từ agent.' }])
     } finally {
-      setIsSending(false);
+      setIsSending(false)
     }
-  };
+  }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSend();
+      event.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#020409]">
@@ -86,14 +83,16 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
           <div className="text-[11px] text-neutral-400">Chọn provider và bắt đầu chat ngay.</div>
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="ai-model" className="text-[11px] text-neutral-400 uppercase tracking-widest">Provider</label>
+          <label htmlFor="ai-model" className="text-[11px] text-neutral-400 uppercase tracking-widest">
+            Provider
+          </label>
           <select
             id="ai-model"
             value={selectedModel}
-            onChange={e => onSelectModel(e.target.value)}
+            onChange={(e) => onSelectModel(e.target.value)}
             className="bg-black border border-neutral-700 text-white text-xs px-3 py-2 rounded-none focus:border-cyan-400 focus:outline-none"
           >
-            {MODEL_OPTIONS.map(option => (
+            {MODEL_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -110,8 +109,8 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
               message.role === 'user'
                 ? 'bg-cyan-950 border-cyan-700 text-cyan-100 ml-auto max-w-[85%]'
                 : message.role === 'assistant'
-                ? 'bg-neutral-900 border-neutral-700 text-slate-100 max-w-[85%]'
-                : 'bg-neutral-950 border-neutral-800 text-neutral-400 max-w-[90%]'
+                  ? 'bg-neutral-900 border-neutral-700 text-slate-100 max-w-[85%]'
+                  : 'bg-neutral-950 border-neutral-800 text-neutral-400 max-w-[90%]'
             }`}
           >
             <div className="text-[11px] uppercase tracking-[0.2em] font-bold mb-2">
@@ -138,7 +137,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <textarea
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Nhập câu hỏi của bạn vào đây..."
             className="min-h-[96px] w-full resize-none rounded-none border border-neutral-700 bg-[#06080F] px-3 py-3 text-sm text-white outline-none focus:border-cyan-400"
@@ -154,5 +153,5 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

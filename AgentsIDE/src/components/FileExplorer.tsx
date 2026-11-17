@@ -14,12 +14,17 @@ export function FileExplorer({ activeFile, onSelect }: { activeFile: string; onS
         {open ? <FolderOpen size={15} /> : <Folder size={15} />}
         <strong>src</strong>
       </button>
-      {open && sourceFiles.map((file) => (
-        <button key={file} className={`tree-file ${activeFile === file ? 'active' : ''}`} onClick={() => onSelect(file)}>
-          {file.endsWith('.tsx') ? <FileCode2 size={15} /> : <FileJson size={15} />}
-          <span>{file}</span>
-        </button>
-      ))}
+      {open &&
+        sourceFiles.map((file) => (
+          <button
+            key={file}
+            className={`tree-file ${activeFile === file ? 'active' : ''}`}
+            onClick={() => onSelect(file)}
+          >
+            {file.endsWith('.tsx') ? <FileCode2 size={15} /> : <FileJson size={15} />}
+            <span>{file}</span>
+          </button>
+        ))}
       <button className="tree-file" onClick={() => onSelect('package.json')}>
         <FileJson size={15} />
         <span>package.json</span>

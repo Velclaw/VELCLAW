@@ -18,7 +18,7 @@ const contextText = readFileSync(context, 'utf8')
 const requiredRepos = [
   'Velclaw/VELCLAW',
   'Velclaw/Oauth',
-  'Velclaw/docs.velclaw.ai',
+  'Velclaw/velclaw.cfd/docs',
   'zskbot/repo-docs-velclaw',
   'zskbot/Autoship',
   'zskbot/autoship-velclaw',

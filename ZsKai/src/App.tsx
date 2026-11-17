@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Header } from './components/Header';
-import { SidebarProjectTree } from './components/SidebarProjectTree';
-import { SidebarWatsonAnalysis } from './components/SidebarWatsonAnalysis';
-import { TerminalOutput } from './components/TerminalOutput';
-import { TerminalInput } from './components/TerminalInput';
-import { TerminalPerformanceOverlay } from './components/TerminalPerformanceOverlay';
-import { AIChatPanel } from './components/AIChatPanel';
-import { AuthModal } from './components/AuthModal';
-import { NotificationsDrawer } from './components/NotificationsDrawer';
-import { GoogleTasksDrawer } from './components/GoogleTasksDrawer';
-import { GoogleDocsDrawer } from './components/GoogleDocsDrawer';
-import { GoogleChatDrawer } from './components/GoogleChatDrawer';
-import { GoogleFormsDrawer } from './components/GoogleFormsDrawer';
-import { FileViewerModal } from './components/FileViewerModal';
-import { MainMenuDrawer } from './components/MainMenuDrawer';
+import React, { useState, useEffect, useRef } from 'react'
+import { Header } from './components/Header'
+import { SidebarProjectTree } from './components/SidebarProjectTree'
+import { SidebarWatsonAnalysis } from './components/SidebarWatsonAnalysis'
+import { TerminalOutput } from './components/TerminalOutput'
+import { TerminalInput } from './components/TerminalInput'
+import { TerminalPerformanceOverlay } from './components/TerminalPerformanceOverlay'
+import { AIChatPanel } from './components/AIChatPanel'
+import { AuthModal } from './components/AuthModal'
+import { NotificationsDrawer } from './components/NotificationsDrawer'
+import { GoogleTasksDrawer } from './components/GoogleTasksDrawer'
+import { GoogleDocsDrawer } from './components/GoogleDocsDrawer'
+import { GoogleChatDrawer } from './components/GoogleChatDrawer'
+import { GoogleFormsDrawer } from './components/GoogleFormsDrawer'
+import { FileViewerModal } from './components/FileViewerModal'
+import { MainMenuDrawer } from './components/MainMenuDrawer'
 import {
   CommandHistoryItem,
   WatsonMetrics,
@@ -26,11 +26,11 @@ import {
   SavedSession,
   UserProfile,
   PushNotification,
-  ProjectFile
-} from './types/shell';
-import { INITIAL_FILES, executeCommand } from './utils/watsonEngine';
-import { exportToPDF, exportToMarkdown, exportToCSV } from './utils/exportUtils';
-import { Terminal as TerminalIcon, Folder, Cpu, X, Sparkles } from 'lucide-react';
+  ProjectFile,
+} from './types/shell'
+import { INITIAL_FILES, executeCommand } from './utils/watsonEngine'
+import { exportToPDF, exportToMarkdown, exportToCSV } from './utils/exportUtils'
+import { Terminal as TerminalIcon, Folder, Cpu, X, Sparkles } from 'lucide-react'
 
 export default function App() {
   // Command History State
@@ -50,9 +50,9 @@ export default function App() {
           cluster: 'cloudant_prod_us_south',
           records_processed: 1402991,
           anomalies_detected: 14,
-          ai_confidence: 0.992
-        }
-      }
+          ai_confidence: 0.992,
+        },
+      },
     },
     {
       id: 'cmd_init_2',
@@ -65,14 +65,14 @@ export default function App() {
         type: 'markdown',
         content: `### Watson AI Optimization Preview
 - Shard rebalancing ready for 3 Cloudant cluster nodes.
-- Suggested command: \`watson prune --duplicates\` to clear 14 anomaly entries.`
-      }
-    }
-  ]);
+- Suggested command: \`watson prune --duplicates\` to clear 14 anomaly entries.`,
+      },
+    },
+  ])
 
   // Project Files & Sessions State
-  const [files, setFiles] = useState<ProjectFile[]>(INITIAL_FILES);
-  const [activeFile, setActiveFile] = useState<ProjectFile | null>(null);
+  const [files, setFiles] = useState<ProjectFile[]>(INITIAL_FILES)
+  const [activeFile, setActiveFile] = useState<ProjectFile | null>(null)
   const [sessions, setSessions] = useState<SavedSession[]>([
     {
       id: 's1',
@@ -80,7 +80,7 @@ export default function App() {
       timestamp: '2h ago',
       commandCount: 18,
       status: 'synced',
-      encryptedHash: '4f88c83e29f34567...b829'
+      encryptedHash: '4f88c83e29f34567...b829',
     },
     {
       id: 's2',
@@ -88,9 +88,9 @@ export default function App() {
       timestamp: '1d ago',
       commandCount: 42,
       status: 'synced',
-      encryptedHash: 'e92fa0129a029318...102a'
-    }
-  ]);
+      encryptedHash: 'e92fa0129a029318...102a',
+    },
+  ])
 
   // Metrics & Sync State
   const [metrics, setMetrics] = useState<WatsonMetrics>({
@@ -100,8 +100,8 @@ export default function App() {
     aiConfidence: 0.992,
     recordsProcessed: 1402991,
     activeNodes: 3,
-    statusText: 'Optimal'
-  });
+    statusText: 'Optimal',
+  })
 
   const [devices, setDevices] = useState<DeviceSync[]>([
     {
@@ -110,7 +110,7 @@ export default function App() {
       type: 'mobile',
       status: 'synced',
       lastSyncTime: '12s ago',
-      ipAddress: '192.168.1.42'
+      ipAddress: '192.168.1.42',
     },
     {
       id: 'd2',
@@ -118,11 +118,11 @@ export default function App() {
       type: 'tablet',
       status: 'synced',
       lastSyncTime: 'Just now',
-      ipAddress: '10.0.0.18'
-    }
-  ]);
+      ipAddress: '10.0.0.18',
+    },
+  ])
 
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false)
 
   // User Profile & Security
   const [user, setUser] = useState<UserProfile>({
@@ -130,8 +130,8 @@ export default function App() {
     role: 'Senior Cloud Engineer',
     authProvider: 'github',
     is2FAEnabled: true,
-    repoConnected: 'watson-cloudant-etl'
-  });
+    repoConnected: 'watson-cloudant-etl',
+  })
 
   // Notifications
   const [notifications, setNotifications] = useState<PushNotification[]>([
@@ -141,7 +141,7 @@ export default function App() {
       title: 'Watson AI Recommendation',
       message: 'Found 14 duplicate entries in cloudant_v3_log. Run "watson prune --duplicates" to optimize.',
       timestamp: '10:15',
-      read: false
+      read: false,
     },
     {
       id: 'n2',
@@ -149,98 +149,100 @@ export default function App() {
       title: 'Cloudant Sync Complete',
       message: 'Mobile Dashboard Pro synchronized 1,402,991 records successfully.',
       timestamp: '09:42',
-      read: false
-    }
-  ]);
+      read: false,
+    },
+  ])
 
   // UI Drawer & Modal Visibility
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isGoogleTasksOpen, setIsGoogleTasksOpen] = useState(false);
-  const [isGoogleDocsOpen, setIsGoogleDocsOpen] = useState(false);
-  const [isGoogleChatOpen, setIsGoogleChatOpen] = useState(false);
-  const [isGoogleFormsOpen, setIsGoogleFormsOpen] = useState(false);
-  const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
-  const [cleanHomeMode, setCleanHomeMode] = useState(true);
-  const [mobileTab, setMobileTab] = useState<'terminal' | 'files' | 'watson'>('terminal');
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isGoogleTasksOpen, setIsGoogleTasksOpen] = useState(false)
+  const [isGoogleDocsOpen, setIsGoogleDocsOpen] = useState(false)
+  const [isGoogleChatOpen, setIsGoogleChatOpen] = useState(false)
+  const [isGoogleFormsOpen, setIsGoogleFormsOpen] = useState(false)
+  const [isMainMenuOpen, setIsMainMenuOpen] = useState(false)
+  const [cleanHomeMode, setCleanHomeMode] = useState(true)
+  const [mobileTab, setMobileTab] = useState<'terminal' | 'files' | 'watson'>('terminal')
 
-  const outputEndRef = useRef<HTMLDivElement>(null);
+  const outputEndRef = useRef<HTMLDivElement>(null)
 
   // Auto scroll output
   useEffect(() => {
-    outputEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history]);
+    outputEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [history])
 
   // Periodic Cloudant Sync simulation
   useEffect(() => {
     const interval = setInterval(() => {
-      setDevices(prev => prev.map(d => ({ ...d, lastSyncTime: 'Just now' })));
-    }, 25000);
-    return () => clearInterval(interval);
-  }, []);
+      setDevices((prev) => prev.map((d) => ({ ...d, lastSyncTime: 'Just now' })))
+    }, 25000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Handlers
   const handleExecuteCommand = async (commandStr: string) => {
-    const newItem = await executeCommand(commandStr, '~/projects/etl', metrics, setMetrics);
+    const newItem = await executeCommand(commandStr, '~/projects/etl', metrics, setMetrics)
 
     if (newItem.output.content === 'CLEAR_TERMINAL') {
-      setHistory([]);
-      return;
+      setHistory([])
+      return
     }
 
     // Check for Export triggers embedded in output
     if (newItem.output.content.startsWith('EXPORT_TRIGGER:')) {
-      const format = newItem.output.content.split(':')[1];
-      if (format === 'pdf') handleExportPDF();
-      else if (format === 'md') handleExportMarkdown();
-      else if (format === 'csv') handleExportCSV();
+      const format = newItem.output.content.split(':')[1]
+      if (format === 'pdf') handleExportPDF()
+      else if (format === 'md') handleExportMarkdown()
+      else if (format === 'csv') handleExportCSV()
 
-      newItem.output.content = `Exporting report as ${format.toUpperCase()}... File generated.`;
+      newItem.output.content = `Exporting report as ${format.toUpperCase()}... File generated.`
     }
 
-    setHistory(prev => [...prev, newItem]);
-  };
+    setHistory((prev) => [...prev, newItem])
+  }
 
   const handleClearTerminal = () => {
-    setHistory([]);
-  };
+    setHistory([])
+  }
 
   const handleManualSync = () => {
-    setIsSyncing(true);
+    setIsSyncing(true)
     setTimeout(() => {
-      setIsSyncing(false);
-      setNotifications(prev => [
+      setIsSyncing(false)
+      setNotifications((prev) => [
         {
           id: `n_${Date.now()}`,
           type: 'success',
           title: 'Manual Cloudant Sync Completed',
           message: 'All device nodes re-indexed with zero latency drop.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false
+          read: false,
         },
-        ...prev
-      ]);
-    }, 1200);
-  };
+        ...prev,
+      ])
+    }, 1200)
+  }
 
   const handleExportPDF = () => {
-    exportToPDF(history, metrics);
-  };
+    exportToPDF(history, metrics)
+  }
 
   const handleExportMarkdown = () => {
-    exportToMarkdown(history, metrics);
-  };
+    exportToMarkdown(history, metrics)
+  }
 
   const handleExportCSV = () => {
-    exportToCSV(history);
-  };
+    exportToCSV(history)
+  }
 
   const handleSaveFile = (fileId: string, newContent: string) => {
-    setFiles(prev => prev.map(folder => ({
-      ...folder,
-      children: folder.children?.map(f => f.id === fileId ? { ...f, content: newContent } : f)
-    })));
-  };
+    setFiles((prev) =>
+      prev.map((folder) => ({
+        ...folder,
+        children: folder.children?.map((f) => (f.id === fileId ? { ...f, content: newContent } : f)),
+      })),
+    )
+  }
 
   const handleNewSession = () => {
     const newSession: SavedSession = {
@@ -249,13 +251,13 @@ export default function App() {
       timestamp: 'Just now',
       commandCount: history.length,
       status: 'synced',
-      encryptedHash: Math.random().toString(36).substring(2, 18)
-    };
-    setSessions(prev => [newSession, ...prev]);
-  };
+      encryptedHash: Math.random().toString(36).substring(2, 18),
+    }
+    setSessions((prev) => [newSession, ...prev])
+  }
 
-  const [activeNavTab, setActiveNavTab] = useState<'chat' | 'diff' | 'logs' | 'rfc'>('chat');
-  const [selectedModel, setSelectedModel] = useState<'zsk' | 'ohmaba' | 'openai' | 'gemini' | 'qwen' | 'claude'>('zsk');
+  const [activeNavTab, setActiveNavTab] = useState<'chat' | 'diff' | 'logs' | 'rfc'>('chat')
+  const [selectedModel, setSelectedModel] = useState<'zsk' | 'ohmaba' | 'openai' | 'gemini' | 'qwen' | 'claude'>('zsk')
 
   return (
     <div className="flex flex-col h-screen w-screen bg-black text-white font-sans overflow-hidden">
@@ -287,8 +289,8 @@ export default function App() {
               files={files}
               sessions={sessions}
               selectedFileId={activeFile?.id || null}
-              onSelectFile={file => setActiveFile(file)}
-              onSelectSession={s => handleExecuteCommand(`watson run-analysis --session ${s.name}`)}
+              onSelectFile={(file) => setActiveFile(file)}
+              onSelectSession={(s) => handleExecuteCommand(`watson run-analysis --session ${s.name}`)}
               onExportPDF={handleExportPDF}
               onExportMarkdown={handleExportMarkdown}
               onExportCSV={handleExportCSV}
@@ -302,7 +304,9 @@ export default function App() {
           {/* Desktop view OR Mobile Tabbed views */}
           <div className="flex-1 flex overflow-hidden relative">
             {/* Terminal Main View */}
-            <div className={`flex-1 flex flex-col h-full overflow-hidden ${mobileTab !== 'terminal' ? 'hidden lg:flex' : 'flex'}`}>
+            <div
+              className={`flex-1 flex flex-col h-full overflow-hidden ${mobileTab !== 'terminal' ? 'hidden lg:flex' : 'flex'}`}
+            >
               <div className="hidden lg:block h-full">
                 <AIChatPanel selectedModel={selectedModel} onSelectModel={setSelectedModel} />
               </div>
@@ -318,12 +322,11 @@ export default function App() {
                   onClear={handleClearTerminal}
                   onToggleGraph={() => handleExecuteCommand('watson run-analysis --db cloudant_prod')}
                   onToggleLogs={() => handleExecuteCommand('cat cloudant_v3_log.json')}
-                  historyCommands={history.map(h => h.command)}
+                  historyCommands={history.map((h) => h.command)}
                   aiConfidence={metrics.aiConfidence}
                 />
               </div>
             </div>
-
 
             {/* Mobile Files view */}
             {mobileTab === 'files' && (
@@ -332,13 +335,13 @@ export default function App() {
                   files={files}
                   sessions={sessions}
                   selectedFileId={activeFile?.id || null}
-                  onSelectFile={file => {
-                    setActiveFile(file);
-                    setMobileTab('terminal');
+                  onSelectFile={(file) => {
+                    setActiveFile(file)
+                    setMobileTab('terminal')
                   }}
-                  onSelectSession={s => {
-                    handleExecuteCommand(`watson run-analysis --session ${s.name}`);
-                    setMobileTab('terminal');
+                  onSelectSession={(s) => {
+                    handleExecuteCommand(`watson run-analysis --session ${s.name}`)
+                    setMobileTab('terminal')
                   }}
                   onExportPDF={handleExportPDF}
                   onExportMarkdown={handleExportMarkdown}
@@ -354,9 +357,9 @@ export default function App() {
                 <SidebarWatsonAnalysis
                   metrics={metrics}
                   devices={devices}
-                  onTriggerQuickCommand={cmd => {
-                    handleExecuteCommand(cmd);
-                    setMobileTab('terminal');
+                  onTriggerQuickCommand={(cmd) => {
+                    handleExecuteCommand(cmd)
+                    setMobileTab('terminal')
                   }}
                   encryptedHash="4f88c83e29f34567...b829"
                 />
@@ -388,8 +391,8 @@ export default function App() {
         user={user}
         cleanHomeMode={cleanHomeMode}
         onToggleCleanHomeMode={() => setCleanHomeMode(!cleanHomeMode)}
-        onSelectFile={file => setActiveFile(file)}
-        onSelectSession={s => handleExecuteCommand(`watson run-analysis --session ${s.name}`)}
+        onSelectFile={(file) => setActiveFile(file)}
+        onSelectSession={(s) => handleExecuteCommand(`watson run-analysis --session ${s.name}`)}
         onExecuteCommand={handleExecuteCommand}
         onExportPDF={handleExportPDF}
         onExportMarkdown={handleExportMarkdown}
@@ -399,7 +402,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthOpen(true)}
         onManualSync={handleManualSync}
         isSyncing={isSyncing}
-        onSetConfidence={(score) => setMetrics(m => ({ ...m, aiConfidence: score }))}
+        onSetConfidence={(score) => setMetrics((m) => ({ ...m, aiConfidence: score }))}
       />
 
       {/* Auth & Security Modal */}
@@ -407,7 +410,7 @@ export default function App() {
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         user={user}
-        onUpdateUser={updated => setUser(prev => ({ ...prev, ...updated }))}
+        onUpdateUser={(updated) => setUser((prev) => ({ ...prev, ...updated }))}
       />
 
       {/* Notifications Drawer */}
@@ -415,41 +418,31 @@ export default function App() {
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
         notifications={notifications}
-        onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+        onMarkAllRead={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
       />
 
       {/* Google Tasks Drawer */}
-      <GoogleTasksDrawer
-        isOpen={isGoogleTasksOpen}
-        onClose={() => setIsGoogleTasksOpen(false)}
-      />
+      <GoogleTasksDrawer isOpen={isGoogleTasksOpen} onClose={() => setIsGoogleTasksOpen(false)} />
 
       {/* Google Docs Drawer */}
       <GoogleDocsDrawer
         isOpen={isGoogleDocsOpen}
         onClose={() => setIsGoogleDocsOpen(false)}
-        terminalHistoryText={history.map(h => `$ ${h.command}\n${h.output.content}`).join('\n\n')}
+        terminalHistoryText={history.map((h) => `$ ${h.command}\n${h.output.content}`).join('\n\n')}
       />
 
       {/* Google Chat Drawer */}
       <GoogleChatDrawer
         isOpen={isGoogleChatOpen}
         onClose={() => setIsGoogleChatOpen(false)}
-        terminalHistoryText={history.map(h => `$ ${h.command}\n${h.output.content}`).join('\n\n')}
+        terminalHistoryText={history.map((h) => `$ ${h.command}\n${h.output.content}`).join('\n\n')}
       />
 
       {/* Google Forms Drawer */}
-      <GoogleFormsDrawer
-        isOpen={isGoogleFormsOpen}
-        onClose={() => setIsGoogleFormsOpen(false)}
-      />
+      <GoogleFormsDrawer isOpen={isGoogleFormsOpen} onClose={() => setIsGoogleFormsOpen(false)} />
 
       {/* Code / File Viewer Modal */}
-      <FileViewerModal
-        file={activeFile}
-        onClose={() => setActiveFile(null)}
-        onSaveFile={handleSaveFile}
-      />
+      <FileViewerModal file={activeFile} onClose={() => setActiveFile(null)} onSaveFile={handleSaveFile} />
     </div>
-  );
+  )
 }

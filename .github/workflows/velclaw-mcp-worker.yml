@@ -1,0 +1,59 @@
+name: Velclaw MCP Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/mcp/worker/**"
+      - ".github/workflows/velclaw-mcp-worker.yml"
+  pull_request:
+    paths:
+      - "app/mcp/worker/**"
+      - ".github/workflows/velclaw-mcp-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/mcp/worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/mcp/worker/package.json
+      - name: Install dependencies
+        run: npm install
+      - name: Type-check Worker
+        run: npm run typecheck
+      - name: Validate Cloudflare bundle (dry run)
+        run: npx wrangler deploy --dry-run
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Skip deployment when Cloudflare token is not configured
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "Deployment skipped. Add the repository Actions secret CLOUDFLARE_API_TOKEN to enable automatic deployment."
+      - name: Deploy to Cloudflare Workers
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 1ef9a53ff8bd33ebfc65710ea07e7556
+          workingDirectory: app/mcp/worker
+          command: deploy

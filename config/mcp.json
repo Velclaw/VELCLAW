@@ -1,0 +1,45 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/2025-06-18/mcp.json",
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"]
+    },
+    "filesystem": {
+      "command": "go",
+      "args": ["run", "github.com/mark3labs/mcp-filesystem-server@latest", "."]
+    },
+    "postgres": {
+      "command": "uvx",
+      "args": ["postgres-mcp", "--access-mode=restricted"],
+      "env": {
+        "DATABASE_URI": "${POSTGRES_URL}"
+      }
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_MCP_PAT}"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "sequential-thinking-recall": {
+      "command": "node",
+      "args": ["mcp/sequential-thinking-recall/dist/index.js"],
+      "env": {
+        "RECALL_PRIVATE_KEY": "${RECALL_PRIVATE_KEY}",
+        "RECALL_NETWORK": "${RECALL_NETWORK}",
+        "RECALL_BUCKET_ALIAS": "${RECALL_BUCKET_ALIAS}",
+        "RECALL_LOG_PREFIX": "${RECALL_LOG_PREFIX}"
+      },
+      "disabled": true
+    }
+  }
+}

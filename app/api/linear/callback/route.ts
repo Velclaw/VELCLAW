@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
   const oauthError = request.nextUrl.searchParams.get('error')
 
   if (oauthError) return NextResponse.redirect(new URL('/builder?linear_error=oauth_denied', request.url))
-  if (!session?.user?.id || !code || !state) return NextResponse.json({ error: 'Invalid Linear OAuth callback' }, { status: 400 })
+  if (!session?.user?.id || !code || !state)
+    return NextResponse.json({ error: 'Invalid Linear OAuth callback' }, { status: 400 })
 
   try {
     const stateData = JSON.parse(decrypt(state)) as { userId: string; verifier: string; issuedAt: number }
@@ -33,7 +34,11 @@ export async function GET(request: NextRequest) {
       teams: workspace.teams.nodes,
     })
 
-    const existing = await db.select({ id: connectors.id }).from(connectors).where(and(eq(connectors.userId, session.user.id), eq(connectors.name, 'linear'))).limit(1)
+    const existing = await db
+      .select({ id: connectors.id })
+      .from(connectors)
+      .where(and(eq(connectors.userId, session.user.id), eq(connectors.name, 'linear')))
+      .limit(1)
     const values = {
       description: 'Linear workspace connection for Velclaw IDE Build',
       type: 'remote' as const,

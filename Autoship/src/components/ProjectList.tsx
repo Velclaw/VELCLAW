@@ -1,27 +1,27 @@
-import React from 'react';
-import { 
-  Server, 
-  GitBranch, 
-  Play, 
-  Trash2, 
-  Edit3, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Globe, 
+import React from 'react'
+import {
+  Server,
+  GitBranch,
+  Play,
+  Trash2,
+  Edit3,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Globe,
   ExternalLink,
-  Plus
-} from 'lucide-react';
-import { DeploymentProject } from '../types';
+  Plus,
+} from 'lucide-react'
+import { DeploymentProject } from '../types'
 
 interface ProjectListProps {
-  projects: DeploymentProject[];
-  selectedProject: DeploymentProject | null;
-  onSelectProject: (project: DeploymentProject) => void;
-  onEditProject: (project: DeploymentProject) => void;
-  onDeleteProject: (projectId: string) => void;
-  onTriggerDeploy: (projectId: string) => void;
-  onOpenNewProjectModal: () => void;
+  projects: DeploymentProject[]
+  selectedProject: DeploymentProject | null
+  onSelectProject: (project: DeploymentProject) => void
+  onEditProject: (project: DeploymentProject) => void
+  onDeleteProject: (projectId: string) => void
+  onTriggerDeploy: (projectId: string) => void
+  onOpenNewProjectModal: () => void
 }
 
 export const ProjectList: React.FC<ProjectListProps> = ({
@@ -54,7 +54,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projects.map((p) => {
-          const isSelected = selectedProject?.id === p.id;
+          const isSelected = selectedProject?.id === p.id
           return (
             <div
               key={p.id}
@@ -77,7 +77,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                     <GitBranch className="w-3.5 h-3.5 text-indigo-400" />
                     <span>{p.branch}</span>
                     <span>•</span>
-                    <span className="truncate max-w-[200px] text-slate-300">{p.repoUrl.replace('https://github.com/', '')}</span>
+                    <span className="truncate max-w-[200px] text-slate-300">
+                      {p.repoUrl.replace('https://github.com/', '')}
+                    </span>
                   </div>
                 </div>
 
@@ -85,8 +87,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      onEditProject(p);
+                      e.stopPropagation()
+                      onEditProject(p)
                     }}
                     className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                     title="Chỉnh sửa cấu hình"
@@ -97,9 +99,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation()
                       if (confirm(`Bạn có chắc muốn xóa dự án "${p.name}"?`)) {
-                        onDeleteProject(p.id);
+                        onDeleteProject(p.id)
                       }
                     }}
                     className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950 hover:text-rose-400 text-slate-400 transition"
@@ -130,8 +132,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                       p.lastDeployStatus === 'success'
                         ? 'bg-emerald-400'
                         : p.lastDeployStatus === 'failed'
-                        ? 'bg-rose-500'
-                        : 'bg-slate-500'
+                          ? 'bg-rose-500'
+                          : 'bg-slate-500'
                     }`}
                   />
                   <span className="text-slate-400">
@@ -144,8 +146,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onTriggerDeploy(p.id);
+                    e.stopPropagation()
+                    onTriggerDeploy(p.id)
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-sm"
                 >
@@ -154,9 +156,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 </button>
               </div>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
-};
+  )
+}

@@ -658,7 +658,7 @@ export function TaskSidebar({ tasks, width = 288 }: TaskSidebarProps) {
               <>
                 {displayedRepos.map((repo) => {
                   const repoPath = `/repos/${repo.owner}/${repo.name}`
-                  const isActive = pathname === repoPath || pathname.startsWith(repoPath + '/')
+                  const isActive = pathname === repoPath || pathname?.startsWith(repoPath + '/')
                   const repoKey = `${repo.owner}/${repo.name}`
                   const taskCount = taskCountByRepo.get(repoKey) || 0
 

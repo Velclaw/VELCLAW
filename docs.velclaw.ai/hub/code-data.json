@@ -9,7 +9,7 @@
       "access": "github-authenticated"
     },
     {
-      "fullName": "Velclaw/docs.velclaw.ai",
+      "fullName": "Velclaw/velclaw.cfd/docs",
       "visibility": "private",
       "description": "Docs và VelclawHub",
       "defaultBranch": "main",

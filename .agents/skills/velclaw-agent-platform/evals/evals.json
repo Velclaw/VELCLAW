@@ -1,0 +1,30 @@
+{
+  "skill": "velclaw-agent-platform",
+  "test_cases": [
+    {
+      "name": "setup_cursor_api_key",
+      "input": "Cấu hình auth Cursor bằng API key cho agent Velclaw",
+      "assertions": ["Hướng dẫn export CURSOR_API_KEY", "agent status", "Không hardcode key", "Nhắc Dashboard → API Keys"]
+    },
+    {
+      "name": "multi_agent_orchestration",
+      "input": "Thiết lập multi-agent với roles và memory trong Velclaw",
+      "assertions": ["Nhắc AGENTS.md / SOUL.md / workspace", "Approval-first", "Memory layers"]
+    },
+    {
+      "name": "channel_wechat_setup",
+      "input": "Tích hợp WeChat KF channel an toàn",
+      "assertions": ["Dùng ${ENV_VAR}", "probe / status", "Không commit secret"]
+    },
+    {
+      "name": "coding_workflow_with_checks",
+      "input": "Viết code và chuẩn bị PR cho dự án Velclaw",
+      "assertions": ["pnpm format type-check lint build", "Không chạy dev server", "Static log strings", "Branch + PR"]
+    },
+    {
+      "name": "monitoring_health",
+      "input": "Kiểm tra health và monitoring của agent platform",
+      "assertions": ["Gateway status", "deployment READY", "audit / logs"]
+    }
+  ]
+}

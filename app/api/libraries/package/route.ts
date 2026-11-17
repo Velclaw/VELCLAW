@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(url, { headers: { accept: 'application/json' }, next: { revalidate: 60 } })
-    if (!response.ok) return NextResponse.json({ error: 'Package not found' }, { status: response.status === 404 ? 404 : 502 })
+    if (!response.ok)
+      return NextResponse.json({ error: 'Package not found' }, { status: response.status === 404 ? 404 : 502 })
 
     const data = await response.json()
     return NextResponse.json({

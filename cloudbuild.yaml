@@ -1,0 +1,71 @@
+substitutions:
+  _REGION: asia-southeast1
+  _AR_REPOSITORY: velclaw
+  _SERVICE: velclaw
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: "1800s"
+
+steps:
+  - id: type-check
+    name: node:22-bookworm
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        corepack enable
+        corepack prepare pnpm@10.15.1 --activate
+        pnpm install --frozen-lockfile
+        pnpm type-check
+
+  - id: application-build
+    name: node:22-bookworm
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        corepack enable
+        corepack prepare pnpm@10.15.1 --activate
+        pnpm install --frozen-lockfile
+        pnpm build
+
+  - id: docker-build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --tag
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw:$COMMIT_SHA
+      - --tag
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw:latest
+      - .
+
+  - id: docker-push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw
+
+  - id: cloud-run-deploy
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw:$COMMIT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --port=3000
+      - --execution-environment=gen2
+      - --cpu=1
+      - --memory=1Gi
+      - --min-instances=0
+      - --max-instances=10
+      - --allow-unauthenticated
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw:$COMMIT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/velclaw:latest
